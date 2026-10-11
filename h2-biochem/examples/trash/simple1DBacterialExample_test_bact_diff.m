@@ -51,10 +51,12 @@ cp       = 0.0; % scaling coefficient
 [model0, poro0, perm0] = setupBioCloggingModel(model0, initBact, nc, cp, clogModel);
 
 % Shut wells – transport driven by initial gradients only
-schedule.control.W(1).components = [0.001, 0.958, 0.001, 0.05];
-schedule.control.W(2).components = [0.001, 0.998, 0.001, 0.05];
+schedule.control.W(1).components = [0.001, 0.948, 0.001, 0.05];
+schedule.control.W(2).components = [0.001, 0.948, 0.001, 0.05];
 schedule.control.W(1).type = 'rate'; schedule.control.W(1).val = 0;
 schedule.control.W(2).type = 'rate'; schedule.control.W(2).val = 0;
+[schedule.control.W.status] = deal(false);
+assert(all(arrayfun(@(w) abs(sum(w.components)-1)<1e-12, schedule.control.W)));
 
 %% 3. Create models with/without bacterial diffusion
 compFluid = TableCompositionalMixture( ...

@@ -4,6 +4,7 @@ function problem = packH2simSimulationProblem(state0,model,schedule,baseName,var
 % for cache identity. The resulting name is independent of global useHash.
 % Models, state0, schedule, and solver are saved beside packed state/well/
 % report files. Changing inputs selects a distinct result directory.
+validateH2simSimulationInputs(state0,model,schedule);
 serialized=getByteStreamFromArray({state0,model,schedule,varargin});
 hash=obj2hash(serialized,'maxSize',inf);
 problem=packSimulationProblem(state0,model,schedule,baseName, ...

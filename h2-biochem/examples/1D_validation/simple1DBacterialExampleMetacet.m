@@ -61,7 +61,7 @@ model.fluid = modifyRelPermForResidualSaturations( ...
 initComp  = [0.90, 0.045, 0.005, 0.05, 0.0];
 
 % Alternative: test with higher hydrogen content
-% initComp = [0.40, 0.445, 0.055, 0.10];
+% initComp = [0.40, 0.445, 0.055, 0.10, 0.0];
 
 % Thermodynamic conditions
 initTemp  = 273.15 + 40;   % Absolute temperature [K]
@@ -95,10 +95,12 @@ model   = BiochemistryModel(model.G, model.rock, model.fluid, compFluid,...
     'bacteriamodel', true,'moleculardiffusion', true, 'liquidPhase','O','vaporPhase','G');
 
 %% Shut Wells
-schedule.control.W(1).components = [0.001, 0.958, 0.001, 0.05,0.0];
-schedule.control.W(2).components = [0.001, 0.998, 0.001, 0.05,0.0];
+schedule.control.W(1).components = [0.001, 0.948, 0.001, 0.05,0.0];
+schedule.control.W(2).components = [0.001, 0.948, 0.001, 0.05,0.0];
 schedule.control.W(1).type = 'rate'; schedule.control.W(1).val = 0;
 schedule.control.W(2).type = 'rate'; schedule.control.W(2).val = 0;
+[schedule.control.W.status] = deal(false);
+assert(all(arrayfun(@(w) abs(sum(w.components)-1)<1e-12, schedule.control.W)));
 
 %% Initialize state
 state0 = initCompositionalStateBacteria(model, initPress, initTemp, [0,1], ...
