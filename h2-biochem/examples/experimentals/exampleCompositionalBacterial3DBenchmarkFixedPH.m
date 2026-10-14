@@ -10,7 +10,7 @@ function setup = exampleCompositionalBacterial3DBenchmarkFixedPH(varargin)
 % and aqueous sulfide are tracers. The legacy mixed initial composition
 % differs from the black-oil source's pure-brine initialization.
 % Fixed-pH Soreide-Whitson EOS, without PHREEQC or additional transport terms.
-% Kinetics and solver settings use the current module defaults.
+% Default microbial kinetics; AMGCL CPR with the benchmark solver settings.
 %
 %   setup = exampleCompositionalBacterial3DBenchmarkFixedPH;
 %   simulatePackedProblem(setup.problem);
@@ -81,7 +81,9 @@ state0.tracerHS = zeros(model.G.cells.num, 1);
 state0.h2sDissolvedLag = zeros(model.G.cells.num, 1);
 model = model.validateModel(schedule.control(schedule.step.control(1)));
 state0 = model.validateState(state0);
-[solver, linear] = setupOptimizedLinearSolver(model);
+[solver, linear] = setupOptimizedLinearSolver(model, 'maxNonlinIter', 12);
+solver.maxTimestepCuts = 12;
+solver.timeStepSelector.maxTimestep = 5*day;
 root = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
 directory = fullfile(root, 'build', 'benchmark-3d-fixed-ph-three-reactions');
 problem = packH2simSimulationProblem(state0, model, schedule, ...

@@ -69,6 +69,9 @@ function [nls, lsolve] = setupOptimizedLinearSolver(model, varargin)
     if isa(lsolve, 'AMGCL_CPRSolverAD') && isa(model, 'BiochemistryModel') && model.bacteriamodel
         % Keep bacterial and aqueous tracer cell unknowns in the CPR system.
         % Reducing to fluid components can create an expensive Schur fill-in.
+        % Derive the pressure equation from the full local Jacobian.
+        % Residual convergence scales are not true-IMPES weights.
+        lsolve.decoupling = 'quasiIMPES';
         lsolve.amgcl_setup.block_size = 0;
         lsolve.amgcl_setup.cpr_blocksolver = false;
         lsolve.variableOrdering = [];
