@@ -142,6 +142,16 @@ Research & community
       +++
       Talks, releases & events →
 
+
+.. raw:: html
+
+   <section class="support-carousel" aria-labelledby="support-title">
+   <h2 id="support-title">Research &amp; support</h2>
+   <input class="support-motion-toggle" type="checkbox" id="pause-support-motion"><label class="support-motion-label" for="pause-support-motion">Pause animation</label>
+   <div class="support-viewport"><div class="support-track"><div class="support-group"><a class="support-logo support-logo--hydrogeni" href="https://hydrogeni.no/" aria-label="HYDROGENi"><img src="_static/support/hydrogeni.png" alt="HYDROGENi" loading="lazy" decoding="async"><span>Hydrogen & ammonia research</span></a><a class="support-logo support-logo--sintef" href="https://www.sintef.no/en/" aria-label="SINTEF"><img src="_static/support/sintef.svg" alt="SINTEF" loading="lazy" decoding="async"><span>Applied research</span></a><a class="support-logo support-logo--hydrogemm" href="https://hydrogemm.cnrs.fr/" aria-label="GdR HydroGEMM"><img src="_static/support/hydrogemm.png" alt="GdR HydroGEMM" loading="lazy" decoding="async"><span>Underground hydrogen research</span></a><a class="support-logo support-logo--uppa" href="https://www.univ-pau.fr/" aria-label="Université de Pau et des Pays de l’Adour"><img src="_static/support/uppa.png" alt="Université de Pau et des Pays de l’Adour" loading="lazy" decoding="async"><span>University of Pau</span></a></div><div class="support-group" aria-hidden="true"><a class="support-logo support-logo--hydrogeni" href="https://hydrogeni.no/" tabindex="-1" aria-label="HYDROGENi"><img src="_static/support/hydrogeni.png" alt="" loading="lazy" decoding="async"><span>Hydrogen & ammonia research</span></a><a class="support-logo support-logo--sintef" href="https://www.sintef.no/en/" tabindex="-1" aria-label="SINTEF"><img src="_static/support/sintef.svg" alt="" loading="lazy" decoding="async"><span>Applied research</span></a><a class="support-logo support-logo--hydrogemm" href="https://hydrogemm.cnrs.fr/" tabindex="-1" aria-label="GdR HydroGEMM"><img src="_static/support/hydrogemm.png" alt="" loading="lazy" decoding="async"><span>Underground hydrogen research</span></a><a class="support-logo support-logo--uppa" href="https://www.univ-pau.fr/" tabindex="-1" aria-label="Université de Pau et des Pays de l’Adour"><img src="_static/support/uppa.png" alt="" loading="lazy" decoding="async"><span>University of Pau</span></a></div></div></div>
+   <p class="support-note"><a href="funding.html">Funding acknowledgements <span aria-hidden="true">↗</span></a></p>
+   </section>
+
 .. toctree::
    :hidden:
    :caption: Getting started

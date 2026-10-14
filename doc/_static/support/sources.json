@@ -1,0 +1,30 @@
+{
+  "retrieved": "2026-10-14",
+  "note": "Official website logo assets. Marks belong to their respective organizations. GdR HydroGEMM is one organization.",
+  "assets": [
+    {
+      "file": "hydrogeni.png",
+      "source": "https://hydrogeni.no/wp-content/uploads/2022/07/hydrogeni-logo-uten-fme.png",
+      "website": "https://hydrogeni.no/",
+      "sha256": "c31ce048f5594d1660f1f5227df3426af8dd7e98e99dc6eb7e59c914ac5b22c3"
+    },
+    {
+      "file": "hydrogemm.png",
+      "source": "https://hydrogemm.cnrs.fr/wp-content/uploads/2023/05/Capture-decran-2023-04-16-a-19.49.01-1.png",
+      "website": "https://hydrogemm.cnrs.fr/",
+      "sha256": "bf13203bd97994f36e7f8142d0a335e2d853afb205184d1e1fb8344c0bf09ed1"
+    },
+    {
+      "file": "uppa.png",
+      "source": "https://www.univ-pau.fr/skins/uppa_cms_2023-www/resources/img/logoUPPA-RepFr.png",
+      "website": "https://www.univ-pau.fr/",
+      "sha256": "d33cdcb75b28608e60ede885674130a42a32a0486ea3dee5e46ee2994b08f67c"
+    },
+    {
+      "file": "sintef.svg",
+      "source": "https://www.sintef.no/en/",
+      "note": "Official inline horizontal SVG, original paths and colors retained.",
+      "sha256": "4fe86cda55d12bd81b3439a8bd4607dc378c2199ae6478447244d74c03ce9dc6"
+    }
+  ]
+}
