@@ -20,6 +20,7 @@ html_logo = '_static/h2sim-logo.svg'
 html_favicon = '_static/h2sim-icon.svg'
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
+html_js_files = [('js/community.js', {'defer': 'defer'})]
 html_baseurl = 'https://sintefmath.github.io/h2-sim/'
 html_theme_options = {
  'sidebar_hide_name': True,

@@ -114,3 +114,25 @@ a.phreeqc-brand:hover {border-color:var(--color-brand-content)}
 @media (max-width:480px) {.support-carousel h2 {font-size:1rem;padding-right:8rem;}.support-logo {width:174px;}.support-motion-label {font-size:.7rem;}.support-motion-toggle {right:6.65rem;}}
 @media (prefers-reduced-motion:reduce) {.support-track {animation:none;}.support-group[aria-hidden="true"] {display:none;}.support-viewport {overflow-x:auto;}.support-motion-toggle,.support-motion-label {display:none;}}
 @media print {.support-track {animation:none;flex-wrap:wrap;width:auto;}.support-group {flex-wrap:wrap;}.support-group[aria-hidden="true"],.support-motion-toggle,.support-motion-label {display:none;}.support-viewport {overflow:visible;}}
+
+/* A small community launcher, available on every documentation page. */
+.h2sim-community {position:fixed;right:max(1rem,env(safe-area-inset-right));bottom:max(1rem,env(safe-area-inset-bottom));z-index:1000;font-family:var(--font-stack,sans-serif);}
+.h2sim-community-toggle {display:flex;align-items:center;gap:.6rem;min-height:46px;padding:.75rem 1rem;border:1px solid #087f82;border-radius:999px;background:#087f82;color:#fff;box-shadow:0 5px 20px #003d4530;font:inherit;font-size:.85rem;font-weight:650;cursor:pointer;}
+.h2sim-community-toggle:hover {background:#066c70;border-color:#066c70;}
+.h2sim-community-toggle svg {flex-shrink:0;}
+.h2sim-community-panel {position:absolute;right:0;bottom:calc(100% + .8rem);box-sizing:border-box;width:min(365px,calc(100vw - 2rem));max-height:calc(100dvh - 110px);overflow-y:auto;padding:1.25rem;border:1px solid var(--color-background-border);border-radius:18px;background:var(--color-background-primary);color:var(--color-foreground-primary);box-shadow:0 12px 40px #001f3d30;}
+.h2sim-community-panel[hidden] {display:none;}
+.h2sim-community-header {display:flex;align-items:flex-start;gap:.6rem;justify-content:space-between;}
+.h2sim-community-eyebrow {color:var(--color-brand-content);font-size:.63rem;letter-spacing:.1em;font-weight:700;}
+.h2sim-community-panel h2 {margin:.3rem 0 .65rem;font-size:1.25rem;line-height:1.3;}
+.h2sim-community-panel p {font-size:.83rem;line-height:1.6;margin:.3rem 0 1rem;}
+.h2sim-community-close {display:grid;place-items:center;min-width:36px;min-height:36px;padding:0;border:1px solid var(--color-background-border);border-radius:50%;background:var(--color-background-secondary);color:var(--color-foreground-primary);font-size:1.3rem;cursor:pointer;}
+.h2sim-community-link {display:block;padding:.75rem .8rem;margin:.5rem 0;border:1px solid var(--color-background-border);border-radius:10px;text-decoration:none!important;background:var(--color-background-secondary);}
+.h2sim-community-link:hover {border-color:var(--color-brand-content);}
+.h2sim-community-link strong {display:flex;justify-content:space-between;font-size:.84rem;color:var(--color-brand-content);}
+.h2sim-community-link>span {display:block;margin-top:.25rem;font-size:.73rem;line-height:1.5;color:var(--color-foreground-secondary);}
+.h2sim-community-panel .h2sim-community-note {font-size:.73rem;color:var(--color-foreground-secondary);margin:1rem 0 .65rem;}
+.h2sim-community-more {font-size:.78rem;font-weight:650;}
+.h2sim-community button:focus-visible,.h2sim-community a:focus-visible {outline:3px solid var(--color-brand-content);outline-offset:3px;}
+@media(max-width:480px){.h2sim-community-toggle {font-size:.8rem;padding:.65rem .9rem;}.h2sim-community-panel {padding:1rem;}}
+@media print {.h2sim-community {display:none;}}

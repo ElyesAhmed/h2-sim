@@ -1,0 +1,24 @@
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask the H2sim maintainers and community. Describe your storage question or technical problem below.
+        Discussions are public; include only code and data you can share.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What are you trying to do, and where would you like help?
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup and versions
+      description: For technical questions, include your workflow or example, H2sim revision, and MATLAB/MRST versions.
+  - type: textarea
+    id: details
+    attributes:
+      label: Details or a small example
+      description: Include the error message, expected behavior, and a minimal code snippet if relevant.
