@@ -90,12 +90,19 @@ model = model.validateModel(schedule.control(schedule.step.control(1)));
 state0 = model.validateState(state0);
 [solver, linear] = setupOptimizedLinearSolver(model, 'maxNonlinIter', 40);
 solver.maxTimestepCuts = 12;
-solver.timeStepSelector.maxTimestep = 5*day;
+solver.timeStepSelector.maxTimestep = 2*day;
 root = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
 directory = fullfile(root, 'build', 'benchmark-3d-fixed-ph-three-reactions');
+% Use a name keyed on the run options instead of packH2simSimulationProblem's
+% default content hash: the EOS flash during state0/model construction runs
+% through OpenMP-accelerated MEX code (useOMP is on by default), whose
+% reduction order is not guaranteed bit-reproducible run to run, so the
+% hash of the serialized model can differ between two otherwise-identical
+% runs and silently restart the simulation from step 1 each time.
+runName = sprintf('pH%g_sal%g_so4%g', opt.fixedPH, opt.salinity, opt.initialSO4);
 problem = packH2simSimulationProblem(state0, model, schedule, ...
     'H2_3D_BENCHMARK_FIXED_PH_THREE_REACTIONS', ...
-    'Directory', directory, 'NonLinearSolver', solver);
+    'Directory', directory, 'NonLinearSolver', solver, 'Name', runName);
 setup = struct('description', description, 'options', opt, ...
     'sourceOptions', sourceOptions, 'model', model, 'state0', state0, ...
     'schedule', schedule, 'problem', problem, 'solverClass', class(linear));
