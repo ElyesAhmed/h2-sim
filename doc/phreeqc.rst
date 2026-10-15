@@ -202,6 +202,30 @@ splitting; this is not a convergence test of reaction substepping alone.
 
    Open the full-cycle multirate comparison →
 
+Three-cycle 2D storage
+----------------------
+
+Explore the completed layered storage comparison with compositional PHREEQC:
+three cycles, hydrogen consumption by pathway, gas composition and pH maps,
+and an interactive animation of hydrogen and microbial evolution.
+
+.. figure:: _static/examples/phreeqc_2d_chemistry.png
+   :alt: Third-injection gas H2, CO2, methane and aqueous pH maps in the layered coupled model.
+   :width: 100%
+
+   Spatial chemistry after the third injection period. The full example
+   distinguishes mobile microbial transport from cell-local PHREEQC kinetics.
+
+.. button-ref:: phreeqc_2d
+   :color: primary
+
+   Explore the 2D results and animation →
+
+.. toctree::
+   :hidden:
+
+   phreeqc_2d
+
 Conservation diagnostics
 ------------------------
 

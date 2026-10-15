@@ -1,0 +1,57 @@
+{
+  "end_days": 347.40410156250005,
+  "frames": 70,
+  "cells": 10116,
+  "snapshot_days": 307.602734375,
+  "sources": [
+    {
+      "workflow": "mobile",
+      "file": "field_mineral2d_original_c1_g0.5.mat",
+      "sha256": "8c79a1e2ec96cbf568be677e81b7f6ffc7ddae3cdecb27d33bd26bbf6ffdab2c"
+    },
+    {
+      "workflow": "mobile",
+      "file": "field_mineral2d_original_cycle2_cpr.mat",
+      "sha256": "46e546260bc7d54f4877c05ecdb7af73197c8f34271ba7c31c3c070bef7fc2de"
+    },
+    {
+      "workflow": "mobile",
+      "file": "field_mineral2d_original_cycle3_cpr.mat",
+      "sha256": "19777271c8d8e8b7b8e49afa9d2341c9f56acccb40e9d6245184e9b65dbbfd54"
+    },
+    {
+      "workflow": "phreeqc",
+      "file": "field_mineral2d_a_c1_g0.5.mat",
+      "sha256": "db9f0fde1eb21cc455976ee086183820af9d8ec9b52ac3f1ded6a61af56127b1"
+    },
+    {
+      "workflow": "phreeqc",
+      "file": "field_mineral2d_a_cycle2_cpr.mat",
+      "sha256": "6f4eff4bdd38f6e905bcf8fe5e82c83ade8818536f0591a553e687e1bd4c37fd"
+    },
+    {
+      "workflow": "phreeqc",
+      "file": "field_mineral2d_a_cycle3_cpr.mat",
+      "sha256": "943fe1a693cf6d0ffe15d75517da8eaea861659a28b5b5992adb8f28811d214a"
+    }
+  ],
+  "loss_normalization": "Cumulative consumed H2 divided by cumulative prescribed H2 injection at each time.",
+  "population_normalization": "Collector population scale divided by initial value 15; workflow-specific representations are not equivalent physical biomass units.",
+  "animation_sampling": "Selected accepted states; no interpolation of fields. Color quantization: 256 levels in log10 space.",
+  "results": {
+    "mobile": {
+      "loss_percent": 11.4655362709587,
+      "consumed_kmol": 6.81779706029158,
+      "element_audit_available": false,
+      "element_audit_failures": 0,
+      "element_audit_max_mol": 0.0
+    },
+    "phreeqc": {
+      "loss_percent": 10.42560778239683,
+      "consumed_kmol": 6.199420280987409,
+      "element_audit_available": true,
+      "element_audit_failures": 62,
+      "element_audit_max_mol": 2.6799334023053234e-06
+    }
+  }
+}
