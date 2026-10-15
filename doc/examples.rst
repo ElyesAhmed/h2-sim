@@ -61,6 +61,18 @@ PHREEQC validation
    Complete-cycle PHREEQC validation. The source of the reference and the differences
    in chemistry splitting are described in the notebook.
 
+Three-cycle 2D PHREEQC coupling
+-------------------------------
+
+.. grid:: 1
+
+   .. grid-item-card:: Hydrogen and microbial evolution in a layered reservoir
+      :link: phreeqc_2d
+      :link-type: doc
+
+      Completed three-cycle results, metabolic consumption, gas composition,
+      pH, and a time-slider animation comparing mobile and cell-local populations.
+
 Short chemistry walkthroughs
 ----------------------------
 
