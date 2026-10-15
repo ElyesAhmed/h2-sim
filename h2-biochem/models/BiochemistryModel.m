@@ -788,7 +788,7 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
                         else
                             chemistry_i = chemistry(:, i);
                         end
-                        scaleChemistry = dt./max(chemistry_i, dt);
+                        scaleChemistry = dt./max(chemistry_i, 1e-12);
                         scaleChemistry = filloutliers(scaleChemistry, "nearest","mean");
                         scale{ix} = scaleChemistry;
                     end
@@ -949,6 +949,20 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
                 % Aggressive damping for highly stiff growth/decay kinetics (linear growth + nbact^2 decay).
                 % 5% change per iteration is conservative but necessary for quadratic decay singularities.
                  nbioreact=model.biochemFluid.nbioreact;
+                max_frac_change = 0.05;
+
+                % Compute ONE relaxation factor per cell from the worst-case
+                % fractional change across all bacterial populations, then
+                % apply that single factor to every population in that cell.
+                % Damping each population to its own independent 5% cap
+                % (the previous approach) distorts the relative correction
+                % between coupled species: one population can get clamped
+                % much harder than another in the same cell, which breaks
+                % self-consistency with the linearized Newton direction and
+                % can lock a population into a spurious fixed point while
+                % the others keep converging normally.
+                ncells = model.G.cells.num;
+                lambda = ones(ncells, 1);
                 for i = 1:nbioreact
                     if iscell(nbact_old)
                         nbacti_old=nbact_old{i};
@@ -957,19 +971,28 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
                         nbacti_old=nbact_old(:,i);
                         nbacti_new=nbact_new(:,i);
                     end
-                    max_frac_change = 0.05;
                     frac_change = (nbacti_new - nbacti_old) ./ max(abs(nbacti_old), 1e-12);
+                    lambda = min(lambda, max_frac_change ./ max(abs(frac_change), max_frac_change));
+                end
 
-                    % Apply adaptive damping where fractional change is excessive
-                    excessive = abs(frac_change) > max_frac_change;
-                    if any(excessive)&&false
-                        % Apply exponential damping: new = old + max_frac_change * sign(change) * old_mag
-                        sign_inc = sign(nbacti_new(excessive) - nbacti_old(excessive));
-                        nbacti_damped = nbacti_old(excessive) + ...
-                            max_frac_change * sign_inc .* max(abs(nbacti_old(excessive)), 1e-12);
-                        nbacti_new(excessive) = nbacti_damped;
-                        state = model.setProp(state, 'nbact', nbacti_new);
+                if any(lambda < 1)
+                    nbact_damped = nbact_new;
+                    for i = 1:nbioreact
+                        if iscell(nbact_old)
+                            nbacti_old=nbact_old{i};
+                            nbacti_new=nbact_new{i};
+                        else
+                            nbacti_old=nbact_old(:,i);
+                            nbacti_new=nbact_new(:,i);
+                        end
+                        nbacti_damped = nbacti_old + lambda.*(nbacti_new - nbacti_old);
+                        if iscell(nbact_damped)
+                            nbact_damped{i} = nbacti_damped;
+                        else
+                            nbact_damped(:,i) = nbacti_damped;
+                        end
                     end
+                    state = model.setProp(state, 'nbact', nbact_damped);
                 end
 
 
