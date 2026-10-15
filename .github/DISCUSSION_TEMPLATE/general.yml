@@ -1,0 +1,17 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Discuss H2sim development, equations, workflows, solvers, and contributions with the community.
+  - type: textarea
+    id: topic
+    attributes:
+      label: What would you like to discuss?
+      description: Describe the topic, proposal, or implementation question. Link related code, issues, or pull requests.
+    validations:
+      required: true
+  - type: textarea
+    id: next
+    attributes:
+      label: Feedback or next steps
+      description: What would help move the discussion forward?

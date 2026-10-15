@@ -143,6 +143,17 @@ Research & community
       Talks, releases & events →
 
 
+Talk with the H2sim community
+-----------------------------
+
+Ask the team a modeling question, discuss development with other contributors,
+or share an example. Public conversations are collected in GitHub Discussions.
+
+.. button-ref:: community
+   :color: primary
+
+   Questions, ideas & developer conversations →
+
 .. raw:: html
 
    <section class="support-carousel" aria-labelledby="support-title">
@@ -181,6 +192,7 @@ Research & community
 
    publications
    events
+   community
 
 .. toctree::
    :hidden:
