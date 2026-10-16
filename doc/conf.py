@@ -20,7 +20,17 @@ html_logo = '_static/h2sim-logo.svg'
 html_favicon = '_static/h2sim-icon.svg'
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
-html_js_files = [('js/community.js', {'defer': 'defer'})]
+html_js_files = [
+ ('js/community.js', {'defer': 'defer'}),
+ ('https://cloud.umami.is/script.js', {
+  'defer': 'defer',
+  'data-website-id': 'aeb4cd9c-9e16-4992-aa40-c418b160424a',
+  'data-domains': 'sintefmath.github.io',
+  'data-exclude-search': 'true',
+  'data-exclude-hash': 'true',
+  'data-do-not-track': 'true',
+ }),
+]
 html_baseurl = 'https://sintefmath.github.io/h2-sim/'
 html_theme_options = {
  'sidebar_hide_name': True,
