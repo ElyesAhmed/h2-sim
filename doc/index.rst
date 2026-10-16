@@ -154,6 +154,9 @@ or share an example. Public conversations are collected in GitHub Discussions.
 
    Questions, ideas & developer conversations →
 
+Explore :doc:`website-statistics` for visit counts, popular pages, and the
+countries reading the documentation.
+
 .. raw:: html
 
    <section class="support-carousel" aria-labelledby="support-title">

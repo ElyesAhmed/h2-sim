@@ -136,3 +136,7 @@ a.phreeqc-brand:hover {border-color:var(--color-brand-content)}
 .h2sim-community button:focus-visible,.h2sim-community a:focus-visible {outline:3px solid var(--color-brand-content);outline-offset:3px;}
 @media(max-width:480px){.h2sim-community-toggle {font-size:.8rem;padding:.65rem .9rem;}.h2sim-community-panel {padding:1rem;}}
 @media print {.h2sim-community {display:none;}}
+
+/* Read-only visitor dashboard, with a direct-link fallback in the page. */
+.h2sim-visitor-dashboard {display:block;width:100%;height:1700px;margin:1.3rem 0;border:1px solid var(--color-background-border);border-radius:12px;background:white;}
+@media(max-width:700px){.h2sim-visitor-dashboard {height:2250px;}}
