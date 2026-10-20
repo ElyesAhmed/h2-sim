@@ -91,6 +91,21 @@ only when that chemistry feedback and the MRST-reported reaction extent
 nonconvergence error. It is therefore a same-timestep outer Picard scheme, not
 a lagged post-step chemistry split.
 
+### Standalone comparisons and validation
+
+`runThreeBackendComparison()` compares three models included in H2sim and
+uses the bundled chemistry database. It does not run an external driver.
+`runPhreeqcValidation()` also runs standalone by default. For a short check:
+
+```matlab
+result = runPhreeqcValidation('gridCells', 2, 'totalDays', 2);
+```
+
+An external reference is optional: pass its checkout explicitly using
+`'referenceRoot', referenceRoot`. Its files and platform are checked before
+simulations start. New results store external outputs as `result.reference`.
+Previously saved reference datasets remain readable by the plotting helpers.
+
 ### Biochemical Reaction Model
 
 The module simulates the methanogenesis reaction:

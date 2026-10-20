@@ -128,7 +128,7 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
                 'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
                 'phreeqcDatabaseFile', databaseFile);
             assert(baseModel.bacterialDecayOrder == 1, ...
-                'The UGFACT-matched hybrid case requires first-order biomass decay.');
+                'The matched hybrid case requires first-order biomass decay.');
 
             % Keep only the first 5 fine (0.4 day) steps: a short 2 day
             % comparison window.

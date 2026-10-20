@@ -92,7 +92,7 @@ pH = comparison(2).states{end}.phreeqcPH;
 plotPhreeqcMineralComparison(comparison);
 ```
 
-Read the [PHREEQC workflow guide](https://sintefmath.github.io/h2-sim/phreeqc.html) before comparing backends: their microbial kinetic ownership and splitting differ. The bundled database originates from UGFACT; its source revision, checksum, and attribution are recorded in [the database README](h2-biochem/database/README.md). The [full-cycle validation notebook](https://sintefmath.github.io/h2-sim/notebooks/phreeqc_validation.html) compares results against a separate reference implementation.
+Read the [PHREEQC workflow guide](https://sintefmath.github.io/h2-sim/phreeqc.html) before comparing backends: their microbial kinetic ownership and splitting differ. The bundled database originates from UGFACT; its source revision, checksum, and attribution are recorded in [the database README](h2-biochem/database/README.md). The [full-cycle validation notebook](https://sintefmath.github.io/h2-sim/notebooks/phreeqc_validation.html) includes attributed external reference data. The examples run with the bundled database; reproducing the external reference is optional and requires an explicit `referenceRoot`.
 
 ## Explore and reuse results
 

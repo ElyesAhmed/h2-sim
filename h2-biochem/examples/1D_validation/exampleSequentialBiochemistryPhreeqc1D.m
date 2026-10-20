@@ -248,9 +248,9 @@ end
 
 function validateBenchmarkSetup(baseModel, state0)
     assert(baseModel.bacterialDecayOrder == 1, ...
-        'The UGFACT-matched hybrid case requires first-order biomass decay.');
+        'The matched hybrid case requires first-order biomass decay.');
     assert(max(abs(value(state0.nbact) - 1), [], 'all') < 1e-12, ...
-        'The UGFACT-matched hybrid case requires initial N/N0 = 1.');
+        'The matched hybrid case requires initial N/N0 = 1.');
 end
 
 %{

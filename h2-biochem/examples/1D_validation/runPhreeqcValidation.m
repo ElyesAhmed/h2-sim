@@ -1,15 +1,16 @@
 function result = runPhreeqcValidation(varargin)
-%Compare compositional PHREEQC with an external UGFACT reference
+%Compare compositional PHREEQC with an optional external reference
 %
 % SYNOPSIS:
-%   result = runPhreeqcValidation('ugfactRoot', referenceRoot)
+%   result = runPhreeqcValidation()
+%   result = runPhreeqcValidation('referenceRoot', referenceRoot)
 %
 % DESCRIPTION:
 %   Run the storage-cycle comparison in exampleCompositionalPhreeqcValidation.
-%   A separate UGFACT checkout supplies the reference model. Both simulations
-%   run serially, and their setups, states, and comparison diagnostics are
-%   saved for subsequent plotting. The external reference requires Windows
-%   MATLAB with IPhreeqcCOM.
+%   The default case uses only H2sim and the bundled chemistry database.
+%   Supply referenceRoot to add an external comparison. Simulations run
+%   serially and save setups, states, and diagnostics for plotting. Only
+%   the optional external reference requires Windows MATLAB with COM.
 %
 % PARAMETERS:
 %   Pass name/value options to exampleCompositionalPhreeqcValidation.

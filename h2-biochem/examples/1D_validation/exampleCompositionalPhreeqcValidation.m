@@ -1,10 +1,11 @@
 function result = exampleCompositionalPhreeqcValidation(varargin)
-%Compare compositional PHREEQC coupling with the UGFACT storage-cycle model
+%Validate compositional PHREEQC storage with an optional external comparison
 %
 % SYNOPSIS:
-%   result = exampleCompositionalPhreeqcValidation('ugfactRoot', referenceRoot)
+%   result = exampleCompositionalPhreeqcValidation()
+%   result = exampleCompositionalPhreeqcValidation('referenceRoot', referenceRoot)
 %   result = exampleCompositionalPhreeqcValidation( ...
-%       'ugfactRoot', referenceRoot, 'totalDays', 2, 'plotResults', false)
+%       'referenceRoot', referenceRoot, 'totalDays', 2, 'plotResults', false)
 %
 % DESCRIPTION:
 %   Simulate hydrogen injection, storage, and production in a 50 m, 1D
@@ -12,39 +13,40 @@ function result = exampleCompositionalPhreeqcValidation(varargin)
 %   kinetics, and a 250-day schedule with injection ending at day 50 and
 %   production starting at day 200. Diffusion and chemotaxis are disabled.
 %
-%   H2sim and the UGFACT reference use the Soreide-Whitson equation of state
-%   with 2.865 mol/kg NaCl. Their chemistry splitting differs: H2sim applies
-%   one PHREEQC update per two-day flow step, whereas UGFACT uses five
-%   chemistry substeps. The comparison retains the reference kinetics.
+%   The standalone case uses the Soreide-Whitson equation of state
+%   with 2.865 mol/kg NaCl and one PHREEQC update per two-day flow step.
+%   No external checkout is needed. If referenceRoot is supplied, an optional
+%   comparison uses the same thermodynamic parameters and the reference
+%   model's five chemistry substeps, retaining its kinetic equations.
 %
 %   Reference sources are copied to a temporary folder and adapted there;
-%   the supplied UGFACT checkout is unchanged. The reference driver uses
+%   the supplied checkout is unchanged. The optional reference driver uses
 %   IPhreeqcCOM and requires Windows MATLAB. This restriction applies to
 %   the external reference, rather than H2sim's native Linux integration.
 %
 % OPTIONAL PARAMETERS:
-%   ugfactRoot      - Path to a separate UGFACT checkout containing
-%                     examples/H2Storage1D.m. Required.
+%   referenceRoot   - Optional external reference checkout containing
+%                     examples/H2Storage1D.m (default empty: H2sim only).
 %   injectionDays   - Injection duration in days. Must be 50 for this case.
 %   totalDays       - Simulated duration in days: a positive multiple of
 %                     two, up to 250 (default 250).
 %   gridCells       - Number of grid cells (default 20).
 %   rate            - Microbial rate case: 'medrate' or 'highrate'
 %                     (default 'highrate').
-%   plotResults     - Plot the comparison (default true).
+%   plotResults     - Plot chemistry and any reference data (default true).
 %   outputDirectory - Folder for validation_results.mat and figures
 %                     (default build/phreeqc-validation under pwd).
 %
 % RETURNS:
-%   result - H2sim and UGFACT setups, simulation outputs, elapsed times,
-%            comparison diagnostics, and reference-adapter metadata.
+%   result - H2sim setup, states, elapsed time, and chemistry diagnostics.
+%            Includes reference outputs only when referenceRoot is supplied.
 %
 % SEE ALSO:
 %   runPhreeqcValidation, plotCompositionalPhreeqcValidation,
 %   collectPhreeqcValidationDiagnostics
 
     %% Set comparison options
-    opt = struct('ugfactRoot',      '', ...
+    opt = struct('referenceRoot',   '', ...
                  'injectionDays',   50, ...
                  'totalDays',       250, ...
                  'gridCells',       20, ...
@@ -55,27 +57,33 @@ function result = exampleCompositionalPhreeqcValidation(varargin)
     opt = validateOptions(opt);
     opt.outputDirectory = prepareOutputDirectory(opt.outputDirectory);
 
+    %% Prepare an optional reference before starting simulations
+    referenceRunRoot = '';
+    referenceSetup = '';
+    if ~isempty(opt.referenceRoot)
+        referenceRunRoot = stageReferenceSources(opt.referenceRoot);
+        referenceSetup = adaptReferenceSetup(opt);
+    end
+
     %% Run the H2sim storage case
     h2sim = runH2simCase(opt);
 
-    %% Run the reference with matching thermodynamic parameters
-    % Restore the MATLAB path and working folder even if the reference fails.
-    savedPath = path;
-    savedFolder = pwd;
-    cleanup = onCleanup(@() restoreEnvironment(savedPath, savedFolder));
-    referenceRunRoot = stageReferenceSources(opt.ugfactRoot);
-    ugfact = runReferenceCase(opt, referenceRunRoot);
+    %% Optionally compare with an explicitly supplied reference
+    result = struct('h2sim', h2sim, 'referenceRoot', opt.referenceRoot, ...
+        'description', 'Compositional PHREEQC storage-cycle validation.');
+    if ~isempty(opt.referenceRoot)
+        savedPath = path;
+        savedFolder = pwd;
+        cleanup = onCleanup(@() restoreEnvironment(savedPath, savedFolder));
+        result.referenceRunRoot = referenceRunRoot;
+        result.reference = runReferenceCase(opt, referenceRunRoot, referenceSetup);
+        result.referenceAdapter = ...
+            'Shared SW flow/chemistry EOS and C1 methane alias; reference kinetics retained';
+        result.description = ...
+            'PHREEQC storage-cycle comparison with an optional external reference.';
+    end
 
-    %% Collect diagnostics and save the comparison
-    result = struct( ...
-        'h2sim',           h2sim, ...
-        'ugfact',          ugfact, ...
-        'ugfactRoot',      opt.ugfactRoot, ...
-        'referenceRunRoot', referenceRunRoot, ...
-        'referenceAdapter', ...
-            'Shared SW flow/chemistry EOS and C1 methane alias; upstream kinetics retained', ...
-        'description', ...
-            'Complete PHREEQC storage-cycle comparison; common SW parameters; distinct chemistry splitting.');
+    %% Collect diagnostics and save the result
     result.diagnostics = collectPhreeqcValidationDiagnostics(result);
 
     % Write locally before copying to support output folders on WSL shares.
@@ -90,9 +98,13 @@ function result = exampleCompositionalPhreeqcValidation(varargin)
 end
 
 function opt = validateOptions(opt)
-    referenceFile = fullfile(opt.ugfactRoot, 'examples', 'H2Storage1D.m');
-    assert(isfile(referenceFile), ...
-        'Set ugfactRoot to a separate UGFACT checkout.');
+    assert(ischar(opt.referenceRoot) || ...
+        (isstring(opt.referenceRoot) && isscalar(opt.referenceRoot)), ...
+        'referenceRoot must be a character vector or scalar string.');
+    opt.referenceRoot = char(opt.referenceRoot);
+    if ~isempty(opt.referenceRoot)
+        validateReferenceFiles(opt.referenceRoot);
+    end
     validateattributes(opt.injectionDays, {'numeric'}, ...
         {'scalar', 'positive', '<=', 50});
     validateattributes(opt.totalDays, {'numeric'}, ...
@@ -104,6 +116,26 @@ function opt = validateOptions(opt)
     validateattributes(opt.gridCells, {'numeric'}, ...
         {'scalar', 'integer', 'positive'});
     opt.rate = validatestring(opt.rate, {'medrate', 'highrate'});
+end
+
+function validateReferenceFiles(referenceRoot)
+    required = {fullfile('examples', 'H2Storage1D.m'), ...
+        fullfile('Modified_Models', 'mass2Zi.m'), ...
+        fullfile('Modified_Models', 'mass2Zi_Parpool.m'), ...
+        fullfile('Modified_Models', 'updateStatesFromPhreeqc.m')};
+    for k = 1:numel(required)
+        file = fullfile(referenceRoot, required{k});
+        assert(isfile(file), 'H2sim:ReferenceDriverNotFound', ...
+            'Optional reference file was not found at %s.', file);
+    end
+    assert(isfolder(fullfile(referenceRoot, 'examples', 'database')), ...
+        'H2sim:ReferenceDatabaseNotFound', ...
+        'The optional reference checkout must contain examples/database.');
+    source = fileread(fullfile(referenceRoot, 'examples', 'H2Storage1D.m'));
+    assert(contains(source, '%% Running the simulation'), ...
+        'H2sim:ReferenceSetupChanged', 'External reference setup marker was not found.');
+    assert(ispc, 'H2sim:ReferencePlatform', ...
+        'The optional external reference uses Windows COM. H2sim runs without it.');
 end
 
 function directory = prepareOutputDirectory(directory)
@@ -162,15 +194,15 @@ function summary = runH2simCase(opt)
                      'elapsedSeconds', toc(timer));
 end
 
-function referenceRoot = stageReferenceSources(ugfactRoot)
+function referenceRoot = stageReferenceSources(sourceRoot)
     % Stage sources and database together to retain relative database paths.
     referenceRoot = tempname;
     mkdir(referenceRoot);
     modelDirectory = fullfile(referenceRoot, 'Modified_Models');
     exampleDirectory = fullfile(referenceRoot, 'examples');
-    copyfile(fullfile(ugfactRoot, 'Modified_Models'), modelDirectory);
+    copyfile(fullfile(sourceRoot, 'Modified_Models'), modelDirectory);
     mkdir(exampleDirectory);
-    copyfile(fullfile(ugfactRoot, 'examples', 'database'), ...
+    copyfile(fullfile(sourceRoot, 'examples', 'database'), ...
         fullfile(exampleDirectory, 'database'));
 
     originalEOS = ['eos = EquationOfStateModel([], ', ...
@@ -205,10 +237,10 @@ function addTotalDICDiagnostic(modelDirectory)
 end
 
 function source = adaptReferenceSetup(opt)
-    source = fileread(fullfile(opt.ugfactRoot, 'examples', 'H2Storage1D.m'));
+    source = fileread(fullfile(opt.referenceRoot, 'examples', 'H2Storage1D.m'));
     source = strrep(source, 'clear;clc;close all', '');
     source = strrep(source, '''CH4''', '''C1'''); % SW methane alias.
-    source = regexprep(source, 'mrstModule add UGFACT2[^\n]*', '');
+    source = regexprep(source, 'mrstModule add [^\n]*', '');
     marker = strfind(source, '%% Running the simulation');
     assert(~isempty(marker), 'Upstream setup marker changed.');
     source = source(1:marker(1)-1);
@@ -239,9 +271,8 @@ function source = adaptReferenceSetup(opt)
          '''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
 end
 
-function summary = runReferenceCase(opt, referenceRunRoot)
+function summary = runReferenceCase(opt, referenceRunRoot, source)
     addpath(fullfile(referenceRunRoot, 'Modified_Models'));
-    source = adaptReferenceSetup(opt);
     cd(fullfile(referenceRunRoot, 'examples'));
     % The upstream script defines model, state0, and schedule in this scope.
     [model, state0, schedule] = evaluateReferenceSetup(source);
@@ -299,11 +330,11 @@ function validateReferenceSetup(model, opt)
 end
 
 function validateReferenceOutput(states, report)
-    assert(~report.Failure, 'UGFACT reference did not converge.');
+    assert(~report.Failure, 'External reference did not converge.');
     finiteState = @(state) all(isfinite(state.pressure)) && ...
                            all(isfinite(state.x(:)));
     assert(all(cellfun(finiteState, states)), ...
-        'UGFACT reference returned non-finite pressure or composition.');
+        'External reference returned non-finite pressure or composition.');
 end
 
 function writeReferenceSource(file, source)

@@ -301,7 +301,7 @@ reactNames = {'MethanogenicArchae', 'AcetogenicBacteria', ...
 biomassNames = {'bactM', 'bactA', 'bactS'};
 biochemFluid = TableBioChemMixture(reactNames, biomassNames);
 
-% First-order decay uses the UGFACT ratio b = 0.01*mu.
+% First-order decay uses the first-order decay ratio b = 0.01*mu.
 idxM = strcmp(biochemFluid.metabolicReaction, 'MethanogenicArchae');
 biochemFluid.Psigrowthmax(idxM) = metabolicGrowthRate(1);
 biochemFluid.alphaH2(idxM) = h2HalfSaturation(1);
@@ -481,7 +481,7 @@ else
         true, backend, modelOptions{:});
 end
 if opt.paperBiomassKinetics
-    % UGFACT constrains every population between N0 and Nmax=N0*1e4.
+    % The reference kinetic model constrains every population between N0 and Nmax=N0*1e4.
     model.bact_capProp = 1;
     model.bact_maxProp = 1e4;
 end
@@ -562,7 +562,7 @@ if opt.phreeqcTimestepCoupling
 end
 %% H2Storage1D benchmark schedule.
 if strcmp(phreeqcBackend, 'sequential-h2biochem-phreeqc')
-    % UGFACT integrates biogeochemistry in five substeps per 2-day flow
+    % The reference kinetic model integrates biogeochemistry in five substeps per 2-day flow
     % step. The MRST biomass balance also requires mu*dt < 1 to retain a
     % positive backward-Euler growth solution at the high-rate setting.
     scheduleTimestep = 2*day;

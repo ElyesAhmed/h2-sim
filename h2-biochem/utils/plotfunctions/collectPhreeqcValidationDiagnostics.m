@@ -6,8 +6,9 @@ function diagnostics = collectPhreeqcValidationDiagnostics(result)
 %
 % PARAMETERS:
 %   result - Comparison returned by exampleCompositionalPhreeqcValidation,
-%            with h2sim and ugfact entries containing model, schedule, and
-%            accepted states. UGFACT states must include Solution.TotalDIC.
+%            with an h2sim entry and an optional reference entry containing model,
+%            schedule, and accepted states. Reference states must include
+%            Solution.TotalDIC. Older saved reference data are also accepted.
 %
 % RETURNS:
 %   diagnostics - Per-model times, cell coordinates, aqueous hydrogen mole
@@ -18,7 +19,14 @@ function diagnostics = collectPhreeqcValidationDiagnostics(result)
 % SEE ALSO:
 %   exampleCompositionalPhreeqcValidation, plotCompositionalPhreeqcValidation
 
-    names = {'h2sim', 'ugfact'};
+    % Compatibility with previously saved reference datasets.
+    if ~isfield(result, 'reference') && isfield(result, 'ugfact')
+        result.reference = result.ugfact;
+    end
+    names = {'h2sim'};
+    if isfield(result, 'reference') && ~isempty(result.reference)
+        names{end+1} = 'reference';
+    end
     diagnostics = struct();
     for j = 1:numel(names)
         run = result.(names{j});

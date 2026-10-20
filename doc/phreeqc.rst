@@ -45,9 +45,13 @@ Complete-cycle validation
 
 .. code-block:: matlab
 
-   result = runPhreeqcValidation('ugfactRoot', referenceRoot, ...
+   result = runPhreeqcValidation( ...
        'gridCells', 20, 'totalDays', 250, 'rate', 'highrate');
    plotCompositionalPhreeqcValidation(result);
+
+The command above runs H2sim without an external checkout. The reference
+curves on this page are retained comparison data; reproducing that external
+run is optional, as described below.
 
 The selected comparison uses a 20-cell, 50 m column and a complete 250-day
 cycle: 50 days of injection, 150 days of storage, and 50 days of production.
@@ -138,12 +142,20 @@ history as CSV and every figure as PNG and vector PDF.
 
    Open PHREEQC validation →
 
-The reference implementation is
+The external reference data shown on this page were generated with
 `UGFACT <https://github.com/ahmadrezashojaee/UGFACT>`_ by Ahmadreza Shojaee.
-It remains a separate dependency for this comparison. Its sources are staged
-locally for the reference COM interface. The adapter uses the configured SW EOS
-for its post-chemistry reflash and the matching methane component alias;
-the reference kinetic equations are retained.
+The standalone case and ``runThreeBackendComparison`` require no external
+checkout. To reproduce those external reference data, explicitly request the
+optional comparison:
+
+.. code-block:: matlab
+
+   comparison = runPhreeqcValidation('referenceRoot', referenceRoot, ...
+       'gridCells', 20, 'totalDays', 250, 'rate', 'highrate');
+
+Only this optional reference uses a separate checkout and Windows COM. Its
+files and platform are checked before H2sim simulations start. Sources are
+staged locally, and the adapter retains the reference kinetic equations.
 
 Compositional kinetic coupling
 ------------------------------

@@ -4,7 +4,7 @@ function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
 % This backend uses the h2_biogeochemistry.dat IPhreeqcCOM input and
 % SELECTED_OUTPUT convention. It is Windows-only: PHREEQC owns MET/ACE/SRB
 % kinetics and its biomass state, while MRST retains flow and tracer
-% transport. Its split conventions match the UGFACT H2Storage1D reference.
+% transport. Its split conventions match the storage-cycle reference.
 %
 % Cells are processed through one persistent IPhreeqcCOM object and one
 % h2_biogeochemistry.dat database load per coupling invocation (actxserver
