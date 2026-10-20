@@ -31,8 +31,8 @@ function [biochemFluid, model, schedule, state0] = setupH2StorageExampleWithSRB_
 %   phreeqcDatabaseFile  - Absolute h2_biogeochemistry.dat path used by
 %                         either COM backend.
 %   phreeqcBackend       - 'sequential-compositional-phreeqc' (default,
-%                         Windows IPhreeqcCOM kinetics), or
-%                         'sequential-h2biochem-phreeqc' (Windows IPhreeqcCOM equilibrium).
+%                         IPhreeqc kinetics), or
+%                         'sequential-h2biochem-phreeqc' (IPhreeqc equilibrium).
 %   phreeqcComProgId     - Registered Windows IPhreeqcCOM ProgID for
 %                         COM backends (default: IPhreeqcCOM.Object)
 %   phreeqc*WtFraction   - Dolomite, calcite, brucite, quartz, and inert
@@ -182,8 +182,6 @@ if opt.phreeqcTimestepCoupling
     assert(opt.carbonateBuffer && opt.bacteriamodel, ...
         ['phreeqcTimestepCoupling requires carbonateBuffer=true and ', ...
          'bacteriamodel=true so HCO3 and SO4 tracers are active.']);
-    assert(ispc, ['COM PHREEQC backends require Windows and ', ...
-        'a registered IPhreeqcCOM server.']);
     assert(~isempty(opt.phreeqcDatabaseFile) && ...
         isAbsolutePhreeqcPath(opt.phreeqcDatabaseFile), ...
         ['COM PHREEQC backends require phreeqcDatabaseFile to be an explicit ', ...

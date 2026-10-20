@@ -32,11 +32,6 @@ phase = getPhaseData(model, state, waterMass, opt.waterDensity);
 mineral = getMineralData(state, waterMass, nc);
 state = storePhreeqcInputDiagnostics(state, phase);
 
-assert(ispc, ['sequential-h2biochem-phreeqc requires Windows and a registered ', ...
-    'IPhreeqcCOM server.']);
-assert(exist('actxserver', 'file') == 2 || exist('actxserver', 'builtin') == 5, ...
-    ['IPhreeqcCOM activation is unavailable. Install/register the Windows ', ...
-     'IPhreeqcCOM server identified by phreeqcComProgId.']);
 iph = getPersistentIPhreeqcCom(opt, false);
 results = repmat(emptyResult(), nc, 1);
 for cellNo = 1:nc
@@ -344,10 +339,10 @@ thisProgId = char(opt.comProgId);
 thisDbFile = char(opt.phreeqcDatabaseFile);
 if forceNew || isempty(server) || ~strcmp(progId, thisProgId) || ~strcmp(dbFile, thisDbFile)
     try
-        newServer = actxserver(thisProgId);
+        newServer = createH2simIPhreeqc(thisProgId);
     catch ME
         error('H2Biochem:SequentialH2BiochemPhreeqcActivation', ...
-            'IPhreeqcCOM activation failed for "%s":\n%s', thisProgId, ME.message);
+            'IPhreeqc activation failed for "%s":\n%s', thisProgId, ME.message);
     end
     % We only ever read GetSelectedOutputArray/GetErrorString (in-memory);
     % none of IPhreeqc's echo/log/dump/selected-output FILES are used.
@@ -358,8 +353,13 @@ if forceNew || isempty(server) || ~strcmp(progId, thisProgId) || ~strcmp(dbFile,
     disableIPhreeqcFileOutput(newServer);
     loadStatus = newServer.LoadDatabase(thisDbFile);
     if loadStatus ~= 0
+        message = getPhreeqcError(newServer);
+        delete(newServer);
         error('H2Biochem:SequentialH2BiochemPhreeqcDatabase', ...
-            'PHREEQC database load failed:\n%s', getPhreeqcError(newServer));
+            'PHREEQC database load failed:\n%s', message);
+    end
+    if ~isempty(server)
+        delete(server);
     end
     server = newServer;
     progId = thisProgId;
@@ -398,7 +398,7 @@ catch ME
     % reactivates it instead of reusing a possibly broken instance.
     getPersistentIPhreeqcCom(opt, true);
     error('H2Biochem:SequentialH2BiochemPhreeqcRun', ...
-        'IPhreeqcCOM failed in cell %d:\n%s', cellNo, ME.message);
+        'IPhreeqc failed in cell %d:\n%s', cellNo, ME.message);
 end
 end
 
@@ -406,10 +406,10 @@ function message = getPhreeqcError(iph)
 try
     message = char(iph.GetErrorString());
 catch
-    message = 'No PHREEQC error string was available from IPhreeqcCOM.';
+    message = 'No PHREEQC error string was available from IPhreeqc.';
 end
 if isempty(strtrim(message))
-    message = 'IPhreeqcCOM did not provide an error message.';
+    message = 'IPhreeqc did not provide an error message.';
 end
 end
 

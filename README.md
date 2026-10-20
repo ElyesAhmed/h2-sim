@@ -70,14 +70,14 @@ This is a larger simulation than the introductory aquifer example. The [bacteria
 
 ## Use PHREEQC chemistry
 
-H2sim’s core storage and thermodynamic workflows do not require Windows. The two sequential PHREEQC backends currently use **IPhreeqcCOM**, which requires MATLAB on Windows, and a registered server from the [USGS PHREEQC distribution](https://www.usgs.gov/software/phreeqc-version-3). See the [PHREEQC installation instructions](https://sintefmath.github.io/h2-sim/installation.html#optional-phreeqc-setup).
+H2sim supports sequential PHREEQC coupling on **Linux MATLAB** through PhreeqcMatlab's native IPhreeqc shared library, and on **Windows MATLAB** through IPhreeqcCOM. On Linux, launch with `bash run_matlab_h2sim.sh "MATLAB statements"`; set `MATLAB_BIN` if MATLAB is not on PATH. See the [PHREEQC installation instructions](https://sintefmath.github.io/h2-sim/installation.html#optional-phreeqc-setup).
 
-After installing IPhreeqcCOM and running `startupH2sim`, check the interface and bundled database:
+After completing the platform setup and running `startupH2sim`, check the interface and bundled database:
 
 ```matlab
 db = which('h2_biogeochemistry.dat');
 assert(~isempty(db), 'Initialize H2sim first.');
-iph = actxserver('IPhreeqcCOM.Object');
+iph = createH2simIPhreeqc('IPhreeqcCOM.Object');
 status = iph.LoadDatabase(db);
 assert(status == 0, 'PHREEQC database loading failed.');
 delete(iph);

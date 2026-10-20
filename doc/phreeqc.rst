@@ -1,6 +1,17 @@
 PHREEQC coupling
 ================
 
+Platform support
+----------------
+
+The development integration supports both sequential backends on **Linux
+MATLAB** through PhreeqcMatlab's native IPhreeqc library and on **Windows
+MATLAB** through IPhreeqcCOM. Linux does not need a COM server.
+Earlier releases use Windows COM; native Linux simulation validation is
+pending. See :ref:`optional-phreeqc-setup` for installation, runtime
+requirements, and a verification command.
+
+
 .. raw:: html
 
    <a class="phreeqc-brand" href="https://www.usgs.gov/software/phreeqc-version-3" aria-label="PHREEQC — official USGS software page"><img src="_static/phreeqc-icon.png" alt="PHREEQC application icon" width="32" height="32"><span><strong>PHREEQC</strong><small>USGS geochemical software ↗</small></span></a>
@@ -147,7 +158,7 @@ Aqueous tracers remain transported in MRST.
    comparison = exampleCompositionalBacterial1DPhreeqcMinerals( ...
        'gridCells', 4, 'maximumFlowSteps', 2);
 
-Batches reduce COM overhead. The default batch size is 50; use
+Batches reduce IPhreeqc call overhead. The default batch size is 50; use
 ``sequentialCompositionalPhreeqcBatchSize=1`` for individual cell calls.
 Inactive-cell skipping records an explicit execution mask; a skipped identity
 update is not an independently evaluated chemistry audit.

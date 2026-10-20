@@ -1,5 +1,5 @@
 classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
-    % Real COM regressions for cell mapping and solvent-H bookkeeping.
+    % IPhreeqc regressions for cell mapping and solvent-H bookkeeping.
     properties
         model
         baseline
@@ -9,8 +9,8 @@ classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
     methods (TestClassSetup)
         function simulateBothBatchLayouts(test)
             db=which('h2_biogeochemistry.dat');
-            test.assumeTrue(ispc && ~isempty(db), ...
-                'Windows IPhreeqcCOM and the bundled database are required.');
+            test.assumeTrue((ispc || (isunix && ~ismac)) && ~isempty(db), ...
+                'Windows COM or Linux native IPhreeqc and the bundled database are required.');
             [~,model,schedule,state0]=setupH2StorageExampleWithSRB_benchmark( ...
                 'gridCells',4,'domainLength',5,'rate','highrate', ...
                 'scheduleMode','complete','injectionCO2',0, ...
@@ -119,7 +119,7 @@ classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
             end
         end
         function acetateIncludesItsImplicitHydrogen(test)
-            iph=actxserver(char(test.model.phreeqcComProgId));
+            iph=createH2simIPhreeqc(test.model.phreeqcComProgId);
             cleanup=onCleanup(@() delete(iph)); %#ok<NASGU>
             test.assertEqual(double(iph.LoadDatabase(test.model.phreeqcDatabaseFile)),0);
             % Add independent explicit-H and acetate-total observations to
@@ -147,7 +147,7 @@ classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
         end
 
         function addedWaterContributesItsActualHydrogenMoles(test)
-            iph=actxserver(char(test.model.phreeqcComProgId));
+            iph=createH2simIPhreeqc(test.model.phreeqcComProgId);
             cleanup=onCleanup(@() delete(iph)); %#ok<NASGU>
             test.assertEqual(double(iph.LoadDatabase(test.model.phreeqcDatabaseFile)),0);
             input=[test.preamble,sprintf([ ...
