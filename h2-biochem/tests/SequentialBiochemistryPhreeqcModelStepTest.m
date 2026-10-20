@@ -191,15 +191,12 @@ function databaseFile = resolveStepTestDatabaseFile()
 end
 
 function tf = isIPhreeqcComAvailable()
-% Best-effort probe for a registered IPhreeqcCOM server. Never throws:
-% returns false on any failure (non-Windows, unregistered server, ...) so
+% Best-effort probe for the platform IPhreeqc interface. Never throws:
+% returns false on any failure (missing native library or COM server) so
 % calling tests can gate on it via assumeTrue and skip cleanly.
     tf = false;
-    if ~ispc
-        return
-    end
     try
-        server = actxserver('IPhreeqcCOM.Object');
+        server = createH2simIPhreeqc('IPhreeqcCOM.Object');
         delete(server);
         tf = true;
     catch

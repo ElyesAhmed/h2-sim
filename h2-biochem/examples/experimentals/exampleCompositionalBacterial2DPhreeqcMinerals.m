@@ -443,8 +443,6 @@ model.OutputStateFunctions{end + 1} = 'ComponentPhaseDensity';
 end
 
 function stagedFile = stagePhreeqcDatabase(sourceFile)
-assert(ispc, ...
-    'This example requires Windows and a registered IPhreeqcCOM server.');
 assert(isfile(sourceFile), ...
     'PHREEQC database not found: %s', sourceFile);
 stageDirectory = fullfile(tempdir, 'h2-biochem-phreeqc');

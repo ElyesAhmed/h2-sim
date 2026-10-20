@@ -15,8 +15,8 @@ This module extends MRST's capabilities by integrating a bio-chemistry model wit
 
 ### Optional PHREEQC backends
 
-`setupH2StorageExampleWithSRB_benchmark` supports exactly two PHREEQC backends. Both require Windows, a registered
-`IPhreeqcCOM.Object` (or configured `phreeqcComProgId`), and an explicit absolute `phreeqcDatabaseFile` path to
+`setupH2StorageExampleWithSRB_benchmark` supports exactly two PHREEQC backends. Both use native PhreeqcMatlab IPhreeqc on Linux, or a registered
+`IPhreeqcCOM.Object` (configured with `phreeqcComProgId`) on Windows, and require an explicit absolute `phreeqcDatabaseFile` path to
 `h2_biogeochemistry.dat`. The database is bundled at
 [`h2-biochem/database/h2_biogeochemistry.dat`](database/h2_biogeochemistry.dat).
 The database is a renamed, unmodified copy from [UGFACT](https://github.com/ahmadrezashojaee/UGFACT); [source revision and checksum](database/README.md) are recorded alongside it.
@@ -64,7 +64,7 @@ MRST `nbact` is likewise outside the equilibrium-only boundary.
 
 `phreeqcBackend='sequential-h2biochem-phreeqc'` retains MRST's biochemical
 sources and adds sequential PHREEQC equilibrium feedback.
-It also requires a registered IPhreeqcCOM server and an absolute
+It requires native IPhreeqc on Linux or a registered IPhreeqcCOM server on Windows, and an absolute
 `h2_biogeochemistry.dat` path, but contains **no** PHREEQC `RATES` or
 `KINETICS`. MRST's existing `state.nbact` Monod model remains the sole
 reaction owner: bacterial growth, `BactConvertionRate`, and tracer reaction
@@ -123,9 +123,9 @@ From the H2sim repository root under WSL, run:
 bash run_matlab_h2sim.sh "results = profilePhreeqcWorkflows;"
 ```
 
-The launcher uses Windows MATLAB R2026a, initializes this checkout from the
+The launcher prefers Linux MATLAB on PATH and falls back to Windows MATLAB R2026a under WSL. It initializes this checkout from the
 standard MATLAB path, and propagates MATLAB's batch exit status. Set
-`MATLAB_BIN` to another Windows MATLAB executable's WSL path when needed.
+`MATLAB_BIN` to the desired Linux executable or Windows executable's WSL path.
 The Windows COM backends require access to your MATLAB license server.
 
 `profilePhreeqcWorkflows` profiles each baseline and compares three alternating

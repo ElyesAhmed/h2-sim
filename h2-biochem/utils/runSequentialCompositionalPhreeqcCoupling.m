@@ -21,17 +21,12 @@ assert(isa(model, 'BiochemistryPhreeqcModel'), ...
     'compositional PHREEQC coupling requires a BiochemistryPhreeqcModel instance.');
 assert(model.phreeqcTimestepCoupling && model.isSequentialCompositionalPhreeqcBackend(), ...
     'compositional PHREEQC IPhreeqcCOM timestep coupling is not enabled on this model.');
-assert(ispc, ['compositional PHREEQC IPhreeqcCOM timestep coupling is available only on ', ...
-    'Windows with a registered IPhreeqcCOM server.']);
 validateattributes(dt, {'numeric'}, {'scalar', 'real', 'finite', 'positive'}, ...
     mfilename, 'dt');
 
 opt = getCouplingOptions(model);
 nc = model.G.cells.num;
 validateCouplingOptions(opt, nc);
-assert(exist('actxserver', 'file') == 2 || exist('actxserver', 'builtin') == 5, ...
-    ['IPhreeqcCOM activation is unavailable. Install/register the Windows ', ...
-     'IPhreeqcCOM server identified by phreeqcComProgId.']);
 
 rhoWater = opt.waterDensity;
 waterMass = getWaterMass(model, state, rhoWater);
@@ -710,10 +705,10 @@ function iph = openPhreeqcSession(opt)
 % RunString/GetSelectedOutputArray are designed to be called repeatedly on
 % the same loaded instance.
 try
-    iph = actxserver(char(opt.comProgId));
+    iph = createH2simIPhreeqc(opt.comProgId);
 catch ME
     error('H2Biochem:SequentialCompositionalPhreeqcActivation', ...
-        'IPhreeqcCOM activation failed for "%s":\n%s', ...
+        'IPhreeqc activation failed for "%s":\n%s', ...
         char(opt.comProgId), ME.message);
 end
 try
@@ -767,7 +762,7 @@ catch ME
     end
     phreeqcMessage = getPhreeqcError(iph);
     error('H2Biochem:SequentialCompositionalPhreeqcRun', ...
-        'IPhreeqcCOM failed for cells %s:\n%s\nPHREEQC message:\n%s', ...
+        'IPhreeqc failed for cells %s:\n%s\nPHREEQC message:\n%s', ...
         cellRangeText, ME.message, phreeqcMessage);
 end
 end
@@ -880,10 +875,10 @@ function message = getPhreeqcError(iph)
 try
     message = char(iph.GetErrorString());
 catch
-    message = 'No PHREEQC error string was available from IPhreeqcCOM.';
+    message = 'No PHREEQC error string was available from IPhreeqc.';
 end
 if isempty(strtrim(message))
-    message = 'IPhreeqcCOM did not provide an error message.';
+    message = 'IPhreeqc did not provide an error message.';
 end
 end
 

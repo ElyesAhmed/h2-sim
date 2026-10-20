@@ -49,7 +49,7 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
     % OPTIONAL PARAMETERS:
     %   'phreeqcTimestepCoupling' - Enable the post-timestep PHREEQC
     %                               coupling (default false; requires
-    %                               Windows and a registered IPhreeqcCOM
+    %                               Linux native IPhreeqc or Windows IPhreeqcCOM
     %                               server).
     %   'phreeqcBackend'          - 'sequential-compositional-phreeqc'
     %                               (default) or 'sequential-h2biochem-phreeqc'.
@@ -153,8 +153,6 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
                 {'scalar', 'integer', '>=', 1, '<=', 2}, ...
                 mfilename, 'bacterialDecayOrder');
             if model.phreeqcTimestepCoupling
-                assert(ispc, ['COM PHREEQC backends require Windows and ', ...
-                    'a registered IPhreeqcCOM server.']);
                 validateModifiedComConfiguration(model);
             end
 

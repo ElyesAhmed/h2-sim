@@ -66,14 +66,63 @@ with ``amgcl_matlab`` compiled for your platform. A standard MRST installation
 can keep its existing solver paths. AMGCL does not require Parallel Computing
 Toolbox.
 
+.. _optional-phreeqc-setup:
+
 Optional PHREEQC setup
 ----------------------
 
 This step is needed only for examples that couple H2sim to PHREEQC.
-The core storage and thermodynamic workflows do not require Windows.
-The two sequential PHREEQC backends currently use the Windows-only
-IPhreeqcCOM interface; they cannot run through that interface in MATLAB
-on Linux or macOS.
+Both sequential backends support Linux MATLAB through the native IPhreeqc
+C library supplied by PhreeqcMatlab. Windows MATLAB continues to use
+IPhreeqcCOM. macOS sequential coupling is not supported.
+
+Linux
+~~~~~
+
+.. note::
+
+   Native Linux coupling is available in the development checkout containing
+   ``createH2simIPhreeqc.m`` and ``H2simNativeIPhreeqc.m``. Earlier releases
+   use Windows COM for both sequential backends. Check your checkout before
+   following the Linux steps below. Full Linux MATLAB simulation validation
+   is pending; native-interface chemistry has been tested with Windows DLLs.
+
+Initialize the pinned submodules, then launch native Linux MATLAB:
+
+.. code-block:: bash
+
+   git submodule update --init --recursive
+   MATLAB_BIN=/path/to/MATLAB/bin/matlab bash run_matlab_h2sim.sh "disp('Ready')"
+
+If ``matlab`` is on PATH, ``MATLAB_BIN`` may be omitted. The launcher prefers
+Linux MATLAB and falls back to Windows MATLAB under WSL when none is found.
+It delegates to PhreeqcMatlab's Linux launcher, which preloads the system
+``libstdc++.so.6`` for its modern GCC binaries. Set
+``PHREEQCMATLAB_LIBSTDCPP`` to override that library location if necessary.
+The system C++ runtime must provide ``GLIBCXX_3.4.32`` for the supplied
+3.8.6 binaries. MATLAB needs a configured supported C compiler for
+``loadlibrary`` (``mex -setup C``).
+
+``startupH2sim`` initializes PhreeqcMatlab, which resolves the shared
+libraries from its ``libs/`` directory, a local install specified by
+``PHREEQCMATLAB_LIB_PATH`` (or ``/usr/local/lib``), or release downloads.
+For offline installations, provide the libraries before startup.
+No COM registration is needed on Linux. Use the same explicit absolute
+``phreeqcDatabaseFile`` path to ``h2_biogeochemistry.dat`` as on Windows;
+``phreeqcComProgId`` is only used on Windows.
+
+Verify chemistry and cell batching after initialization:
+
+.. code-block:: matlab
+
+   iph = createH2simIPhreeqc('IPhreeqcCOM.Object');
+   assert(iph.LoadDatabase(which('h2_biogeochemistry.dat')) == 0);
+   delete(iph);
+   results = runtests('h2-biochem/tests/CompositionalPhreeqcBatchTest.m');
+   assertSuccess(results);
+
+Windows
+~~~~~~~
 
 Install and register IPhreeqcCOM from the
 `USGS PHREEQC distribution <https://www.usgs.gov/software/phreeqc-version-3>`_
