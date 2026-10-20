@@ -20,9 +20,9 @@ your selected model needs them.
    * - PhreeqcMatlab
      - Included chemistry integration tools
      - Pinned Git submodule
-   * - IPhreeqcCOM
+   * - IPhreeqc (Linux) / IPhreeqcCOM (Windows)
      - The two sequential PHREEQC backends
-     - Platform-specific COM setup; see installation
+     - Native shared library through PhreeqcMatlab on Linux; registered COM server on Windows; see :ref:`optional-phreeqc-setup`
    * - ``h2_biogeochemistry.dat``
      - Selected PHREEQC examples
      - Bundled under ``h2-biochem/database``
@@ -75,10 +75,13 @@ checkout to MATLAB's path. Its startup and module manager select the needed path
 Platform requirements
 ---------------------
 
-The core black-oil, compositional bacterial, and thermodynamic workflows do
-not depend on the Windows COM interface. The two sequential PHREEQC backends
-currently use IPhreeqcCOM; their platform requirement and setup check are
-documented in :doc:`installation`.
+Both sequential PHREEQC backends support **Linux MATLAB** through the native
+IPhreeqc shared library supplied by PhreeqcMatlab, and **Windows MATLAB**
+through a registered IPhreeqcCOM server. Linux uses the native C interface
+and requires no COM registration. See :ref:`optional-phreeqc-setup` for
+platform-specific installation, the Linux runtime setup, and verification
+commands. The core black-oil, compositional bacterial, and thermodynamic
+workflows run independently of the optional PHREEQC coupling.
 
 Database source
 ---------------
