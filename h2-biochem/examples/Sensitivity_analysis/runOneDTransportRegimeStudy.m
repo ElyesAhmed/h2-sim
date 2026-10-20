@@ -1,7 +1,7 @@
 function study = runOneDTransportRegimeStudy(varargin)
 % Regime analysis: when do transport and motility processes affect H2 loss?
 %
-% The UGFACT-style 1D benchmark is advection-dominated and its reactive
+% The 1D storage benchmark is advection-dominated and its reactive
 % front is H2-saturated, so molecular diffusion, mechanical dispersion,
 % microbial diffusion and chemotaxis have almost no effect on the
 % integrated biological H2 loss (see runTransportEffectsSensitivity). This
@@ -635,7 +635,7 @@ function checkPositive(opt, fields)
 end
 
 %{
-Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2026 H2sim contributors.
 
-This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
+This file is part of H2sim.
 %}

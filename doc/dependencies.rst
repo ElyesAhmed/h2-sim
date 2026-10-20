@@ -39,9 +39,11 @@ your selected model needs them.
 Reference validation
 --------------------
 
-The PHREEQC validation case additionally uses a separate UGFACT checkout.
-Pass its root directory as ``ugfactRoot`` to ``runPhreeqcValidation``.
-All selected examples and the reference run use serial execution.
+The three-backend comparison and standalone PHREEQC validation use only
+H2sim and the bundled database. No external reference checkout is required.
+To reproduce an optional external comparison, pass its checkout explicitly
+as ``referenceRoot`` to ``runPhreeqcValidation``. The reference files and
+platform are checked before simulation starts. All cases run serially.
 
 Without Parallel Computing Toolbox
 ----------------------------------

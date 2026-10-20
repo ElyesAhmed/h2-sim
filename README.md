@@ -68,6 +68,10 @@ plotCompositionalBacterial2DThreeReactions(results);
 
 This is a larger simulation than the introductory aquifer example. The [bacterial storage notebook](https://sintefmath.github.io/h2-sim/notebooks/bacterial_storage_2d.html) presents hydrogen consumption by reaction, spatial results, and signed well component rates with bottom-hole pressure.
 
+Initialize biochemistry through `startupH2sim`, which selects the standalone
+`h2sim-biochem` implementation. Do not load MRST's separate `h2-biochem`
+module for these examples. See the [upstream comparison and attribution audit](h2-biochem/MRST_COMPARISON.md).
+
 ## Use PHREEQC chemistry
 
 H2sim supports sequential PHREEQC coupling on **Linux MATLAB** through PhreeqcMatlab's native IPhreeqc shared library, and on **Windows MATLAB** through IPhreeqcCOM. On Linux, launch with `bash run_matlab_h2sim.sh "MATLAB statements"`; set `MATLAB_BIN` if MATLAB is not on PATH. See the [PHREEQC installation instructions](https://sintefmath.github.io/h2-sim/installation.html#optional-phreeqc-setup).
@@ -92,7 +96,7 @@ pH = comparison(2).states{end}.phreeqcPH;
 plotPhreeqcMineralComparison(comparison);
 ```
 
-Read the [PHREEQC workflow guide](https://sintefmath.github.io/h2-sim/phreeqc.html) before comparing backends: their microbial kinetic ownership and splitting differ. The bundled database originates from UGFACT; its source revision, checksum, and attribution are recorded in [the database README](h2-biochem/database/README.md). The [full-cycle validation notebook](https://sintefmath.github.io/h2-sim/notebooks/phreeqc_validation.html) compares results against a separate reference implementation.
+Read the [PHREEQC workflow guide](https://sintefmath.github.io/h2-sim/phreeqc.html) before comparing backends: their microbial kinetic ownership and splitting differ. The bundled database originates from UGFACT; its source revision, checksum, and attribution are recorded in [the database README](h2-biochem/database/README.md). The [full-cycle validation notebook](https://sintefmath.github.io/h2-sim/notebooks/phreeqc_validation.html) includes attributed external reference data. The examples run with the bundled database; reproducing the external reference is optional and requires an explicit `referenceRoot`.
 
 ## Explore and reuse results
 

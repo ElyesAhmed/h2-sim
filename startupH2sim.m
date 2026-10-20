@@ -49,6 +49,11 @@ for ind = 1 : numel(dirnames)
     addpath(genpath(dirname));
 end
 
+%% Select H2sim's implementation of biochemistry
+% The MRST dependency also contains a separate h2-biochem implementation.
+% Keep that module out of this session and use the explicit H2sim namespace.
+activateH2simBiochemistry(rootdirname);
+
 %% Install Phreeqcs
 
 run(fullfile(rootdirname, 'submodules', 'PhreeqcMatlab', 'startup'));

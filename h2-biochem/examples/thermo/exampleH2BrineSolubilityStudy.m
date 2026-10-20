@@ -5,20 +5,20 @@ function result = exampleH2BrineSolubilityStudy(varargin)
 % table (near-pure water), not a live PC-SAFT solver. No NIST or PCT needed.
 % Results and RK tables are saved, permitting plots to be regenerated.
 %{
-Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2026 H2sim contributors.
 
-This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
+This file is part of H2sim.
 
-MRST is free software: you can redistribute it and/or modify it under
+H2sim is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
 
-MRST is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+H2sim is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with MRST. If not, see <http://www.gnu.org/licenses/>.
+along with H2sim. If not, see <http://www.gnu.org/licenses/>.
 %}
 % Ahmed et al. (2024), Advances in Water Resources 191, 104772.
 opt=merge_options(struct('plotResults',true, ...

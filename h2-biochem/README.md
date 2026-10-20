@@ -1,6 +1,17 @@
-# MRST Bio-Chemistry Module for Hydrogen Storage Simulation
+# H2sim biochemistry and reactive hydrogen storage
 
 A comprehensive MATLAB Reservoir Simulation Toolbox (MRST) module for simulating hydrogen storage in depleted reservoirs with bio-chemical reactions and compositional modeling.
+
+Initialize this standalone toolbox with `startupH2sim` from the H2sim root.
+Do not initialize it with `mrstModule add h2-biochem`: MRST ships a separate
+module under that name. H2sim registers its implementation as
+`h2sim-biochem` and removes the upstream name and paths from the current
+session to prevent mixed implementations.
+
+[File-by-file comparison with upstream MRST](MRST_COMPARISON.md) records new,
+modified, and relocated files, source attribution, and the exact baseline
+revision. Existing MRST notices are retained on inherited files; new H2sim
+source files use H2sim 2026 notices with GPL terms preserved.
 
 ## Overview
 
@@ -90,6 +101,21 @@ only when that chemistry feedback and the MRST-reported reaction extent
 (`h2ConsumptionRate * dt`) meet configured tolerances, otherwise it raises a
 nonconvergence error. It is therefore a same-timestep outer Picard scheme, not
 a lagged post-step chemistry split.
+
+### Standalone comparisons and validation
+
+`runThreeBackendComparison()` compares three models included in H2sim and
+uses the bundled chemistry database. It does not run an external driver.
+`runPhreeqcValidation()` also runs standalone by default. For a short check:
+
+```matlab
+result = runPhreeqcValidation('gridCells', 2, 'totalDays', 2);
+```
+
+An external reference is optional: pass its checkout explicitly using
+`'referenceRoot', referenceRoot`. Its files and platform are checked before
+simulations start. New results store external outputs as `result.reference`.
+Previously saved reference datasets remain readable by the plotting helpers.
 
 ### Biochemical Reaction Model
 

@@ -128,7 +128,7 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
                 'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
                 'phreeqcDatabaseFile', databaseFile);
             assert(baseModel.bacterialDecayOrder == 1, ...
-                'The UGFACT-matched hybrid case requires first-order biomass decay.');
+                'The matched hybrid case requires first-order biomass decay.');
 
             % Keep only the first 5 fine (0.4 day) steps: a short 2 day
             % comparison window.
@@ -279,20 +279,20 @@ function tf = isIPhreeqcComAvailableForReferenceTest()
 end
 
 %{
-Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2026 H2sim contributors.
 
-This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
+This file is part of H2sim.
 
-MRST is free software: you can redistribute it and/or modify
+H2sim is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-MRST is distributed in the hope that it will be useful,
+H2sim is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with MRST.  If not, see <http://www.gnu.org/licenses/>.
+along with H2sim.  If not, see <http://www.gnu.org/licenses/>.
 %}

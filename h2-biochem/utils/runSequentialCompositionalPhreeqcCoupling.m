@@ -4,7 +4,7 @@ function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
 % This backend uses the h2_biogeochemistry.dat IPhreeqcCOM input and
 % SELECTED_OUTPUT convention. It is Windows-only: PHREEQC owns MET/ACE/SRB
 % kinetics and its biomass state, while MRST retains flow and tracer
-% transport. Its split conventions match the UGFACT H2Storage1D reference.
+% transport. Its split conventions match the storage-cycle reference.
 %
 % Cells are processed through one persistent IPhreeqcCOM object and one
 % h2_biogeochemistry.dat database load per coupling invocation (actxserver
@@ -1400,3 +1400,22 @@ path = char(path);
 isAbsolute = ~isempty(regexp(path, '^[A-Za-z]:[\\/]|^\\\\', 'once')) || ...
     startsWith(path, filesep);
 end
+
+%{
+Copyright 2026 H2sim contributors.
+
+This file is part of H2sim.
+
+H2sim is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+H2sim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with H2sim. If not, see <https://www.gnu.org/licenses/>.
+%}

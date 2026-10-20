@@ -1,11 +1,29 @@
 function results = benchmarkSequentialPhreeqcVolumeFlash(databaseFile)
-% Run after startupH2sim on Windows MATLAB with IPhreeqcCOM registered.
-% Timings surround the entire example call, including setup and reporting.
-% Alternate ordering over three paired trials to expose startup/order noise.
-% No grid, timestep, EOS tolerance, or inventory tolerance changes.
+%Compare local and global pressure brackets for the sequential volume flash
+%
+% SYNOPSIS:
+%   results = benchmarkSequentialPhreeqcVolumeFlash(databaseFile)
+%
+% DESCRIPTION:
+%   Run three pairs of two-step simulations with and without the local
+%   pressure bracket. Alternate the run order and report elapsed times,
+%   pressure differences, and component-inventory differences. Timings
+%   include example setup and reporting. Grid, timesteps, and conservation
+%   tolerances are identical in each pair.
+%
+% PARAMETERS:
+%   databaseFile - Absolute path to h2_biogeochemistry.dat. Initialize
+%                  H2sim and the platform's IPhreeqc interface first.
+%
+% RETURNS:
+%   results - Paired timings, median speedup, and maximum relative
+%             differences in pressure and component inventories.
+%
+% SEE ALSO:
+%   exampleSequentialBiochemistryPhreeqc1D, profilePhreeqcWorkflows
 
 previous = warning('error', 'H2Biochem:PhreeqcReflashInventory');
-cleanup = onCleanup(@() warning(previous)); %#ok<NASGU>
+cleanup = onCleanup(@() warning(previous));
 seconds = zeros(3, 2);
 pressureRelativeDifference = zeros(3, 1);
 inventoryRelativeDifference = zeros(3, 1);
@@ -49,3 +67,22 @@ results = struct('seconds', seconds, ...
     'inventoryRelativeDifference', inventoryRelativeDifference);
 disp(results);
 end
+
+%{
+Copyright 2026 H2sim contributors.
+
+This file is part of H2sim.
+
+H2sim is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+H2sim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with H2sim. If not, see <https://www.gnu.org/licenses/>.
+%}

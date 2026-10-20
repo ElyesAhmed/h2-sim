@@ -49,5 +49,5 @@ assert(numel(values) == nc && all(isfinite(values)), ...
 end
 
 %{
-Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2026 H2sim contributors.
 %}

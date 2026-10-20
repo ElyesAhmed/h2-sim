@@ -156,7 +156,7 @@ classdef GrowthBactRateSRC < StateFunction
                                 totalCarbon = feedback.co2Molality + ...
                                     feedback.hco3Molality;
                             end
-                            % UGFACT/PHREEQC MET and ACE kinetics use
+                            % PHREEQC MET and ACE kinetics use
                             % tot("Carbonate(4)"), not free aqueous CO2.
                             xsub = totalCarbon .* ...
                                 rm.EOSModel.rho_water ./ rho_molar;
