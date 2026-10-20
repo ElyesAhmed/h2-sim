@@ -31,6 +31,24 @@ Then run:
 Use MATLAB R2021a or newer for the core examples. Startup adds H2sim modules
 and initializes dependencies. Do not add the complete MRST tree with ``genpath``.
 
+H2sim uses its own biochemistry implementation, registered as
+``h2sim-biochem``. Initialize it with ``startupH2sim``; do not use
+``mrstModule add h2-biochem`` to initialize this toolbox. That name belongs
+to MRST's separate module. H2sim startup removes the upstream module's
+paths and mapping for the current MATLAB session, then selects this
+checkout's implementation. Other MRST modules remain available.
+
+If you have already created model objects with MRST's upstream module,
+restart MATLAB and initialize H2sim before constructing new models.
+You can check which implementation is selected:
+
+.. code-block:: matlab
+
+   which BiochemistryModel
+   mrstPath('search', 'h2sim-biochem')
+
+Both paths should point into this H2sim checkout's ``h2-biochem`` folder.
+
 Run a first example
 -------------------
 

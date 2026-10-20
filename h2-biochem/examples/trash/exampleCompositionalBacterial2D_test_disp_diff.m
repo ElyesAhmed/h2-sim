@@ -252,6 +252,6 @@ fprintf('============================================================\n');
 % %% Copyright notice
 % % <html>
 % % <p><font size="-1">
-% % Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+% % Copyright 2026 H2sim contributors.
 % % </font></p>
 % % </html>

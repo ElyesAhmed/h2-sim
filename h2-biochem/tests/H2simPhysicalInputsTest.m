@@ -42,3 +42,22 @@ m=BiochemistryModel(G,rock,f,c,TableBioChemMixture({'MethanogenicArchae'}),true,
 s=struct('pressure',1e7,'T',313.15,'s',[0.8,0.2],'components',[0.9,0.045,0.005,0.05],'nbact',1);
 q=simpleSchedule(day);q.control.W=struct('components',[0.001,0.948,0.001,0.05],'compi',[0,1],'status',false);
 end
+
+%{
+Copyright 2026 H2sim contributors.
+
+This file is part of H2sim.
+
+H2sim is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+H2sim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with H2sim. If not, see <https://www.gnu.org/licenses/>.
+%}
