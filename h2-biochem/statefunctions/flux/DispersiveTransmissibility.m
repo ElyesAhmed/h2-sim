@@ -100,7 +100,7 @@ end
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
-This file is part of The MATLAB Reservoir Simulation Toolbox (h2sim).
+This file is part of h2sim.
 
 h2sim is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
