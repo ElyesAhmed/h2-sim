@@ -70,39 +70,39 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "047195c230bb4bf060d5fb995b5cc25b99ee67e37ab3302c7b1cf40069f036cf",
+      "local_sha256": "cb8ffa424e0089828a17662afc78cd8702a92e426fc03c23c8fb2772df4ac963",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/1D_validation/exampleCompositionalPhreeqcValidation.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "d7317305ab09e0cc856653daaadb82543288c9685aa11b2236295136b6312765",
+      "local_sha256": "45eb1abd07d82b61bddbf413aeffc71a18d44828be4b5eb849b6b37124fac9cd",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/1D_validation/exampleSequentialBiochemistryPhreeqc1D.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "3a45f8dfefef135104b7a592e8b2ca0bf178ba8ba4fa931ae12af453c3c5e7e2",
+      "local_sha256": "75b34a15dc179101a6dd3ff8517aab8b72d693d7c636c4cc82266a7eaf018b8a",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/1D_validation/notebooks/simple1DBacterialExampleMetacet.ipynb",
@@ -135,52 +135,52 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "803c88fa8d22efe7b827ad871918de91d04bbaa59e006f37f0e0d46c5251a625",
+      "local_sha256": "f440bdfa605463e53fccad17b5fd769b23158855ffd97accf207604674e8cf2d",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/1D_validation/profilePhreeqcWorkflows.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "3abba0961639b56d2085f145de61243f1ebe4afd747021b303e96742bf4eb460",
+      "local_sha256": "de71e2d90221f31dddc484291400653632959ae962a624b8fb7893f30f914f39",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/1D_validation/runPhreeqcValidation.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "25cd51cf7c1c31deaae07f67a5a2e75a659c6b29810d993795dfa2bf52f92e87",
+      "local_sha256": "939dc09403960cc010c2e310d84a96f6d822e41a589104881fb09155c4da01e2",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/1D_validation/runThreeBackendComparison.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "4aeb29609bc461391d13d947308b14b2af2e5bc5ed80ba2a21f9135d086735ee",
+      "local_sha256": "23756ef3c0811ad1f8b1be1d23ed1ae6cbd057b6293ee15ed76eaeefe3556c5f",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/1D_validation/simple1DBacterialExample.m",
@@ -200,39 +200,39 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "a2cf3c259103e1282f6b52adaf444f799519e98dd4cd29214d63701e554e42f4",
+      "local_sha256": "024da057d76d72ad5230cb2968071328854e0932fe0ee74624d925cdb484a4fe",
       "upstream_sha256": null,
       "possible_derived_from": "modules/h2-biochem/examples/simple1DBacterialExample.m",
       "copied_fingerprint_fraction": 0.5,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "Add H2sim 2026; retain existing notices (possible MRST-derived code)"
+      "copyright_action": "Retain original notices; add MRST-format h2sim notice"
     },
     {
       "path": "h2-biochem/examples/1D_validation/testAllDiffusionEffects.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "660a0f73c4ce404054b7e03e2f7997d302601e2ac9e5a106787864160be7ef3f",
+      "local_sha256": "5bb587cab4763e33f56fd8e513bfeb4908802fbd0941c446fbaded93635e2af8",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/2D_experiments/TestCompositionalBacterial2DWithMolecularDiff.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "3762b2949d3ba3b292251d414f7f954ab813361862040ca8019a1ff4c1860399",
+      "local_sha256": "3a661a04b73490598756867eb7cfda3e588281e56c1573f51e42af020e0d4222",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": 0.036,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/2D_experiments/exampleBlackoilVsCompositional.m",
@@ -265,13 +265,13 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "b01d46393f3a5fcb727001904b124b444fb6518b626843d59f22954710ffa289",
+      "local_sha256": "80ef0c04f7926fdd7dd23a104a4c40eea345f625dd9776865ead8fa73a89643d",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/2D_experiments/figures/H2_cumulative_loss_spatial.eps",
@@ -512,26 +512,26 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "0a975b92b2cc07184b395536e962ef5a24a3d5256e8399ef99e14bb2384fdafe",
+      "local_sha256": "b1e113e594dee1878a79fda129bb202d0ae602c3bf00fc233d0578cb3a9f9fee",
       "upstream_sha256": null,
       "possible_derived_from": "modules/h2-biochem/examples/exampleCompositionalBacterial3DbenchmarkEAGE2023.m",
       "copied_fingerprint_fraction": 0.395,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "Add H2sim 2026; retain existing notices (possible MRST-derived code)"
+      "copyright_action": "Retain original notices; add MRST-format h2sim notice"
     },
     {
       "path": "h2-biochem/examples/3D_experiments/exampleCompositionalBacterial3DbenchmarkThreeReactions.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "52427e910b450dd51c5d390902ecf7dd213a4ad292dea66f4ff597e852204d92",
+      "local_sha256": "d124444fa90673078cd0dc5d8fc4d754899a22ee8d9225039e38f0c05b686d4b",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/3D_experiments/figures/threeReactions_3D_rock_properties.eps",
@@ -655,91 +655,91 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "34ec9f01a1edf887e71805ec203f2ffde3bfd04470d897c544925b4e3ddb4904",
+      "local_sha256": "3ae79bb20392f7451125fe3a6e18f7005ce318d4a2e84eb806bbc53386877716",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/Sensitivity_analysis/runOneDTransportRegimeStudy.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "2c5058ee34344d58576d366b3ffeffbce5b2d1aa3ab48d11e145eae3b0208ce2",
+      "local_sha256": "224e8d52ec5978644dfe47064f4598d1785d8dec1c3ada142dd7ab0fe0dfca48",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/Sensitivity_analysis/runTransportEffectsSensitivity.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "b8f0b6e7299c8d5826db7c6dad3b0c4eddb324eeab2c335b73521e78dc1cdd79",
+      "local_sha256": "c2807b3ef999e8704b858f481cd1cd2d8627615d5ce0b4d6b116ebdfddab5c2b",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/experimentals/exampleCompositionalBacterial1DPhreeqcMinerals.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "e2d0e0f3cd6fe8c7173b4f44bdccdfbd3d4181ad882ba96a169b5573b29352af",
+      "local_sha256": "8a917f2c0ea041ba0531b3d59340da08caf4ca593fb6fdfbc16ded5be150555f",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/experimentals/exampleCompositionalBacterial2DPhreeqcMinerals.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "2c5b250a609cb3c0c167f4769655b4628e4552e1e6fe8cf4c4a5262ccb87486b",
+      "local_sha256": "8a120837e7e3956491eb492c621dc353628cdfee78a48276d0680bd0806caa1c",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/experimentals/exampleCompositionalBacterial3DBenchmarkFixedPH.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "94102f6b1c2a4ffcd78002a9056626f6eeb6d21e9f6c6ccc440148e38a91f55b",
+      "local_sha256": "5a106b14e2813ef50aeb80f67b059dfde0ce062b0fe53bd8a1f2ff76af7cfa3f",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/thermo/exampleH2BrineSolubilityStudy.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "c4df2686f6c529e099d05e6476d62da78609d5ac230e8ef12a7b1407e0169b5c",
+      "local_sha256": "7ea5ca66f8839ac42023b2977a2bd752da948451cae2da03dbaae7ea3db6bb62",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/thermo/exampleVLECO2H2O.m",
@@ -772,52 +772,52 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "fff0e728dfa73e21c63114b5f623fc9e1f06e8af8884bd44fe333af77eff3e33",
+      "local_sha256": "44849383b28e16769135ac233206399ed7790191c792749d12a8b22369e74e92",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": 0.034,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/trash/exampleCompositionalBacterial2D_test_disp_diff.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "9e7d82b12c2c25bcd3c26ba608cfee002721c4f1b7e2ceddc8a271c9eda56403",
+      "local_sha256": "9c807fc3f125d1c58851ff1dae5cd431e9878a1ad6b6fda241159fcafad29131",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": 0.026,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/trash/simple1DBacterialExample_test_bact_diff.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "4dad77914388b131847bda851627439834b09b7551e3adefb630892354ad8fe3",
+      "local_sha256": "a8e6b5eef5e671b420aaa03ca271ba5adccf666d55213902d5fcf11da4780777",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": 0.022,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/examples/trash/simple1DBacterialExample_test_disp_diff.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "bdbc3d03bd76076597bb8b64f76942c4abcebda40f04aeeaa2327a784747908c",
+      "local_sha256": "50a1867a36e00cff5283f56252fac9388d804a9da4924a075d555999b7f82a06",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": 0.043,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/models/BiochemistryGenericFacilityModel.m",
@@ -850,39 +850,39 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "620067b5c7418d3985c41b0b94730d987ba2c9c7a5dc1705e62c424b611766f9",
+      "local_sha256": "6bbbdc42a6741ab8da14019089850b3d6648d0e997aa0ec3a0f6caa70b9f522d",
       "upstream_sha256": null,
       "possible_derived_from": "modules/h2-biochem/models/BiochemistryModel.m",
       "copied_fingerprint_fraction": 0.197,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "Add H2sim 2026; retain existing notices (possible MRST-derived code)"
+      "copyright_action": "Retain original notices; add MRST-format h2sim notice"
     },
     {
       "path": "h2-biochem/models/SequentialBiochemistryPhreeqcModel.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "31f6ef55efef068f01c9fa1ef86725f31d0e422da1ae22b0ddabd4985209714a",
+      "local_sha256": "ebc282852ba47ed91b9a019cde0607097a15e17716eecbcc309b4fb521d47afa",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/models/TableBioChemMixture.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "8ec15d900ad6a07ac770e7cc9afe943c517c9b6abcefc8645c0ffdf763fa4380",
+      "local_sha256": "3284f66934fe56dc6d8bf2257f0033255b7e5a7100f7a29bd7a5c57540a51c68",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/models/eos/SoreideWhitsonEos.m",
@@ -915,13 +915,13 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "2d6c71ce53f226e5ce22bb1a4f947b7ee098ce535177b11336eee93eb9d86660",
+      "local_sha256": "2b4c77d5def5dda95bce69f62175469748de4bce02265ff6a085c7fce017f217",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flowprops/BactConvertionRate.m",
@@ -954,13 +954,13 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "e42c9e4dee3b4c5a8dbe42165390ba9db19d4dcf0aa5d17b013a3f85bb56a99f",
+      "local_sha256": "5f604e0e0b58d05563aacc3876df81f9a33c5bb33da7428f87b4a316e9426345",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flowprops/DecayBactRateSRC.m",
@@ -993,13 +993,13 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "fee60b1d9b44dfe4690738b6fe4f19e6188b41bd39248a1d48ca64b1a1f29ab7",
+      "local_sha256": "50de4c7efdd475bde3fac51e37388ee81ffebe179a42dc3720db65c10bfb4381",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/BactPermeability.m",
@@ -1032,117 +1032,117 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "2fe011f6c1619cfeececd5101dd6a60ce0bd18765ef86d188c291e578d41233b",
+      "local_sha256": "83fdda43f59c9d8c7c0cebe85d9f963d131d3149582d321e6336e35a92d87599",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/ChemotaxisTransmissibility.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "a7ef0960171d135b348eb539b1455a1d976da382a92d27b1b38dd44eadb05e93",
+      "local_sha256": "72244ea19a6f941e05f99e21474a54b1b102cf4c39728dcda8e5a24116613b4e",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/ComponentPhaseDispFlux.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "5e6915582f4a3e854a4141f0c7cdec71accf63e7809fb152f842a77066e6f0ae",
+      "local_sha256": "7f4ea160dd9d22249e9b28efaf2278ff4123b3cee46c58f41af7084e31b1e712",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/ComponentTotalDispFlux.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "b4f2a27dd40e06bb76e36ab860270c09fbbb4980fdc315b992b1c9d1d138eca6",
+      "local_sha256": "52596f6faaab56db8016282c449c3b17a313ded5e652297ce4f8ad802f5fa50f",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/ComponentTotalFluxForBio.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "f1fb6d3a7d58dabad1422420a414f4a4d2ac249084700be3d0be868f85b389b2",
+      "local_sha256": "5694969e826d76e4770d2183f63b31bb08d7e7f443fa24a45555791e7d44afb1",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/DiffusiveBactFlux.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "02d421f0123880ce9a019462f2f15abe5acfdb1cc6c012f01a5b382327a571ab",
+      "local_sha256": "4ec64c4263bbbf92e20b3f0a0117dd05d03647dc0537774ecf5f70fefb27896d",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/DiffusiveTracerFlux.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "14667cc8e60721fabd9be50b42dbfa7bbb4a66dc38bc76d3f45d97d3d78f8e0a",
+      "local_sha256": "a7e13f6aae1a3d753c4abeb40a9296454d3f6ca76fb6dd86c4318c0a54d65706",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/DispersiveDiffusivity.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "7b949057d9557f7c5470dcb7cfcb41600ad5767a847b3c85a0da939ee67f8a8d",
+      "local_sha256": "61d8d5e306ccf56b8af433c262b9c8d4fc3b62905e7c1c7b8955a59b463796bf",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/DispersiveTransmissibility.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "d8db7c05d9e5d8f56788d94c057aca81ae814d009e709fb1d27626bdda6cfd7c",
+      "local_sha256": "43432d08a7322f7477babe231be71c3eee33332f723255ea8c2bc143d5983ec3",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/DynamicFlowPoreVolume.m",
@@ -1175,403 +1175,403 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "9da08cead911b153c065fd40868cd2569c935bc66f036387b3808f0287c7bbd7",
+      "local_sha256": "70bc60b564b65e35378e9386655b6790e054a6cdd31e6bc5b0a504ec465e3154",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/MicrobialDiffusivity.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "17fa85f3d0acd932467770a2360e9b7090eb75045a02e0fdb7a621712c46267f",
+      "local_sha256": "573dd9eb0eb71f090fd3b9a9490674702dd88075ab84655195d4b142177e5c22",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/MicrobialTransmissibility.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "5ef8215209a2b012bd11e4a9736c7f719240395c8c74c28d446ab0656541f599",
+      "local_sha256": "c4f7ca485a4efc99da8c2e91a6f751e048646fcacf75229b6759aa0ea188eaa7",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/PorosityFromRock.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "612cc18e039a0d9a84971cba05334e129bf4eb4b2b57ef5cc7a9fb4086b7ce00",
+      "local_sha256": "26d6ba53b741235150a379e011126738556f8e32b21497f44a86b962c5f3caed",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/TracerDiffusivity.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "9cadb51c16a88e36de5c3321fd9b4e4c2041bf93b6333063ac00cacb79bfe925",
+      "local_sha256": "7db463a486416f969d0a145ee1420f52a1952f836a601cb7f15a97e887052ce0",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/statefunctions/flux/TracerTransmissibility.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "f944604b8a432e662c912cc9715c87e00f99e758000926662b9c6783873fc07d",
+      "local_sha256": "4bdbc9d1b6d0ccec9131889de3584643d6b8ffbbfc90e634d521c3f1f652b578",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/CompositionalPhreeqcBatchTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "8b5bb86be091f948c7933269b23b90beb438a19cc641b6c6b21d427692547bc9",
+      "local_sha256": "46a472ebe925c786a4fba47504892e6227a082639d578498659956d3ec11727c",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/H2BiochemMixtureTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "b5d55702fb3f35be4d3cde68b27fad35332cadbb99c488f4402c3dfda16e5fbb",
+      "local_sha256": "e87810cccf483bcf04b6252330115ecfde24d289e8d29b7d91f2cd442e7ae127",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/H2BiochemParallelTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "978ef513b312abd9de0f89044f31f31ed3e9d1ab4f3d8c80625678f30d20982c",
+      "local_sha256": "25fa1611a9fc097064b5a57223a0d9ac423156a26e05a7eb3db9b7328b742680",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/H2BiochemVolumePressureTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "dbc9d250bf46eea843ed3f534a1f582e89b60a2d9cc4a1ce7c1c5d95e35cfa11",
+      "local_sha256": "79479ea05e91c3fea38b00f1ddf8512b2cbdfbbbcc286949b9cedec6b30183d3",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/H2simBiochemistryPathTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "100f6d6b0991b50a495f088a2037e7c0155d11b8d7f34d58218cdf35280bbcf5",
+      "local_sha256": "9bf8d52aa1767530e088a3b722b463e039600bf8f7f6de1973671be9cfcb8576",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/H2simPackedSimulationTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "caa8489268de1b78f8d0f69aab8f46c8d6e535e225a79a7069f21615fcac4290",
+      "local_sha256": "3505b56259e12d39976cc9afca1f67fdb324dc7b506781812cd4fa11939553cf",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/H2simPhysicalInputsTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "f64d30c749cbd4234779d95c9bf7e5696225dc49fe70da2157b5aafb8b6e39c4",
+      "local_sha256": "d634cf6923fd391cf4f73489a7e556a49879f4d5fedd887661a8ee414fba87d1",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/NativeIPhreeqcTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "12b2edc5308a8186a460014b2c2376efd29c2a0dba9f353483ca5ba13d228dfb",
+      "local_sha256": "cdf4803399814b29ea15578f213b517057031f3c4775aff47bca818d3cb68cc8",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/PhreeqcMineralRoundoffTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "81f430e88ad28a8e586946ac69d96ea24e23ab9d53dee7794da4e10a74556ec0",
+      "local_sha256": "d6507088f37caae2c969128f845b388a795212656cb5121da0f976d79e6030a5",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/PhreeqcPublicationFiguresTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "d6cbad8205745cd9aba369d7e8e625ecb8b7edecf45fcd2cd7d66535c3a85780",
+      "local_sha256": "7c55ab8744d14230a296b80969a558ff673d25fc029212bd78fcfc6dd0a19b3e",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/PhreeqcValidationDiagnosticsTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "c077126593b1b4e763ddeb9aa8b8f07b30d78af544a8470ff199bcdc52c7d1a7",
+      "local_sha256": "8048148d142b8034206de9f964df8b15b37543b30c9b5dbe9d113f6642bc6a42",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/SequentialBiochemistryPhreeqcModelConstructionTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "f589af262e2977706ae46140702f5ec2af3bc1f02c58c4cd67599d751ab38d5a",
+      "local_sha256": "35e4b2e15abeb864b7b6370b6b36d4393fe42fb7f7696074fde0ad36fa4d9657",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/SequentialBiochemistryPhreeqcModelReferenceTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "d36122f63cdff9eac9f07ec8a4d099603690ea00cd2aede5dd89c02b31d12810",
+      "local_sha256": "bd2d4bd0fb66cf462daef49898ad40916cf4f72335c64f6c3502e8d48c3a3652",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/SequentialBiochemistryPhreeqcModelStepTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "84ff06432ef5e19a1c6e5c89f86a67b345cd3870e7702af290245be63e1aee7c",
+      "local_sha256": "68d3b7854c9afef67f088c10335910b8cda65a6f4a2fc8db70e16143ff0ab6ff",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/tests/SoreideWhitsonPhaseLabelTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "27a7b6187758384d6f00b81041e7b8358abb6a741444e29e86f89c9dc271ef81",
+      "local_sha256": "bde97bcc36790ef8f75abab2cf2856c880cf1018727e7a2a8e85b758f3577555",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/H2simNativeIPhreeqc.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "a0aafefefbf4d60a4ff374e4d9773f182a79287069132c8fa565e24a02335299",
+      "local_sha256": "344b3914d72a9bfb7b9dad201aea8435a2a21c661ddf2bacae15c85c147d6f23",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/addBacterialBC.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "05d29457cce31eb95498a3000c462ae3fb0c2c0341e71a8ec2039edae5cf8f47",
+      "local_sha256": "748e3d8a30cbab871a71fcf6e62d9925c8cbbdc1eb79289eacf0b3e1391c4681",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/advanceSequentialBiochemistryLocalReaction.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "43df7ee6383b6d322223d84955c6f27308a8cde9ff7e9ba748dda5ed3d5eee9b",
+      "local_sha256": "9eb0092cf96d0196da7c7b4478da046dd6dd8bb87c9e713708d312a11dc4a7d9",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/bioChemFluidsStructs.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "f7e91da0381e91a104dc14f603baf301f2152fbb19cd4a850da92964dc3236de",
+      "local_sha256": "beaf7738a5bd286be2df2c13b5ba145169c762004997278966ebcf6c273c9960",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/buildSequentialH2BiochemPhreeqcChemistryFeedback.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "8bfdc666d6fc867188d77942b191cf07c2ec365e5fd8ed7e01534f0ee3a18898",
+      "local_sha256": "f65a08a565506145574f894bacaae3b952d8a94fedc978cd020a48d69c2e88e7",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/checkPhreeqcElementBalance.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "28a2e8d4bacbd0377bbabdb6e2e9e9637c0f813cd346ccc5e898412242d2bfe1",
+      "local_sha256": "2cb9f740172d3aa3794cc77b562ea0f75d9356d9735d8fb7b2fb74331c049c1a",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/coarsenScheduleByControl.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "8477325aadcf722c123d97d988b0927dbd5f7fefe4c1a0138d85279eacda8c44",
+      "local_sha256": "5a535116d23e3e6efa1a4eb2c87c0622dd44e7d3c504cf1de79a95d2245df45c",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/computePhreeqcElementInventory.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "c6b86b2e66bf341e133953f2f883e064267eedf64d779f9723f64972e7d164ae",
+      "local_sha256": "9bd29e45a06b25e31d81aaa99feefbdae1731c92a2698ba102ed59516b46762a",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/convertToSequentialBiochemistryPhreeqcModel.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "823be2bcb7738ba3b6883b8f87977f97df3c4dea8433b02a3555c8cce0f4c8d7",
+      "local_sha256": "ff7d21f63e5b1915dcdc64bc95e3e16c4fedd8743b21c69b2860d65ac68b1ee2",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/copyBiochemistryModelProperties.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "6f5b8e3994c023c1042eed5db3bc527d49df42ad6c603fd1d53bf27d3638c3b1",
+      "local_sha256": "04d55e077b4642d438c79d4e11c322c6c10da6382a121d558bcce1642241d8f0",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/createCyclicScenario.m",
@@ -1591,65 +1591,65 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "f47f05f3a600a55b45af8c9474f16fd6f0b582543a8e610ad5aa671f116ae7f2",
+      "local_sha256": "57d5b6e99facba43f1557477cc635e39336df55b257307035779340f4c536672",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/faceFlux2cellSpeed.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "deafd4eb3a3ced78a8e42917856fc79a2e0f6d026fac6900f6d2eb7d8aa4045d",
+      "local_sha256": "7de8d44f482444dfe466e075db8f413bd64a783bfff408eb2e25dce2a3142d6c",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/getBiochemistryEOSComponentMoles.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "1bd9e42b8707b0bbb310627bb903ddd147c88472e2c523a884c1361ce98d863e",
+      "local_sha256": "d0f58c98cddf64e751c197f843ca3fd0c39e0c5342cb63e6f187f6c0a4857193",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/getH2StorageIPhreeqcCOMSelectedOutputValue.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "c80d674762fb2ce8023b28a810b75b14af067744e9e2897edcd3d05e8dc1ad3d",
+      "local_sha256": "47d45b71be1b9118d10ab708eaf833c19f2f9c26954577b225c2b56a034e2d1f",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/h2BiochemCompositionalMixture.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "03c8c4080203bf88049c7d8be57fee8a9cda50c968baeaf6abde0015b39ab052",
+      "local_sha256": "74c42f369517163cd1d8aefd27ace59b4ee6ce1808494bc3100742d276c67b80",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/initCompositionalStateBacteria.m",
@@ -1669,13 +1669,13 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "c5b781ad71c769b76b3d0d977cb39d0b827792f6e64194fd5f45a5e95260dad6",
+      "local_sha256": "f603ef21fa5fe87e295a7c681f9ad8621daedcb4719143b8918967ff72fd4435",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/modifyRelPermForResidualSaturations.m",
@@ -1695,39 +1695,39 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "c5925ea619d8628d314c787aa1930881c6a80c8f91bd2a6b3b55a0e395e4a4db",
+      "local_sha256": "fc33ac2f84bfe69194f2ccc8824e7c10a15ff61d614f2f4d04931b6c5da26d5a",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/parseH2StorageIPhreeqcCOMSelectedOutput.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "ff2f184217eb8a93ed985a77ded1f9fb4d357ceb2451ed753d3bdc153378cc3d",
+      "local_sha256": "fcc3e4f6f9e502ae9cca99cfcf0b3453765af993277d44f94dfd0bcec2adcc8d",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/H2consumptionTest.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "b03905057026e5001b3871a66e0e90886d0a4474b0858a0c12d6918097672531",
+      "local_sha256": "064199bc560db40426e4918fd1b4f4a48dad8bf6f03df9660addeb45f4f3776b",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/New folder/2D_test/H2_loss_over_dist_inj_3_Bact.fig",
@@ -1799,39 +1799,39 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "5b1fd14a965abf73d582512a2b1e5dfd674a200862278446de6751a01734e4f6",
+      "local_sha256": "ff52678a52119c1cf3f4e270fd169a30de8ee4512302e697a2fd2b237728715d",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/computeH2Consumption.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "0a47f6c97633c07e418d58508036d629dbd14f0586ceff9acfa4f14f19cfaaa9",
+      "local_sha256": "0bc5b5ac85684add5cfa90ff4ecee75cc54f69eb68c1ede3552dd94c75e3bcf3",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/dimensionlessCellDistance.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "062d1a76fa1b9576d6f77506288dceb09bb0e552dc141dd26eb0ec057101853c",
+      "local_sha256": "498009884034136bd1e8e0be31ab6f2b184018230102437d1718789d70f673ee",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/error.inp",
@@ -1851,39 +1851,39 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "fc6add3669065f9b1461721ee884da31b9f8313b14e08eae2bcc635772170e8f",
+      "local_sha256": "48ae4cc5334051a6aaf2737d343b022e87dc45768e6ba7c88bfeb02c0258f860",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/paperExport.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "023e05765c473b836ac5e07d45cf9dd9ea1b318f301186bf197be0a3f9182a39",
+      "local_sha256": "fb80b3ae2457d106214518f5afb4a1d1862fb39efa4357526ff283b78dc91735",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/paperFigure.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "8c87e6b084cab7a014ce2e5c78a23d88aeab69476982ec91ca68be8a0f2667b5",
+      "local_sha256": "5f73193f74e86cd20ce7a0942394a2238135eb8a6f3a8e87160ec743cc78a081",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotBacterialEffects.m",
@@ -1916,13 +1916,13 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "24e937cccd5d570eb2e7505afe4230eb9dd3192b4ed66808975c994169d2c9ab",
+      "local_sha256": "6dccec7514fce8c54030862ed11d2af78d826176ee51c28d9912f5dcf1e62c73",
       "upstream_sha256": null,
       "possible_derived_from": "modules/h2-biochem/utils/plotfunctions/plotBenchmarckAEGE2023.m",
       "copied_fingerprint_fraction": 0.5,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "Add H2sim 2026; retain existing notices (possible MRST-derived code)"
+      "copyright_action": "Retain original notices; add MRST-format h2sim notice"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotComponentComparison.m",
@@ -1955,26 +1955,26 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "35577a8c8b8f111b6d0ae924d1223cf0666777ea4614616854f7f18551d8a550",
+      "local_sha256": "d6ec2ea85fcd6d7b54a5edbbed85196b7c556835ac737b13177543826e85a118",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotCompositionalPhreeqcValidation.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "f36a08030eb7c288807362eed50cf47703b928700f3b8cc05b954cbecff4f3a2",
+      "local_sha256": "f60406bc86676c98c8e9259a5853db63f48e019daab4b62735d7e7443d04e6e1",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotEosPRSW.m",
@@ -1994,65 +1994,65 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "cb8a60e3b0e19f910f5e06dcb2e197e8dc6c8d7069580219c0ca861a5fb25976",
+      "local_sha256": "d94dcf551fb19b12863b35541baf22f99bc880e7657afe1291a0010ffc8c06ba",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotH2Loss.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "2bf876e313a79a95b4287914f542bd6d4c6722b85ad648e24023905d216b8798",
+      "local_sha256": "90d2f5c7b2abbc08259fb8bbf576f9355991b16bb4bc8e12121cf255f7062cbf",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotH2LossVsBaseline.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "4afec6ca64431b66af2114c1cb3c85202a8a75d4450d690da5d9ce04b8b40a98",
+      "local_sha256": "46ea8af0392f39d3fab2c02aa3be428fc9ca8868346c8de4b32d6efe6b2ca656",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotPhreeqcBackendComparison.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "bbc728c83f8f6be738434b5942e2b22cabe987aee3ed5987275ba1fe985cbbf3",
+      "local_sha256": "942d5ea4d6e00c887051df125d5f96562a9db3d33e2532e84e4abdae9ea32586",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotPhreeqcMineralComparison.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "cd7c13dbe14ee9c048db01ace64cbc94ef11dbcd6e6b6cdf3352c0d404ca2c8b",
+      "local_sha256": "3bbc52e71093f1ef3ce2bb6f6ecc7a1f48f0d0a3733189fa92aecd066510a72a",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/plotPressureAndSaturation.m",
@@ -2072,65 +2072,65 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "0d7c37fdf1604be288fb3abcd1628c59caf2a97989d6a08e689f90bc23c637b6",
+      "local_sha256": "f3e3ae4768376094771b24a199183056832ab72a37ed4b45a404d7371520dfb6",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/plotfunctions/styleAxes.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "ddc91ee287b1698b6c4f2eada0a6f28c55d4786fbdda8f6d3e3556112576356e",
+      "local_sha256": "bc67d7178a4e3368edbc6779c9ca9e19198651507d4c87df66fbbba2c706d4eb",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/resolveH2BiochemParallel.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "8e071e3438c5094913fea5092b74272d666deefa92f36134c864bdfa86476b40",
+      "local_sha256": "8d6fb446d8815c415b522496b3ae09d68cee0f849b95f9915c2135d5fdd145d5",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/runSequentialCompositionalPhreeqcCoupling.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "3f00e68f26a96d9eac98690c342587a8945e9102ac87465f99a3501f1c98dba9",
+      "local_sha256": "1f0e6c428df581cbd32955d91e8f826a336214c35bf7ccd5ad85096d91e980dd",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/runSequentialH2BiochemPhreeqcEquilibrium.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "2f0db3edd1e54fcfa8561055d48f5b0624503b21c8b4486ad953e82fbc148244",
+      "local_sha256": "f808ea59f71d043cb532b1fd92ef8b37b98d491781c0f7079553a952e950f5f5",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/setupBioCloggingModel.m",
@@ -2150,91 +2150,91 @@
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "2a467db1944e2598e2be810f1c5b0341e6c7c3ee16e2bc6d481eee5c47ca22e8",
+      "local_sha256": "1f24f6bfdfdd707f59ab9482f893bc8700611da95338889c1dbc1ea590b9c92d",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/setupH2StorageExample.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "60a60b30e40db4311575cd90c224720fcad64806fc5690402987909a506a5c52",
+      "local_sha256": "656ad72d48c0091bd377356132e0a17d245cca6719fd62166aeac49553ba4e74",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/setupH2StorageExampleWithSRB.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "84815703983e068f238ab21453392cf51ea8fe120c436700a8b34cba66e288eb",
+      "local_sha256": "eb612964127c58ca599eff4308cad65e58ea7e413bce29affa857c42128ea60f",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/setupH2StorageExampleWithSRB_benchmark.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "4cb3c76c0cbf0ee5a8d6e90ca431c4496cc5a2a5e865be25bde9122274d7490e",
+      "local_sha256": "9765746a4aafbddf2445e53eff3a51681d6d330463aec487d3ed9176a6313579",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/setupOptimizedLinearSolver.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "9ecd92e2ab3bd8fa7e311b17a6e5d37023e51c35593694350b0dbc5072f0737d",
+      "local_sha256": "c4ee1cae9dfc7e0590c442bc774e0bdd7a67ecd3f9e284337d85dbe56aeadcbb",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/simulateSequentialH2BiochemPhreeqc.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "96e760d1f83d0f461bf2c2414a36eb0d1797e7b564a60b3eb727b72b4c6237b6",
+      "local_sha256": "4ba91c7f488397184cfda6cf98fb48dfffbd30cc44679a16ac483551d3a70d9c",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/solveH2BiochemVolumePressure.m",
       "status": "new",
       "change_kind": "new",
       "upstream": null,
-      "local_sha256": "3b34b4aab3e7eb4d65b2b7acd926a78a82a575a31d08416cb08575cc105a73a9",
+      "local_sha256": "568e9275f38473fcc3db7d803c5a67d38bc08c5b25134bd8e180baf77b239cb2",
       "upstream_sha256": null,
       "possible_derived_from": null,
       "copied_fingerprint_fraction": null,
       "added_lines": null,
       "deleted_lines": null,
-      "copyright_action": "H2sim 2026; GPL terms retained"
+      "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
       "path": "h2-biochem/utils/validateCompositionalForcesSW.m",
