@@ -1,121 +1,318 @@
-function result=exampleCompositionalPhreeqcValidation(varargin)
-%EXAMPLECOMPOSITIONALPHREEQCVALIDATION Storage-cycle benchmark against external UGFACT.
-% A 250-day injection/storage/production cycle is compared on a
-% 20-cell, 50 m domain using the high-rate parameter set. Both use Soreide-Whitson
-% with the same 2.865 mol/kg NaCl molality. No extra diffusion/chemotaxis models.
-% ugfactRoot is an external upstream checkout; it is never modified.
-% Five PHREEQC substeps per 2-day UGFACT flow step versus one H2sim split.
-% Saved full states and setups allow the comparison to be replotted.
-opt=merge_options(struct('ugfactRoot','','injectionDays',50,'totalDays',250,'gridCells',20,'rate','highrate', ...
- 'plotResults',true,'outputDirectory',fullfile(pwd,'build','phreeqc-validation')),varargin{:});
-assert(isfile(fullfile(opt.ugfactRoot,'examples','H2Storage1D.m')), ...
- 'Set ugfactRoot to a separate UGFACT checkout.');
-validateattributes(opt.injectionDays,{'numeric'},{'scalar','positive','<=',50});
-validateattributes(opt.totalDays,{'numeric'},{'scalar','positive','<=',250});
-assert(mod(opt.totalDays,2)==0,'totalDays must be an integer number of 2-day flow steps.');
-assert(opt.injectionDays==50,'The complete cycle uses a 50-day injection phase.');
-validateattributes(opt.gridCells,{'numeric'},{'scalar','integer','positive'});
-opt.rate=validatestring(opt.rate,{'medrate','highrate'});
-if ~isfolder(opt.outputDirectory),mkdir(opt.outputDirectory);end
-[ok,folderInfo]=fileattrib(opt.outputDirectory);assert(ok);
-opt.outputDirectory=folderInfo.Name; % Keep relative output paths valid after cd.
-[~,model,schedule,state0]=setupH2StorageExampleWithSRB_benchmark( ...
- 'gridCells',opt.gridCells,'domainLength',50,'rate',opt.rate,'scheduleMode','complete', ...
- 'paperBiomassKinetics',true,'nbact0',100, ...
- 'injectionCO2',0,'bacteriamodel',true,'bactDiffusion',false, ...
- 'chemotaxisEffect',false,'molecularDiffusion',false,'molecularDispersion',false, ...
- 'bioClogging',false,'carbonateBuffer',true,'carbonateBufferPH',6.24, ...
- 'initialHCO3',1.370e-3,'initialOverallCO2',0,'equilibrateInitialCO2',false, ...
- 'phreeqcTimestepCoupling',true,'phreeqcBackend','sequential-compositional-phreeqc', ...
- 'phreeqcDatabaseFile',which('h2_biogeochemistry.dat'));
-validationStepCount=opt.totalDays/2;schedule.step.val=schedule.step.val(1:validationStepCount);schedule.step.control=schedule.step.control(1:validationStepCount);
-solver=NonLinearSolver();solver.maxTimestepCuts=12;
-problem=packH2simSimulationProblem(state0,model,schedule,'H2_COMPOSITIONAL_PHREEQC_VALIDATION_SW', ...
- 'NonLinearSolver',solver);t=tic;ok=simulatePackedProblem(problem,'continueOnError',false);assert(ok);
-[ws,states,reports]=getPackedSimulatorOutput(problem);
-h2sim=struct('model',model,'state0',state0,'schedule',schedule,'states',{states}, ...
- 'wellSols',{ws},'reports',{reports},'packedProblem',problem,'elapsedSeconds',toc(t));
-% Execute the upstream setup with an explicit shared-EOS adapter. Running
-% from its examples directory resolves its relative PHREEQC database path.
-originalPath=path;originalFolder=pwd;cleanup=onCleanup(@() restore(originalPath,originalFolder)); %#ok<NASGU>
-% Stage reference sources locally so relative COM database paths work from WSL.
-% Retain upstream kinetics; use the configured flow EOS for its chemistry reflash.
-referenceRunRoot=tempname;mkdir(referenceRunRoot);
-copyfile(fullfile(opt.ugfactRoot,'Modified_Models'),fullfile(referenceRunRoot,'Modified_Models'));
-mkdir(fullfile(referenceRunRoot,'examples'));
-copyfile(fullfile(opt.ugfactRoot,'examples','database'),fullfile(referenceRunRoot,'examples','database'));
-for name={'mass2Zi.m','mass2Zi_Parpool.m'}
- adapterFile=fullfile(referenceRunRoot,'Modified_Models',name{1});
- adapterSource=fileread(adapterFile);
- originalEOS='eos = EquationOfStateModel([], model.EOSModel.CompositionalMixture, ''Peng-Robinson'');';
- assert(contains(adapterSource,originalEOS),'Reference chemistry reflash changed.');
- adapterSource=strrep(adapterSource,originalEOS,'eos = model.EOSModel;');
- fid=fopen(adapterFile,'w');fwrite(fid,adapterSource,'char');fclose(fid);
+function result = exampleCompositionalPhreeqcValidation(varargin)
+%Compare compositional PHREEQC coupling with the UGFACT storage-cycle model
+%
+% SYNOPSIS:
+%   result = exampleCompositionalPhreeqcValidation('ugfactRoot', referenceRoot)
+%   result = exampleCompositionalPhreeqcValidation( ...
+%       'ugfactRoot', referenceRoot, 'totalDays', 2, 'plotResults', false)
+%
+% DESCRIPTION:
+%   Simulate hydrogen injection, storage, and production in a 50 m, 1D
+%   reservoir. The default comparison uses 20 cells, high-rate microbial
+%   kinetics, and a 250-day schedule with injection ending at day 50 and
+%   production starting at day 200. Diffusion and chemotaxis are disabled.
+%
+%   H2sim and the UGFACT reference use the Soreide-Whitson equation of state
+%   with 2.865 mol/kg NaCl. Their chemistry splitting differs: H2sim applies
+%   one PHREEQC update per two-day flow step, whereas UGFACT uses five
+%   chemistry substeps. The comparison retains the reference kinetics.
+%
+%   Reference sources are copied to a temporary folder and adapted there;
+%   the supplied UGFACT checkout is unchanged. The reference driver uses
+%   IPhreeqcCOM and requires Windows MATLAB. This restriction applies to
+%   the external reference, rather than H2sim's native Linux integration.
+%
+% OPTIONAL PARAMETERS:
+%   ugfactRoot      - Path to a separate UGFACT checkout containing
+%                     examples/H2Storage1D.m. Required.
+%   injectionDays   - Injection duration in days. Must be 50 for this case.
+%   totalDays       - Simulated duration in days: a positive multiple of
+%                     two, up to 250 (default 250).
+%   gridCells       - Number of grid cells (default 20).
+%   rate            - Microbial rate case: 'medrate' or 'highrate'
+%                     (default 'highrate').
+%   plotResults     - Plot the comparison (default true).
+%   outputDirectory - Folder for validation_results.mat and figures
+%                     (default build/phreeqc-validation under pwd).
+%
+% RETURNS:
+%   result - H2sim and UGFACT setups, simulation outputs, elapsed times,
+%            comparison diagnostics, and reference-adapter metadata.
+%
+% SEE ALSO:
+%   runPhreeqcValidation, plotCompositionalPhreeqcValidation,
+%   collectPhreeqcValidationDiagnostics
+
+    %% Set comparison options
+    opt = struct('ugfactRoot',      '', ...
+                 'injectionDays',   50, ...
+                 'totalDays',       250, ...
+                 'gridCells',       20, ...
+                 'rate',            'highrate', ...
+                 'plotResults',     true, ...
+                 'outputDirectory', fullfile(pwd, 'build', 'phreeqc-validation'));
+    opt = merge_options(opt, varargin{:});
+    opt = validateOptions(opt);
+    opt.outputDirectory = prepareOutputDirectory(opt.outputDirectory);
+
+    %% Run the H2sim storage case
+    h2sim = runH2simCase(opt);
+
+    %% Run the reference with matching thermodynamic parameters
+    % Restore the MATLAB path and working folder even if the reference fails.
+    savedPath = path;
+    savedFolder = pwd;
+    cleanup = onCleanup(@() restoreEnvironment(savedPath, savedFolder));
+    referenceRunRoot = stageReferenceSources(opt.ugfactRoot);
+    ugfact = runReferenceCase(opt, referenceRunRoot);
+
+    %% Collect diagnostics and save the comparison
+    result = struct( ...
+        'h2sim',           h2sim, ...
+        'ugfact',          ugfact, ...
+        'ugfactRoot',      opt.ugfactRoot, ...
+        'referenceRunRoot', referenceRunRoot, ...
+        'referenceAdapter', ...
+            'Shared SW flow/chemistry EOS and C1 methane alias; upstream kinetics retained', ...
+        'description', ...
+            'Complete PHREEQC storage-cycle comparison; common SW parameters; distinct chemistry splitting.');
+    result.diagnostics = collectPhreeqcValidationDiagnostics(result);
+
+    % Write locally before copying to support output folders on WSL shares.
+    localFile = [tempname, '.mat'];
+    fileCleanup = onCleanup(@() delete(localFile));
+    save(localFile, 'result', '-v7');
+    copyfile(localFile, fullfile(opt.outputDirectory, 'validation_results.mat'), 'f');
+    if opt.plotResults
+        plotCompositionalPhreeqcValidation(result, ...
+            'outputDirectory', opt.outputDirectory);
+    end
 end
-addpath(fullfile(referenceRunRoot,'Modified_Models'));
-source=fileread(fullfile(opt.ugfactRoot,'examples','H2Storage1D.m'));
-source=strrep(source,'clear;clc;close all','');
-source=strrep(source,'''CH4''','''C1'''); % SW methane interaction alias
-source=regexprep(source,'mrstModule add UGFACT2[^\n]*','');
-marker=strfind(source,'%% Running the simulation');assert(~isempty(marker),'Upstream setup marker changed.');
-source=source(1:marker(1)-1);
-source=strrep(source,'[NX,NY,NZ]=deal(50,1,1);',sprintf('[NX,NY,NZ]=deal(%d,1,1);',opt.gridCells));
-if strcmp(opt.rate,'highrate')
- source=regexprep(source,'model.Kinetic.mu_MET\s*=\s*1.109','model.Kinetic.mu_MET = 4.1');
- source=regexprep(source,'model.Kinetic.mu_ACE\s*=\s*0.872','model.Kinetic.mu_ACE = 1.9');
- source=regexprep(source,'model.Kinetic.mu_SRB\s*=\s*1.048','model.Kinetic.mu_SRB = 5.5');
- source=regexprep(source,'model.Kinetic.K_Dmet\s*=\s*10e-6','model.Kinetic.K_Dmet = 9e-6');
+
+function opt = validateOptions(opt)
+    referenceFile = fullfile(opt.ugfactRoot, 'examples', 'H2Storage1D.m');
+    assert(isfile(referenceFile), ...
+        'Set ugfactRoot to a separate UGFACT checkout.');
+    validateattributes(opt.injectionDays, {'numeric'}, ...
+        {'scalar', 'positive', '<=', 50});
+    validateattributes(opt.totalDays, {'numeric'}, ...
+        {'scalar', 'positive', '<=', 250});
+    assert(mod(opt.totalDays, 2) == 0, ...
+        'totalDays must be an integer number of 2-day flow steps.');
+    assert(opt.injectionDays == 50, ...
+        'The complete cycle uses a 50-day injection phase.');
+    validateattributes(opt.gridCells, {'numeric'}, ...
+        {'scalar', 'integer', 'positive'});
+    opt.rate = validatestring(opt.rate, {'medrate', 'highrate'});
 end
-% Add a diagnostic of total DIC without changing reference reaction equations.
-diagnosticFile=fullfile(referenceRunRoot,'Modified_Models','updateStatesFromPhreeqc.m');
-diagnosticSource=fileread(diagnosticFile);
-if ~contains(diagnosticSource,'Solution.TotalDIC')
- diagnosticSource=regexprep(diagnosticSource,'(C4\s*=\s*phaseData.C4;)', ...
-  '$1 totalDIC = C4 + states{t,1}.x(:,3)./max(states{t,1}.x(:,1),eps)/MW_H2O;');
- diagnosticSource=regexprep(diagnosticSource,'(C4\(i\)\s*=\s*[^;]+;)', ...
-  '$1 totalDIC(i) = output{end,6};');
- diagnosticSource=strrep(diagnosticSource,'states{t,1}.Solution.C4        = C4;', ...
-  ['states{t,1}.Solution.C4        = C4;',newline,'states{t,1}.Solution.TotalDIC = totalDIC;']);
- fid=fopen(diagnosticFile,'w');fwrite(fid,diagnosticSource,'char');fclose(fid);
+
+function directory = prepareOutputDirectory(directory)
+    if ~isfolder(directory)
+        mkdir(directory);
+    end
+    [ok, info] = fileattrib(directory);
+    assert(ok, 'Unable to resolve output directory: %s', directory);
+    % Resolve before the reference driver changes the working folder.
+    directory = info.Name;
 end
-% Match flow and post-chemistry thermodynamics; upstream kinetic equations stay unchanged.
-source=strrep(source,'model = GenericOverallCompositionModel_Modified(arg{:});', ...
- ['model = GenericOverallCompositionModel_Modified(arg{:});',newline, ...
-  'model.EOSModel = SoreideWhitsonEos(G, mixture, ''msalt'', 2.865, ''pH'', 6.24, ''initial_NaCl'', 2.865, ''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
-source=strrep(source,'eos = EquationOfStateModel([], mixture, ''Peng-Robinson'');', ...
- 'eos = SoreideWhitsonEos([], mixture, ''msalt'', 2.865, ''pH'', 6.24, ''initial_NaCl'', 2.865, ''initial_SO4'', 4.664e-3, ''rho_water'', 1000);');
-cd(fullfile(referenceRunRoot,'examples'));eval(source);
-assert(model.G.cells.num==opt.gridCells,'Reference grid adapter did not match the requested grid.');
-if strcmp(opt.rate,'highrate')
- assert(model.Kinetic.mu_MET==4.1 && model.Kinetic.mu_ACE==1.9 && model.Kinetic.mu_SRB==5.5);
- assert(model.Kinetic.K_Dmet==9e-6,'Reference high-rate MET half-saturation must match H2sim.');
-else
- assert(model.Kinetic.mu_MET==1.109 && model.Kinetic.mu_ACE==0.872 && model.Kinetic.mu_SRB==1.048);
+
+function summary = runH2simCase(opt)
+    [~, model, schedule, state0] = setupH2StorageExampleWithSRB_benchmark( ...
+        'gridCells',               opt.gridCells, ...
+        'domainLength',            50, ...
+        'rate',                    opt.rate, ...
+        'scheduleMode',            'complete', ...
+        'paperBiomassKinetics',    true, ...
+        'nbact0',                  100, ...
+        'injectionCO2',            0, ...
+        'bacteriamodel',           true, ...
+        'bactDiffusion',           false, ...
+        'chemotaxisEffect',        false, ...
+        'molecularDiffusion',      false, ...
+        'molecularDispersion',     false, ...
+        'bioClogging',             false, ...
+        'carbonateBuffer',         true, ...
+        'carbonateBufferPH',       6.24, ...
+        'initialHCO3',             1.370e-3, ...
+        'initialOverallCO2',       0, ...
+        'equilibrateInitialCO2',   false, ...
+        'phreeqcTimestepCoupling', true, ...
+        'phreeqcBackend',          'sequential-compositional-phreeqc', ...
+        'phreeqcDatabaseFile',     which('h2_biogeochemistry.dat'));
+
+    nSteps = opt.totalDays/2;
+    schedule.step.val = schedule.step.val(1:nSteps);
+    schedule.step.control = schedule.step.control(1:nSteps);
+
+    solver = NonLinearSolver();
+    solver.maxTimestepCuts = 12;
+    problem = packH2simSimulationProblem(state0, model, schedule, ...
+        'H2_COMPOSITIONAL_PHREEQC_VALIDATION_SW', 'NonLinearSolver', solver);
+    timer = tic();
+    ok = simulatePackedProblem(problem, 'continueOnError', false);
+    assert(ok, 'H2sim validation case did not complete.');
+    [ws, states, reports] = getPackedSimulatorOutput(problem);
+    summary = struct('model',          model, ...
+                     'state0',         state0, ...
+                     'schedule',       schedule, ...
+                     'states',         {states}, ...
+                     'wellSols',       {ws}, ...
+                     'reports',        {reports}, ...
+                     'packedProblem',  problem, ...
+                     'elapsedSeconds', toc(timer));
 end
-model.parpool=false;schedule.step.val=repmat(2*day,validationStepCount,1);
-schedule.step.control=ones(validationStepCount,1);
-schedule.step.control(cumsum(schedule.step.val)>50*day)=2;
-schedule.step.control(cumsum(schedule.step.val)>200*day)=3;
-referenceProblem=packH2simSimulationProblem(state0,model,schedule,'PHREEQC_REFERENCE_CYCLE_SETUP');
-t=tic;[wellSol,states,report]=simulateScheduleAD_Modified(state0,model,schedule);
-assert(~report.Failure,'UGFACT reference did not converge.');
-assert(all(cellfun(@(s) all(isfinite(s.pressure)) && all(isfinite(s.x(:))),states)));
-% Persist upstream outputs through MRST ResultHandlers as well as the MAT.
-for k=1:numel(states)
- referenceProblem.OutputHandlers.states{k}=states{k};
- referenceProblem.OutputHandlers.wellSols{k}=wellSol{k};
- referenceProblem.OutputHandlers.reports{k}=report.ControlstepReports{k};
+
+function referenceRoot = stageReferenceSources(ugfactRoot)
+    % Stage sources and database together to retain relative database paths.
+    referenceRoot = tempname;
+    mkdir(referenceRoot);
+    modelDirectory = fullfile(referenceRoot, 'Modified_Models');
+    exampleDirectory = fullfile(referenceRoot, 'examples');
+    copyfile(fullfile(ugfactRoot, 'Modified_Models'), modelDirectory);
+    mkdir(exampleDirectory);
+    copyfile(fullfile(ugfactRoot, 'examples', 'database'), ...
+        fullfile(exampleDirectory, 'database'));
+
+    originalEOS = ['eos = EquationOfStateModel([], ', ...
+        'model.EOSModel.CompositionalMixture, ''Peng-Robinson'');'];
+    adapterNames = {'mass2Zi.m', 'mass2Zi_Parpool.m'};
+    for k = 1:numel(adapterNames)
+        adapterFile = fullfile(modelDirectory, adapterNames{k});
+        source = fileread(adapterFile);
+        assert(contains(source, originalEOS), ...
+            'Reference chemistry reflash changed.');
+        source = strrep(source, originalEOS, 'eos = model.EOSModel;');
+        writeReferenceSource(adapterFile, source);
+    end
+    addTotalDICDiagnostic(modelDirectory);
 end
-ugfact=struct('model',model,'state0',state0,'schedule',schedule,'states',{states}, ...
- 'wellSols',{wellSol},'report',report,'packedProblem',referenceProblem,'elapsedSeconds',toc(t));
-result=struct('h2sim',h2sim,'ugfact',ugfact,'ugfactRoot',opt.ugfactRoot,'referenceRunRoot',referenceRunRoot, ...
- 'referenceAdapter','Shared SW flow/chemistry EOS and C1 methane alias; upstream kinetics retained', ...
- 'description','Complete PHREEQC storage-cycle comparison; common SW parameters; distinct chemistry splitting.');
-result.diagnostics=collectPhreeqcValidationDiagnostics(result);
-file=[tempname,'.mat'];fileCleanup=onCleanup(@() delete(file)); %#ok<NASGU>
-save(file,'result','-v7');copyfile(file,fullfile(opt.outputDirectory,'validation_results.mat'),'f');
-if opt.plotResults,plotCompositionalPhreeqcValidation(result,'outputDirectory',opt.outputDirectory);end
+
+function addTotalDICDiagnostic(modelDirectory)
+    file = fullfile(modelDirectory, 'updateStatesFromPhreeqc.m');
+    source = fileread(file);
+    if contains(source, 'Solution.TotalDIC')
+        return
+    end
+    % Record total DIC without changing the reference reaction equations.
+    source = regexprep(source, '(C4\s*=\s*phaseData.C4;)', ...
+        '$1 totalDIC = C4 + states{t,1}.x(:,3)./max(states{t,1}.x(:,1),eps)/MW_H2O;');
+    source = regexprep(source, '(C4\(i\)\s*=\s*[^;]+;)', ...
+        '$1 totalDIC(i) = output{end,6};');
+    source = strrep(source, 'states{t,1}.Solution.C4        = C4;', ...
+        ['states{t,1}.Solution.C4        = C4;', newline, ...
+         'states{t,1}.Solution.TotalDIC = totalDIC;']);
+    writeReferenceSource(file, source);
 end
-function restore(savedPath,folder)
-path(savedPath);cd(folder);
+
+function source = adaptReferenceSetup(opt)
+    source = fileread(fullfile(opt.ugfactRoot, 'examples', 'H2Storage1D.m'));
+    source = strrep(source, 'clear;clc;close all', '');
+    source = strrep(source, '''CH4''', '''C1'''); % SW methane alias.
+    source = regexprep(source, 'mrstModule add UGFACT2[^\n]*', '');
+    marker = strfind(source, '%% Running the simulation');
+    assert(~isempty(marker), 'Upstream setup marker changed.');
+    source = source(1:marker(1)-1);
+    source = strrep(source, '[NX,NY,NZ]=deal(50,1,1);', ...
+        sprintf('[NX,NY,NZ]=deal(%d,1,1);', opt.gridCells));
+
+    if strcmp(opt.rate, 'highrate')
+        source = regexprep(source, 'model.Kinetic.mu_MET\s*=\s*1.109', ...
+            'model.Kinetic.mu_MET = 4.1');
+        source = regexprep(source, 'model.Kinetic.mu_ACE\s*=\s*0.872', ...
+            'model.Kinetic.mu_ACE = 1.9');
+        source = regexprep(source, 'model.Kinetic.mu_SRB\s*=\s*1.048', ...
+            'model.Kinetic.mu_SRB = 5.5');
+        source = regexprep(source, 'model.Kinetic.K_Dmet\s*=\s*10e-6', ...
+            'model.Kinetic.K_Dmet = 9e-6');
+    end
+
+    source = strrep(source, ...
+        'model = GenericOverallCompositionModel_Modified(arg{:});', ...
+        ['model = GenericOverallCompositionModel_Modified(arg{:});', newline, ...
+         'model.EOSModel = SoreideWhitsonEos(G, mixture, ', ...
+         '''msalt'', 2.865, ''pH'', 6.24, ''initial_NaCl'', 2.865, ', ...
+         '''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
+    source = strrep(source, ...
+        'eos = EquationOfStateModel([], mixture, ''Peng-Robinson'');', ...
+        ['eos = SoreideWhitsonEos([], mixture, ''msalt'', 2.865, ', ...
+         '''pH'', 6.24, ''initial_NaCl'', 2.865, ', ...
+         '''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
+end
+
+function summary = runReferenceCase(opt, referenceRunRoot)
+    addpath(fullfile(referenceRunRoot, 'Modified_Models'));
+    source = adaptReferenceSetup(opt);
+    cd(fullfile(referenceRunRoot, 'examples'));
+    % The upstream script defines model, state0, and schedule in this scope.
+    [model, state0, schedule] = evaluateReferenceSetup(source);
+    validateReferenceSetup(model, opt);
+
+    model.parpool = false;
+    nSteps = opt.totalDays/2;
+    schedule.step.val = repmat(2*day, nSteps, 1);
+    schedule.step.control = ones(nSteps, 1);
+    schedule.step.control(cumsum(schedule.step.val) > 50*day) = 2;
+    schedule.step.control(cumsum(schedule.step.val) > 200*day) = 3;
+    problem = packH2simSimulationProblem(state0, model, schedule, ...
+        'PHREEQC_REFERENCE_CYCLE_SETUP');
+
+    timer = tic();
+    [wellSol, states, report] = simulateScheduleAD_Modified(state0, model, schedule);
+    validateReferenceOutput(states, report);
+    % Persist reference outputs through MRST ResultHandlers as well as MAT.
+    for k = 1:numel(states)
+        problem.OutputHandlers.states{k} = states{k};
+        problem.OutputHandlers.wellSols{k} = wellSol{k};
+        problem.OutputHandlers.reports{k} = report.ControlstepReports{k};
+    end
+    summary = struct('model',          model, ...
+                     'state0',         state0, ...
+                     'schedule',       schedule, ...
+                     'states',         {states}, ...
+                     'wellSols',       {wellSol}, ...
+                     'report',         report, ...
+                     'packedProblem',  problem, ...
+                     'elapsedSeconds', toc(timer));
+end
+
+function [model, state0, schedule] = evaluateReferenceSetup(source)
+    % Declare the outputs that the external setup script fills through eval.
+    model = [];
+    state0 = [];
+    schedule = [];
+    eval(source);
+end
+
+function validateReferenceSetup(model, opt)
+    assert(model.G.cells.num == opt.gridCells, ...
+        'Reference grid adapter did not match the requested grid.');
+    actual = [model.Kinetic.mu_MET, model.Kinetic.mu_ACE, model.Kinetic.mu_SRB];
+    if strcmp(opt.rate, 'highrate')
+        expected = [4.1, 1.9, 5.5];
+        assert(model.Kinetic.K_Dmet == 9e-6, ...
+            'Reference high-rate MET half-saturation must match H2sim.');
+    else
+        expected = [1.109, 0.872, 1.048];
+    end
+    assert(all(actual == expected), ...
+        'Reference microbial growth rates do not match the requested rate case.');
+end
+
+function validateReferenceOutput(states, report)
+    assert(~report.Failure, 'UGFACT reference did not converge.');
+    finiteState = @(state) all(isfinite(state.pressure)) && ...
+                           all(isfinite(state.x(:)));
+    assert(all(cellfun(finiteState, states)), ...
+        'UGFACT reference returned non-finite pressure or composition.');
+end
+
+function writeReferenceSource(file, source)
+    fid = fopen(file, 'w');
+    cleanup = onCleanup(@() fclose(fid));
+    fwrite(fid, source, 'char');
+end
+
+function restoreEnvironment(savedPath, savedFolder)
+    path(savedPath);
+    cd(savedFolder);
 end

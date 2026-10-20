@@ -1,6 +1,5 @@
 function scenarios = runThreeBackendComparison(varargin)
-% Compare the original, compositional-PHREEQC, and coarse-flow/local-
-% reaction sequential backends.
+%Compare microbial hydrogen consumption with three chemistry models
 %
 % Aqueous H2 mole fraction and total dissolved inorganic carbon (C(4)
 % molality, mol/kgw) profiles are shown at the end of injection, storage,
@@ -21,11 +20,7 @@ function scenarios = runThreeBackendComparison(varargin)
 %      followed by local reaction substeps each closed by a PHREEQC
 %      equilibrium update -- see convertToSequentialBiochemistryPhreeqcModel.
 %
-% The older outer-Picard hybrid driver (utils/simulateSequentialH2BiochemPhreeqc.m,
-% phreeqcBackend='sequential-h2biochem-phreeqc' run without the coarse-flow
-% split) is intentionally not part of this comparison for now.
-%
-% EXAMPLE:
+% SYNOPSIS:
 %   % h2_biogeochemistry.dat is bundled at h2-biochem/database/ and is found
 %   % automatically via which() once startupH2sim has run, so no path is
 %   % required by default:
@@ -36,30 +31,23 @@ function scenarios = runThreeBackendComparison(varargin)
 %   db = '/absolute/path/to/h2_biogeochemistry.dat';
 %   scenarios = runThreeBackendComparison('phreeqcDatabaseFile', db);
 
-    mrstModule add ad-props compositional deckformat 
+    mrstModule add ad-props compositional deckformat
 
+    %% Set simulation options
     opt = struct( ...
         'phreeqcDatabaseFile', '', ...
         'flowTimestepMaxDt', 2*day, ...
         'reactionSubstepMaxDt', 0.4*day, ...
         'referenceUseSoreideWhitsonEOS', false, ...
         'plotResults', true, ...
-        'outputDirectory', fullfile(pwd,'build','phreeqc-figures'));
+        'outputDirectory', fullfile(pwd, 'build', 'phreeqc-figures'));
     opt = merge_options(opt, varargin{:});
-    validateattributes(opt.referenceUseSoreideWhitsonEOS, ...
-        {'logical', 'numeric'}, {'scalar', 'real', 'finite'}, ...
-        mfilename, 'referenceUseSoreideWhitsonEOS');
+    validateOptions(opt);
     opt.referenceUseSoreideWhitsonEOS = ...
         logical(opt.referenceUseSoreideWhitsonEOS);
-    validateattributes(opt.flowTimestepMaxDt, {'numeric'}, ...
-        {'scalar', 'real', 'finite', 'positive'}, ...
-        mfilename, 'flowTimestepMaxDt');
-    validateattributes(opt.reactionSubstepMaxDt, {'numeric'}, ...
-        {'scalar', 'real', 'finite', 'positive'}, ...
-        mfilename, 'reactionSubstepMaxDt');
-    validateattributes(opt.plotResults, {'logical'}, {'scalar'});
     databaseFile = resolvePhreeqcDatabaseFile(opt.phreeqcDatabaseFile);
 
+    %% Define the shared benchmark and chemistry models
     commonOptions = { ...
         'rate', 'highrate', ...
         'scheduleMode', 'complete', ...
@@ -92,6 +80,7 @@ function scenarios = runThreeBackendComparison(varargin)
             'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
             'phreeqcDatabaseFile', databaseFile}, 'coarseSplit')];
 
+    %% Simulate each chemistry model
     scenarios = initializeScenarios(numel(cases));
     for caseNo = 1:numel(cases)
         current = cases(caseNo);
@@ -102,10 +91,7 @@ function scenarios = runThreeBackendComparison(varargin)
             commonOptions{:}, current.options{:});
 
         if strcmp(current.driver, 'coarseSplit')
-            assert(model.bacterialDecayOrder == 1, ...
-               'The UGFACT-matched sequential case requires first-order biomass decay.');
-            assert(max(abs(value(state0.nbact) - 1), [], 'all') < 1e-12, ...
-               'The UGFACT-matched sequential case requires initial N/N0 = 1.');
+            validateSequentialSetup(model, state0);
             schedule = coarsenScheduleByControl(schedule, opt.flowTimestepMaxDt);
             model = convertToSequentialBiochemistryPhreeqcModel(model, ...
                 'reactionSubstepMaxDt', opt.reactionSubstepMaxDt);
@@ -177,7 +163,7 @@ function metrics = collectMetrics(states, schedule, model)
     idxCO2 = findComponentIndex(componentNames, {'CO2', 'CarbonDioxide'});
 
     controls = schedule.step.control(:);
-    assert(all(ismember([1 2 3],controls)), ...
+    assert(all(ismember([1, 2, 3], controls)), ...
         'The comparison requires injection, storage, and production periods.');
     snapshotIndices = [find(controls == 1, 1, 'last'), ...
         find(controls == 2, 1, 'last'), numel(states)];
@@ -291,7 +277,7 @@ function metrics = collectUGFACTMetrics(states, schedule, model)
     idxCO2 = findComponentIndex(componentNames, {'CO2', 'CarbonDioxide'});
 
     controls = schedule.step.control(:);
-    assert(all(ismember([1 2 3],controls)), ...
+    assert(all(ismember([1, 2, 3], controls)), ...
         'The comparison requires injection, storage, and production periods.');
     snapshotIndices = [find(controls == 1, 1, 'last'), ...
         find(controls == 2, 1, 'last'), numel(states)];
@@ -440,6 +426,26 @@ function databaseFile = resolvePhreeqcDatabaseFile(databaseFile)
     [~, name, extension] = fileparts(databaseFile);
     assert(strcmpi([name, extension], 'h2_biogeochemistry.dat'), ...
         'The database must be h2_biogeochemistry.dat.');
+end
+
+function validateOptions(opt)
+    validateattributes(opt.referenceUseSoreideWhitsonEOS, ...
+        {'logical', 'numeric'}, {'scalar', 'real', 'finite'}, ...
+        'runThreeBackendComparison', 'referenceUseSoreideWhitsonEOS');
+    validateattributes(opt.flowTimestepMaxDt, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'positive'}, ...
+        'runThreeBackendComparison', 'flowTimestepMaxDt');
+    validateattributes(opt.reactionSubstepMaxDt, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'positive'}, ...
+        'runThreeBackendComparison', 'reactionSubstepMaxDt');
+    validateattributes(opt.plotResults, {'logical'}, {'scalar'});
+end
+
+function validateSequentialSetup(model, state0)
+    assert(model.bacterialDecayOrder == 1, ...
+       'The UGFACT-matched sequential case requires first-order biomass decay.');
+    assert(max(abs(value(state0.nbact) - 1), [], 'all') < 1e-12, ...
+       'The UGFACT-matched sequential case requires initial N/N0 = 1.');
 end
 
 %{

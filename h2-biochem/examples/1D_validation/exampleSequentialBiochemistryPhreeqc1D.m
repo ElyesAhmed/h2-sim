@@ -1,50 +1,43 @@
 function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
-% Coarse-flow/local-reaction split applied to the 1D H2-storage benchmark.
-%
-% This experimental example demonstrates SequentialBiochemistryPhreeqcModel,
-% a general coarse-flow/local-reaction sequential model: ONE global
-% compositional flow-and-transport solve per schedule/control step (with
-% biological reaction sources disabled), followed by local MRST
-% biochemical-reaction substeps (no spatial flux/well/BC forcing), each
-% followed by a PHREEQC equilibrium/chemistry-feedback update. Unlike
-% simulateSequentialH2BiochemPhreeqc, there is no outer Picard iteration
-% between the two stages.
-%
-% The setup matches the high-rate sequential h2-biochem-PHREEQC case used
-% by runThreeBackendComparison (paperBiomassKinetics, N/N0 = 1, pH 6.24,
-% HCO3- = 1.370e-3, zero initial overall CO2, high-rate kinetics, complete
-% injection/storage/production schedule), run with a coarse schedule and
-% two-day flow steps and 0.4 day maximum local-reaction substeps. It is run with the plain
-% simulateScheduleAD driver -- no bespoke outer coupling loop is required.
-%
-% Note: runThreeBackendComparison is intentionally left unchanged; this
-% script is a separate, standalone entry point for the new model.
+%Simulate a 1D hydrogen-storage cycle with multirate microbial reactions
 %
 % SYNOPSIS:
 %   summary = exampleSequentialBiochemistryPhreeqc1D();
 %   summary = exampleSequentialBiochemistryPhreeqc1D( ...
 %       'phreeqcDatabaseFile', db, 'reactionSubstepMaxDt', 0.4*day);
 %
+% DESCRIPTION:
+%   Use one compositional flow-and-transport solve per coarse timestep,
+%   followed by local microbial-reaction substeps and PHREEQC equilibrium.
+%   MRST owns the microbial kinetics and biomass; PHREEQC supplies aqueous
+%   speciation and mineral feedback. There is no outer Picard iteration
+%   between the flow and reaction stages.
+%
+%   The high-rate storage benchmark uses initial N/N0 = 1, pH 6.24, and
+%   HCO3- = 1.370e-3. The default 250-day injection/storage/production cycle
+%   uses two-day flow steps and reaction substeps of at most 0.4 day.
+%
 % OPTIONAL PARAMETERS:
 %   phreeqcDatabaseFile  - Absolute path to h2_biogeochemistry.dat. Falls
 %                          back to the PHREEQC_DATABASE_FILE environment
 %                          variable, then to `which('h2_biogeochemistry.dat')`.
 %   reactionSubstepMaxDt - Maximum duration of one local reaction/PHREEQC
-%                          substep (default 0.4 day, matching the
-%                          hybrid Picard reference used elsewhere in this
-%                          module).
+%                          substep (default 0.4 day).
 %   flowTimestepMaxDt     - Maximum coarse compositional-flow timestep
 %                          (default 2 days, giving 125 flow steps over the
 %                          complete 250-day benchmark).
 %   maximumFlowSteps      - Optional positive integer limit for short
 %                          validation runs (default Inf: complete schedule).
-%   phreeqcReflashLocalBracket - Local pressure bracket with fzero fallback (default true).
+%   phreeqcReflashLocalBracket - Use a local pressure bracket with fzero
+%                          fallback (default true).
 %   phreeqcReflashParallel - Run the per-cell constant-volume flash with
 %                          parfor instead of a serial loop (default false;
 %                          requires Parallel Computing Toolbox).
 %   plotResults          - Create publication figures (default false).
 %   outputDirectory      - PDF/PNG output folder (build/phreeqc-figures).
 %                          Pass an empty string to display without export.
+%   simulationDirectory  - Packed simulation output directory. An empty
+%                          value uses the standard H2sim output directory.
 %   reactionSolverVerbose - Print local reaction Newton residuals
 %                          (default false).
 %
@@ -59,6 +52,7 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
 
     mrstModule add ad-core ad-props compositional deckformat
 
+    %% Set simulation options
     opt = struct( ...
         'phreeqcDatabaseFile', '', ...
         'flowTimestepMaxDt', 2*day, ...
@@ -69,29 +63,12 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
         'simulationDirectory', '', ...
         'reactionSolverVerbose', false, ...
         'plotResults', false, ...
-        'outputDirectory', fullfile(pwd,'build','phreeqc-figures'));
+        'outputDirectory', fullfile(pwd, 'build', 'phreeqc-figures'));
     opt = merge_options(opt, varargin{:});
-    validateattributes(opt.reactionSubstepMaxDt, {'numeric'}, ...
-        {'scalar', 'real', 'finite', 'positive'}, ...
-        mfilename, 'reactionSubstepMaxDt');
-    validateattributes(opt.flowTimestepMaxDt, {'numeric'}, ...
-        {'scalar', 'real', 'finite', 'positive'}, ...
-        mfilename, 'flowTimestepMaxDt');
-    assert(isnumeric(opt.maximumFlowSteps) && isscalar(opt.maximumFlowSteps) && ...
-        isreal(opt.maximumFlowSteps) && opt.maximumFlowSteps > 0 && ...
-        (isinf(opt.maximumFlowSteps) || ...
-         (isfinite(opt.maximumFlowSteps) && ...
-          opt.maximumFlowSteps == floor(opt.maximumFlowSteps))), ...
-        'maximumFlowSteps must be a positive integer or Inf.');
-    validateattributes(opt.reactionSolverVerbose, {'logical', 'numeric'}, ...
-        {'scalar', 'real', 'finite'}, mfilename, 'reactionSolverVerbose');
-    validateattributes(opt.plotResults, {'logical'}, {'scalar'});
-    validateattributes(opt.phreeqcReflashLocalBracket, {'logical'}, {'scalar'});
-    validateattributes(opt.phreeqcReflashParallel, {'logical'}, {'scalar'});
+    validateOptions(opt);
     databaseFile = resolvePhreeqcDatabaseFile(opt.phreeqcDatabaseFile);
 
-    % Matched high-rate sequential h2-biochem-PHREEQC setup (see
-    % runThreeBackendComparison's "Sequential h2-biochem PHREEQC" case).
+    %% Set up the high-rate storage benchmark
     [~, baseModel, schedule, state0] = setupH2StorageExampleWithSRB_benchmark( ...
         'rate', 'highrate', ...
         'scheduleMode', 'complete', ...
@@ -112,13 +89,10 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
         'phreeqcTimestepCoupling', true, ...
         'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
         'phreeqcDatabaseFile', databaseFile);
-    assert(baseModel.bacterialDecayOrder == 1, ...
-        'The UGFACT-matched hybrid case requires first-order biomass decay.');
-    assert(max(abs(value(state0.nbact) - 1), [], 'all') < 1e-12, ...
-        'The UGFACT-matched hybrid case requires initial N/N0 = 1.');
+    validateBenchmarkSetup(baseModel, state0);
 
-    % Use the compositional reference's coarse flow resolution while the
-    % sequential model independently subcycles local reactions.
+    %% Select the coarse flow schedule
+    % Local reactions are subcycled independently within each flow step.
     schedule = coarsenScheduleByControl(schedule, opt.flowTimestepMaxDt);
     if isfinite(opt.maximumFlowSteps)
         nSteps = min(opt.maximumFlowSteps, numel(schedule.step.val));
@@ -126,8 +100,7 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
         schedule.step.control = schedule.step.control(1:nSteps);
     end
 
-    % Convert the fully configured benchmark model into the general
-    % coarse-flow/local-reaction split model.
+    %% Configure the multirate model and nonlinear solver
     model = convertToSequentialBiochemistryPhreeqcModel(baseModel, ...
         'reactionSubstepMaxDt', opt.reactionSubstepMaxDt);
     model.phreeqcCouplingOptions.phreeqcReflashLocalBracket = ...
@@ -139,6 +112,7 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
 
     solver = NonLinearSolver();
     solver.maxTimestepCuts = 12;
+    %% Run the packed simulation
     timer = tic();
     problem = packH2simSimulationProblem(state0, model, schedule, ...
         'H2_MULTIRATE_1D_EXAMPLE', 'NonLinearSolver', solver, ...
@@ -153,6 +127,7 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
             'SequentialBiochemistryPhreeqcModel simulation reported failure.');
     end
 
+    %% Summarize hydrogen consumption
     nReactions = model.biochemFluid.nbioreact;
     cumulative = zeros(numel(states), nReactions);
     for reaction = 1:nReactions
@@ -248,6 +223,34 @@ function databaseFile = resolvePhreeqcDatabaseFile(databaseFile)
     [~, name, extension] = fileparts(databaseFile);
     assert(strcmpi([name, extension], 'h2_biogeochemistry.dat'), ...
         'The database must be h2_biogeochemistry.dat.');
+end
+
+function validateOptions(opt)
+    validateattributes(opt.reactionSubstepMaxDt, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'positive'}, ...
+        'exampleSequentialBiochemistryPhreeqc1D', 'reactionSubstepMaxDt');
+    validateattributes(opt.flowTimestepMaxDt, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'positive'}, ...
+        'exampleSequentialBiochemistryPhreeqc1D', 'flowTimestepMaxDt');
+    assert(isnumeric(opt.maximumFlowSteps) && isscalar(opt.maximumFlowSteps) && ...
+        isreal(opt.maximumFlowSteps) && opt.maximumFlowSteps > 0 && ...
+        (isinf(opt.maximumFlowSteps) || ...
+         (isfinite(opt.maximumFlowSteps) && ...
+          opt.maximumFlowSteps == floor(opt.maximumFlowSteps))), ...
+        'maximumFlowSteps must be a positive integer or Inf.');
+    validateattributes(opt.reactionSolverVerbose, {'logical', 'numeric'}, ...
+        {'scalar', 'real', 'finite'}, ...
+        'exampleSequentialBiochemistryPhreeqc1D', 'reactionSolverVerbose');
+    validateattributes(opt.plotResults, {'logical'}, {'scalar'});
+    validateattributes(opt.phreeqcReflashLocalBracket, {'logical'}, {'scalar'});
+    validateattributes(opt.phreeqcReflashParallel, {'logical'}, {'scalar'});
+end
+
+function validateBenchmarkSetup(baseModel, state0)
+    assert(baseModel.bacterialDecayOrder == 1, ...
+        'The UGFACT-matched hybrid case requires first-order biomass decay.');
+    assert(max(abs(value(state0.nbact) - 1), [], 'all') < 1e-12, ...
+        'The UGFACT-matched hybrid case requires initial N/N0 = 1.');
 end
 
 %{
