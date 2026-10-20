@@ -1,5 +1,19 @@
-# Copyright 2026 H2sim contributors.
-# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+#
+# This file is part of h2sim.
+#
+# h2sim is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h2sim is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
 
 """Compare tracked H2sim biochemistry files with an exact MRST Git revision.
 
@@ -22,22 +36,22 @@ import subprocess
 YEAR = '2026'
 MODULE = 'modules/h2-biochem/'
 NOTICE = '''%{
-Copyright 2026 H2sim contributors.
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
-This file is part of H2sim.
+This file is part of h2sim.
 
-H2sim is free software: you can redistribute it and/or modify
+h2sim is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-H2sim is distributed in the hope that it will be useful,
+h2sim is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with H2sim. If not, see <https://www.gnu.org/licenses/>.
+along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
 %}
 '''
 
@@ -109,21 +123,16 @@ def update_notice(source, inherited, possible_source):
     source = update_years(source)
     if inherited:
         return source, 'Retain original attribution; update existing SINTEF end year to 2026'
+    # Keep inherited notices when a new file contains upstream source code.
     if possible_source:
-        if 'Copyright 2026 H2sim contributors.' not in source:
+        if NOTICE.strip() not in source:
             source = source.rstrip() + '\n\n' + NOTICE
-        return source, 'Add H2sim 2026; retain existing notices (possible MRST-derived code)'
-    source = re.sub(r'Copyright \d{4}(?:-\d{4})? SINTEF Digital, Mathematics & Cybernetics\.',
-                    'Copyright 2026 H2sim contributors.', source)
-    # Change the standard copied project boilerplate, preserving GPL terms.
-    source = source.replace('This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).',
-                            'This file is part of H2sim.')
-    source = source.replace('MRST is free software:', 'H2sim is free software:')
-    source = source.replace('MRST is distributed in the hope', 'H2sim is distributed in the hope')
-    source = source.replace('along with MRST.', 'along with H2sim.')
-    if 'Copyright 2026 H2sim contributors.' not in source:
-        source = source.rstrip() + '\n\n' + NOTICE
-    return source, 'H2sim 2026; GPL terms retained'
+        return source, 'Retain original notices; add MRST-format h2sim notice'
+    source = re.sub(r'%\{(?:(?!%\}).)*Copyright(?:(?!%\}).)*%\}\n?',
+                    '', source, flags=re.S)
+    source = re.sub(r'(?m)^% Copyright [^\n]*\n?', '', source)
+    source = source.rstrip() + '\n\n' + NOTICE
+    return source, 'MRST-format notice with software name h2sim'
 
 
 def audit(repo, mrst, update=False):
@@ -209,7 +218,7 @@ def write_report(report, path):
              'generated audit files. Relocated MATLAB examples',
              'are matched by basename. Modified files include code and documentation changes;',
              'line counts compare the files before this audit updates their notices.', '',
-             'New MATLAB files receive H2sim 2026 notices and retain GPL terms. Existing',
+             'New MATLAB files use the exact MRST notice with MRST replaced by h2sim. Existing',
              'MRST files keep their attribution with existing SINTEF end years updated to 2026.',
              'For new files with substantial matching code elsewhere in MRST, the existing',
              'notices are retained alongside the H2sim notice. Similarity candidates are',

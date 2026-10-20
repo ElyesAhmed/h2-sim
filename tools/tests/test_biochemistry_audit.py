@@ -1,5 +1,19 @@
-# Copyright 2026 H2sim contributors.
-# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+#
+# This file is part of h2sim.
+#
+# h2sim is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# h2sim is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
 """Check that notice updates preserve source attribution and MATLAB code."""
 import importlib.util
 from pathlib import Path
@@ -24,16 +38,17 @@ class CopyrightPolicyTest(unittest.TestCase):
     def test_new_file_gets_h2sim_notice_and_keeps_gpl(self):
         source = 'function x = local()\nx = 3;\nend\n%{\nCopyright 2009-2024 SINTEF Digital, Mathematics & Cybernetics.\nThis file is part of The MATLAB Reservoir Simulation Toolbox (MRST).\nMRST is free software: GNU General Public License\n%}\n'
         revised, _ = audit.update_notice(source, False, None)
-        self.assertIn('Copyright 2026 H2sim contributors.', revised)
+        self.assertIn(audit.NOTICE.strip(), revised)
         self.assertIn('GNU General Public License', revised)
-        self.assertNotIn('SINTEF', revised)
+        self.assertIn('Copyright 2009-2026 SINTEF', revised)
+        self.assertEqual(audit.update_notice(revised, False, None)[0], revised)
         self.assertEqual(audit.code_lines(source), audit.code_lines(revised))
 
     def test_possible_derivative_keeps_original_notice(self):
         source = 'function x = derived()\nx = 3;\nend\n% Copyright 2009-2024 SINTEF Digital, Mathematics & Cybernetics.\n'
         revised, _ = audit.update_notice(source, False, 'modules/source.m')
         self.assertIn('Copyright 2009-2026 SINTEF', revised)
-        self.assertIn('Copyright 2026 H2sim contributors.', revised)
+        self.assertIn(audit.NOTICE.strip(), revised)
         self.assertEqual(audit.code_lines(source), audit.code_lines(revised))
         self.assertEqual(audit.update_notice(revised, False, 'modules/source.m')[0], revised)
 
