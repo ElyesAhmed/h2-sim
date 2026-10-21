@@ -37,6 +37,8 @@ Entry points
      - Load result MAT files; optionally stage network files locally for HDF5
    * - ``activateH2simAMGCL``
      - Activate an optional locally compiled MRST gateway
+   * - ``plotPhreeqcMineralComparison``
+     - Redraw saved mineral-case consumption and pH; return two figures
    * - ``plotPhreeqcBackendComparison``
      - Redraw saved backend metrics; return profile, time-series and spatial figures
    * - ``profilePhreeqcWorkflows``
@@ -57,6 +59,26 @@ The base names are ``backends_aqueous_profiles``, ``backends_H2_consumption_time
 and ``backends_H2_consumption_space``. Labels, units and normalization are
 preserved from the scenario metrics; corresponding snapshot times must match.
 See :doc:`phreeqc` for the save/reload workflow and backend interpretation.
+
+Saved mineral figures
+---------------------
+
+``plotPhreeqcMineralComparison(comparison)`` redraws the mineral examples'
+metrics without running simulations. It returns two open figures: reaction-wise
+consumption with final cellwise pH, then consumption histories with optional
+spatial contributions. Empty pH values are omitted; removing the spatial fields
+omits the spatial panels.
+
+Time histories use consumed H2 divided by injected H2 to date. Spatial values
+are per-cell contributions divided by total injected H2. These normalizations
+are supplied by the example metrics and are preserved by plotting.
+
+``'dimension', 2`` changes titles and filenames, not the data or grid mapping.
+The default label is 1. PDF/PNG base names are
+``minerals_<dimension>D_consumption_pH`` and
+``minerals_<dimension>D_H2_consumption``. Pass ``'outputDirectory', ''`` to create
+figures without writing files; otherwise vector PDF and 300-dpi PNG exports go
+to the selected folder, defaulting to ``build/phreeqc-figures`` under pwd.
 
 Shared 1D storage setup
 -----------------------
