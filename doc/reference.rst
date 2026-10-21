@@ -40,6 +40,28 @@ Entry points
    * - ``profilePhreeqcWorkflows``
      - Paired profiling and state comparisons
 
+Shared 1D storage setup
+-----------------------
+
+``setupH2StorageExampleWithSRB_benchmark`` constructs the model, initial state
+and schedule without running a simulation. Its default reservoir is 50 m long,
+with 50 cells, porosity 0.20 and permeability 100 mD. Initial pressure is 150 bar
+and temperature is 333.15 K. The default ``highrate`` kinetics and 125 two-day
+steps cover injection (50 days), storage (150 days) and production (50 days).
+Use ``'scheduleMode', 'injection'`` for the injection period alone.
+
+PHREEQC coupling is disabled by default. Selecting compositional PHREEQC adds
+local PHREEQC kinetics and equilibrium; the hybrid backend instead retains MRST
+microbial kinetics. For multirate execution, convert the hybrid model with
+``convertToSequentialBiochemistryPhreeqcModel`` before simulation, as shown in
+``exampleSequentialBiochemistryPhreeqc1D``. The alternative outer Picard runner
+is ``simulateSequentialH2BiochemPhreeqc``. These are distinct coupling workflows.
+
+The uncoupled ``initialHCO3`` default is ``1.1119e-3 mol/kgw``; coupled cases use
+``sequentialCompositionalPhreeqcInitialC4`` (default ``1.370e-3 mol/kgw``).
+See MATLAB ``help setupH2StorageExampleWithSRB_benchmark`` for option defaults,
+biomass conventions and conservation tolerances.
+
 Output and replotting
 ---------------------
 
