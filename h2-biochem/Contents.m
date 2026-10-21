@@ -17,6 +17,7 @@
 %   exampleH2BrineSolubilityStudy          - Phase partitioning and salting-out.
 %
 % Diagnostics and verification
+%   reportMultirateDiagnostics            - Consumption, biomass and limiter coverage.
 %   collectPhreeqcValidationDiagnostics   - Consumption and chemistry diagnostics.
 %   checkPhreeqcElementBalance            - Record and warn on elemental audit failures.
 %

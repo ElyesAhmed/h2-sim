@@ -28,7 +28,8 @@
 % Developer tools (not introductory examples)
 %   benchmarkSequentialPhreeqcVolumeFlash - Pressure-root timing comparison.
 %   profilePhreeqcWorkflows               - Chemistry batching and reflash profiling.
-%   printSeqDiag                          - Legacy workspace diagnostic; requires summary.
+%   reportMultirateDiagnostics            - Saved-result diagnostics with coverage status.
+%   printSeqDiag                          - Compatibility script; requires summary.
 %
 % Local paper_2026 drivers reproduce specific publication configurations;
 % the folder also contains experiments and verification tools. Directory

@@ -214,6 +214,24 @@ matched exactly; multirate differences passed the stated inventory-based
 absolute/relative tolerances. These short-case timings exclude startup and
 model construction and do not establish full-schedule speedups.
 
+### Saved multirate diagnostics
+
+```matlab
+diagnostics = reportMultirateDiagnostics(summary);
+% Collect without printing:
+diagnostics = reportMultirateDiagnostics(summary, 'verbose', false);
+```
+
+The result reports reaction-specific H2 consumption, maximum population ratios,
+bicarbonate concentrations, and limiter coverage. Limiter minima include all
+recorded accepted ministeps; rejected attempts are excluded. Missing diagnostics
+are marked unavailable, partial coverage is identified, and malformed reports
+raise an error. These diagnostics do not establish elemental conservation.
+
+`printSeqDiag` remains a script reading the existing `summary` variable and
+printing through the new function. It no longer creates incidental loop/helper
+variables in the caller workspace; existing caller variables are preserved.
+
 ### Publication figures
 
 The PHREEQC examples share labeled panels, consistent case colors and line
