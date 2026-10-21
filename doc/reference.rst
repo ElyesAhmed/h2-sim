@@ -37,8 +37,26 @@ Entry points
      - Load result MAT files; optionally stage network files locally for HDF5
    * - ``activateH2simAMGCL``
      - Activate an optional locally compiled MRST gateway
+   * - ``plotPhreeqcBackendComparison``
+     - Redraw saved backend metrics; return profile, time-series and spatial figures
    * - ``profilePhreeqcWorkflows``
      - Paired profiling and state comparisons
+
+Saved backend figures
+---------------------
+
+``plotPhreeqcBackendComparison(scenarios)`` redraws the metrics returned by
+``runThreeBackendComparison`` without running simulations. Its three returned
+figure handles contain aqueous profiles, cumulative consumption over time and
+final spatial consumption, respectively. The caller may inspect or close them.
+
+Pass ``'outputDirectory', ''`` to create figures without export. Otherwise,
+three vector PDF and three 300-dpi PNG files are written under the selected
+folder (default ``build/phreeqc-figures`` under the current directory).
+The base names are ``backends_aqueous_profiles``, ``backends_H2_consumption_time``
+and ``backends_H2_consumption_space``. Labels, units and normalization are
+preserved from the scenario metrics; corresponding snapshot times must match.
+See :doc:`phreeqc` for the save/reload workflow and backend interpretation.
 
 Shared 1D storage setup
 -----------------------
