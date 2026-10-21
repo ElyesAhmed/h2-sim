@@ -103,6 +103,31 @@ is ``build/phreeqc-figures`` under pwd; pass ``'outputDirectory', ''`` to disabl
 export. Returned figures remain open for the caller to inspect or close.
 See :doc:`phreeqc` for saving and reloading the multirate summary.
 
+Storage-cycle validation example
+--------------------------------
+
+``exampleCompositionalPhreeqcValidation`` (also available through
+``runPhreeqcValidation``) runs the bundled compositional PHREEQC case without
+an external checkout. The default uses 20 cells over 50 m and 125 two-day
+steps: injection to day 50, storage to day 200, then production to day 250.
+
+For a short injection-only run, use::
+
+   result = runPhreeqcValidation('gridCells', 4, 'totalDays', 2, ...
+       'plotResults', false, 'outputDirectory', fullfile(pwd, 'validation'));
+
+Each call saves ``validation_results.mat`` with the setup, accepted states,
+reports and diagnostics. ``plotResults`` controls plotting only. The output
+folder does not select the packed simulation cache. Identical setups can reuse
+cached states; changing the duration changes the hashed schedule and selects a
+separate cache. Reported elapsed time includes cache lookup and output loading.
+Short runs exercise injection, rather than the complete storage cycle.
+
+``referenceRoot`` explicitly enables the optional external comparison. Its
+adapter requires Windows MATLAB with COM; standalone H2sim also supports Linux.
+Reference sources are adapted in a temporary copy, retaining the reference
+kinetic equations. This comparison is not a claim of identical reaction models.
+
 Saved validation figures
 ------------------------
 

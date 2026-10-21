@@ -28,8 +28,9 @@ function result = exampleCompositionalPhreeqcValidation(varargin)
 %   referenceRoot   - Optional external reference checkout containing
 %                     examples/H2Storage1D.m (default empty: H2sim only).
 %   injectionDays   - Injection duration in days. Must be 50 for this case.
-%   totalDays       - Simulated duration in days: a positive multiple of
-%                     two, up to 250 (default 250).
+%   totalDays       - Prefix of the storage cycle in days: a positive
+%                     multiple of two, up to 250 (default 250). Runs ending
+%                     at day 50 or earlier contain injection only.
 %   gridCells       - Number of grid cells (default 20).
 %   rate            - Microbial rate case: 'medrate' or 'highrate'
 %                     (default 'highrate').
@@ -38,8 +39,22 @@ function result = exampleCompositionalPhreeqcValidation(varargin)
 %                     (default build/phreeqc-validation under pwd).
 %
 % RETURNS:
-%   result - H2sim setup, states, elapsed time, and chemistry diagnostics.
+%   result - Structure with h2sim (model, initial state, selected schedule,
+%            accepted states, well solutions, reports, packed problem and
+%            elapsedSeconds), referenceRoot, description, and diagnostics.
 %            Includes reference outputs only when referenceRoot is supplied.
+%
+% NOTES:
+%   The selected schedule is hashed with the model and initial state before
+%   packing. Repeating an identical setup can reuse accepted packed states;
+%   changing totalDays selects a different cache. outputDirectory controls
+%   the MAT file and figure exports, not the packed simulation cache.
+%   elapsedSeconds includes cache lookup and output loading.
+%
+%   Each call writes validation_results.mat, even when plotResults is false.
+%   Diagnostics include cumulative reaction consumption and loss relative to
+%   total prescribed H2 injection over the selected schedule. Short runs do
+%   not reproduce the complete storage and production phases.
 %
 % SEE ALSO:
 %   runPhreeqcValidation, plotCompositionalPhreeqcValidation,
@@ -86,11 +101,7 @@ function result = exampleCompositionalPhreeqcValidation(varargin)
     %% Collect diagnostics and save the result
     result.diagnostics = collectPhreeqcValidationDiagnostics(result);
 
-    % Write locally before copying to support output folders on WSL shares.
-    localFile = [tempname, '.mat'];
-    fileCleanup = onCleanup(@() delete(localFile));
-    save(localFile, 'result', '-v7');
-    copyfile(localFile, fullfile(opt.outputDirectory, 'validation_results.mat'), 'f');
+    saveValidationResult(result, opt.outputDirectory);
     if opt.plotResults
         plotCompositionalPhreeqcValidation(result, ...
             'outputDirectory', opt.outputDirectory);
@@ -149,6 +160,28 @@ function directory = prepareOutputDirectory(directory)
 end
 
 function summary = runH2simCase(opt)
+    [model, schedule, state0] = setupH2simCase(opt);
+    schedule = selectSchedule(schedule, opt.totalDays);
+
+    solver = NonLinearSolver();
+    solver.maxTimestepCuts = 12;
+    problem = packH2simSimulationProblem(state0, model, schedule, ...
+        'H2_COMPOSITIONAL_PHREEQC_VALIDATION_SW', 'NonLinearSolver', solver);
+    timer = tic();
+    ok = simulatePackedProblem(problem, 'continueOnError', false);
+    assert(ok, 'H2sim validation case did not complete.');
+    [ws, states, reports] = getPackedSimulatorOutput(problem);
+    summary = struct('model',          model, ...
+                     'state0',         state0, ...
+                     'schedule',       schedule, ...
+                     'states',         {states}, ...
+                     'wellSols',       {ws}, ...
+                     'reports',        {reports}, ...
+                     'packedProblem',  problem, ...
+                     'elapsedSeconds', toc(timer));
+end
+
+function [model, schedule, state0] = setupH2simCase(opt)
     [~, model, schedule, state0] = setupH2StorageExampleWithSRB_benchmark( ...
         'gridCells',               opt.gridCells, ...
         'domainLength',            50, ...
@@ -171,27 +204,21 @@ function summary = runH2simCase(opt)
         'phreeqcTimestepCoupling', true, ...
         'phreeqcBackend',          'sequential-compositional-phreeqc', ...
         'phreeqcDatabaseFile',     which('h2_biogeochemistry.dat'));
+end
 
-    nSteps = opt.totalDays/2;
+function schedule = selectSchedule(schedule, totalDays)
+    % Keep the original controls and take complete two-day flow steps.
+    nSteps = totalDays/2;
     schedule.step.val = schedule.step.val(1:nSteps);
     schedule.step.control = schedule.step.control(1:nSteps);
+end
 
-    solver = NonLinearSolver();
-    solver.maxTimestepCuts = 12;
-    problem = packH2simSimulationProblem(state0, model, schedule, ...
-        'H2_COMPOSITIONAL_PHREEQC_VALIDATION_SW', 'NonLinearSolver', solver);
-    timer = tic();
-    ok = simulatePackedProblem(problem, 'continueOnError', false);
-    assert(ok, 'H2sim validation case did not complete.');
-    [ws, states, reports] = getPackedSimulatorOutput(problem);
-    summary = struct('model',          model, ...
-                     'state0',         state0, ...
-                     'schedule',       schedule, ...
-                     'states',         {states}, ...
-                     'wellSols',       {ws}, ...
-                     'reports',        {reports}, ...
-                     'packedProblem',  problem, ...
-                     'elapsedSeconds', toc(timer));
+function saveValidationResult(result, outputDirectory)
+    % Write locally before copying to support output folders on WSL shares.
+    localFile = [tempname, '.mat'];
+    cleanup = onCleanup(@() delete(localFile));
+    save(localFile, 'result', '-v7');
+    copyfile(localFile, fullfile(outputDirectory, 'validation_results.mat'), 'f');
 end
 
 function referenceRoot = stageReferenceSources(sourceRoot)
