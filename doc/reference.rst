@@ -128,6 +128,28 @@ adapter requires Windows MATLAB with COM; standalone H2sim also supports Linux.
 Reference sources are adapted in a temporary copy, retaining the reference
 kinetic equations. This comparison is not a claim of identical reaction models.
 
+PHREEQC model configuration
+---------------------------
+
+``BiochemistryPhreeqcModel`` requires grid, rock, fluid, compositional mixture,
+biochemical mixture, water-phase flag and MRST AD backend as positional inputs.
+The AD backend is separate from ``phreeqcBackend``, which selects chemistry.
+Coupling is disabled by default and does not activate the PHREEQC engine during
+construction. Backend names are trimmed and normalized to lower case.
+
+With ``phreeqcTimestepCoupling`` enabled, provide an absolute existing path to
+``h2_biogeochemistry.dat`` through ``phreeqcDatabaseFile`` or, when that property
+is empty, ``phreeqcCouplingOptions.databaseFile``. Both backends also require
+bacterial transport, the carbonate buffer and sulfate reduction. Compositional
+PHREEQC owns the reaction kinetics; hybrid PHREEQC retains H2sim kinetics and
+requires its Picard driver or the multirate split. Internal driver activation
+flags cannot be enabled through constructor options.
+
+Linux uses native IPhreeqc through PhreeqcMatlab; Windows defaults to COM.
+The ProgID properties remain configuration metadata on Linux. Constructor
+validation does not establish runtime engine availability. Backend-specific
+coupling options are documented in the corresponding coupling utility.
+
 Reaction-specific H2 accounting
 -------------------------------
 
