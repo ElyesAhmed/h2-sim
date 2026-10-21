@@ -128,6 +128,22 @@ adapter requires Windows MATLAB with COM; standalone H2sim also supports Linux.
 Reference sources are adapted in a temporary copy, retaining the reference
 kinetic equations. This comparison is not a claim of identical reaction models.
 
+Reaction-specific H2 accounting
+-------------------------------
+
+``[rate, cumulative] = computeH2Consumption(states, schedule, model, reaction)``
+returns cell-by-time consumption in mol/s and mol. Standard reaction indices
+are MET (1), ACE (2), SRB (3). Supply one accepted state per schedule step,
+excluding the initial state, with timestep lengths in seconds.
+
+The collector prefers compositional PHREEQC step increments, then multirate
+PHREEQC cumulative values, then generic cumulative values, then converged
+source rates. Backend-specific fields require the matching model backend.
+Cumulative histories take precedence over saved rates; their differences give
+step-average rates. The first cumulative value is treated as the first step's
+increment, so a truncated history with a nonzero initial consumption offset
+cannot provide the correct first step rate. Stored values are not clipped.
+
 Validation diagnostics
 ----------------------
 
