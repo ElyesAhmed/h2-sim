@@ -968,6 +968,13 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
             % Compositional PHREEQC owns its reaction extents. The hybrid
             % driver owns chemistry updates; this hook only checks that
             % the driver is active and records H2sim reaction extents.
+            if ~model.reactionsEnabled
+                % No timestep carbon budget is assembled without reactions.
+                % Omit this reaction-stage output from the local model copy;
+                % retain the caller's requests for a later reaction stage.
+                model.OutputStateFunctions = model.OutputStateFunctions( ...
+                    ~strcmp(model.OutputStateFunctions, 'CarbonLimitedGrowthRate'));
+            end
             [state, report] = updateAfterConvergence@GenericOverallCompositionModel( ...
                 model, state0, state, dt, drivingForces);
             state = recordAcceptedH2Consumption(model, state0, state, dt);
