@@ -5,16 +5,37 @@ function diagnostics = collectPhreeqcValidationDiagnostics(result)
 %   diagnostics = collectPhreeqcValidationDiagnostics(result)
 %
 % PARAMETERS:
-%   result - Comparison returned by exampleCompositionalPhreeqcValidation,
-%            with an h2sim entry and an optional reference entry containing model,
-%            schedule, and accepted states. Reference states must include
-%            Solution.TotalDIC. Older saved reference data are also accepted.
+%   result - Structure with an h2sim run and, optionally, a reference run.
+%            Each run contains model, schedule and a nonempty cell array of
+%            accepted states, one per schedule step (excluding state0).
+%            The model supplies cell geometry and facility pressure (Pa)
+%            and temperature (K). State x(:, 2) is aqueous H2 mole fraction.
+%            H2sim states supply phreeqcPH and phreeqcTotalCarbon (mol/kg
+%            water); H2 consumption is obtained with computeH2Consumption.
+%            Reference states supply Solution.pH, TotalDIC (mol/kg water),
+%            Water (g), and MET_Rate, ACE_Rate, SRB_Rate (mol/kg water/day).
+%            Legacy result.ugfact is read only when reference is absent.
 %
 % RETURNS:
-%   diagnostics - Per-model times, cell coordinates, aqueous hydrogen mole
-%                 fractions, pH, DIC molality, and cumulative consumption by
-%                 reaction. Loss percentages use prescribed active-well H2
-%                 injection as the common normalization basis.
+%   diagnostics - Structure with h2sim and, when supplied, reference fields.
+%                 Each entry contains:
+%     timeDays      - nSteps-by-1 cumulative accepted times in days.
+%     coordinates   - nCells-by-nDimensions cell centroids in metres.
+%     h2, pH, dic   - nCells-by-nSteps aqueous H2 mole fraction, pH and
+%                     total DIC molality (mol/kg water), respectively.
+%     consumption   - nCells-by-nSteps-by-3 cumulative H2 consumption in mol,
+%                     ordered MET, ACE, SRB.
+%     injectedMoles - Positive total prescribed H2 injection in mol.
+%     lossPercent   - nSteps-by-1 total cumulative reaction consumption as
+%                     a percentage of injectedMoles.
+%
+% NOTES:
+%   Injection uses active injectors with rate or grat controls, H2 component
+%   index 2, and the facility ideal-gas conversion. Other control types are
+%   skipped. This is prescribed injection, not measured well-solution flux.
+%   Each run uses its own fixed denominator over the whole selected schedule,
+%   including during injection. No interpolation or reference alignment is
+%   performed here; the plotting function checks comparison coordinates.
 %
 % SEE ALSO:
 %   exampleCompositionalPhreeqcValidation, plotCompositionalPhreeqcValidation
@@ -29,45 +50,47 @@ function diagnostics = collectPhreeqcValidationDiagnostics(result)
     end
     diagnostics = struct();
     for j = 1:numel(names)
-        run = result.(names{j});
-        timeDays = double(cumsum(run.schedule.step.val(:)))/day;
-        nSteps = numel(run.states);
-        validateStateCount(nSteps, timeDays);
-        current = struct('timeDays',    timeDays, ...
-                         'coordinates', run.model.G.cells.centroids, ...
-                         'h2',          [], ...
-                         'pH',          [], ...
-                         'dic',         [], ...
-                         'consumption', zeros(run.model.G.cells.num, nSteps, 3));
-
-        for k = 1:nSteps
-            state = run.states{k};
-            current.h2(:, k) = state.x(:, 2);
-            if j == 1
-                current.pH(:, k) = state.phreeqcPH;
-                current.dic(:, k) = state.phreeqcTotalCarbon;
-            else
-                validateReferenceChemistry(state.Solution);
-                current.pH(:, k) = state.Solution.pH;
-                current.dic(:, k) = state.Solution.TotalDIC;
-            end
-        end
-
-        for reaction = 1:3
-            if j == 1
-                [~, current.consumption(:, :, reaction)] = computeH2Consumption( ...
-                    run.states, run.schedule, run.model, reaction);
-            else
-                current.consumption(:, :, reaction) = ...
-                    referenceConsumption(run, reaction);
-            end
-        end
-        injected = prescribedInjectedH2(run);
-        current.injectedMoles = injected;
-        current.lossPercent = 100*reshape( ...
-            sum(sum(current.consumption, 1), 3), nSteps, 1)/injected;
-        diagnostics.(names{j}) = current;
+        diagnostics.(names{j}) = collectRun(result.(names{j}), j == 1);
     end
+end
+
+function current = collectRun(run, isH2sim)
+    timeDays = double(cumsum(run.schedule.step.val(:)))/day;
+    nSteps = numel(run.states);
+    validateStateCount(nSteps, timeDays);
+    current = struct('timeDays',    timeDays, ...
+                     'coordinates', run.model.G.cells.centroids, ...
+                     'h2',          [], ...
+                     'pH',          [], ...
+                     'dic',         [], ...
+                     'consumption', zeros(run.model.G.cells.num, nSteps, 3));
+
+    for k = 1:nSteps
+        state = run.states{k};
+        current.h2(:, k) = state.x(:, 2);
+        if isH2sim
+            current.pH(:, k) = state.phreeqcPH;
+            current.dic(:, k) = state.phreeqcTotalCarbon;
+        else
+            validateReferenceChemistry(state.Solution);
+            current.pH(:, k) = state.Solution.pH;
+            current.dic(:, k) = state.Solution.TotalDIC;
+        end
+    end
+
+    for reaction = 1:3
+        if isH2sim
+            [~, current.consumption(:, :, reaction)] = computeH2Consumption( ...
+                run.states, run.schedule, run.model, reaction);
+        else
+            current.consumption(:, :, reaction) = ...
+                referenceConsumption(run, reaction);
+        end
+    end
+    injected = prescribedInjectedH2(run);
+    current.injectedMoles = injected;
+    current.lossPercent = 100*reshape( ...
+        sum(sum(current.consumption, 1), 3), nSteps, 1)/injected;
 end
 
 function validateStateCount(nSteps, timeDays)
@@ -78,7 +101,8 @@ end
 
 function validateReferenceChemistry(solution)
     assert(isfield(solution, 'TotalDIC'), ...
-        'Reference total-DIC diagnostic required.');
+        'H2sim:ValidationReferenceDIC', ...
+        'Reference Solution.TotalDIC (mol/kg water) is required.');
 end
 
 function consumption = referenceConsumption(run, reaction)

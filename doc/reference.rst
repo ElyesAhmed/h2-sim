@@ -128,6 +128,24 @@ adapter requires Windows MATLAB with COM; standalone H2sim also supports Linux.
 Reference sources are adapted in a temporary copy, retaining the reference
 kinetic equations. This comparison is not a claim of identical reaction models.
 
+Validation diagnostics
+----------------------
+
+``collectPhreeqcValidationDiagnostics(result)`` collects saved model, schedule
+and accepted states; it does not run PHREEQC. Each run must contain one state
+per schedule step, excluding the initial state. Its outputs are cell-by-time
+H2 mole fraction, pH and DIC (mol/kg water), plus cell-by-time-by-reaction
+cumulative H2 consumption in mol, ordered MET, ACE, SRB. Times are in days and
+cell coordinates in metres.
+
+Loss percentages use each run's total prescribed injection over the selected
+schedule as a fixed denominator. Active ``rate`` and ``grat`` injectors are
+counted using H2 component index 2 and the facility ideal-gas conversion;
+other control types are skipped. This is not a well-solution flux integral.
+Reference rates use mol/kg water/day and water mass in grams. Reference states
+must include ``Solution.TotalDIC``; legacy ``ugfact`` saved entries remain
+readable. The collector does not interpolate or align reference coordinates.
+
 Saved validation figures
 ------------------------
 
