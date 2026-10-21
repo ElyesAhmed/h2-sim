@@ -214,6 +214,21 @@ matched exactly; multirate differences passed the stated inventory-based
 absolute/relative tolerances. These short-case timings exclude startup and
 model construction and do not establish full-schedule speedups.
 
+### Short 2D storage checks
+
+```matlab
+results = exampleCompositionalBacterial2DThreeReactions( ...
+    'gridSpacing', [10, 10], 'numCycles', 1, 'maximumFlowSteps', 1, ...
+    'plotResults', false, 'outputDirectory', fullfile(pwd, 'build', 'storage-check'), ...
+    'simulationDirectory', fullfile(pwd, 'build', 'storage-check', 'packed'));
+```
+
+This coarser, limited run checks setup and accepted output. It does not reproduce
+the website's 0.5 m, five-cycle case. Keep the same setup and packed directory
+when increasing `maximumFlowSteps` to resume; the full schedule determines the
+cache identity. `results.complete` identifies whether the entire schedule was
+requested. An empty `simulationDirectory` retains MRST's default output location.
+
 ### Saved multirate diagnostics
 
 ```matlab
