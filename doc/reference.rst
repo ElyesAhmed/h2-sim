@@ -37,6 +37,8 @@ Entry points
      - Load result MAT files; optionally stage network files locally for HDF5
    * - ``activateH2simAMGCL``
      - Activate an optional locally compiled MRST gateway
+   * - ``plotCompositionalPhreeqcValidation``
+     - Redraw validation maps and reaction loss with optional saved reference data
    * - ``plotSequentialBiochemistryPhreeqc``
      - Redraw saved multirate flow/chemistry and consumption; return two figures
    * - ``plotPhreeqcMineralComparison``
@@ -100,6 +102,28 @@ Exports use vector PDF and 300-dpi PNG with base names
 is ``build/phreeqc-figures`` under pwd; pass ``'outputDirectory', ''`` to disable
 export. Returned figures remain open for the caller to inspect or close.
 See :doc:`phreeqc` for saving and reloading the multirate summary.
+
+Saved validation figures
+------------------------
+
+``plotCompositionalPhreeqcValidation(result)`` returns three figures for hydrogen
+loss and aqueous H2, pH/DIC maps, and MET/ACE/SRB loss contributions. It uses cached
+``result.diagnostics`` when supplied; otherwise it collects diagnostics from the
+saved H2sim model, schedule and states. Optional reference data add comparison
+curves and maps; no external checkout is needed to redraw saved data. Legacy
+``ugfact`` fields remain readable without changing stored provenance.
+
+Time is in days, distance uses the first cell coordinate in metres, aqueous H2
+is a mole fraction and DIC is in mol/kg water. Loss uses total prescribed H2
+injection as its denominator throughout the selected schedule. Reference times
+and first coordinate columns must match exactly, and reaction contributions must sum to the
+total loss within the existing tolerance.
+
+Export is disabled by default. A nonempty ``outputDirectory`` receives three
+200-dpi PNGs, three vector PDFs and ``phreeqc_loss_history.csv``. CSV reference
+columns appear only when reference diagnostics are present. Historical export
+base names end in ``full_cycle`` even for short datasets; filenames alone do
+not establish full-cycle coverage. The caller owns the returned open figures.
 
 Shared 1D storage setup
 -----------------------
