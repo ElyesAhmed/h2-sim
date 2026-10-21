@@ -150,6 +150,27 @@ The ProgID properties remain configuration metadata on Linux. Constructor
 validation does not establish runtime engine availability. Backend-specific
 coupling options are documented in the corresponding coupling utility.
 
+Accepted-step PHREEQC coupling
+------------------------------
+
+``BiochemistryPhreeqcModel.updateAfterConvergence`` finalizes each accepted
+nonlinear ministep, rather than each Newton iteration. It first calls the
+parent flow update, records H2sim reaction consumption when applicable, then
+dispatches the configured chemistry backend. Lagged dissolved H2S is cached
+after chemistry and reflash for the following EOS evaluation.
+
+Compositional PHREEQC owns reaction kinetics and consumption; the H2sim
+consumption-rate path is skipped. Hybrid PHREEQC records the converged H2sim
+source rate before chemistry changes the state and accumulates accepted
+reaction extents. Reaction-disabled flow stages record zero rate and carry
+existing cumulative hybrid consumption forward unchanged.
+
+The hybrid hook checks that the Picard or multirate driver is active; it does
+not perform a separate chemistry update. Direct ``simulateScheduleAD`` with
+an undriven hybrid model is rejected to prevent a lagged one-pass split.
+Coupling-disabled models skip chemistry dispatch. Existing consumption fields
+remain in accepted states and are carried through packed restarts.
+
 Reaction-specific H2 accounting
 -------------------------------
 
