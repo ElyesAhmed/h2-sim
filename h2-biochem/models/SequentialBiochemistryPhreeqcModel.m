@@ -34,14 +34,12 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
     %   exactly once per control step; the reaction substeps are purely
     %   local (no spatial coupling between cells).
     %
-    %   The `flowStageModel`/`reactionStageModel` sub-models used
-    %   internally are plain `BiochemistryPhreeqcModel` instances (NOT
-    %   `SequentialBiochemistryPhreeqcModel`), so their inner
-    %   `NonLinearSolver.solveTimestep` calls use the ordinary inherited
-    %   Newton `stepFunction` -- this avoids any risk of the nested solves
-    %   recursively re-entering this class's overridden `stepFunction`
-    %   (MRST models are value classes, so merely copying `model` would
-    %   otherwise preserve its class and recurse).
+    %   The flowStageModel and reactionStageModel are plain
+    %   BiochemistryPhreeqcModel instances. The flow stage uses the
+    %   ordinary nonlinear timestep solver. Local reactions use
+    %   advanceSequentialBiochemistryLocalReaction, a bounded integrator;
+    %   they do not use reactionNonLinearSolver. Separate stage models
+    %   prevent recursive entry into this meta-model's stepFunction.
     %
     % REQUIRED PARAMETERS:
     %   G, rock, fluid, compFluid, biochemFluid, includeWater, backend -
