@@ -1,36 +1,71 @@
 function scenarios = runThreeBackendComparison(varargin)
-%Compare microbial hydrogen consumption with three chemistry models
-%
-% Aqueous H2 mole fraction and total dissolved inorganic carbon (C(4)
-% molality, mol/kgw) profiles are shown at the end of injection, storage,
-% and production. DIC is compared instead of the aqueous CO2 mole fraction
-% because CO2(aq) depends on pH and alkalinity. Summing the carbonate
-% species gives a common quantity for comparison across coupled backends. Additional figures compare H2 loss over
-% time and its final spatial distribution. Results remain in memory and no
-% simulation files are written; figures export to outputDirectory.
-%
-% All three models are included in H2sim. The bundled chemistry database
-% is sufficient; no external reference checkout is required.
-%
-% The three compared backends are:
-%   1. Original h2-biochem (BiochemistryModel, no PHREEQC).
-%   2. Sequential compositional PHREEQC (BiochemistryPhreeqcModel,
-%      phreeqcBackend='sequential-compositional-phreeqc'): PHREEQC owns
-%      MET/ACE/SRB kinetics entirely, applied once per transport timestep.
-%   3. Sequential (SequentialBiochemistryPhreeqcModel): MRST retains
-%      microbial kinetics/biomass, split into one coarse global flow step
-%      followed by local reaction substeps each closed by a PHREEQC
-%      equilibrium update -- see convertToSequentialBiochemistryPhreeqcModel.
+%Compare hydrogen consumption and aqueous chemistry across three backends
 %
 % SYNOPSIS:
-%   % h2_biogeochemistry.dat is bundled at h2-biochem/database/ and is found
-%   % automatically via which() once startupH2sim has run, so no path is
-%   % required by default:
 %   scenarios = runThreeBackendComparison();
+%   scenarios = runThreeBackendComparison('plotResults', false);
+%   scenarios = runThreeBackendComparison( ...
+%       'phreeqcDatabaseFile', '/absolute/path/to/h2_biogeochemistry.dat');
 %
-%   % To use a different database, pass its absolute path explicitly:
-%   db = '/absolute/path/to/h2_biogeochemistry.dat';
-%   scenarios = runThreeBackendComparison('phreeqcDatabaseFile', db);
+% DESCRIPTION:
+%   Run three included models on a 50-cell, 50 m storage benchmark with
+%   high-rate MET/ACE/SRB reactions. The complete 250-day schedule covers
+%   injection (50 days), storage (150 days), and production (50 days).
+%   All cases disable diffusion, dispersion, chemotaxis and clogging.
+%
+%   The cases, in returned order, are:
+%     1. Microbial biochemistry with a reduced fixed-pH carbonate buffer.
+%        BiochemistryPhreeqcModel is used for the buffer, with PHREEQC
+%        timestep coupling disabled; no PHREEQC reactions are run.
+%     2. Compositional PHREEQC: PHREEQC owns local microbial kinetics,
+%        biomass and aqueous/mineral chemistry after each transport step.
+%     3. Multirate biochemistry/PHREEQC: MRST owns microbial kinetics and
+%        biomass; each coarse flow step is followed by local reaction
+%        substeps and PHREEQC equilibrium, without an outer Picard loop.
+%
+%   This compares complete formulations, including their biomass and decay
+%   conventions. Differences are not attributable to mineral chemistry alone.
+%   Historical MRST-prefixed result names are retained for compatibility;
+%   all cases use H2sim code initialized by startupH2sim, not MRST's separate
+%   h2-biochem module. No external reference checkout is used by this driver.
+%
+%   The bundled database and PhreeqcMatlab are required: native IPhreeqc on
+%   Linux or COM on Windows. Default runs use 125 flow steps per case, with
+%   additional local reaction substeps in the multirate case. This is a full
+%   comparison, not a short dependency check; use the mineral example for
+%   a four-cell, two-step check. Runtime depends on backend and platform.
+%
+%   Results remain in memory. The driver writes figures only; save the
+%   returned scenarios explicitly to retain simulations for later plotting.
+%
+% OPTIONAL PARAMETERS:
+%   phreeqcDatabaseFile - h2_biogeochemistry.dat path (default empty).
+%                         Resolution: explicit input, PHREEQC_DATABASE_FILE,
+%                         then the MATLAB path after startupH2sim.
+%   flowTimestepMaxDt   - Maximum coarse flow step for the multirate case,
+%                         in seconds (default 2*day). The first two cases
+%                         retain the benchmark's two-day flow steps.
+%   reactionSubstepMaxDt - Maximum multirate reaction substep, in seconds
+%                         (default 0.4*day).
+%   plotResults        - Plot and export three figures (default true).
+%   outputDirectory    - Figure folder (default build/phreeqc-figures under
+%                         pwd). An empty value displays without export.
+%
+% RETURNS:
+%   scenarios - Three structs containing model, state0, schedule, states,
+%               ws and metrics. timeDays is in days; aqueousH2 is a liquid
+%               mole fraction and aqueousDIC is C(4) molality in mol/kgw.
+%               Profile columns correspond to the last injection, last
+%               storage and final simulation states (snapshotIndices).
+%               lossPercent uses total prescribed scheduled H2 injection
+%               as its denominator at every time, including during injection.
+%               finalSpatialConsumptionMoles is mol H2 per cell; injectedH2Moles
+%               and consumedH2Moles are total mol H2. runtimeSeconds includes
+%               simulation and metric collection, excluding model setup.
+%
+% SEE ALSO:
+%   plotPhreeqcBackendComparison, exampleCompositionalBacterial1DPhreeqcMinerals,
+%   exampleSequentialBiochemistryPhreeqc1D, runPhreeqcValidation
 
     mrstModule add ad-props compositional deckformat
 
@@ -46,6 +81,27 @@ function scenarios = runThreeBackendComparison(varargin)
     databaseFile = resolvePhreeqcDatabaseFile(opt.phreeqcDatabaseFile);
 
     %% Define the shared benchmark and chemistry models
+    [commonOptions, cases] = defineCases(databaseFile);
+
+    %% Simulate each chemistry model
+    scenarios = initializeScenarios(numel(cases));
+    for caseNo = 1:numel(cases)
+        current = cases(caseNo);
+        fprintf('\nBackend %d/%d: %s\n', ...
+            caseNo, numel(cases), current.name);
+        [model, schedule, state0] = setupScenario(current, commonOptions, opt);
+        scenarios(caseNo) = runScenario( ...
+            current, model, schedule, state0, scenarios(caseNo));
+    end
+
+    printSummary(scenarios);
+    if opt.plotResults
+        plotPhreeqcBackendComparison(scenarios, ...
+            'outputDirectory', opt.outputDirectory);
+    end
+end
+
+function [commonOptions, cases] = defineCases(databaseFile)
     commonOptions = { ...
         'rate', 'highrate', ...
         'scheduleMode', 'complete', ...
@@ -77,60 +133,51 @@ function scenarios = runThreeBackendComparison(varargin)
             'phreeqcTimestepCoupling', true, ...
             'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
             'phreeqcDatabaseFile', databaseFile}, 'coarseSplit')];
+end
 
-    %% Simulate each chemistry model
-    scenarios = initializeScenarios(numel(cases));
-    for caseNo = 1:numel(cases)
-        current = cases(caseNo);
-        fprintf('\nBackend %d/%d: %s\n', ...
-            caseNo, numel(cases), current.name);
-        [~, model, schedule, state0] = ...
-            setupH2StorageExampleWithSRB_benchmark( ...
+function [model, schedule, state0] = setupScenario(current, commonOptions, opt)
+    [~, model, schedule, state0] = ...
+        setupH2StorageExampleWithSRB_benchmark( ...
             commonOptions{:}, current.options{:});
 
-        if strcmp(current.driver, 'coarseSplit')
-            validateSequentialSetup(model, state0);
-            schedule = coarsenScheduleByControl(schedule, opt.flowTimestepMaxDt);
-            model = convertToSequentialBiochemistryPhreeqcModel(model, ...
-                'reactionSubstepMaxDt', opt.reactionSubstepMaxDt);
-        end
+    if strcmp(current.driver, 'coarseSplit')
+        validateSequentialSetup(model, state0);
+        schedule = coarsenScheduleByControl(schedule, opt.flowTimestepMaxDt);
+        model = convertToSequentialBiochemistryPhreeqcModel(model, ...
+            'reactionSubstepMaxDt', opt.reactionSubstepMaxDt);
+    end
+end
 
-        solver = NonLinearSolver();
-        solver.maxTimestepCuts = 12;
-        timer = tic();
-        [ws, states, report] = simulateScheduleAD( ...
-            state0, model, schedule, 'nonlinearSolver', solver);
-        if isstruct(report) && isfield(report, 'Failure')
-            assert(~report.Failure, ...
-                'Simulation report indicates failure for "%s".', current.name);
-        end
-
-        metrics = collectMetrics(states, schedule, model);
-        scenarios(caseNo).name = current.name;
-        scenarios(caseNo).model = model;
-        scenarios(caseNo).schedule = schedule;
-        scenarios(caseNo).states = states;
-        scenarios(caseNo).ws = ws;
-        scenarios(caseNo).state0 = state0;
-        scenarios(caseNo).timeDays = metrics.timeDays;
-        scenarios(caseNo).snapshotIndices = metrics.snapshotIndices;
-        scenarios(caseNo).snapshotLabels = metrics.snapshotLabels;
-        scenarios(caseNo).aqueousH2 = metrics.aqueousH2;
-        scenarios(caseNo).aqueousDIC = metrics.aqueousDIC;
-        scenarios(caseNo).lossPercent = metrics.lossPercent;
-        scenarios(caseNo).finalSpatialConsumptionMoles = ...
-            metrics.finalSpatialConsumptionMoles;
-        scenarios(caseNo).xDimensionless = metrics.xDimensionless;
-        scenarios(caseNo).injectedH2Moles = metrics.injectedH2Moles;
-        scenarios(caseNo).consumedH2Moles = metrics.consumedH2Moles;
-        scenarios(caseNo).runtimeSeconds = toc(timer);
+function scenario = runScenario(current, model, schedule, state0, scenario)
+    solver = NonLinearSolver();
+    solver.maxTimestepCuts = 12;
+    timer = tic();
+    [ws, states, report] = simulateScheduleAD( ...
+        state0, model, schedule, 'nonlinearSolver', solver);
+    if isstruct(report) && isfield(report, 'Failure')
+        assert(~report.Failure, ...
+            'Simulation report indicates failure for "%s".', current.name);
     end
 
-    printSummary(scenarios);
-    if opt.plotResults
-        plotPhreeqcBackendComparison(scenarios, ...
-            'outputDirectory', opt.outputDirectory);
-    end
+    metrics = collectMetrics(states, schedule, model);
+    scenario.name = current.name;
+    scenario.model = model;
+    scenario.schedule = schedule;
+    scenario.states = states;
+    scenario.ws = ws;
+    scenario.state0 = state0;
+    scenario.timeDays = metrics.timeDays;
+    scenario.snapshotIndices = metrics.snapshotIndices;
+    scenario.snapshotLabels = metrics.snapshotLabels;
+    scenario.aqueousH2 = metrics.aqueousH2;
+    scenario.aqueousDIC = metrics.aqueousDIC;
+    scenario.lossPercent = metrics.lossPercent;
+    scenario.finalSpatialConsumptionMoles = ...
+        metrics.finalSpatialConsumptionMoles;
+    scenario.xDimensionless = metrics.xDimensionless;
+    scenario.injectedH2Moles = metrics.injectedH2Moles;
+    scenario.consumedH2Moles = metrics.consumedH2Moles;
+    scenario.runtimeSeconds = toc(timer);
 end
 
 function item = makeCase(name, options, driver)
