@@ -1,10 +1,31 @@
 function comparison = exampleCompositionalBacterial1DPhreeqcMinerals(varargin)
 % Compare original h2-biochem with three PHREEQC mineral cases in 1D.
 %
-% The test uses the 50-day injection period, no bio-clogging, and the same
+% SYNOPSIS:
+%   comparison = exampleCompositionalBacterial1DPhreeqcMinerals();
+%   comparison = exampleCompositionalBacterial1DPhreeqcMinerals( ...
+%       'gridCells', 4, 'maximumFlowSteps', 2, 'plotResults', false);
+%
+% DESCRIPTION:
+% The comparison uses the 50-day injection period, no bio-clogging, and the same
 % grid, flow controls, brine, biomass, and transport settings in all cases.
 % Use maximumFlowSteps for short validation; plotResults=false suppresses plots.
 % Figures export to outputDirectory as vector PDF and 300-dpi PNG.
+%
+% OPTIONAL PARAMETERS:
+%   gridCells           - Number of longitudinal cells (default 50).
+%   maximumFlowSteps    - Positive step limit, or Inf for all steps (default Inf).
+%   batchSize           - Independent PHREEQC cells per call (default 50).
+%   phreeqcDatabaseFile - h2_biogeochemistry.dat path; environment/path fallback.
+%   plotResults         - Plot and export results (default true).
+%   outputDirectory     - Figure output folder (default build/phreeqc-figures).
+%
+% RETURNS:
+%   comparison - Four result structs: original biochemistry and three mineral
+%                configurations, with model, states, schedule and diagnostics.
+%
+% SEE ALSO:
+%   runPhreeqcValidation, exampleSequentialBiochemistryPhreeqc1D
 
 mrstModule add ad-core ad-props compositional deckformat 
 
@@ -17,16 +38,7 @@ opt = struct( ...
     'outputDirectory', fullfile(pwd,'build','phreeqc-figures'));
 opt = merge_options(opt, varargin{:});
 opt.phreeqcDatabaseFile = resolvePhreeqcDatabaseFile(opt.phreeqcDatabaseFile);
-validateattributes(opt.gridCells, {'numeric'}, ...
-    {'scalar', 'integer', 'positive', 'finite'}, mfilename, 'gridCells');
-validateattributes(opt.batchSize, {'numeric'}, ...
-    {'scalar', 'integer', 'positive', 'finite'}, mfilename, 'batchSize');
-
-assert(isnumeric(opt.maximumFlowSteps) && isreal(opt.maximumFlowSteps) && ...
-    isscalar(opt.maximumFlowSteps) && opt.maximumFlowSteps>0 && ...
-    (isinf(opt.maximumFlowSteps) || opt.maximumFlowSteps==floor(opt.maximumFlowSteps)), ...
-    'maximumFlowSteps must be a positive integer or Inf.');
-validateattributes(opt.plotResults, {'logical'}, {'scalar'});
+validateOptions(opt);
 
 mineralCases = table( ...
     ["A"; "B"; "C"], ...
@@ -262,6 +274,19 @@ end
 error('Required EOS component was not found: %s.', aliases{1});
 end
 
+function validateOptions(opt)
+    validateattributes(opt.gridCells, {'numeric'}, ...
+        {'scalar', 'integer', 'positive', 'finite'}, mfilename, 'gridCells');
+    validateattributes(opt.batchSize, {'numeric'}, ...
+        {'scalar', 'integer', 'positive', 'finite'}, mfilename, 'batchSize');
+
+    assert(isnumeric(opt.maximumFlowSteps) && isreal(opt.maximumFlowSteps) && ...
+        isscalar(opt.maximumFlowSteps) && opt.maximumFlowSteps>0 && ...
+        (isinf(opt.maximumFlowSteps) || opt.maximumFlowSteps==floor(opt.maximumFlowSteps)), ...
+        'maximumFlowSteps must be a positive integer or Inf.');
+    validateattributes(opt.plotResults, {'logical'}, {'scalar'});
+end
+
 function databaseFile = resolvePhreeqcDatabaseFile(databaseFile)
 assert(ischar(databaseFile) || ...
     (isstring(databaseFile) && isscalar(databaseFile)), ...
@@ -284,10 +309,10 @@ assert(strcmpi([name, extension], 'h2_biogeochemistry.dat'), ...
     'The database must be h2_biogeochemistry.dat.');
 end
 
-function schedule=limitSchedule(schedule,steps)
-steps=min(steps,numel(schedule.step.val));
-schedule.step.val=schedule.step.val(1:steps);
-schedule.step.control=schedule.step.control(1:steps);
+function schedule = limitSchedule(schedule, steps)
+    steps = min(steps, numel(schedule.step.val));
+    schedule.step.val = schedule.step.val(1:steps);
+    schedule.step.control = schedule.step.control(1:steps);
 end
 
 %{

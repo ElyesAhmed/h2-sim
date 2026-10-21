@@ -5,6 +5,24 @@ Run the MATLAB commands locally and inspect their saved results in the
 notebooks. Start with a representative storage or validation case, then use
 the smaller workflow checks to explore chemistry settings.
 
+Choose how to run an example
+----------------------------
+
+* **Setup check:** use ``runPhreeqcValidation('totalDays', 2,
+  'plotResults', false)`` or the four-cell mineral notebook to check dependencies.
+  These short runs do not reproduce full-duration figures.
+* **Tutorial run:** follow a notebook's stated grid, schedule, and physical
+  switches. Storage examples can be substantially larger than setup checks.
+* **Exact reproduction:** use the configuration and source dataset identified
+  for the displayed result. A default example with a different cycle count,
+  grid, or kinetic model does not reproduce that figure.
+* **Saved-result exploration:** redraw the exported multirate histories or
+  inspect the three-cycle animation. Their provenance records identify the
+  saved inputs; the documentation build does not rerun MATLAB simulations.
+
+Open ``h2-biochem/examples/Contents.m`` in this checkout for the example
+catalogue. Initialize H2sim with ``startupH2sim`` before running examples.
+
 Storage in saline aquifers
 --------------------------
 

@@ -8,7 +8,11 @@ on:
       - 'doc/**'
       - '.github/workflows/doc.yml'
       - 'tools/**'
-      - 'utils/setupIpynbForH2sim.py'
+      - 'utils/**'
+      - 'h2-biochem/**'
+      - 'h2-store/**'
+      - 'h2-calibration/**'
+      - 'startupH2sim.m'
   workflow_dispatch:
 
 permissions:

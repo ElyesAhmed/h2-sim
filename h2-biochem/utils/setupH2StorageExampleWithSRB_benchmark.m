@@ -561,14 +561,9 @@ if opt.phreeqcTimestepCoupling
     state0 = initializeH2StoragePhreeqcCouplingState(model, state0);
 end
 %% H2Storage1D benchmark schedule.
-if strcmp(phreeqcBackend, 'sequential-h2biochem-phreeqc')
-    % The reference kinetic model integrates biogeochemistry in five substeps per 2-day flow
-    % step. The MRST biomass balance also requires mu*dt < 1 to retain a
-    % positive backward-Euler growth solution at the high-rate setting.
-    scheduleTimestep = 2*day;
-else
-    scheduleTimestep = 2*day;
-end
+% Both chemistry backends use the same two-day flow schedule. Reaction
+% substeps are configured independently by the selected coupling workflow.
+scheduleTimestep = 2*day;
 dtInj = repmat(scheduleTimestep, 50*day/scheduleTimestep, 1);
 if strcmp(scheduleMode, 'complete')
     dtStor = repmat(scheduleTimestep, 150*day/scheduleTimestep, 1);

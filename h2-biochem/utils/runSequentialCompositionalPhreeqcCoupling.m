@@ -2,7 +2,8 @@ function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
 % Run the optional compositional PHREEQC split after convergence.
 %
 % This backend uses the h2_biogeochemistry.dat IPhreeqcCOM input and
-% SELECTED_OUTPUT convention. It is Windows-only: PHREEQC owns MET/ACE/SRB
+% SELECTED_OUTPUT convention. Native IPhreeqc on Linux and IPhreeqcCOM on
+% Windows share the session adapter. PHREEQC owns MET/ACE/SRB
 % kinetics and its biomass state, while MRST retains flow and tracer
 % transport. Its split conventions match the storage-cycle reference.
 %

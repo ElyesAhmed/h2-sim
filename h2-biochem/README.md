@@ -1,6 +1,7 @@
 # H2sim biochemistry and reactive hydrogen storage
 
-A comprehensive MATLAB Reservoir Simulation Toolbox (MRST) module for simulating hydrogen storage in depleted reservoirs with bio-chemical reactions and compositional modeling.
+H2sim couples MRST compositional flow with microbial reactions and optional
+PHREEQC aqueous/mineral chemistry for hydrogen storage in porous reservoirs.
 
 Initialize this standalone toolbox with `startupH2sim` from the H2sim root.
 Do not initialize it with `mrstModule add h2-biochem`: MRST ships a separate
@@ -12,6 +13,36 @@ session to prevent mixed implementations.
 modified, and relocated files, source attribution, and the exact baseline
 revision. Existing MRST notices are retained on inherited files; new H2sim
 source files use H2sim 2026 notices with GPL terms preserved.
+
+## Example catalogue
+
+Open [Contents.m](Contents.m) for model entry points and
+[examples/Contents.m](examples/Contents.m) for the example index. Existing
+public function names remain available.
+
+| Purpose | Entry point | Dependencies and scope |
+|---|---|---|
+| Introductory microbial storage | `simple1DBacterialExampleMetacet` | MRST; no PHREEQC |
+| Three-reaction 2D storage | `exampleCompositionalBacterial2DThreeReactions` | Larger cyclic case; no PHREEQC |
+| Phase partitioning and salting-out | `exampleH2BrineSolubilityStudy` | MRST and bundled reference data; no live PC-SAFT solver |
+| Mineral-coupling setup check | `exampleCompositionalBacterial1DPhreeqcMinerals` | PHREEQC; use `gridCells=4`, `maximumFlowSteps=2` for a short check |
+| Multirate reactions | `exampleSequentialBiochemistryPhreeqc1D` | PHREEQC; `maximumFlowSteps` limits the full 250-day default |
+| Storage-cycle numerical comparison | `runPhreeqcValidation` | PHREEQC; H2sim-only by default, external reference opt-in |
+| Three chemistry formulations | `runThreeBackendComparison` | Advanced included-model comparison; PHREEQC required |
+
+A setup check verifies basic operation. A tutorial explains a chosen workflow.
+Exact reproduction requires the displayed result's grid, schedule, kinetics,
+backend, solver options and source dataset; a short or default example may use
+another configuration. Saved-result plots use identified archived data without
+rerunning the simulation. See the website notebooks and provenance records for
+these distinctions, including normalization and conservation-audit limitations.
+
+`benchmarkSequentialPhreeqcVolumeFlash` and `profilePhreeqcWorkflows` are
+developer performance tools. Local `paper_2026` includes publication drivers,
+tests and exploratory studies; not every file there is a manuscript case.
+The older transport and 3D examples remain available while their configuration
+and documentation are reviewed. They are not deleted solely because a current
+website or manuscript does not use them.
 
 ## Overview
 
@@ -135,7 +166,7 @@ For detailed methodology and validation, see our publication:
 - **MRST**: MATLAB Reservoir Simulation Toolbox (2023b or newer)
 - **Required MRST Modules**:
   - `compositional`
-  - `ad-blackoil` 
+  - `ad-blackoil`
   - `ad-core`
   - `ad-props`
   - `h2store`
