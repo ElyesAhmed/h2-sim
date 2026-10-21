@@ -6,6 +6,10 @@ classdef CarbonLimitedGrowthRate < StateFunction
     % This property limits methanogenic and acetogenic growth so their
     % combined CO2 demand over the implicit timestep cannot exceed the
     % aqueous EOS CO2 plus HCO3- inventory at the timestep start.
+    % The timestep budget is assembled only when reactions are enabled.
+    % BiochemistryPhreeqcModel omits this diagnostic from accepted output
+    % for reaction-disabled stages; it does not substitute unlimited growth
+    % or a zero budget when the required inventory is unavailable.
 
     methods
         function clgr = CarbonLimitedGrowthRate(model, varargin)

@@ -165,6 +165,13 @@ source rate before chemistry changes the state and accumulates accepted
 reaction extents. Reaction-disabled flow stages record zero rate and carry
 existing cumulative hybrid consumption forward unchanged.
 
+Reaction-disabled stages do not assemble a timestep carbon budget, so the
+post-convergence hook omits ``CarbonLimitedGrowthRate`` from diagnostic output.
+Other requested diagnostics, including the raw ``PsiGrowthRate`` kinetic
+coefficient, remain available. The caller's output requests are preserved,
+so re-enabling reactions restores the carbon-limited diagnostic with its
+normal timestep and inventory checks. No unlimited-growth fallback is used.
+
 The hybrid hook checks that the Picard or multirate driver is active; it does
 not perform a separate chemistry update. Direct ``simulateScheduleAD`` with
 an undriven hybrid model is rejected to prevent a lagged one-pass split.
