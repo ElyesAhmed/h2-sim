@@ -37,6 +37,8 @@ Entry points
      - Load result MAT files; optionally stage network files locally for HDF5
    * - ``activateH2simAMGCL``
      - Activate an optional locally compiled MRST gateway
+   * - ``plotSequentialBiochemistryPhreeqc``
+     - Redraw saved multirate flow/chemistry and consumption; return two figures
    * - ``plotPhreeqcMineralComparison``
      - Redraw saved mineral-case consumption and pH; return two figures
    * - ``plotPhreeqcBackendComparison``
@@ -79,6 +81,25 @@ The default label is 1. PDF/PNG base names are
 ``minerals_<dimension>D_H2_consumption``. Pass ``'outputDirectory', ''`` to create
 figures without writing files; otherwise vector PDF and 300-dpi PNG exports go
 to the selected folder, defaulting to ``build/phreeqc-figures`` under pwd.
+
+Saved multirate figures
+-----------------------
+
+``plotSequentialBiochemistryPhreeqc(summary)`` redraws a saved multirate summary
+without running simulations. It needs ``model``, ``states``, ``schedule`` and
+``injectedH2Moles``. The final state provides pressure, saturation, pH and biomass;
+reaction-wise consumption is computed from the saved state history.
+
+The two returned figures show final profiles (pressure in MPa, gas saturation,
+pH and biomass N/N0) and cumulative consumption (mol and percent of total
+scheduled injected H2). Time is in days and distance is x/L. The injection
+denominator is fixed over the selected schedule, including during injection.
+
+Exports use vector PDF and 300-dpi PNG with base names
+``multirate_final_profiles`` and ``multirate_H2_consumption``. The default folder
+is ``build/phreeqc-figures`` under pwd; pass ``'outputDirectory', ''`` to disable
+export. Returned figures remain open for the caller to inspect or close.
+See :doc:`phreeqc` for saving and reloading the multirate summary.
 
 Shared 1D storage setup
 -----------------------
