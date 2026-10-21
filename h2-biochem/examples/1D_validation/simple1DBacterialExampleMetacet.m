@@ -1,159 +1,145 @@
-%% 1D Compositional Simulation with Bio-Clogging (MRST-style, release-ready)
+%% Closed-system microbial reactions in a 1D compositional model
+% Initialize this checkout with startupH2sim, then run this script. Compare
+% methanogenesis and acetogenesis with dynamic rock properties, with fixed
+% rock properties, and without microbial reactions. PHREEQC is not used.
 %
-% This MRST example demonstrates a 1D two-phase compositional simulation
-% with and without bio-clogging effects in a porous medium. The simulation
-% includes:
-%   - Initial fluid mixture with configurable H2 content (high or low)
-%   - Bio-clogging effects: porosity and permeability reduction due to
-%     bacterial growth
-%   - Soreide-Whitson equation of state (EOS) for compositional fluids
-%   - LBC viscosity correlation for multi-phase flow
-%   - Relative permeability functions accounting for residual saturations
-%   - Comparison of three scenarios:
-%       1) With bacterial effects and bio-clogging
-%       2) With bacterial effects but no clogging
-%       3) Without bacterial effects (abiotic)
+% The initial pressure is 82 bar, temperature is 313.15 K, and the component
+% order is H2O, H2, CH4, CO2, acetate. Both wells are closed. The 400-step
+% schedule is inherited from MRST's simplecomp dataset and shortened by a
+% factor of three. This example requires that dataset and mrst-gui for the
+% final interactive viewer; the other comparison figures are static plots.
 %
-% This example is suitable for testing MRST compositional solvers,
-% bio-chemical extensions, and the impact of microbial activity on flow.
-%
-% Reference: https://www.sciencedirect.com/science/article/pii/S0360319925039473
+% This is a script: model, state0, schedule, prob1/prob2/prob3, ws1/ws2/ws3
+% and st1/st2/st3 remain in the caller workspace for inspection. The linked
+% notebook is generated from this source without executing the simulation.
+% Related model publication:
+% https://www.sciencedirect.com/science/article/pii/S0360319925039473
 
 mrstModule add ad-core ad-props deckformat mrst-gui
 mrstModule add compositional
 mrstVerbose off;
 
-%% Setup base compositional model
-%
-
+%% Prepare the grid, fluid and schedule
+% Increase boundary-cell porosity to mimic well-adjacent storage. Retain
+% the original gas/liquid reference densities in kg/m^3.
 [~, model, schedule, ~] = setupSimpleCompositionalExample(false);
-%% Mimic simple well effects by altering boundary cells
-% Increase porosity in boundary cells.
-model.rock.poro([1, end]) = 0.90;   % First and last cell porosity
-
-% Define reference densities for phases at standard conditions.
-model.fluid.rhoGS = 0.08988;   % Hydrogen-like gas density at STP [kg/m^3]
-model.fluid.rhoOS = 999.0140;    % Water-like liquid density at STP [kg/m^3]
-% Shorten schedule for faster simulation
-schedule.step.val     = schedule.step.val/3;
-schedule.step.val     = schedule.step.val(1:400);
+model.rock.poro([1, end]) = 0.90;
+model.fluid.rhoGS = 0.08988;
+model.fluid.rhoOS = 999.0140;
+schedule.step.val = schedule.step.val/3;
+schedule.step.val = schedule.step.val(1:400);
 schedule.step.control = schedule.step.control(1:400);
 
-%% EOS setup: Soreide-Whitson
-model.EOSModel = SoreideWhitsonEos( ...
-    model.G, model.EOSModel.CompositionalMixture, 'msalt', 5);
-
-%% Residual saturations and relperm adjustments
-% Define residual saturations for water, gas, and oil.
-swc   = 0.20;   % Connate water saturation
-sor   = 0.20;   % Residual oil saturation
-sgr   = 0.10;   % Residual gas saturation
-swmax = 0.90;   % Maximum water saturation (oil/gas nearly absent)
-sgmax = 0.80;   % Maximum gas saturation (oil/water nearly absent)
-
-% Update relative permeability functions to include residual saturations
+%% Set residual saturations and relative permeability
+swc = 0.20;
+sor = 0.20;
+sgr = 0.10;
+swmax = 0.90;
+sgmax = 0.80;
 model.fluid = modifyRelPermForResidualSaturations( ...
     model.fluid, swc, swmax, sgr, sor, sgmax);
 
-%% Initial conditions
-%--------------------------------------------------------------------------
-% Default initial overall composition [H2O, H2, C1, CO2, CH3COOH]
-initComp  = [0.90, 0.045, 0.005, 0.05, 0.0];
+%% Define the initial mixture and microbial populations
+% The composition follows H2O, H2, CH4, CO2, acetate and sums to one.
+initComp = [0.90, 0.045, 0.005, 0.05, 0.0];
+initTemp = 273.15 + 40;
+initPress = 82*barsa;
+biochemFluid = TableBioChemMixture( ...
+    {'MethanogenicArchae', 'AcetogenicBacteria'}, {'nbactM', 'nbactA'});
+nbioreact = biochemFluid.nbioreact;
+initBact = ones(1, nbioreact)*9;
+nc = ones(1, nbioreact)*180;
+cp = zeros(1, nbioreact);
 
-% Alternative: test with higher hydrogen content
-% initComp = [0.40, 0.445, 0.055, 0.10, 0.0];
-
-% Thermodynamic conditions
-initTemp  = 273.15 + 40;   % Absolute temperature [K]
-initPress = 82*barsa;      % Pressure [Pa]
-
-% Metabolic reaction
- %biochemFluid = TableBioChemMixture({'MethanogenicArchae'},{'nbactM'});
- biochemFluid = TableBioChemMixture({'MethanogenicArchae','AcetogenicBacteria'},{'nbactM','nbactA'});
-
-%% Bio-clogging model
-nbioreact=biochemFluid.nbioreact;
-initBact = ones(1, nbioreact) * 9;              % Normalized bacteria concentration
-nc = ones(1, nbioreact) * 180;                 % critical bacteria concentration
-cp = zeros(1, nbioreact);                      % scaling coefficient
-
-% Use appropriate setup function based on number of reactors
+%% Configure the inherited bio-clogging formulation
+% Keep the original coefficients. In setupBioCloggingModel2bacts, cp=0
+% leaves scale=1 and does not disable porosity/permeability changes. The
+% fixed-rock comparison below explicitly restores poro0 and perm0.
 if nbioreact == 1
-    [model, poro0, perm0] = setupBioCloggingModel(model, initBact(1), nc(1), cp(1));
+    [model, poro0, perm0] = setupBioCloggingModel( ...
+        model, initBact(1), nc(1), cp(1));
 else
     [model, poro0, perm0] = setupBioCloggingModel2bacts(model, initBact, nc, cp);
 end
 
-%% Biochemistry model wrapper
+%% Construct the biochemical compositional model
+% BiochemistryModel constructs its own Soreide-Whitson EOS. Its default
+% msalt=0 is the effective setting retained from the original simulation;
+% assigning a different EOS to the precursor model would be overwritten.
 compFluid = h2BiochemCompositionalMixture( ...
-    {'Water','Hydrogen','Methane','CarbonDioxide','AceticAcid'}, ...
-    {'H2O','H2','C1','CO2','CH3COOH'});
-
+    {'Water', 'Hydrogen', 'Methane', 'CarbonDioxide', 'AceticAcid'}, ...
+    {'H2O', 'H2', 'C1', 'CO2', 'CH3COOH'});
 backend = DiagonalAutoDiffBackend('modifyOperators', true);
-model   = BiochemistryModel(model.G, model.rock, model.fluid, compFluid,...
+model = BiochemistryModel(model.G, model.rock, model.fluid, compFluid, ...
     biochemFluid, true, backend, 'water', false, 'oil', true, 'gas', true, ...
-    'bacteriamodel', true,'moleculardiffusion', true, 'liquidPhase','O','vaporPhase','G');
+    'bacteriamodel', true, 'moleculardiffusion', true, ...
+    'liquidPhase', 'O', 'vaporPhase', 'G');
 
-%% Shut Wells
-schedule.control.W(1).components = [0.001, 0.948, 0.001, 0.05,0.0];
-schedule.control.W(2).components = [0.001, 0.948, 0.001, 0.05,0.0];
-schedule.control.W(1).type = 'rate'; schedule.control.W(1).val = 0;
-schedule.control.W(2).type = 'rate'; schedule.control.W(2).val = 0;
+%% Close both wells and initialize the state
+% Retain valid placeholder well compositions even though rates are zero
+% and status is false. This is not an injection/production comparison.
+schedule.control.W(1).components = [0.001, 0.948, 0.001, 0.05, 0.0];
+schedule.control.W(2).components = [0.001, 0.948, 0.001, 0.05, 0.0];
+schedule.control.W(1).type = 'rate';
+schedule.control.W(1).val = 0;
+schedule.control.W(2).type = 'rate';
+schedule.control.W(2).val = 0;
 [schedule.control.W.status] = deal(false);
-assert(all(arrayfun(@(w) abs(sum(w.components)-1)<1e-12, schedule.control.W)));
-
-%% Initialize state
-state0 = initCompositionalStateBacteria(model, initPress, initTemp, [0,1], ...
+state0 = initCompositionalStateBacteria(model, initPress, initTemp, [0, 1], ...
     initComp, initBact, model.EOSModel);
+% Keep the original strict well-composition check alongside shared validation.
+assert(all(arrayfun(@(w) abs(sum(w.components) - 1) < 1e-12, schedule.control.W)));
+validateH2simSimulationInputs(state0, model, schedule);
 
-%% Scenario 1: with bacterial clogging
+%% Run the dynamic-rock microbial case
 prob1 = packSimulationProblem(state0, model, schedule, 'bio_cloggingMA');
 prob1.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
 simulatePackedProblem(prob1);
 [ws1, st1] = getPackedSimulatorOutput(prob1);
 
-%% Scenario 2: bacteria but no clogging
+%% Run the fixed-rock microbial case
 model2 = model;
 model2.rock.perm = perm0;
 model2.rock.poro = poro0;
-% Create pvMultR function that accepts any number of bacterial arguments
 model2.fluid.pvMultR = @(p, varargin) ones(size(p));
-
-%model2.fluid.pvMultR = @(p,nb) 1;
 prob2 = packSimulationProblem(state0, model2, schedule, 'bio_no_clogMA');
 prob2.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
 simulatePackedProblem(prob2);
 [ws2, st2] = getPackedSimulatorOutput(prob2);
 
-%% Scenario 3: abiotic (no bacteria)
-model3 = model2; model3.bacteriamodel = false;
-state3 = state0; % same state without bacteria effects
+%% Run the abiotic case with the same initial state
+model3 = model2;
+model3.bacteriamodel = false;
+state3 = state0;
 prob3 = packSimulationProblem(state3, model3, schedule, 'no_bacteriaMA');
 prob3.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
 simulatePackedProblem(prob3);
 [ws3, st3] = getPackedSimulatorOutput(prob3);
 
-%% Compare scenarios
+%% Prepare the scenario comparison
 compNames = model.EOSModel.getComponentNames();
-idxH2  = find(strcmp(compNames,'H2'));
-idxCO2 = find(strcmp(compNames,'CO2'));
-idxCH4 = find(strcmp(compNames,'C1'));
-
+idxH2 = find(strcmp(compNames, 'H2'));
+idxCO2 = find(strcmp(compNames, 'CO2'));
+idxCH4 = find(strcmp(compNames, 'C1'));
 timeDays = cumsum(schedule.step.val)/day;
-timeYrs  = timeDays/365;
-
+timeYrs = timeDays/365;
 scenarios = {
-    struct('name','Bio-Clog','model', model,'states',{st1},'color',[0 0.5 0],'line','-'), ...
-    struct('name','Bio-NoClog','model', model2, 'states',{st2},'color',[0 0.7 0.7],'line','--'), ...
-    struct('name','Abiotic','model', model3,'states',{st3},'color',[0.7 0 0],'line',':')};
+    struct('name', 'Bio-Clog', 'model', model, 'states', {st1}, ...
+           'color', [0, 0.5, 0], 'line', '-'), ...
+    struct('name', 'Bio-NoClog', 'model', model2, 'states', {st2}, ...
+           'color', [0, 0.7, 0.7], 'line', '--'), ...
+    struct('name', 'Abiotic', 'model', model3, 'states', {st3}, ...
+           'color', [0.7, 0, 0], 'line', ':')};
 
-%% Plot results
+%% Plot the physical results
 plotComponentProfiles(scenarios, compNames, timeYrs);
 plotBacterialEffects(scenarios, timeYrs, poro0, perm0);
 plotPressureAndSaturation(scenarios, timeYrs);
 plotComponentComparison(scenarios, timeYrs, idxH2, idxCO2, idxCH4);
 
-plotToolbar(model.G, st1, 'plot1d', true, 'field','pressure');
+%% Open the interactive pressure viewer
+% This final viewer is intended for a MATLAB desktop session.
+plotToolbar(model.G, st1, 'plot1d', true, 'field', 'pressure');
 title('Bio-Clogging Scenario - Pressure');
 
 %% Copyright notice

@@ -214,6 +214,20 @@ matched exactly; multirate differences passed the stated inventory-based
 absolute/relative tolerances. These short-case timings exclude startup and
 model construction and do not establish full-schedule speedups.
 
+### Introductory 1D comparison
+
+`simple1DBacterialExampleMetacet` remains a script. It leaves the three models,
+packed problems, well outputs and state histories in the caller workspace.
+Both wells are closed, and the comparison includes methanogenesis and
+acetogenesis. The cleaned source and downloadable notebooks use the same code.
+
+The effective EOS `msalt` is zero: `BiochemistryModel` constructs its own EOS,
+replacing the precursor model's EOS. The legacy two-population clogging helper
+also retains a nonzero response when `cp=0`; the fixed-rock case explicitly
+restores the original rock properties. These inherited behaviors are documented
+and preserved. The notebooks are regenerated without running the full
+400-step simulation; plots are produced when the user executes the code.
+
 ### Short 2D storage checks
 
 ```matlab
