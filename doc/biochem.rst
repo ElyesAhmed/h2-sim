@@ -100,8 +100,17 @@ Hydrogen plume and microbial populations
 Introductory notebook
 ----------------------
 
-``simple1DBacterialExampleMetacet`` provides a smaller introduction to grid
-construction, wells, microbial populations, and compositional transport.
+``simple1DBacterialExampleMetacet`` compares methanogenesis and acetogenesis
+in a one-dimensional closed system. Both wells are closed; the three cases
+use dynamic rock properties, fixed rock properties, and no microbial reactions.
+The script retains its 400-step schedule and leaves its models and states in
+the MATLAB workspace for inspection.
+
+The downloadable notebooks are generated from the MATLAB source without
+executing the full comparison. Run the code locally to create the plots;
+the final pressure viewer uses MATLAB's interactive desktop. The source
+explains the inherited clogging coefficients and the effective EOS salt
+molality, which is zero in this example.
 
 .. button-ref:: nblinks/simple1DBacterialExampleMetacet
    :color: secondary
