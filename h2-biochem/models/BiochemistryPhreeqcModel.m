@@ -3,17 +3,17 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
     % an external PHREEQC geochemistry engine.
     %
     % SYNOPSIS:
-    %   model = BiochemistryPhreeqcModel(G, rock, fluid)
-    %   model = BiochemistryPhreeqcModel(G, rock, fluid, compFluid)
-    %   model = BiochemistryPhreeqcModel(..., 'pn1', vn1, ...)
+    %   model = BiochemistryPhreeqcModel(G, rock, fluid, compFluid, ...
+    %       biochemFluid, includeWater, backend)
+    %   model = BiochemistryPhreeqcModel(G, rock, fluid, compFluid, ...
+    %       biochemFluid, includeWater, backend, 'name', value, ...)
     %
     % DESCRIPTION:
     %   BiochemistryPhreeqcModel adds an optional PHREEQC coupling on top
     %   of BiochemistryModel's compositional-flow + Monod-kinetics base.
     %   With phreeqcTimestepCoupling = false (the default) it behaves
-    %   exactly like BiochemistryModel. With it enabled, one of two
-    %   mutually exclusive backends (phreeqcBackend) is used after every
-    %   accepted timestep:
+    %   retains the uncoupled biochemical flow formulation. With coupling
+    %   enabled, phreeqcBackend selects one of two chemistry workflows:
     %
     %     - 'sequential-compositional-phreeqc': PHREEQC owns the MET/ACE/
     %       SRB kinetics and biomass entirely (via runSequentialCompositionalPhreeqcCoupling).
@@ -44,19 +44,27 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
     %   G         - Simulation grid
     %   rock      - Rock properties for the model
     %   fluid     - Fluid model for the simulation
-    %   compFluid - Compositional fluid mixture (optional)
+    %   compFluid    - Compositional mixture; pass [] to request the default.
+    %   biochemFluid - Biochemical mixture; pass [] to request the default.
+    %   includeWater - Whether to include the water phase.
+    %   backend      - MRST automatic differentiation backend. This is distinct
+    %                  from the phreeqcBackend chemistry selection.
     %
     % OPTIONAL PARAMETERS:
     %   'phreeqcTimestepCoupling' - Enable the post-timestep PHREEQC
     %                               coupling (default false; requires
-    %                               Linux native IPhreeqc or Windows IPhreeqcCOM
-    %                               server).
+    %                               native IPhreeqc through PhreeqcMatlab
+    %                               on Linux, or IPhreeqcCOM on Windows).
     %   'phreeqcBackend'          - 'sequential-compositional-phreeqc'
     %                               (default) or 'sequential-h2biochem-phreeqc'.
     %   'phreeqcDatabaseFile'     - Absolute path to the PHREEQC database
-    %                               (h2_biogeochemistry.dat).
+    %                               (h2_biogeochemistry.dat). If empty, use
+    %                               phreeqcCouplingOptions.databaseFile.
+    %                               Checked at construction only when
+    %                               phreeqcTimestepCoupling is enabled.
     %   'phreeqcComProgId'        - Registered IPhreeqcCOM server ProgID
-    %                               (default 'IPhreeqcCOM.Object').
+    %                               (default 'IPhreeqcCOM.Object'). Retained
+    %                               as compatibility metadata on Linux.
     %   'phreeqcCouplingOptions'  - Struct of backend-specific coupling
     %                               parameters (kinetic rate constants,
     %                               brine composition, tolerances, ...);
@@ -65,8 +73,21 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
     %                               full field list and defaults.
     %   'carbonateBuffer'         - Enable the simplified fixed-pH HCO3-/
     %                               CO2 buffer (default false).
+    %   'carbonateBufferPH'       - Fixed buffer pH (default 6.24).
+    %   'carbonateBufferPka1'     - Fixed carbonate pKa1 (default 6.35).
     %   'bacterialDecayOrder'     - 1 (first-order) or 2 (legacy
     %                               quadratic, default) biomass decay.
+    %
+    % NOTES:
+    %   MRST merge_options applies property type checks before scalar flags
+    %   are normalized to logical. Backend names are trimmed and converted
+    %   to lower case. Coupling also requires
+    %   bacteriamodel, carbonateBuffer and the sulfate-reducing reaction.
+    %   The compositional backend rejects bacterial diffusion and chemotaxis
+    %   during validateModel. The hybrid backend requires its Picard driver
+    %   or the multirate split; direct simulateScheduleAD is guarded.
+    %   Internal Picard/split activation flags cannot be set on construction.
+    %   Construction checks configuration, not runtime engine availability.
     %
     % RETURNS:
     %   model - BiochemistryPhreeqcModel class instance
@@ -116,45 +137,7 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
             model = model@BiochemistryModel(G, rock, fluid, compFluid, ...
                 biochemFluid, includeWater, backend, baseOptions{:});
             model = merge_options(model, varargin{:});
-            model.molecularDiffusion = normalizeTransportFlag( ...
-                model.molecularDiffusion, 'molecularDiffusion');
-            model.molecularDispersion = normalizeTransportFlag( ...
-                model.molecularDispersion, 'molecularDispersion');
-            model.bactDiffusion = normalizeTransportFlag( ...
-                model.bactDiffusion, 'bactDiffusion');
-            model.chemotaxisEffect = normalizeTransportFlag( ...
-                model.chemotaxisEffect, 'chemotaxisEffect');
-            model.carbonateBuffer = normalizeTransportFlag( ...
-                model.carbonateBuffer, 'carbonateBuffer');
-            model.phreeqcTimestepCoupling = normalizeTransportFlag( ...
-                model.phreeqcTimestepCoupling, 'phreeqcTimestepCoupling');
-            model.phreeqcBackend = normalizePhreeqcBackend(model.phreeqcBackend);
-            model.sequentialH2BiochemPhreeqcPicardActive = normalizeTransportFlag( ...
-                model.sequentialH2BiochemPhreeqcPicardActive, ...
-                'sequentialH2BiochemPhreeqcPicardActive');
-            assert(~model.sequentialH2BiochemPhreeqcPicardActive, ...
-                ['sequentialH2BiochemPhreeqcPicardActive is reserved for ', ...
-                 'simulateSequentialH2BiochemPhreeqc and cannot be ', ...
-                 'configured on construction.']);
-            model.sequentialSplitActive = normalizeTransportFlag( ...
-                model.sequentialSplitActive, 'sequentialSplitActive');
-            assert(~model.sequentialSplitActive, ...
-                ['sequentialSplitActive is reserved for the flow-stage ', ...
-                 'and reaction-stage sub-models built internally by ', ...
-                 'SequentialBiochemistryPhreeqcModel and cannot be ', ...
-                 'configured on construction.']);
-            assert(ischar(model.phreeqcComProgId) || ...
-                (isstring(model.phreeqcComProgId) && isscalar(model.phreeqcComProgId)), ...
-                'phreeqcComProgId must be a character vector or scalar string.');
-            model.phreeqcComProgId = char(model.phreeqcComProgId);
-            assert(~isempty(strtrim(model.phreeqcComProgId)), ...
-                'phreeqcComProgId must identify a registered IPhreeqcCOM server.');
-            validateattributes(model.bacterialDecayOrder, {'numeric'}, ...
-                {'scalar', 'integer', '>=', 1, '<=', 2}, ...
-                mfilename, 'bacterialDecayOrder');
-            if model.phreeqcTimestepCoupling
-                validateModifiedComConfiguration(model);
-            end
+            model = normalizeModelConfiguration(model);
 
             % Set up operators
             model = model.setupOperators();
@@ -1261,40 +1244,83 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
     end
 end
 
+function model = normalizeModelConfiguration(model)
+    % Preserve option normalization and validation order before setup.
+    model.molecularDiffusion = normalizeTransportFlag( ...
+        model.molecularDiffusion, 'molecularDiffusion');
+    model.molecularDispersion = normalizeTransportFlag( ...
+        model.molecularDispersion, 'molecularDispersion');
+    model.bactDiffusion = normalizeTransportFlag( ...
+        model.bactDiffusion, 'bactDiffusion');
+    model.chemotaxisEffect = normalizeTransportFlag( ...
+        model.chemotaxisEffect, 'chemotaxisEffect');
+    model.carbonateBuffer = normalizeTransportFlag( ...
+        model.carbonateBuffer, 'carbonateBuffer');
+    model.phreeqcTimestepCoupling = normalizeTransportFlag( ...
+        model.phreeqcTimestepCoupling, 'phreeqcTimestepCoupling');
+    model.phreeqcBackend = normalizePhreeqcBackend(model.phreeqcBackend);
+    model.sequentialH2BiochemPhreeqcPicardActive = normalizeTransportFlag( ...
+        model.sequentialH2BiochemPhreeqcPicardActive, ...
+        'sequentialH2BiochemPhreeqcPicardActive');
+    assert(~model.sequentialH2BiochemPhreeqcPicardActive, ...
+        ['sequentialH2BiochemPhreeqcPicardActive is reserved for ', ...
+         'simulateSequentialH2BiochemPhreeqc and cannot be ', ...
+         'configured on construction.']);
+    model.sequentialSplitActive = normalizeTransportFlag( ...
+        model.sequentialSplitActive, 'sequentialSplitActive');
+    assert(~model.sequentialSplitActive, ...
+        ['sequentialSplitActive is reserved for the flow-stage ', ...
+         'and reaction-stage sub-models built internally by ', ...
+         'SequentialBiochemistryPhreeqcModel and cannot be ', ...
+         'configured on construction.']);
+    assert(ischar(model.phreeqcComProgId) || ...
+        (isstring(model.phreeqcComProgId) && isscalar(model.phreeqcComProgId)), ...
+        'phreeqcComProgId must be a character vector or scalar string.');
+    model.phreeqcComProgId = char(model.phreeqcComProgId);
+    assert(~isempty(strtrim(model.phreeqcComProgId)), ...
+        'phreeqcComProgId must be a nonempty IPhreeqcCOM compatibility ProgID.');
+    validateattributes(model.bacterialDecayOrder, {'numeric'}, ...
+        {'scalar', 'integer', '>=', 1, '<=', 2}, ...
+        mfilename, 'bacterialDecayOrder');
+    if model.phreeqcTimestepCoupling
+        validatePhreeqcConfiguration(model);
+    end
+end
+
 function flag = normalizeTransportFlag(flag, name)
-validateattributes(flag, {'logical', 'numeric'}, {'scalar', 'real', 'finite'}, ...
-    mfilename, name);
-flag = logical(flag);
+    validateattributes(flag, {'logical', 'numeric'}, {'scalar', 'real', 'finite'}, ...
+        mfilename, name);
+    flag = logical(flag);
 end
 
 function baseOptions = getBiochemistryModelOptions(options)
-% Keep subclass-only options away from the original model constructor.
-subclassOptions = { ...
-    'carbonateBuffer', 'carbonateBufferPH', 'carbonateBufferPka1', ...
-    'phreeqcTimestepCoupling', 'phreeqcBackend', ...
-    'phreeqcDatabaseFile', ...
-    'phreeqcComProgId', 'phreeqcCouplingOptions', ...
-    'sequentialH2BiochemPhreeqcPicardActive', 'sequentialSplitActive', ...
-    'bacterialDecayOrder'};
-assert(mod(numel(options), 2) == 0, ...
-    'BiochemistryPhreeqcModel options must be property/value pairs.');
-baseOptions = {};
-for i = 1:2:numel(options)
-    if ~any(strcmpi(options{i}, subclassOptions))
-        baseOptions(end + 1:end + 2) = options(i:i + 1); %#ok<AGROW>
+    % Keep subclass-only options away from the original model constructor.
+    subclassOptions = { ...
+        'carbonateBuffer', 'carbonateBufferPH', 'carbonateBufferPka1', ...
+        'phreeqcTimestepCoupling', 'phreeqcBackend', ...
+        'phreeqcDatabaseFile', ...
+        'phreeqcComProgId', 'phreeqcCouplingOptions', ...
+        'sequentialH2BiochemPhreeqcPicardActive', 'sequentialSplitActive', ...
+        'bacterialDecayOrder'};
+    assert(mod(numel(options), 2) == 0, ...
+        'BiochemistryPhreeqcModel options must be property/value pairs.');
+    baseOptions = {};
+    for i = 1:2:numel(options)
+        if ~any(strcmpi(options{i}, subclassOptions))
+            baseOptions(end + 1:end + 2) = options(i:i + 1); %#ok<AGROW>
+        end
     end
-end
 end
 
 function backend = normalizePhreeqcBackend(backend)
-assert(ischar(backend) || (isstring(backend) && isscalar(backend)), ...
-    'phreeqcBackend must be a character vector or scalar string.');
-backend = lower(strtrim(char(backend)));
-assert(ismember(backend, {'sequential-compositional-phreeqc', ...
-    'sequential-h2biochem-phreeqc'}), ...
-    ['phreeqcBackend must be ''sequential-compositional-phreeqc'' or ', ...
-     '''sequential-h2biochem-phreeqc''; ', ...
-     'got ''%s''.'], backend);
+    assert(ischar(backend) || (isstring(backend) && isscalar(backend)), ...
+        'phreeqcBackend must be a character vector or scalar string.');
+    backend = lower(strtrim(char(backend)));
+    assert(ismember(backend, {'sequential-compositional-phreeqc', ...
+        'sequential-h2biochem-phreeqc'}), ...
+        ['phreeqcBackend must be ''sequential-compositional-phreeqc'' or ', ...
+         '''sequential-h2biochem-phreeqc''; ', ...
+         'got ''%s''.'], backend);
 end
 
 function feedback = normalizeSequentialH2BiochemPhreeqcChemistryFeedback(feedback, nc)
@@ -1320,37 +1346,37 @@ for i = 1:numel(required)
 end
 end
 
-function validateModifiedComConfiguration(model)
-databaseFile = model.phreeqcDatabaseFile;
-if isempty(databaseFile) && isfield(model.phreeqcCouplingOptions, 'databaseFile')
-    databaseFile = model.phreeqcCouplingOptions.databaseFile;
-end
-assert(ischar(databaseFile) || (isstring(databaseFile) && isscalar(databaseFile)), ...
-    'COM PHREEQC backends require an explicitly configured h2_biogeochemistry.dat path.');
-databaseFile = char(databaseFile);
-assert(~isempty(strtrim(databaseFile)) && isAbsolutePhreeqcPath(databaseFile), ...
-    ['COM PHREEQC backends require an explicit absolute databaseFile path to ', ...
-     'h2_biogeochemistry.dat.']);
-assert(isfile(databaseFile), ...
-    'COM PHREEQC database not found: %s', databaseFile);
-assert(contains(lower(databaseFile), 'h2_biogeochemistry.dat'), ...
-    ['COM PHREEQC backends require h2_biogeochemistry.dat, not a standard ', ...
-     'PHREEQC database: %s'], databaseFile);
+function validatePhreeqcConfiguration(model)
+    databaseFile = model.phreeqcDatabaseFile;
+    if isempty(databaseFile) && isfield(model.phreeqcCouplingOptions, 'databaseFile')
+        databaseFile = model.phreeqcCouplingOptions.databaseFile;
+    end
+    assert(ischar(databaseFile) || (isstring(databaseFile) && isscalar(databaseFile)), ...
+        'PHREEQC coupling requires an explicitly configured h2_biogeochemistry.dat path.');
+    databaseFile = char(databaseFile);
+    assert(~isempty(strtrim(databaseFile)) && isAbsolutePhreeqcPath(databaseFile), ...
+        ['PHREEQC coupling requires an explicit absolute databaseFile path to ', ...
+         'h2_biogeochemistry.dat.']);
+    assert(isfile(databaseFile), ...
+        'PHREEQC database not found: %s', databaseFile);
+    assert(contains(lower(databaseFile), 'h2_biogeochemistry.dat'), ...
+        ['PHREEQC coupling requires h2_biogeochemistry.dat, not a standard ', ...
+         'PHREEQC database: %s'], databaseFile);
 
-comProgId = model.phreeqcComProgId;
-if isfield(model.phreeqcCouplingOptions, 'comProgId')
-    comProgId = model.phreeqcCouplingOptions.comProgId;
-end
-assert(ischar(comProgId) || (isstring(comProgId) && isscalar(comProgId)), ...
-    'COM PHREEQC backends require an explicitly configured IPhreeqcCOM ProgID.');
-assert(~isempty(strtrim(char(comProgId))), ...
-    'COM PHREEQC backends require an explicitly configured IPhreeqcCOM ProgID.');
+    comProgId = model.phreeqcComProgId;
+    if isfield(model.phreeqcCouplingOptions, 'comProgId')
+        comProgId = model.phreeqcCouplingOptions.comProgId;
+    end
+    assert(ischar(comProgId) || (isstring(comProgId) && isscalar(comProgId)), ...
+        'phreeqcCouplingOptions.comProgId must be a nonempty character vector or scalar string.');
+    assert(~isempty(strtrim(char(comProgId))), ...
+        'phreeqcCouplingOptions.comProgId must be a nonempty character vector or scalar string.');
 end
 
 function isAbsolute = isAbsolutePhreeqcPath(path)
-path = char(path);
-isAbsolute = ~isempty(regexp(path, '^[A-Za-z]:[\\/]|^\\\\', 'once')) || ...
-    startsWith(path, filesep);
+    path = char(path);
+    isAbsolute = ~isempty(regexp(path, '^[A-Za-z]:[\\/]|^\\\\', 'once')) || ...
+        startsWith(path, filesep);
 end
 
 function carbonMoles = getAqueousCarbonMoles(model, state)
