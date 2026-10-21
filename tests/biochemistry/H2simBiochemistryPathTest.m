@@ -20,6 +20,26 @@ classdef H2simBiochemistryPathTest < matlab.unittest.TestCase
             verifyLocalModule(test, root);
         end
 
+        function developmentPathsAreRemoved(test)
+            [root, ~] = moduleRoots();
+            addpath(fullfile(root, 'tests', 'biochemistry'));
+            addpath(fullfile(root, 'research', 'biochemistry', '3d'));
+            activateH2simBiochemistry(root);
+            verifyDevelopmentPathsAbsent(test, root);
+            verifySupportedExamples(test);
+        end
+
+        function reactivationPreservesRuntimeBoundary(test)
+            [root, ~] = moduleRoots();
+            activateH2simBiochemistry(root);
+            modules = mrstModule();
+            test.addTeardown(@() mrstModule('reset', modules{:}));
+            mrstModule('reset', modules{:});
+            verifyLocalModule(test, root);
+            verifyDevelopmentPathsAbsent(test, root);
+            verifySupportedExamples(test);
+        end
+
         function repeatedActivationKeepsOneModule(test)
             [root, ~] = moduleRoots();
             activateH2simBiochemistry(root);
@@ -46,6 +66,31 @@ function verifyLocalModule(test, root)
     fromMRST = ~cellfun(@isempty, ...
         regexpi(entries, '/modules/h2-biochem(/|$)', 'once'));
     test.verifyFalse(any(fromMRST));
+end
+
+function verifyDevelopmentPathsAbsent(test, root)
+    entries = strrep(strsplit(path, pathsep), '\', '/');
+    roots = {fullfile(root, 'tests'), fullfile(root, 'research')};
+    for k = 1:numel(roots)
+        directory = strrep(roots{k}, '\', '/');
+        if ispc
+            directory = lower(directory);
+            entries = cellfun(@lower, entries, 'UniformOutput', false);
+        end
+        test.verifyFalse(any(strcmp(entries, directory) | ...
+            startsWith(entries, [directory, '/'])));
+    end
+end
+
+function verifySupportedExamples(test)
+    names = {'simple1DBacterialExampleMetacet', ...
+             'exampleCompositionalBacterial2DThreeReactions', ...
+             'exampleCompositionalBacterial1DPhreeqcMinerals', ...
+             'exampleSequentialBiochemistryPhreeqc1D', ...
+             'runThreeBackendComparison', 'exampleH2BrineSolubilityStudy'};
+    for k = 1:numel(names)
+        test.verifyNotEmpty(which(names{k}), names{k});
+    end
 end
 
 %{

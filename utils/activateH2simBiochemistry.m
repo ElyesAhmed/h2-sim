@@ -39,6 +39,30 @@ function activateH2simBiochemistry(rootDirectory)
     mrstPath('reregister', 'h2sim-biochem', localRoot);
     mrstModule add h2sim-biochem
 
+    % Clean paths left by an earlier startup or a manual recursive add.
+    % These folders are deliberately outside the registered module root.
+    excluded = {fullfile(rootDirectory, 'tests'), ...
+                fullfile(rootDirectory, 'research'), ...
+                fullfile(localRoot, 'tests'), ...
+                fullfile(localRoot, 'examples', 'trash'), ...
+                fullfile(localRoot, 'examples', '3D_experiments')};
+    entries = strsplit(path, pathsep);
+    normalized = strrep(entries, '\', '/');
+    remove = false(size(entries));
+    for k = 1:numel(excluded)
+        directory = strrep(excluded{k}, '\', '/');
+        candidates = normalized;
+        if ispc
+            directory = lower(directory);
+            candidates = cellfun(@lower, candidates, 'UniformOutput', false);
+        end
+        remove = remove | strcmp(candidates, directory) | ...
+            startsWith(candidates, [directory, '/']);
+    end
+    if any(remove)
+        rmpath(entries{remove});
+    end
+
     expected = fullfile(localRoot, 'models', 'BiochemistryModel.m');
     actual = which('BiochemistryModel');
     if ispc

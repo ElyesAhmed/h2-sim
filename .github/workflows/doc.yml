@@ -10,6 +10,8 @@ on:
       - 'tools/**'
       - 'utils/**'
       - 'h2-biochem/**'
+      - 'tests/**'
+      - 'research/**'
       - 'h2-store/**'
       - 'h2-calibration/**'
       - 'startupH2sim.m'
