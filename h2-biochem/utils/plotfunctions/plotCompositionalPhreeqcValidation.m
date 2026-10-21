@@ -5,12 +5,67 @@ function figures = plotCompositionalPhreeqcValidation(result, varargin)
 %   figures = plotCompositionalPhreeqcValidation(result)
 %   figures = plotCompositionalPhreeqcValidation(result, 'outputDirectory', folder)
 %
+% PARAMETERS:
+%   result - Result returned by exampleCompositionalPhreeqcValidation, or a
+%            struct with cached diagnostics. diagnostics.h2sim is required;
+%            diagnostics.reference is optional. Each diagnostic entry has
+%            timeDays, coordinates (m), h2 (aqueous mole fraction), pH, dic
+%            (mol/kg water), consumption (cumulative mol H2, cells-by-times-
+%            reactions), injectedMoles and lossPercent. Reaction order is
+%            MET, ACE, SRB. Reference times and first coordinate columns
+%            must match H2sim exactly. Without cached diagnostics, the collector uses
+%            result.h2sim and any optional result.reference saved states.
+%
+% OPTIONAL PARAMETERS:
+%   outputDirectory - Export folder (default '', figures only). A nonempty
+%                     folder receives three 200-dpi PNGs, three vector PDFs
+%                     and phreeqc_loss_history.csv.
+%
+% RETURNS:
+%   figures - Row vector of three open figure handles, owned by the caller:
+%               1. Hydrogen loss and aqueous hydrogen maps.
+%               2. pH and DIC maps with shared per-quantity color limits.
+%               3. MET/ACE/SRB contributions to hydrogen loss.
+%
 % DESCRIPTION:
-%   Plot hydrogen consumption, aqueous hydrogen, pH, DIC, and reaction
-%   contributions for the standalone H2sim result. Include reference curves
-%   and maps when the result contains optional reference data.
+%   Redraw stored results without running simulations or an external driver.
+%   Cached diagnostics are preferred; otherwise collect them from the saved
+%   model, schedule and accepted states. Legacy ugfact fields remain readable
+%   as optional reference data; stored provenance is not changed.
+%
+%   All loss percentages use total prescribed injection as their denominator
+%   at every time. Reaction contributions must sum to total loss within
+%   1e-8 percentage points. Time is in days; maps use the first cell coordinate
+%   as distance. Operating-period markers appear at days 50 and 200 when the
+%   final time exceeds them. Common color limits are padded for constant data.
+%
+%   Export base names are phreeqc_validation_full_cycle,
+%   phreeqc_geochemistry_full_cycle and phreeqc_reaction_loss_full_cycle.
+%   The CSV contains time, total loss and reaction percentages, adding reference
+%   columns only when reference diagnostics are present. Short datasets retain
+%   these historical filenames; filenames do not establish full-cycle coverage.
+%
+% SEE ALSO:
+%   exampleCompositionalPhreeqcValidation, collectPhreeqcValidationDiagnostics
 
     opt = merge_options(struct('outputDirectory', ''), varargin{:});
+    [data, labels, time, distance, nCases, styles] = prepareData(result);
+
+    %% Hydrogen consumption and aqueous profiles
+    figures = gobjects(1, 3);
+    figures(1) = plotHydrogenProfiles(data, labels, time, distance, nCases, styles);
+
+    %% pH and dissolved inorganic carbon
+    figures(2) = plotGeochemistry(data, labels, time, distance, nCases);
+
+    %% Reaction-specific hydrogen consumption
+    [figures(3), contributions] = plotReactionConsumption( ...
+        data, labels, time, nCases, styles);
+    styleFigures(figures, time(end));
+    exportResults(figures, time, data, contributions, opt.outputDirectory);
+end
+
+function [data, labels, time, distance, nCases, styles] = prepareData(result)
     if isfield(result, 'diagnostics')
         diagnostics = result.diagnostics;
     else
@@ -31,10 +86,10 @@ function figures = plotCompositionalPhreeqcValidation(result, varargin)
     validateComparisonCoordinates(data, time, distance);
     nCases = numel(data);
     styles = {'-', '--'};
+end
 
-    %% Hydrogen consumption and aqueous profiles
-    figures = gobjects(1, 3);
-    figures(1) = figure('Color', 'w', 'Units', 'centimeters', ...
+function fig = plotHydrogenProfiles(data, labels, time, distance, nCases, styles)
+    fig = figure('Color', 'w', 'Units', 'centimeters', ...
         'Position', [2, 2, 29, 11]);
     tiledlayout(1, 1 + nCases, 'TileSpacing', 'compact', 'Padding', 'compact');
     ax = nexttile;
@@ -54,9 +109,10 @@ function figures = plotCompositionalPhreeqcValidation(result, varargin)
         plotChemistryMap(ax, time, distance, data{j}.h2, ...
             labels{j}, 'Aqueous H_2 mole fraction (-)', plotLimits(0, maximum));
     end
+end
 
-    %% pH and dissolved inorganic carbon
-    figures(2) = figure('Color', 'w', 'Units', 'centimeters', ...
+function fig = plotGeochemistry(data, labels, time, distance, nCases)
+    fig = figure('Color', 'w', 'Units', 'centimeters', ...
         'Position', [2, 2, 26, 18]);
     tiledlayout(2, nCases, 'TileSpacing', 'compact', 'Padding', 'compact');
     fields = {'pH', 'dic'};
@@ -75,9 +131,11 @@ function figures = plotCompositionalPhreeqcValidation(result, varargin)
                 [labels{j}, ' · ', fields{c}], units{c}, plotLimits(low, high));
         end
     end
+end
 
-    %% Reaction-specific hydrogen consumption
-    figures(3) = figure('Color', 'w', 'Units', 'centimeters', ...
+function [fig, contributions] = plotReactionConsumption( ...
+        data, labels, time, nCases, styles)
+    fig = figure('Color', 'w', 'Units', 'centimeters', ...
         'Position', [2, 2, 29, 11]);
     tiledlayout(1, 3, 'TileSpacing', 'compact', 'Padding', 'compact');
     reactions = {'MET', 'ACE', 'SRB'};
@@ -100,8 +158,6 @@ function figures = plotCompositionalPhreeqcValidation(result, varargin)
         legend(ax, labels, 'Location', 'best');
         grid(ax, 'on');
     end
-    styleFigures(figures, time(end));
-    exportResults(figures, time, data, contributions, opt.outputDirectory);
 end
 
 function validateComparisonCoordinates(data, time, distance)
@@ -156,6 +212,8 @@ function exportResults(figures, time, data, contributions, folder)
     if ~isfolder(folder)
         mkdir(folder);
     end
+    % Settle tiled layouts and colorbars before export captures their bounds.
+    drawnow;
     files = {'phreeqc_validation_full_cycle', 'phreeqc_geochemistry_full_cycle', ...
         'phreeqc_reaction_loss_full_cycle'};
     for j = 1:numel(figures)
