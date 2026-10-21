@@ -49,6 +49,29 @@ You can check which implementation is selected:
 
 Both paths should point into this H2sim checkout's ``h2-biochem`` folder.
 
+Runtime and development paths
+-----------------------------
+
+Startup adds the supported biochemistry module, storage module and toolbox
+utilities. Biochemistry tests live in ``tests/biochemistry``; archived examples
+and older 3D studies live in ``research/biochemistry``. These folders are
+outside the registered module root, so MRST module reactivation does not add
+them. Activation also removes paths left by their previous locations.
+Supported examples and model class locations are unchanged. Developer tools
+that share a supported example folder remain visible pending a separate review.
+
+Run tests by their explicit folder path from the repository root:
+
+.. code-block:: matlab
+
+   checks = runtests('tests/biochemistry');
+   assertSuccess(checks);
+
+To inspect an archived study, add only its selected folder explicitly after
+startup. Do not recursively add the entire repository. This separation covers
+the moved biochemistry groups; it does not classify local unpublished studies
+or reorganize the storage and calibration modules.
+
 Run a first example
 -------------------
 
@@ -136,7 +159,7 @@ Verify chemistry and cell batching after initialization:
    iph = createH2simIPhreeqc('IPhreeqcCOM.Object');
    assert(iph.LoadDatabase(which('h2_biogeochemistry.dat')) == 0);
    delete(iph);
-   results = runtests('h2-biochem/tests/CompositionalPhreeqcBatchTest.m');
+   results = runtests('tests/biochemistry/CompositionalPhreeqcBatchTest.m');
    assertSuccess(results);
 
 Windows

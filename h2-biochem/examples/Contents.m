@@ -34,7 +34,8 @@
 % Local paper_2026 drivers reproduce specific publication configurations;
 % the folder also contains experiments and verification tools. Directory
 % membership alone does not mean a case was included in the manuscript.
-% Older trash and 3D cases remain available pending separate review.
+% Archived and older 3D cases are under research/biochemistry, outside the
+% runtime module. Add the selected study folder explicitly to inspect them.
 % Website notebooks distinguish setup checks, tutorials and saved-result plots.
 
 %{

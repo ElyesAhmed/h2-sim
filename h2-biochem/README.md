@@ -290,3 +290,13 @@ provide it. Backend profile panels share a y scale for each plotted quantity;
 phase boundaries and snapshot times come from the result schedules. Mineral
 consumption uses separate labeled scales for the original and PHREEQC kinetics,
 with printed totals; detail panels preserve the smaller mineral-case differences.
+
+## Tests and archived studies
+
+Run `runtests('tests/biochemistry')` from the repository root after
+`startupH2sim`. Tests and the archived legacy/3D examples under
+`research/biochemistry` are outside the registered runtime module. They are
+not added by startup or MRST reactivation. Add only a selected research folder
+explicitly when inspecting an older study. Supported example and model class
+locations are unchanged; developer tools sharing supported folders remain
+visible. Local unpublished studies are not reorganized by this change.

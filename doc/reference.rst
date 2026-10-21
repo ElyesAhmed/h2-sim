@@ -80,7 +80,7 @@ Tests
 
 .. code-block:: matlab
 
-   checks = runtests('h2-biochem/tests');
+   checks = runtests('tests/biochemistry');
    assertSuccess(checks);
 
 COM integration tests require the IPhreeqcCOM setup described in :doc:`installation`.
