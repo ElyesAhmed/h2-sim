@@ -961,65 +961,17 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
         end
 
 
-        function  [state, report] = updateAfterConvergence(model, state0, state, dt, drivingForces)
-            % Like BiochemistryModel.updateAfterConvergence, but skips the
-            % H2-consumption diagnostic entirely when PHREEQC owns the
-            % kinetics ('sequential-compositional-phreeqc'), and, for the
-            % 'sequential-h2biochem-phreeqc' backend, additionally
-            % accumulates this step's consumption for the outer Picard
-            % loop / coarse-flow-local-reaction substep bookkeeping.
-            [state, report] = updateAfterConvergence@GenericOverallCompositionModel(model, state0, state, dt, drivingForces);
-            if model.bacteriamodel && ~model.isSequentialCompositionalPhreeqcBackend()
-                if model.reactionsEnabled
-                    % Preserve the converged reaction source before an optional
-                    % PHREEQC split step changes the chemical state.
-                    state.h2ConsumptionRate = ...
-                        model.computeConvergedH2ConsumptionRate(state);
-                    if model.isSequentialH2BiochemPhreeqcBackend()
-                        state = accumulateSequentialH2BiochemPhreeqcH2Consumption( ...
-                            state0, state, dt, model.G.cells.num, ...
-                            model.biochemFluid.nbioreact);
-                    end
-                else
-                    % Reactions are disabled for this stage (e.g. the flow
-                    % stage of a coarse-flow/local-reaction split, see
-                    % SequentialBiochemistryPhreeqcModel): no reaction
-                    % extent occurred here, so the H2 accounting is
-                    % carried forward unchanged rather than recomputed or
-                    % accumulated from an unused hypothetical rate.
-                    state.h2ConsumptionRate = zeros(model.G.cells.num, ...
-                        model.biochemFluid.nbioreact);
-                    if isfield(state0, 'sequentialH2BiochemPhreeqcCumulativeH2ConsumptionMoles')
-                        state.sequentialH2BiochemPhreeqcCumulativeH2ConsumptionMoles = ...
-                            value(state0.sequentialH2BiochemPhreeqcCumulativeH2ConsumptionMoles);
-                    end
-                end
-            end
-            if model.phreeqcTimestepCoupling
-                % This deliberately runs only after the nonlinear timestep
-                % has converged. The helper updates aqueous tracer and
-                % mineral state for the following timestep; it never enters
-                % a Newton iteration.
-                switch model.phreeqcBackend
-                    case 'sequential-compositional-phreeqc'
-                        state = runSequentialCompositionalPhreeqcCoupling( ...
-                            model, state, dt);
-                    case 'sequential-h2biochem-phreeqc'
-                        if ~model.sequentialH2BiochemPhreeqcPicardActive && ...
-                                ~model.sequentialSplitActive
-                            error('BiochemistryPhreeqcModel:SequentialH2BiochemPhreeqcRequiresPicardDriver', ...
-                                ['phreeqcBackend=''sequential-h2biochem-phreeqc'' must be run with ', ...
-                                 'simulateSequentialH2BiochemPhreeqc, or with a ', ...
-                                 'SequentialBiochemistryPhreeqcModel-driven local ', ...
-                                 'reaction stage. Direct simulateScheduleAD would ', ...
-                                 'apply a lagged chemistry split and is intentionally ', ...
-                                 'rejected.']);
-                        end
-                    otherwise
-                        error('BiochemistryPhreeqcModel:InvalidPhreeqcBackend', ...
-                            'Unsupported PHREEQC backend: %s.', model.phreeqcBackend);
-                end
-            end
+        function [state, report] = updateAfterConvergence(model, state0, state, dt, drivingForces)
+            % Finalize one accepted nonlinear ministep in this order:
+            % parent flow update, H2 accounting, backend dispatch, then
+            % lagged dissolved sulfide for the next EOS evaluation.
+            % Compositional PHREEQC owns its reaction extents. The hybrid
+            % driver owns chemistry updates; this hook only checks that
+            % the driver is active and records H2sim reaction extents.
+            [state, report] = updateAfterConvergence@GenericOverallCompositionModel( ...
+                model, state0, state, dt, drivingForces);
+            state = recordAcceptedH2Consumption(model, state0, state, dt);
+            state = dispatchAcceptedPhreeqcStep(model, state, dt);
             if model.sulfateReduction
                 % Cache the converged dissolved-H2S concentration
                 % [mol/m3 liquid] for use as the (lagged) total-sulfide
@@ -1241,6 +1193,68 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
             nbact = num2cell(zeros(1, nbioreact));
         end
 
+    end
+end
+
+function state = recordAcceptedH2Consumption(model, state0, state, dt)
+    % Record converged kinetics before any compositional chemistry reflash.
+    if model.bacteriamodel && ~model.isSequentialCompositionalPhreeqcBackend()
+        if model.reactionsEnabled
+            % Preserve the converged reaction source before an optional
+            % PHREEQC split step changes the chemical state.
+            state.h2ConsumptionRate = ...
+                model.computeConvergedH2ConsumptionRate(state);
+            if model.isSequentialH2BiochemPhreeqcBackend()
+                state = accumulateSequentialH2BiochemPhreeqcH2Consumption( ...
+                    state0, state, dt, model.G.cells.num, ...
+                    model.biochemFluid.nbioreact);
+            end
+        else
+            % Reactions are disabled for this stage (e.g. the flow
+            % stage of a coarse-flow/local-reaction split, see
+            % SequentialBiochemistryPhreeqcModel): no reaction
+            % extent occurred here, so the H2 accounting is
+            % carried forward unchanged rather than recomputed or
+            % accumulated from an unused hypothetical rate.
+            state.h2ConsumptionRate = zeros(model.G.cells.num, ...
+                model.biochemFluid.nbioreact);
+            if isfield(state0, 'sequentialH2BiochemPhreeqcCumulativeH2ConsumptionMoles')
+                state.sequentialH2BiochemPhreeqcCumulativeH2ConsumptionMoles = ...
+                    value(state0.sequentialH2BiochemPhreeqcCumulativeH2ConsumptionMoles);
+            end
+        end
+    end
+end
+
+function state = dispatchAcceptedPhreeqcStep(model, state, dt)
+    % Dispatch only after convergence; hybrid chemistry stays in its driver.
+    if model.phreeqcTimestepCoupling
+        % This deliberately runs only after the nonlinear timestep
+        % has converged. Compositional chemistry updates aqueous tracers
+        % and minerals; hybrid chemistry remains in its outer driver.
+        switch model.phreeqcBackend
+            case 'sequential-compositional-phreeqc'
+                state = runSequentialCompositionalPhreeqcCoupling( ...
+                    model, state, dt);
+            case 'sequential-h2biochem-phreeqc'
+                validateHybridPhreeqcDriver(model);
+            otherwise
+                error('BiochemistryPhreeqcModel:InvalidPhreeqcBackend', ...
+                    'Unsupported PHREEQC backend: %s.', model.phreeqcBackend);
+        end
+    end
+end
+
+function validateHybridPhreeqcDriver(model)
+    if ~model.sequentialH2BiochemPhreeqcPicardActive && ...
+            ~model.sequentialSplitActive
+        error('BiochemistryPhreeqcModel:SequentialH2BiochemPhreeqcRequiresPicardDriver', ...
+            ['phreeqcBackend=''sequential-h2biochem-phreeqc'' must be run with ', ...
+             'simulateSequentialH2BiochemPhreeqc, or with a ', ...
+             'SequentialBiochemistryPhreeqcModel-driven local ', ...
+             'reaction stage. Direct simulateScheduleAD would ', ...
+             'apply a lagged chemistry split and is intentionally ', ...
+             'rejected.']);
     end
 end
 
