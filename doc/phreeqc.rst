@@ -189,6 +189,41 @@ update is not an independently evaluated chemistry audit.
 
    Open the mineral chemistry setup check →
 
+Three-backend comparison
+------------------------
+
+``runThreeBackendComparison`` runs three included H2sim formulations through
+injection, storage and production. Its default 50-cell, 250-day comparison is
+longer than a dependency check and requires no external reference checkout.
+The first case retains a reduced carbonate buffer with PHREEQC reactions off;
+the second uses PHREEQC microbial kinetics; the third uses multirate MRST
+microbial kinetics with PHREEQC equilibrium. Biomass and decay conventions also
+differ, so this comparison does not isolate mineral effects alone.
+
+.. code-block:: matlab
+
+   scenarios = runThreeBackendComparison('plotResults', false);
+   save('three_backend_comparison.mat', 'scenarios', '-v7');
+
+The first two cases use two-day flow steps. ``flowTimestepMaxDt`` and
+``reactionSubstepMaxDt`` control only the multirate case (defaults: two days
+and 0.4 day). Result profiles use the last injection, last storage and final
+states. Aqueous H2 is a liquid mole fraction; DIC is in mol/kgw. The time-dependent
+hydrogen loss uses total scheduled injected H2 as its denominator, including
+during injection. Historical MRST-prefixed labels identify H2sim results here;
+they do not select MRST's separate biochemistry module.
+
+Save the returned array explicitly to redraw without solving again:
+
+.. code-block:: matlab
+
+   saved = load('three_backend_comparison.mat', 'scenarios');
+   plotPhreeqcBackendComparison(saved.scenarios, ...
+       'outputDirectory', fullfile(pwd, 'build', 'backend-figures'));
+
+The driver retains simulations in memory and exports three PDF/PNG figures
+when plotting is enabled; it does not write a packed simulation archive.
+
 Multirate aqueous equilibrium
 -----------------------------
 
