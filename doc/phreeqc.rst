@@ -238,6 +238,31 @@ no PHREEQC ``RATES`` or ``KINETICS`` blocks.
        'maximumFlowSteps', 2, 'plotResults', true, ...
        'phreeqcReflashParallel', false);
 
+The example uses 50 cells over 50 m. Biomass starts at ``N/N0=1`` with
+``N0=1e9 cells/kgw``, first-order decay and ``Nmax/N0=1e4``. Time options use
+seconds; MRST's ``day`` converts days to seconds. The default complete schedule
+contains 125 two-day flow steps with reaction substeps of at most 0.4 day.
+
+Matching packed results are reused. ``maximumFlowSteps`` truncates the schedule
+before packing, so changing the limit selects a different cache identity rather
+than extending the previous run. ``simulationDirectory`` selects a packed-output
+root; leaving it empty uses the normal H2sim output directory. Runtime includes
+packing, simulation/cache access and output loading, excluding setup and plots.
+A short run checks execution and does not reproduce a complete storage cycle.
+
+To retain and redraw the returned summary explicitly:
+
+.. code-block:: matlab
+
+   save('multirate_summary.mat', 'summary', '-v7');
+   saved = load('multirate_summary.mat', 'summary');
+   plotSequentialBiochemistryPhreeqc(saved.summary, ...
+       'outputDirectory', fullfile(pwd, 'build', 'multirate-figures'));
+
+Summary hydrogen quantities are mol; ``h2LossPercent`` uses total prescribed
+injection over the selected schedule as its denominator. The two plotted figures
+show final flow/chemistry profiles and cumulative biological consumption.
+
 ``reactionSubstepMaxDt`` controls the local reaction cadence. Pressure
 flashes run serially by default; Parallel Computing Toolbox is optional.
 The separate ``simulateSequentialH2BiochemPhreeqc`` runner is an outer Picard

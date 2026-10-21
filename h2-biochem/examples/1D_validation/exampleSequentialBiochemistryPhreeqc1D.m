@@ -14,8 +14,19 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
 %   between the flow and reaction stages.
 %
 %   The high-rate storage benchmark uses initial N/N0 = 1, pH 6.24, and
-%   HCO3- = 1.370e-3. The default 250-day injection/storage/production cycle
+%   HCO3- = 1.370e-3 mol/kgw on a 50-cell, 50 m grid. Biomass uses
+%   N/N0 with N0 = 1e9 cells/kgw, first-order decay and Nmax/N0 = 1e4.
+%   Diffusion, dispersion, chemotaxis and clogging are disabled.
+%   The default 250-day injection/storage/production cycle
 %   uses two-day flow steps and reaction substeps of at most 0.4 day.
+%   Time options are in seconds; MRST's day converts days to seconds.
+%
+%   Packed output is reused when the complete serialized setup matches.
+%   maximumFlowSteps truncates the schedule before packing: changing this
+%   limit changes the cache identity, rather than extending a previous run.
+%   elapsedSeconds measures packing, simulation/cache access and output
+%   loading; it excludes setup, consumption metrics and plotting.
+%   A short run checks execution, not full-cycle numerical convergence.
 %
 % OPTIONAL PARAMETERS:
 %   phreeqcDatabaseFile  - Absolute path to h2_biogeochemistry.dat. Falls
@@ -35,7 +46,7 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
 %                          requires Parallel Computing Toolbox).
 %   plotResults          - Create publication figures (default false).
 %   outputDirectory      - PDF/PNG output folder (build/phreeqc-figures).
-%                          Pass an empty string to display without export.
+%                          Pass '' to display without export.
 %   simulationDirectory  - Packed simulation output directory. An empty
 %                          value uses the standard H2sim output directory.
 %   reactionSolverVerbose - Print local reaction Newton residuals
@@ -43,7 +54,11 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
 %
 % RETURNS:
 %   summary - Struct with the model, schedule, states, well solutions,
-%             report, and H2 consumption/runtime metrics.
+%             report, packedProblem and metrics. injectedH2Moles is total
+%             prescribed H2 injection over the selected schedule;
+%             consumedH2Moles is cumulative biological H2 consumption (mol).
+%             h2LossPercent is 100*consumed/injected. elapsedSeconds is in s.
+%             Short-run summaries retain the truncated schedule and report.
 %
 % SEE ALSO:
 %   SequentialBiochemistryPhreeqcModel,
@@ -69,6 +84,30 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
     databaseFile = resolvePhreeqcDatabaseFile(opt.phreeqcDatabaseFile);
 
     %% Set up the high-rate storage benchmark
+    [baseModel, schedule, state0] = setupBenchmark(databaseFile);
+
+    %% Select the coarse flow schedule
+    % Local reactions are subcycled independently within each flow step.
+    schedule = selectSchedule(schedule, opt);
+
+    %% Configure the multirate model and nonlinear solver
+    [model, solver] = configureModel(baseModel, opt);
+
+    %% Run the packed simulation
+    [problem, ws, states, report, elapsedSeconds] = ...
+        runPackedCase(state0, model, schedule, solver, opt);
+
+    %% Summarize hydrogen consumption
+    summary = buildSummary(model, schedule, state0, states, ws, ...
+        report, problem, elapsedSeconds);
+    printSummary(summary, opt);
+    if opt.plotResults
+        plotSequentialBiochemistryPhreeqc(summary, ...
+            'outputDirectory', opt.outputDirectory);
+    end
+end
+
+function [baseModel, schedule, state0] = setupBenchmark(databaseFile)
     [~, baseModel, schedule, state0] = setupH2StorageExampleWithSRB_benchmark( ...
         'rate', 'highrate', ...
         'scheduleMode', 'complete', ...
@@ -90,17 +129,18 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
         'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
         'phreeqcDatabaseFile', databaseFile);
     validateBenchmarkSetup(baseModel, state0);
+end
 
-    %% Select the coarse flow schedule
-    % Local reactions are subcycled independently within each flow step.
+function schedule = selectSchedule(schedule, opt)
     schedule = coarsenScheduleByControl(schedule, opt.flowTimestepMaxDt);
     if isfinite(opt.maximumFlowSteps)
         nSteps = min(opt.maximumFlowSteps, numel(schedule.step.val));
         schedule.step.val = schedule.step.val(1:nSteps);
         schedule.step.control = schedule.step.control(1:nSteps);
     end
+end
 
-    %% Configure the multirate model and nonlinear solver
+function [model, solver] = configureModel(baseModel, opt)
     model = convertToSequentialBiochemistryPhreeqcModel(baseModel, ...
         'reactionSubstepMaxDt', opt.reactionSubstepMaxDt);
     model.phreeqcCouplingOptions.phreeqcReflashLocalBracket = ...
@@ -112,7 +152,10 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
 
     solver = NonLinearSolver();
     solver.maxTimestepCuts = 12;
-    %% Run the packed simulation
+end
+
+function [problem, ws, states, report, elapsedSeconds] = ...
+        runPackedCase(state0, model, schedule, solver, opt)
     timer = tic();
     problem = packH2simSimulationProblem(state0, model, schedule, ...
         'H2_MULTIRATE_1D_EXAMPLE', 'NonLinearSolver', solver, ...
@@ -126,8 +169,10 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
         assert(~report.Failure, ...
             'SequentialBiochemistryPhreeqcModel simulation reported failure.');
     end
+end
 
-    %% Summarize hydrogen consumption
+function summary = buildSummary(model, schedule, state0, states, ws, ...
+        report, problem, elapsedSeconds)
     nReactions = model.biochemFluid.nbioreact;
     cumulative = zeros(numel(states), nReactions);
     for reaction = 1:nReactions
@@ -137,15 +182,6 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
     end
     consumedH2Moles = sum(cumulative(end, :), 2);
     injectedH2Moles = prescribedInjectedH2(schedule, model);
-
-    fprintf('\nSequentialBiochemistryPhreeqcModel, 1D benchmark:\n');
-    fprintf('  Control steps            : %d\n', numel(schedule.step.val));
-    fprintf('  Reaction substep max dt  : %.3g day\n', ...
-        opt.reactionSubstepMaxDt/day);
-    fprintf('  Injected H2              : %.6g mol\n', injectedH2Moles);
-    fprintf('  Consumed H2              : %.6g mol (%.3g %%)\n', ...
-        consumedH2Moles, 100*consumedH2Moles/injectedH2Moles);
-    fprintf('  Runtime                  : %.3g s\n', elapsedSeconds);
 
     summary = struct( ...
         'model', model, ...
@@ -159,9 +195,18 @@ function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
         'consumedH2Moles', consumedH2Moles, ...
         'h2LossPercent', 100*consumedH2Moles/injectedH2Moles, ...
         'elapsedSeconds', elapsedSeconds);
-    if opt.plotResults
-        plotSequentialBiochemistryPhreeqc(summary,'outputDirectory',opt.outputDirectory);
-    end
+end
+
+function printSummary(summary, opt)
+    fprintf('\nSequentialBiochemistryPhreeqcModel, 1D benchmark:\n');
+    fprintf('  Control steps            : %d\n', numel(summary.schedule.step.val));
+    fprintf('  Reaction substep max dt  : %.3g day\n', ...
+        opt.reactionSubstepMaxDt/day);
+    fprintf('  Injected H2              : %.6g mol\n', summary.injectedH2Moles);
+    fprintf('  Consumed H2              : %.6g mol (%.3g %%)\n', ...
+        summary.consumedH2Moles, ...
+        100*summary.consumedH2Moles/summary.injectedH2Moles);
+    fprintf('  Runtime                  : %.3g s\n', summary.elapsedSeconds);
 end
 
 function injected = prescribedInjectedH2(schedule, model)
