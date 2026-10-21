@@ -39,6 +39,24 @@ classdef PhreeqcValidationDiagnosticsTest < matlab.unittest.TestCase
                 'H2sim:ValidationInjection');
         end
 
+        function rejectsReferenceWithoutTotalDIC(test)
+            result = fixture();
+            result.reference.states{1}.Solution = ...
+                rmfield(result.reference.states{1}.Solution, 'TotalDIC');
+            test.verifyError(@() collectPhreeqcValidationDiagnostics(result), ...
+                'H2sim:ValidationReferenceDIC');
+        end
+
+        function explicitReferenceTakesPrecedenceOverLegacyData(test)
+            result = fixture();
+            expected = collectPhreeqcValidationDiagnostics(result);
+            result.ugfact = struct();
+            test.verifyEqual(collectPhreeqcValidationDiagnostics(result), expected);
+            result.reference = [];
+            standalone = collectPhreeqcValidationDiagnostics(result);
+            test.verifyEqual(fieldnames(standalone), {'h2sim'});
+        end
+
         function checksExplicitReferenceBeforeSimulation(test)
             test.verifyError(@() runPhreeqcValidation('referenceRoot', tempname), ...
                 'H2sim:ReferenceDriverNotFound');
