@@ -170,8 +170,17 @@ Aqueous tracers remain transported in MRST.
    comparison = exampleCompositionalBacterial1DPhreeqcMinerals( ...
        'gridCells', 4, 'maximumFlowSteps', 2);
 
-Batches reduce IPhreeqc call overhead. The default batch size is 50; use
-``sequentialCompositionalPhreeqcBatchSize=1`` for individual cell calls.
+This four-cell, two-step run checks setup and chemistry execution. The default
+example runs the complete 50-day injection period on 50 cells, comparing a
+microbial biochemistry baseline with Bentheimer, Berea and Grey Berea mineral
+inventories. It is a comparison of reaction backends as well as minerals;
+differences from the baseline cannot be attributed to mineral chemistry alone.
+Returned hydrogen consumption is in mol, and spatial loss is normalized by
+total prescribed injected hydrogen. Packed simulations reuse matching caches.
+
+Batches reduce IPhreeqc call overhead. The example's default ``batchSize`` is
+50; pass ``'batchSize', 1`` to this example for individual cell calls. The
+underlying setup option is ``sequentialCompositionalPhreeqcBatchSize``.
 Inactive-cell skipping records an explicit execution mask; a skipped identity
 update is not an independently evaluated chemistry audit.
 
