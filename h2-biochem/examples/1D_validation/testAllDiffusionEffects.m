@@ -147,7 +147,8 @@ function scenario = runScenario( ...
         assert(model.bacterialDecayOrder == 1, ...
             'Scenario "%s" requires first-order biomass decay.', name);
         schedule = coarsenScheduleByControl(schedule, 2*day);
-        model = convertToSequentialBiochemistryPhreeqcModel(model);
+        model = convertToSequentialBiochemistryPhreeqcModel(model, ...
+            'reactionSubstepMaxDt', 0.4*day);
         % Unlike the base 'plain' branch (whose constructed class depends
         % on carbonateBuffer/paperBiomassKinetics as well as
         % phreeqcTimestepCoupling -- see setupH2StorageExampleWithSRB_benchmark
