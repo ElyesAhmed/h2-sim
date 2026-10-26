@@ -208,6 +208,37 @@ time increments, divided by the final reported kinetic time. The existing
 last-value fallback applies when that final time is nonpositive. Parsing does
 not convert the stored units or change kinetics, mineral correction or reflash.
 
+Hybrid and multirate chemistry stages
+-------------------------------------
+
+``SequentialBiochemistryPhreeqcModel`` advances one flow/transport stage, then
+``ceil(dt/reactionSubstepMaxDt)`` equal local reaction substeps of duration
+``dt/nSub`` seconds. The flow stage includes wells, boundary conditions and
+transport, with biological reaction sources disabled. The reaction stage
+has no external forcing and uses the bounded local integrator; the retained
+``reactionNonLinearSolver`` property is for API compatibility.
+
+Before local reactions, the flow well solution is cleared so the well-free
+reaction facility can initialize its own state. Chemistry feedback is loaded
+into both the reaction model and its facility's reservoir-model reference.
+Each successful local reaction update is followed by aqueous/mineral PHREEQC
+equilibrium and a feedback refresh, including the final substep. The flow
+well solution is restored on the accepted state for reporting.
+
+The hybrid equilibrium entry point validates the request, snapshots its
+post-reaction water/aqueous/mineral basis, and processes cells in order using
+the existing persistent IPhreeqc session. It supplies no gas phase or PHREEQC
+kinetics: MRST owns reaction kinetics and the EOS owns gas/liquid partitioning.
+``refreshOutputs=false`` skips requested output-state-function evaluation;
+chemistry reconstruction and the volume-constrained reflash still occur.
+The independent hybrid element audit remains unavailable.
+
+Feedback uses PHREEQC molalities when present, with the existing tracer/EOS
+fallbacks otherwise. Aqueous feedback concentrations use mol/kg water; tracer
+fallbacks are converted from mol per liquid volume using EOS water density.
+pH and carbonate pKa1 are dimensionless. Existing defaults, validation,
+resource limits, reaction accounting and convergence policies are retained.
+
 PHREEQC selected-output definitions
 -----------------------------------
 

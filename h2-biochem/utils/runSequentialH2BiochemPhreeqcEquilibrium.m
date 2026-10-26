@@ -12,41 +12,65 @@ function state = runSequentialH2BiochemPhreeqcEquilibrium(model, state, varargin
 % about CO2 solubility, so every call strips CO2 into the gas and
 % dissolves dolomite to re-saturate the water.)
 
-runtimeOpt = merge_options(struct( ...
-    'refreshOutputs', true), varargin{:});
-validateattributes(runtimeOpt.refreshOutputs, {'logical'}, {'scalar'}, ...
-    mfilename, 'refreshOutputs');
-assert(isa(model, 'BiochemistryPhreeqcModel'), ...
-    'sequential-h2biochem-phreeqc requires a BiochemistryPhreeqcModel instance.');
-assert(model.phreeqcTimestepCoupling && model.isSequentialH2BiochemPhreeqcBackend(), ...
-    'sequential-h2biochem-phreeqc equilibrium chemistry is not enabled on this model.');
+% SYNOPSIS:
+%   state = runSequentialH2BiochemPhreeqcEquilibrium(model, state)
+%   state = runSequentialH2BiochemPhreeqcEquilibrium(model, state, ...
+%       'refreshOutputs', false)
+%
+% The state carries post-MRST reaction inventories. Aqueous inputs use
+% mol/kg water and mineral state inventories use mol/cell. The persistent
+% engine is reused across cells/calls; existing recovery behavior is retained.
+% refreshOutputs is a scalar logical (default true). False skips requested
+% output state functions, but still reconstructs inventories and performs
+% the volume-constrained EOS reflash. The independent element audit remains
+% unavailable; this cleanup does not enable it.
 
-opt = getCouplingOptions(model);
-validateCouplingOptions(opt, model.EOSModel.getNumberOfComponents());
-nc = model.G.cells.num;
-waterMass = getWaterMass(model, state, opt.waterDensity);
-assert(all(isfinite(waterMass) & waterMass > 0), ...
-    'sequential-h2biochem-phreeqc requires positive liquid water mass in every cell.');
-
-phase = getPhaseData(model, state, waterMass, opt.waterDensity);
-mineral = getMineralData(state, waterMass, nc);
-state = storePhreeqcInputDiagnostics(state, phase);
-
-iph = getPersistentIPhreeqcCom(opt, false);
-results = repmat(emptyResult(), nc, 1);
-for cellNo = 1:nc
-    input = buildPhreeqcInput(opt, phase, mineral, cellNo);
-    if cellNo == 1
-        state.sequentialH2BiochemPhreeqcInputCell1String = input;
-    end
-    raw = runIPhreeqcCOM(iph, input, opt, cellNo);
-    results(cellNo) = parseSelectedOutput(raw, cellNo);
+    runtimeOpt = merge_options(struct('refreshOutputs', true), varargin{:});
+    validateEquilibriumRequest(model, runtimeOpt);
+    [state, opt, phase, mineral, waterMass] = prepareEquilibriumInput(model, state);
+    [state, results] = equilibrateCells(opt, phase, mineral, state, model.G.cells.num);
+    state = auditElementBalance(state, opt, phase, mineral, results, waterMass);
+    state = updateStateFromResults( ...
+        model, state, opt, phase, results, waterMass, runtimeOpt.refreshOutputs);
 end
 
-state = auditElementBalance(state, opt, phase, ...
-    mineral, results, waterMass);
-state = updateStateFromResults( ...
-    model, state, opt, phase, results, waterMass, runtimeOpt.refreshOutputs);
+function validateEquilibriumRequest(model, runtimeOpt)
+    % Validate runtime flags and chemistry ownership before preparing input.
+    validateattributes(runtimeOpt.refreshOutputs, {'logical'}, {'scalar'}, ...
+        mfilename, 'refreshOutputs');
+    assert(isa(model, 'BiochemistryPhreeqcModel'), ...
+        'sequential-h2biochem-phreeqc requires a BiochemistryPhreeqcModel instance.');
+    assert(model.phreeqcTimestepCoupling && model.isSequentialH2BiochemPhreeqcBackend(), ...
+        'sequential-h2biochem-phreeqc equilibrium chemistry is not enabled on this model.');
+end
+
+function [state, opt, phase, mineral, waterMass] = prepareEquilibriumInput(model, state)
+    % Snapshot post-reaction aqueous chemistry on a positive kg-water basis.
+    opt = getCouplingOptions(model);
+    validateCouplingOptions(opt, model.EOSModel.getNumberOfComponents());
+    nc = model.G.cells.num;
+    waterMass = getWaterMass(model, state, opt.waterDensity);
+    assert(all(isfinite(waterMass) & waterMass > 0), ...
+        'sequential-h2biochem-phreeqc requires positive liquid water mass in every cell.');
+
+    phase = getPhaseData(model, state, waterMass, opt.waterDensity);
+    mineral = getMineralData(state, waterMass, nc);
+    state = storePhreeqcInputDiagnostics(state, phase);
+end
+
+function [state, results] = equilibrateCells(opt, phase, mineral, state, nc)
+    % Preserve the persistent engine and cell order; PHREEQC owns aqueous
+    % speciation/minerals here, while the EOS owns gas/liquid partitioning.
+    iph = getPersistentIPhreeqcCom(opt, false);
+    results = repmat(emptyResult(), nc, 1);
+    for cellNo = 1:nc
+        input = buildPhreeqcInput(opt, phase, mineral, cellNo);
+        if cellNo == 1
+            state.sequentialH2BiochemPhreeqcInputCell1String = input;
+        end
+        raw = runIPhreeqcCOM(iph, input, opt, cellNo);
+        results(cellNo) = parseSelectedOutput(raw, cellNo);
+    end
 end
 
 function state = storePhreeqcInputDiagnostics(state, phase)

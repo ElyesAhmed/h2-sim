@@ -90,8 +90,8 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
         flowStageModel
         reactionStageModel
 
-        % NonLinearSolver instances used for the flow-stage global solve
-        % and for each local reaction substep, respectively.
+        % Flow-stage nonlinear solver and compatibility-only reaction solver.
+        % Local reaction substeps use the bounded integrator, not a solver.
         flowNonLinearSolver
         reactionNonLinearSolver
     end
@@ -246,8 +246,8 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             % the coarse-flow/local-reaction operator split in two stages
             % run once per control step (stepFunctionIsLinear = true, so
             % the outer NonLinearSolver calls this exactly once, with no
-            % outer Newton/Picard iteration at this level -- each stage
-            % still iterates internally to its own convergence):
+            % outer Newton/Picard iteration at this level. The flow stage
+            % uses its nonlinear solver; reactions use bounded integration:
             %   1. One global flow+transport solve on flowStageModel
             %      (reactionsEnabled = false: no biological source terms).
             %   2. nSub local reaction substeps on reactionStageModel
@@ -295,66 +295,14 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             nSub  = max(1, ceil(dt/model.reactionSubstepMaxDt));
             subDt = dt/nSub;
 
-            % The reaction stage has no wells (no external forcing), so
-            % its FacilityModel.WellModels is empty. flowState.wellSol
-            % still holds the flow stage's (possibly non-empty) well
-            % solution; clearing it here lets reactionModel.validateState
-            % rebuild a wellSol sized to the well-less reaction stage
-            % instead of mismatching model.WellModels in
-            % updateWellSolAfterStep. The flow-stage wellSol is restored
-            % onto the final state below.
-            flowStateForReaction = flowState;
-            flowStateForReaction.wellSol = [];
-            reactionState0 = reactionModel.validateState(flowStateForReaction);
-            [reactionModel, reactionState0] = reactionModel.updateForChangedControls( ...
-                reactionState0, reactionModel.getValidDrivingForces());
-            chemistryFeedback = ...
-                buildSequentialH2BiochemPhreeqcChemistryFeedback( ...
-                reactionModel, reactionState0);
-            reactionModel = ...
-                reactionModel.setSequentialH2BiochemPhreeqcChemistryFeedback( ...
-                chemistryFeedback);
-            reactionModel.FacilityModel = ...
-                reactionModel.FacilityModel.setReservoirModel(reactionModel);
-
-            reactionState  = reactionState0;
-            substepReports = cell(nSub, 1);
-            reactionOk     = true;
-            phreeqcCalls   = 0;
-            for i = 1:nSub
-                [reactionState, subReport] = ...
-                    advanceSequentialBiochemistryLocalReaction( ...
-                    reactionModel, reactionState, subDt);
-                substepReports{i} = subReport;
-                reactionOk = subReport.Converged;
-                if ~reactionOk
-                    break
-                end
-                % One PHREEQC equilibrium per substep: dolomite
-                % dissolution (the carbon resupply for methanogens and
-                % acetogens) and the dolomite-buffered DIC/pH that
-                % throttles the carbon Monod factor must both be
-                % refreshed at the substep scale. A coarse-step-stale
-                % feedback lets the early high-DIC transient compound
-                % through biomass growth and overpredicts methanogenic
-                % consumption, while a coarse-step carbon refill starves
-                % it.
-                reactionState = runSequentialH2BiochemPhreeqcEquilibrium( ...
-                    reactionModel, reactionState);
-                phreeqcCalls = phreeqcCalls + 1;
-                chemistryFeedback = ...
-                    buildSequentialH2BiochemPhreeqcChemistryFeedback( ...
-                    reactionModel, reactionState);
-                reactionModel = ...
-                    reactionModel.setSequentialH2BiochemPhreeqcChemistryFeedback( ...
-                    chemistryFeedback);
-                reactionModel.FacilityModel = ...
-                    reactionModel.FacilityModel.setReservoirModel(reactionModel);
-            end
+            [reactionModel, reactionState0] = ...
+                prepareLocalReactionStage(reactionModel, flowState);
+            [reactionState, substepReports, reactionOk, phreeqcCalls, lastSubstep] = ...
+                advanceReactionSubsteps(reactionModel, reactionState0, nSub, subDt);
 
             stageReport.ReactionSubsteps       = nSub;
             stageReport.ReactionSubstepSize     = subDt;
-            stageReport.ReactionSubstepReports = substepReports(1:i);
+            stageReport.ReactionSubstepReports = substepReports(1:lastSubstep);
             stageReport.ReactionStageOk        = reactionOk;
             stageReport.ReactionIntegrationMethod = 'bounded-local-ode';
             stageReport.ReactionRejectedSteps = 0;
@@ -363,7 +311,7 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             if ~reactionOk
                 report = model.makeStepReport('Converged', false, 'Failure', true, ...
                     'FailureMsg', sprintf( ...
-                    'Local reaction substep %d of %d failed to converge.', i, nSub));
+                    'Local reaction substep %d of %d failed to converge.', lastSubstep, nSub));
                 report.SequentialBiochemistryPhreeqcStages = stageReport;
                 return
             end
@@ -379,6 +327,69 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             report.SequentialBiochemistryPhreeqcStages = stageReport;
         end
     end
+end
+
+function [reactionModel, reactionState0] = prepareLocalReactionStage(reactionModel, flowState)
+    % The reaction stage has no wells (no external forcing), so
+    % its FacilityModel.WellModels is empty. flowState.wellSol
+    % still holds the flow stage's (possibly non-empty) well
+    % solution; clearing it here lets reactionModel.validateState
+    % rebuild a wellSol sized to the well-less reaction stage
+    % instead of mismatching model.WellModels in
+    % updateWellSolAfterStep. The flow-stage wellSol is restored
+    % by stepFunction on the accepted state.
+    flowStateForReaction = flowState;
+    flowStateForReaction.wellSol = [];
+    reactionState0 = reactionModel.validateState(flowStateForReaction);
+    [reactionModel, reactionState0] = reactionModel.updateForChangedControls( ...
+        reactionState0, reactionModel.getValidDrivingForces());
+    reactionModel = refreshChemistryFeedback(reactionModel, reactionState0);
+end
+
+function [reactionState, substepReports, reactionOk, phreeqcCalls, substepNo] = ...
+        advanceReactionSubsteps(reactionModel, reactionState0, nSub, subDt)
+    % Advance equal substeps in seconds. Each successful bounded reaction
+    % update is followed by equilibrium and feedback for the next substep.
+    reactionState  = reactionState0;
+    substepReports = cell(nSub, 1);
+    reactionOk     = true;
+    phreeqcCalls   = 0;
+    for substepNo = 1:nSub
+        [reactionState, subReport] = ...
+            advanceSequentialBiochemistryLocalReaction( ...
+            reactionModel, reactionState, subDt);
+        substepReports{substepNo} = subReport;
+        reactionOk = subReport.Converged;
+        if ~reactionOk
+            break
+        end
+        % One PHREEQC equilibrium per substep: dolomite
+        % dissolution (the carbon resupply for methanogens and
+        % acetogens) and the dolomite-buffered DIC/pH that
+        % throttles the carbon Monod factor must both be
+        % refreshed at the substep scale. A coarse-step-stale
+        % feedback lets the early high-DIC transient compound
+        % through biomass growth and overpredicts methanogenic
+        % consumption, while a coarse-step carbon refill starves
+        % it.
+        reactionState = runSequentialH2BiochemPhreeqcEquilibrium( ...
+            reactionModel, reactionState);
+        phreeqcCalls = phreeqcCalls + 1;
+        reactionModel = refreshChemistryFeedback(reactionModel, reactionState);
+    end
+end
+
+function reactionModel = refreshChemistryFeedback(reactionModel, state)
+    % Keep the reservoir model held by FacilityModel synchronized with the
+    % fixed numerical snapshot used by the next local kinetic evaluation.
+    chemistryFeedback = ...
+        buildSequentialH2BiochemPhreeqcChemistryFeedback( ...
+        reactionModel, state);
+    reactionModel = ...
+        reactionModel.setSequentialH2BiochemPhreeqcChemistryFeedback( ...
+        chemistryFeedback);
+    reactionModel.FacilityModel = ...
+        reactionModel.FacilityModel.setReservoirModel(reactionModel);
 end
 
 function baseOptions = getSequentialBiochemistryModelOptions(options)
