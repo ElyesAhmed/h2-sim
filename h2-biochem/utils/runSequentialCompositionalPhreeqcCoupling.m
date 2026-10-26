@@ -127,9 +127,8 @@ function [state, phase, mineral, waterMass, firstCouplingStep] = ...
     assert(all(isfinite(waterMass) & waterMass > 0), ...
         'compositional PHREEQC coupling requires positive liquid water mass in every cell.');
 
-    state = initializeSequentialCompositionalPhreeqcState(state, opt, nc);
     [state, firstCouplingStep] = ...
-        applyReferenceFirstStepBiomassConvention(state, waterMass);
+        initializeSequentialCompositionalPhreeqcState(state, opt, nc, waterMass);
     phase = getPhaseData(model, state, waterMass, rhoWater);
     if firstCouplingStep
         % H2Storage1D equilibrates every water-containing cell on its first
@@ -267,9 +266,14 @@ function validateCouplingOptions(opt, nc)
         mfilename, 'phreeqcElementBalanceWarningMode');
 end
 
-function state = initializeSequentialCompositionalPhreeqcState(state, opt, nc)
+function [state, firstCouplingStep] = ...
+        initializeSequentialCompositionalPhreeqcState(state, opt, nc, waterMass)
+    % Initialize missing inventories, then apply the historical normalization
+    % only when the saved state does not mark it as already applied.
     % Stored biomass is mol/kg water and never aliases MRST's nbact field.
-    initialBiomass = opt.sequentialCompositionalPhreeqcN0*opt.sequentialCompositionalPhreeqcCellMass/opt.sequentialCompositionalPhreeqcBiomassMW;
+    initialBiomass = opt.sequentialCompositionalPhreeqcN0* ...
+        opt.sequentialCompositionalPhreeqcCellMass/ ...
+        opt.sequentialCompositionalPhreeqcBiomassMW;
     biomassFields = {'sequentialCompositionalPhreeqcBiomassMET', 'sequentialCompositionalPhreeqcBiomassACE', ...
         'sequentialCompositionalPhreeqcBiomassSRB'};
     for i = 1:numel(biomassFields)
@@ -284,6 +288,8 @@ function state = initializeSequentialCompositionalPhreeqcState(state, opt, nc)
         end
     end
 
+    % Mineral state fields hold mol/cell. Keep existing values verbatim;
+    % conversion to mol/kg water occurs when constructing PHREEQC input.
     mineralFields = {'phreeqcMineralCalcite', 'phreeqcMineralDolomite', ...
         'phreeqcMineralAnhydrite', 'phreeqcMineralQuartz', ...
         'phreeqcMineralGoethite', 'phreeqcMineralBrucite', ...
@@ -295,29 +301,31 @@ function state = initializeSequentialCompositionalPhreeqcState(state, opt, nc)
             state.(field) = zeros(nc, 1);
         end
     end
+    [state, firstCouplingStep] = ...
+        applyReferenceFirstStepBiomassConvention(state, waterMass);
 end
 
 
 function [state, firstCouplingStep] = ...
         applyReferenceFirstStepBiomassConvention(state, waterMass)
-% H2Storage1D initializes Solution.*_Biomass in mol/kgw, but its first
-% buildPhreeqcStrings call divides those values by cell water mass as if
-% they were mol/cell. Subsequent calls use PHREEQC output stored in
-% mol/cell and are unit-consistent. Retain that first-step convention for
-% compatibility with the reference result.
-flag = 'sequentialCompositionalPhreeqcFirstStepBiomassConventionApplied';
-if isfield(state, flag) && state.(flag)
-    firstCouplingStep = false;
-    return;
-end
-firstCouplingStep = true;
-fields = {'sequentialCompositionalPhreeqcBiomassMET', 'sequentialCompositionalPhreeqcBiomassACE', ...
-    'sequentialCompositionalPhreeqcBiomassSRB'};
-for i = 1:numel(fields)
-    field = fields{i};
-    state.(field) = state.(field)./waterMass;
-end
-state.(flag) = true;
+    % H2Storage1D initializes Solution.*_Biomass in mol/kgw, but its first
+    % buildPhreeqcStrings call divides those values by cell water mass as if
+    % they were mol/cell. Subsequent calls use PHREEQC output stored in
+    % mol/cell and are unit-consistent. Retain that first-step convention for
+    % compatibility with the reference result.
+    flag = 'sequentialCompositionalPhreeqcFirstStepBiomassConventionApplied';
+    if isfield(state, flag) && state.(flag)
+        firstCouplingStep = false;
+        return;
+    end
+    firstCouplingStep = true;
+    fields = {'sequentialCompositionalPhreeqcBiomassMET', 'sequentialCompositionalPhreeqcBiomassACE', ...
+        'sequentialCompositionalPhreeqcBiomassSRB'};
+    for i = 1:numel(fields)
+        field = fields{i};
+        state.(field) = state.(field)./waterMass;
+    end
+    state.(flag) = true;
 end
 
 function phase = getPhaseData(model, state, waterMass, rhoWater)

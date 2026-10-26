@@ -208,6 +208,28 @@ time increments, divided by the final reported kinetic time. The existing
 last-value fallback applies when that final time is nonpositive. Parsing does
 not convert the stored units or change kinetics, mineral correction or reflash.
 
+PHREEQC state initialization and restarts
+-----------------------------------------
+
+State validation supplies missing fields only for enabled model features.
+It preserves existing biomass, tracer, pH and lagged sulfide values. Bacterial
+``nbact`` is distinct from PHREEQC's MET/ACE/SRB biomass fields. The latter
+use mol/kg water; mineral state inventories use mol per cell. Missing mineral
+fields start at zero, while existing inventories are retained.
+
+The compositional backend preserves its historical first-call biomass
+normalization by cell water mass. The state flag
+``sequentialCompositionalPhreeqcFirstStepBiomassConventionApplied`` records
+that this conversion has occurred and controls first-call equilibration.
+Keep this flag with the biomass, aqueous chemistry and mineral fields when
+saving a restart. A state without the flag follows first-call behavior;
+there is no inference from simulation time or from nonzero biomass.
+
+Restart from the complete saved state, rather than copying pressure and
+composition alone. This also retains cumulative reaction accounting and
+element-audit warning history. Initialization does not reconstruct missing
+history or migrate partial states from other chemistry backends.
+
 PHREEQC audit reporting and failure files
 -----------------------------------------
 

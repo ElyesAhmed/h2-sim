@@ -5,6 +5,7 @@ classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
         baseline
         batched
         preamble
+        schedule
     end
     methods (TestClassSetup)
         function simulateBothBatchLayouts(test)
@@ -27,6 +28,7 @@ classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
             [~,test.baseline,report]=simulateScheduleAD(state0,model,schedule);
             assert(~report.Failure);
             test.model=model;
+            test.schedule=schedule;
             % Independent setup avoids shared mutable EOS/state-function caches.
             [~,candidate,schedule,state0]=setupH2StorageExampleWithSRB_benchmark( ...
                 'gridCells',4,'domainLength',5,'rate','highrate', ...
@@ -49,6 +51,42 @@ classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
         end
     end
     methods (Test)
+        function savedStateResumesWithoutRepeatingFirstStepConvention(test)
+            state = test.baseline{1};
+            file = [tempname, '.mat'];
+            cleanup = onCleanup(@() delete(file)); %#ok<NASGU>
+            save(file, 'state', '-v7');
+            loaded = load(file, 'state');
+            schedule = test.schedule;
+            schedule.step.val = schedule.step.val(2);
+            schedule.step.control = schedule.step.control(2);
+            [~, states, report] = simulateScheduleAD(loaded.state, test.model, schedule);
+            test.assertFalse(report.Failure);
+            actual = states{1};
+            expected = test.baseline{2};
+            test.verifyTrue(actual.sequentialCompositionalPhreeqcFirstStepBiomassConventionApplied);
+            fields = {'pressure', 's', 'components', 'phreeqcPH', ...
+                'tracerHCO3', 'tracerSO4', 'tracerHS', 'tracerCa', 'tracerMg', ...
+                'phreeqcMineralCalcite', 'phreeqcMineralDolomite', ...
+                'sequentialCompositionalPhreeqcBiomassMET', ...
+                'sequentialCompositionalPhreeqcBiomassACE', ...
+                'sequentialCompositionalPhreeqcBiomassSRB'};
+            for k = 1:numel(fields)
+                field = fields{k};
+                tolerance = 1e-10;
+                if startsWith(field, 'tracer'), tolerance = 5e-8; end
+                if strcmp(field, 'pressure'), tolerance = 0.01; end
+                test.verifyEqual(value(actual.(field)), value(expected.(field)), ...
+                    'AbsTol', tolerance, 'RelTol', 1e-8, field);
+            end
+            test.verifyEqual(actual.phreeqcElementBalancePass, expected.phreeqcElementBalancePass);
+            field = 'phreeqcElementBalanceWarningHistory';
+            test.verifyEqual(isfield(actual, field), isfield(expected, field));
+            if isfield(expected, field)
+                test.verifyEqual(actual.(field), expected.(field));
+            end
+        end
+
         function auditReportingHistorySurvivesAcceptedSteps(test)
             first = test.baseline{1};
             second = test.baseline{2};

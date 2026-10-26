@@ -310,48 +310,7 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
 
         function state = validateState(model, state)
             state = validateState@ThreePhaseCompositionalModel(model, state);
-            if model.bacteriamodel && ~isfield(state, 'nbact')
-                nbact0 = 1e6;
-                state.nbact = repmat(nbact0, model.G.cells.num, 1);
-            end
-            if model.carbonateBuffer && ~isfield(state, 'tracerHCO3')
-                state.tracerHCO3 = zeros(model.G.cells.num, 1);
-            end
-            if model.sulfateReduction
-                if ~isfield(state, 'tracerSO4')
-                    state.tracerSO4 = zeros(model.G.cells.num, 1);
-                end
-                if ~isfield(state, 'tracerHS')
-                    state.tracerHS = zeros(model.G.cells.num, 1);
-                end
-                if ~isfield(state, 'h2sDissolvedLag')
-                    % Lagged (previous converged timestep) dissolved H2S
-                    % concentration [mol/m3 liquid], used only to avoid a
-                    % circular dependency between the flash (needs
-                    % msalt) and the flash-derived H2S content when
-                    % feeding total sulfide to the EOS -- see
-                    % initStateAD/updateAfterConvergence.
-                    state.h2sDissolvedLag = zeros(model.G.cells.num, 1);
-                end
-            end
-            if model.phreeqcTimestepCoupling
-                % These are state quantities, rather than mutable model
-                % properties, because updateAfterConvergence returns only
-                % state. They are used by the next timestep's kinetics.
-                if ~isfield(state, 'phreeqcPH')
-                    state.phreeqcPH = repmat(model.carbonateBufferPH, model.G.cells.num, 1);
-                end
-                if ~isfield(state, 'phreeqcCarbonatePka1')
-                    state.phreeqcCarbonatePka1 = repmat( ...
-                        model.carbonateBufferPka1, model.G.cells.num, 1);
-                end
-                if ~isfield(state, 'tracerCa')
-                    state.tracerCa = zeros(model.G.cells.num, 1);
-                end
-                if ~isfield(state, 'tracerMg')
-                    state.tracerMg = zeros(model.G.cells.num, 1);
-                end
-            end
+            state = initializeBiochemistryState(model, state);
         end
 
         function [vars, names, origin] = getPrimaryVariables(model, state)
@@ -1166,6 +1125,55 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
             nbact = num2cell(zeros(1, nbioreact));
         end
 
+    end
+end
+
+function state = initializeBiochemistryState(model, state)
+    % Fill missing fields only. Existing values belong to the accepted state
+    % and must survive validateState calls and saved-state restarts.
+    % nbact is the dimensionless bacterial mass fraction. Aqueous tracers
+    % and h2sDissolvedLag use mol/m^3 liquid; pH and pKa1 are dimensionless.
+    if model.bacteriamodel && ~isfield(state, 'nbact')
+        nbact0 = 1e6;
+        state.nbact = repmat(nbact0, model.G.cells.num, 1);
+    end
+    if model.carbonateBuffer && ~isfield(state, 'tracerHCO3')
+        state.tracerHCO3 = zeros(model.G.cells.num, 1);
+    end
+    if model.sulfateReduction
+        if ~isfield(state, 'tracerSO4')
+            state.tracerSO4 = zeros(model.G.cells.num, 1);
+        end
+        if ~isfield(state, 'tracerHS')
+            state.tracerHS = zeros(model.G.cells.num, 1);
+        end
+        if ~isfield(state, 'h2sDissolvedLag')
+            % Lagged (previous converged timestep) dissolved H2S
+            % concentration [mol/m3 liquid], used only to avoid a
+            % circular dependency between the flash (needs
+            % msalt) and the flash-derived H2S content when
+            % feeding total sulfide to the EOS -- see
+            % initStateAD/updateAfterConvergence.
+            state.h2sDissolvedLag = zeros(model.G.cells.num, 1);
+        end
+    end
+    if model.phreeqcTimestepCoupling
+        % These are state quantities, rather than mutable model
+        % properties, because updateAfterConvergence returns only
+        % state. They are used by the next timestep's kinetics.
+        if ~isfield(state, 'phreeqcPH')
+            state.phreeqcPH = repmat(model.carbonateBufferPH, model.G.cells.num, 1);
+        end
+        if ~isfield(state, 'phreeqcCarbonatePka1')
+            state.phreeqcCarbonatePka1 = repmat( ...
+                model.carbonateBufferPka1, model.G.cells.num, 1);
+        end
+        if ~isfield(state, 'tracerCa')
+            state.tracerCa = zeros(model.G.cells.num, 1);
+        end
+        if ~isfield(state, 'tracerMg')
+            state.tracerMg = zeros(model.G.cells.num, 1);
+        end
     end
 end
 
