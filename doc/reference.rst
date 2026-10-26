@@ -208,6 +208,34 @@ time increments, divided by the final reported kinetic time. The existing
 last-value fallback applies when that final time is nonpositive. Parsing does
 not convert the stored units or change kinetics, mineral correction or reflash.
 
+PHREEQC selected-output definitions
+-----------------------------------
+
+Custom ``USER_PUNCH`` calculations precede the standard ``SELECTED_OUTPUT``
+requests. The custom rate columns retain MET/ACE/SRB ordering, reading
+``GET`` slots 1/3/2. They report H2-consumption rates on the unit-water basis;
+the coupling later converts these to per-cell rates and integrated moles.
+Species molalities and aqueous totals use mol/kg water; activities and pH
+are dimensionless. Gas and mineral outputs are inventories for the unit-water
+calculation and are rescaled by the coupling.
+
+The custom carbonate and gas diagnostic headings retain their existing
+expressions. In particular, ``TOT_CO2`` combines the reported gas CO2 amount
+with aqueous ``MOL("CarbonateO2")``; ``Dissolved_CO2`` retains the carbonate
+speciation subtraction; ``Z_Factor`` retains
+``GAS_P*GAS_VM/TK/0.082057366080960``. Grouping the definitions introduces no
+header renaming, formula changes or unit conversion.
+
+``REACTIVE_SYSTEM_H`` counts hydrogen outside aqueous solvent H2O, then adds
+the net water change relative to the initial one kg and three implicit H
+atoms per acetate pseudo-element. These corrections apply to initial and
+final audit rows. Existing acetate and added-water tests check this accounting.
+
+Simulation and solution identifiers remain diagnostic metadata. Batch row
+association uses initial-row step signs and repeated kinetic-step sequences;
+kinetic time is retained for interval integration. Requested species, mineral
+phases, biomass names and column ordering remain part of the parser contract.
+
 PHREEQC shared rate definitions
 -------------------------------
 
