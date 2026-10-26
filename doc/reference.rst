@@ -151,7 +151,7 @@ validation does not establish runtime engine availability. Backend-specific
 coupling options are documented in the corresponding coupling utility.
 
 Compositional PHREEQC coupling inputs
-------------------------------------
+-------------------------------------
 
 ``runSequentialCompositionalPhreeqcCoupling(model, state, dt)`` accepts an
 already converged state and a positive duration in seconds. It validates
