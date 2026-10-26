@@ -71,6 +71,10 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
     %                               see getCouplingOptions in the
     %                               corresponding utils/run*.m file for the
     %                               full field list and defaults.
+    %                               phreeqcElementBalanceWarningMode = 'once'
+    %                               limits repeated audit messages; 'always'
+    %                               reports every failing call. Audit values
+    %                               and conservation tolerances are unchanged.
     %   'carbonateBuffer'         - Enable the simplified fixed-pH HCO3-/
     %                               CO2 buffer (default false).
     %   'carbonateBufferPH'       - Fixed buffer pH (default 6.24).
