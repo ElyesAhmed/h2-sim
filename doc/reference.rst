@@ -208,6 +208,27 @@ time increments, divided by the final reported kinetic time. The existing
 last-value fallback applies when that final time is nonpositive. Parsing does
 not convert the stored units or change kinetics, mineral correction or reflash.
 
+PHREEQC cell input blocks
+-------------------------
+
+Each cell contributes a solution, gas phase, kinetics and equilibrium-mineral
+block, followed by explicit ``USE`` commands. Entity numbers are local to the
+batch (1 through its cell count). The shared selected-output and rate
+preamble is prepended once per batch.
+
+The solution uses one kg water, concentrations in mol/kg water, pressure in
+atm and temperature in degrees Celsius. Gas volume and inventories use the
+same water basis. ``GAS_PHASE_MODIFY`` supplies the full EOS volatile
+inventory, including its dissolved portion, for PHREEQC to repartition.
+Mineral inventories are converted from mol per cell to mol/kg water before
+input construction.
+
+Kinetics retain the existing biomass caps, reaction stoichiometry, seconds-based
+coupling duration and configured substep count. Inactive cells receive zero
+available H2. When brine TDS is pinned, its value is passed through the kinetic
+``PARM`` entry. Block ordering, numeric formatting and reaction boundaries are
+preserved by the individual builders.
+
 PHREEQC result writeback
 ------------------------
 
