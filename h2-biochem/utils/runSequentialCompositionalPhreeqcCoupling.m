@@ -950,93 +950,104 @@ end
 
 
 function result = parseSelectedOutput(raw, cellNo)
-assert(iscell(raw) && size(raw, 1) >= 2 && size(raw, 2) >= 1, ...
-    ['PHREEQC selected output in cell %d does not follow the required ', ...
-     'compositional PHREEQC GetSelectedOutputArray schema.'], cellNo);
-headers = normalizeHeaders(raw(1, :));
-values = selectedOutputValues(raw(2:end, :), cellNo);
-assert(all(isfinite(values(:))), ...
-    'PHREEQC selected output contains non-finite values in cell %d.', cellNo);
+    assert(iscell(raw) && size(raw, 1) >= 2 && size(raw, 2) >= 1, ...
+        ['PHREEQC selected output in cell %d does not follow the required ', ...
+         'compositional PHREEQC GetSelectedOutputArray schema.'], cellNo);
+    headers = normalizeHeaders(raw(1, :));
+    values = selectedOutputValues(raw(2:end, :), cellNo);
+    assert(all(isfinite(values(:))), ...
+        'PHREEQC selected output contains non-finite values in cell %d.', cellNo);
 
-result = emptyResult();
-result.pH = finalValue(values, headers, {'ph'}, cellNo);
-% IPhreeqcCOM versions differ in whether selected molality headers retain
-% PHREEQC's "m_" prefix. Accept both representations of the unchanged
-% compositional PHREEQC selected-output schema.
-result.aqH2 = finalValue(values, headers, {'mh2', 'mh2molkgw', 'h2'}, cellNo);
-result.aqN2 = finalValue(values, headers, {'mn2', 'mn2molkgw', 'n2'}, cellNo);
-result.aqCO2 = finalValue(values, headers, ...
-    {'mcarbonateo2', 'mcarbonateo2molkgw', 'carbonateo2'}, cellNo);
-result.aqCH4 = finalValue(values, ...
-    headers, {'mmethaneh4', 'mmethaneh4molkgw', 'methaneh4'}, cellNo);
-result.aqH2S = finalValue(values, ...
-    headers, {'mh2sulfide', 'mh2sulfidemolkgw', 'h2sulfide'}, cellNo);
-result.water = finalValue(values, headers, {'water', 'massh2o'}, cellNo);
-result.gasH2 = finalValue(values, headers, {'gh2g', 'h2g'}, cellNo);
-result.gasCO2 = finalValue(values, headers, ...
-    {'gredoxcarbonateo2g', 'redoxcarbonateo2g'}, cellNo);
-result.gasCH4 = finalValue(values, headers, {'gredoxch4g', 'redoxch4g'}, cellNo);
-result.gasH2S = finalValue(values, headers, {'gredoxh2sg', 'redoxh2sg'}, cellNo);
-result.gasN2 = finalValue(values, headers, {'gn2g', 'n2g'}, cellNo);
-result.calcite = finalValue(values, headers, ...
-    {'redoxcalcite', 'equiredoxcalcite'}, cellNo);
-result.anhydrite = finalValue(values, headers, ...
-    {'redoxanhydrite', 'equiredoxanhydrite'}, cellNo);
-result.gypsum = finalValue(values, headers, ...
-    {'redoxgypsum', 'equiredoxgypsum'}, cellNo);
-result.dolomite = finalValue(values, headers, ...
-    {'redoxdolomite', 'equiredoxdolomite'}, cellNo);
-result.goethite = finalValue(values, headers, ...
-    {'redoxgoethite', 'equiredoxgoethite'}, cellNo);
-result.pyrite = finalValue(values, headers, ...
-    {'redoxpyrite', 'equiredoxpyrite'}, cellNo);
-result.brucite = finalValue(values, headers, {'brucite', 'equibrucite'}, cellNo);
-result.portlandite = finalValue(values, headers, ...
-    {'portlandite', 'equiportlandite'}, cellNo);
-result.quartz = finalValue(values, headers, {'quartz', 'equiquartz'}, cellNo);
-result.biomassSRB = finalValue(values, headers, {'kbiomasssrb', 'biomasssrb'}, cellNo);
-result.biomassMET = finalValue(values, headers, {'kbiomassmet', 'biomassmet'}, cellNo);
-result.biomassACE = finalValue(values, headers, {'kbiomassace', 'biomassace'}, cellNo);
-result.totalCarbon = finalValue(values, headers, ...
-    {'carbonate4', 'carbonate4molkgw'}, cellNo);
-result.sulfate = finalValue(values, headers, ...
-    {'sulfate6', 'sulfate6molkgw'}, cellNo);
-result.ca = finalValue(values, headers, {'ca', 'camolkgw'}, cellNo);
-result.mg = finalValue(values, headers, {'mg', 'mgmolkgw'}, cellNo);
-result.acetate = finalValue(values, headers, ...
-    {'acetate', 'acetatemolkgw'}, cellNo);
-result.sulfide = finalValue(values, headers, ...
-    {'sulfide2', 'sulfide2molkgw'}, cellNo);
-result.fe2 = finalValue(values, headers, {'fedi', 'fedimolkgw'}, cellNo);
-result.fe3 = finalValue(values, headers, {'fetri', 'fetrimolkgw'}, cellNo);
-result.hco3 = finalValue(values, headers, {'hco3'}, cellNo);
-hydrogen = selectedValue(values, headers, {'reactivesystemh'}, cellNo);
-assert(numel(hydrogen) >= 2, ...
-    ['PHREEQC selected output in cell %d lacks distinct initial and final ', ...
-     'reactive-hydrogen inventories.'], cellNo);
-result.initialSystemHydrogen = hydrogen(1);
-result.systemHydrogen = hydrogen(end);
+    result = readFinalChemistryValues(values, headers, cellNo);
+    hydrogen = selectedValue(values, headers, {'reactivesystemh'}, cellNo);
+    assert(numel(hydrogen) >= 2, ...
+        ['PHREEQC selected output in cell %d lacks distinct initial and final ', ...
+         'reactive-hydrogen inventories.'], cellNo);
+    result.initialSystemHydrogen = hydrogen(1);
+    result.systemHydrogen = hydrogen(end);
 
-time = selectedValue(values, headers, {'time'}, cellNo);
-% The first row is emitted before KINETICS solely for the element audit.
-% Preserve the original rate integration by averaging kinetics rows only.
-kineticsRows = 2:numel(time);
-assert(~isempty(kineticsRows), ...
-    'PHREEQC selected output in cell %d contains no kinetics rows.', cellNo);
-rateMET = selectedValue(values, headers, {'metrate'}, cellNo);
-rateACE = selectedValue(values, headers, {'acerate'}, cellNo);
-rateSRB = selectedValue(values, headers, {'srbrate'}, cellNo);
-result.rateMET = timeAverage(time(kineticsRows), rateMET(kineticsRows));
-result.rateACE = timeAverage(time(kineticsRows), rateACE(kineticsRows));
-result.rateSRB = timeAverage(time(kineticsRows), rateSRB(kineticsRows));
-% Diagnostic only (not fed back into the reaction rates themselves): the
-% same USER_PUNCH-computed TDS the RATES blocks evaluate internally as
-% TDS/PARM(1), time-averaged the same way as the reaction rates, so the
-% pinned vs RHO-based TDS actually used by PHREEQC can be inspected via
-% state.sequentialCompositionalPhreeqcTDS instead of assumed.
-tds = selectedValue(values, headers, {'tds'}, cellNo);
-result.tds = timeAverage(time(kineticsRows), tds(kineticsRows));
+    result = addKineticSummaries(result, values, headers, cellNo);
 end
+
+function result = readFinalChemistryValues(values, headers, cellNo)
+    % Read final chemical fields in the historical required-column order.
+    result = emptyResult();
+    result.pH = finalValue(values, headers, {'ph'}, cellNo);
+    % IPhreeqcCOM versions differ in whether selected molality headers retain
+    % PHREEQC's "m_" prefix. Accept both representations of the unchanged
+    % compositional PHREEQC selected-output schema.
+    result.aqH2 = finalValue(values, headers, {'mh2', 'mh2molkgw', 'h2'}, cellNo);
+    result.aqN2 = finalValue(values, headers, {'mn2', 'mn2molkgw', 'n2'}, cellNo);
+    result.aqCO2 = finalValue(values, headers, ...
+        {'mcarbonateo2', 'mcarbonateo2molkgw', 'carbonateo2'}, cellNo);
+    result.aqCH4 = finalValue(values, ...
+        headers, {'mmethaneh4', 'mmethaneh4molkgw', 'methaneh4'}, cellNo);
+    result.aqH2S = finalValue(values, ...
+        headers, {'mh2sulfide', 'mh2sulfidemolkgw', 'h2sulfide'}, cellNo);
+    result.water = finalValue(values, headers, {'water', 'massh2o'}, cellNo);
+    result.gasH2 = finalValue(values, headers, {'gh2g', 'h2g'}, cellNo);
+    result.gasCO2 = finalValue(values, headers, ...
+        {'gredoxcarbonateo2g', 'redoxcarbonateo2g'}, cellNo);
+    result.gasCH4 = finalValue(values, headers, {'gredoxch4g', 'redoxch4g'}, cellNo);
+    result.gasH2S = finalValue(values, headers, {'gredoxh2sg', 'redoxh2sg'}, cellNo);
+    result.gasN2 = finalValue(values, headers, {'gn2g', 'n2g'}, cellNo);
+    result.calcite = finalValue(values, headers, ...
+        {'redoxcalcite', 'equiredoxcalcite'}, cellNo);
+    result.anhydrite = finalValue(values, headers, ...
+        {'redoxanhydrite', 'equiredoxanhydrite'}, cellNo);
+    result.gypsum = finalValue(values, headers, ...
+        {'redoxgypsum', 'equiredoxgypsum'}, cellNo);
+    result.dolomite = finalValue(values, headers, ...
+        {'redoxdolomite', 'equiredoxdolomite'}, cellNo);
+    result.goethite = finalValue(values, headers, ...
+        {'redoxgoethite', 'equiredoxgoethite'}, cellNo);
+    result.pyrite = finalValue(values, headers, ...
+        {'redoxpyrite', 'equiredoxpyrite'}, cellNo);
+    result.brucite = finalValue(values, headers, {'brucite', 'equibrucite'}, cellNo);
+    result.portlandite = finalValue(values, headers, ...
+        {'portlandite', 'equiportlandite'}, cellNo);
+    result.quartz = finalValue(values, headers, {'quartz', 'equiquartz'}, cellNo);
+    result.biomassSRB = finalValue(values, headers, {'kbiomasssrb', 'biomasssrb'}, cellNo);
+    result.biomassMET = finalValue(values, headers, {'kbiomassmet', 'biomassmet'}, cellNo);
+    result.biomassACE = finalValue(values, headers, {'kbiomassace', 'biomassace'}, cellNo);
+    result.totalCarbon = finalValue(values, headers, ...
+        {'carbonate4', 'carbonate4molkgw'}, cellNo);
+    result.sulfate = finalValue(values, headers, ...
+        {'sulfate6', 'sulfate6molkgw'}, cellNo);
+    result.ca = finalValue(values, headers, {'ca', 'camolkgw'}, cellNo);
+    result.mg = finalValue(values, headers, {'mg', 'mgmolkgw'}, cellNo);
+    result.acetate = finalValue(values, headers, ...
+        {'acetate', 'acetatemolkgw'}, cellNo);
+    result.sulfide = finalValue(values, headers, ...
+        {'sulfide2', 'sulfide2molkgw'}, cellNo);
+    result.fe2 = finalValue(values, headers, {'fedi', 'fedimolkgw'}, cellNo);
+    result.fe3 = finalValue(values, headers, {'fetri', 'fetrimolkgw'}, cellNo);
+    result.hco3 = finalValue(values, headers, {'hco3'}, cellNo);
+end
+
+function result = addKineticSummaries(result, values, headers, cellNo)
+    % Exclude the initial audit row; retain interval-weighted kinetic rates/TDS.
+    time = selectedValue(values, headers, {'time'}, cellNo);
+    % The first row is emitted before KINETICS solely for the element audit.
+    % Preserve the original rate integration by averaging kinetics rows only.
+    kineticsRows = 2:numel(time);
+    assert(~isempty(kineticsRows), ...
+        'PHREEQC selected output in cell %d contains no kinetics rows.', cellNo);
+    rateMET = selectedValue(values, headers, {'metrate'}, cellNo);
+    rateACE = selectedValue(values, headers, {'acerate'}, cellNo);
+    rateSRB = selectedValue(values, headers, {'srbrate'}, cellNo);
+    result.rateMET = timeAverage(time(kineticsRows), rateMET(kineticsRows));
+    result.rateACE = timeAverage(time(kineticsRows), rateACE(kineticsRows));
+    result.rateSRB = timeAverage(time(kineticsRows), rateSRB(kineticsRows));
+    % Diagnostic only (not fed back into the reaction rates themselves): the
+    % same USER_PUNCH-computed TDS the RATES blocks evaluate internally as
+    % TDS/PARM(1), time-averaged the same way as the reaction rates, so the
+    % pinned vs RHO-based TDS actually used by PHREEQC can be inspected via
+    % state.sequentialCompositionalPhreeqcTDS instead of assumed.
+    tds = selectedValue(values, headers, {'tds'}, cellNo);
+    result.tds = timeAverage(time(kineticsRows), tds(kineticsRows));
+end
+
 
 function state = auditElementBalance(state, options, phase, mineral, result, waterMass)
 input = elementReservoirs(phase, mineral, waterMass);
@@ -1118,49 +1129,54 @@ r = struct('hydrogen', zeros(size(waterMass)), ...
 end
 
 function headers = normalizeHeaders(headers)
-headers = cellfun(@(x) lower(regexprep(char(x), '[^a-zA-Z0-9]', '')), ...
-    headers, 'UniformOutput', false);
+    % Match existing aliases case-insensitively, ignoring punctuation.
+    headers = cellfun(@(x) lower(regexprep(char(x), '[^a-zA-Z0-9]', '')), ...
+        headers, 'UniformOutput', false);
 end
 
 function values = selectedOutputValues(raw, cellNo)
-values = zeros(size(raw));
-for i = 1:numel(raw)
-    valueAt = raw{i};
-    if ischar(valueAt) || (isstring(valueAt) && isscalar(valueAt))
-        valueAt = str2double(valueAt);
+    % Decode each scalar; the caller rejects any non-finite numeric results.
+    values = zeros(size(raw));
+    for i = 1:numel(raw)
+        valueAt = raw{i};
+        if ischar(valueAt) || (isstring(valueAt) && isscalar(valueAt))
+            valueAt = str2double(valueAt);
+        end
+        if ~isnumeric(valueAt) || ~isscalar(valueAt)
+            error('H2Biochem:SequentialCompositionalPhreeqcOutput', ...
+                'PHREEQC selected output contains a nonnumeric entry in cell %d.', cellNo);
+        end
+        values(i) = valueAt;
     end
-    if ~isnumeric(valueAt) || ~isscalar(valueAt)
-        error('H2Biochem:SequentialCompositionalPhreeqcOutput', ...
-            'PHREEQC selected output contains a nonnumeric entry in cell %d.', cellNo);
-    end
-    values(i) = valueAt;
-end
 end
 
 function value = finalValue(values, headers, aliases, cellNo)
-value = selectedValue(values, headers, aliases, cellNo);
-value = value(end);
+    value = selectedValue(values, headers, aliases, cellNo);
+    value = value(end);
 end
 
 function values = selectedValue(values, headers, aliases, cellNo)
-column = find(ismember(headers, aliases), 1);
-assert(~isempty(column), ...
-    ['PHREEQC selected output in cell %d is missing required compositional PHREEQC ', ...
-     'column "%s". Available columns: %s'], ...
-    cellNo, aliases{1}, strjoin(headers, ', '));
-values = values(:, column);
+    % Preserve the first matching column in header order, not alias-list order.
+    column = find(ismember(headers, aliases), 1);
+    assert(~isempty(column), ...
+        ['PHREEQC selected output in cell %d is missing required compositional PHREEQC ', ...
+         'column "%s". Available columns: %s'], ...
+        cellNo, aliases{1}, strjoin(headers, ', '));
+    values = values(:, column);
 end
 
 function average = timeAverage(time, rate)
-if isempty(time) || time(end) <= 0
-    average = rate(end);
-    return;
+    % Use interval-ending values, with the existing last-value fallback.
+    if isempty(time) || time(end) <= 0
+        average = rate(end);
+        return;
+    end
+    % Match H2Storage1D's selected-output integration: each reported rate is
+    % applied to the interval ending at that output time.
+    interval = [time(1); diff(time)];
+    average = sum(rate.*interval)./time(end);
 end
-% Match H2Storage1D's selected-output integration: each reported rate is
-% applied to the interval ending at that output time.
-interval = [time(1); diff(time)];
-average = sum(rate.*interval)./time(end);
-end
+
 
 function state = updateStateFromResults(model, state, opt, phase, mineral, result, waterMass, dt) %#ok<INUSD>
 nc = model.G.cells.num;

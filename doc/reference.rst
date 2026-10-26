@@ -191,6 +191,23 @@ or ``soln`` identifiers. A batch size of one still validates the output layout.
 Malformed multi-cell output retains the existing
 ``H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch`` error.
 
+Compositional PHREEQC chemical results
+--------------------------------------
+
+The chemical-result parser normalizes header case and punctuation and accepts
+the existing molality aliases used by native IPhreeqc and COM output. If more
+than one accepted alias is present, the first matching column in output-header
+order is selected. Numeric scalars and numeric text are decoded; nonscalar,
+nonnumeric and non-finite entries retain their existing rejection behavior.
+
+Aqueous concentrations, gas/mineral inventories and biomass use the final
+selected-output row. Reactive hydrogen retains separate initial and final
+inventories for the element audit. Reaction rates and diagnostic TDS exclude
+the initial audit row and use interval-ending values weighted by reported
+time increments, divided by the final reported kinetic time. The existing
+last-value fallback applies when that final time is nonpositive. Parsing does
+not convert the stored units or change kinetics, mineral correction or reflash.
+
 PHREEQC model equation assembly
 -------------------------------
 
