@@ -225,6 +225,16 @@ Each successful local reaction update is followed by aqueous/mineral PHREEQC
 equilibrium and a feedback refresh, including the final substep. The flow
 well solution is restored on the accepted state for reporting.
 
+Normal runs should use ``simulateScheduleAD``. A direct ``stepFunction``
+call must follow the scheduler's preparation sequence: validate the model,
+validate the schedule, validate the state, and apply
+``updateForChangedControls`` to the outer model/state. Schedule validation
+also applies the Soreide–Whitson injection phase-fraction and surface-density
+conversion. Run the report-step/timestep preparation hooks before invoking
+the step method. The resulting state supplies the inner flow solver's initial
+guess, including initialized well controls. State validation alone does not
+perform this sequence.
+
 The hybrid equilibrium entry point validates the request, snapshots its
 post-reaction water/aqueous/mineral basis, and processes cells in order using
 the existing persistent IPhreeqc session. It supplies no gas phase or PHREEQC
