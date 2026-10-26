@@ -72,23 +72,8 @@ function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
     if ~isempty(indices)
         iph = openPhreeqcSession(opt);
         cleanupIph = onCleanup(@() releasePhreeqcSession(iph));
-        preamble = buildPhreeqcPreamble(opt);
-        rowsPerCell = 1 + opt.sequentialCompositionalPhreeqcSteps;
-        batchSize = round(opt.sequentialCompositionalPhreeqcBatchSize);
-        firstBatch = true;
-        for cellStart = 1:batchSize:numel(indices)
-            cellIdx = indices(cellStart:min(cellStart + batchSize - 1, numel(indices)));
-            input = buildPhreeqcBatchInput(preamble, opt, phase, mineral, state, cellIdx, dt);
-            if firstBatch
-                state.sequentialCompositionalPhreeqcInputCell1String = input;
-                firstBatch = false;
-            end
-            output = runIPhreeqcCOMBatch(iph, input, cellIdx);
-            cellOutputs = splitBatchedSelectedOutput(output, cellIdx, rowsPerCell);
-            for k = 1:numel(cellIdx)
-                results(cellIdx(k)) = parseSelectedOutput(cellOutputs{k}, cellIdx(k));
-            end
-        end
+        [state, results] = executePhreeqcBatches( ...
+            iph, opt, phase, mineral, state, indices, dt, results);
     else
         state.sequentialCompositionalPhreeqcInputCell1String = '';
     end
@@ -102,6 +87,27 @@ function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
     state = auditElementBalance(state, opt, phase, ...
         mineral, results, waterMass);
     state = updateStateFromResults(model, state, opt, phase, mineral, results, waterMass, dt);
+end
+
+function [state, results] = executePhreeqcBatches(iph, opt, phase, mineral, state, indices, dt, results)
+    % The caller owns session cleanup through audit and state reconstruction.
+    preamble = buildPhreeqcPreamble(opt);
+    rowsPerCell = 1 + opt.sequentialCompositionalPhreeqcSteps;
+    batchSize = round(opt.sequentialCompositionalPhreeqcBatchSize);
+    firstBatch = true;
+    for cellStart = 1:batchSize:numel(indices)
+        cellIdx = indices(cellStart:min(cellStart + batchSize - 1, numel(indices)));
+        input = buildPhreeqcBatchInput(preamble, opt, phase, mineral, state, cellIdx, dt);
+        if firstBatch
+            state.sequentialCompositionalPhreeqcInputCell1String = input;
+            firstBatch = false;
+        end
+        output = runIPhreeqcCOMBatch(iph, input, cellIdx);
+        cellOutputs = splitBatchedSelectedOutput(output, cellIdx, rowsPerCell);
+        for k = 1:numel(cellIdx)
+            results(cellIdx(k)) = parseSelectedOutput(cellOutputs{k}, cellIdx(k));
+        end
+    end
 end
 
 function validateCouplingRequest(model, dt)
@@ -789,146 +795,159 @@ end
 end
 
 function output = runIPhreeqcCOMBatch(iph, input, cellIdx)
-% Run one RunString call covering the cells in cellIdx on the persistent,
-% already-loaded IPhreeqcCOM session iph.
-cellRangeText = cellRangeDescription(cellIdx);
-try
-    status = iph.RunString(input);
-    if status ~= 0
+    % Run one batch using the session already loaded for this invocation.
+    cellRangeText = cellRangeDescription(cellIdx);
+    try
+        status = iph.RunString(input);
+        if status ~= 0
+            error('H2Biochem:SequentialCompositionalPhreeqcRun', ...
+                'PHREEQC failed for cells %s:\n%s', cellRangeText, getPhreeqcError(iph));
+        end
+        output = iph.GetSelectedOutputArray;
+        if isempty(output)
+            error('H2Biochem:SequentialCompositionalPhreeqcOutput', ...
+                'PHREEQC returned no selected output for cells %s:\n%s', ...
+                cellRangeText, getPhreeqcError(iph));
+        end
+    catch ME
+        if startsWith(ME.identifier, 'H2Biochem:SequentialCompositionalPhreeqc')
+            rethrow(ME);
+        end
+        phreeqcMessage = getPhreeqcError(iph);
         error('H2Biochem:SequentialCompositionalPhreeqcRun', ...
-            'PHREEQC failed for cells %s:\n%s', cellRangeText, getPhreeqcError(iph));
+            'IPhreeqc failed for cells %s:\n%s\nPHREEQC message:\n%s', ...
+            cellRangeText, ME.message, phreeqcMessage);
     end
-    output = iph.GetSelectedOutputArray;
-    if isempty(output)
-        error('H2Biochem:SequentialCompositionalPhreeqcOutput', ...
-            'PHREEQC returned no selected output for cells %s:\n%s', ...
-            cellRangeText, getPhreeqcError(iph));
-    end
-catch ME
-    if startsWith(ME.identifier, 'H2Biochem:SequentialCompositionalPhreeqc')
-        rethrow(ME);
-    end
-    phreeqcMessage = getPhreeqcError(iph);
-    error('H2Biochem:SequentialCompositionalPhreeqcRun', ...
-        'IPhreeqc failed for cells %s:\n%s\nPHREEQC message:\n%s', ...
-        cellRangeText, ME.message, phreeqcMessage);
-end
 end
 
 function text = cellRangeDescription(cellIdx)
-if isscalar(cellIdx)
-    text = sprintf('%d', cellIdx);
-else
-    text = sprintf('%d-%d', cellIdx(1), cellIdx(end));
-end
+    if isscalar(cellIdx)
+        text = sprintf('%d', cellIdx);
+    else
+        text = sprintf('%d-%d', cellIdx(1), cellIdx(end));
+    end
 end
 
 function cellRaw = splitBatchedSelectedOutput(raw, cellIdx, rowsPerCell)
-% Split one RunString batch's combined SELECTED_OUTPUT array back into the
-% per-cell raw arrays expected by parseSelectedOutput.
-%
-% Splitting relies on two self-checked pieces of information:
-%   1. A fixed, a-priori known row count with one negative-step initial
-%      SOLUTION row and a positive-step KINETICS block per cell.
-%   2. Every KINETICS block must repeat the same PHREEQC "step" sequence.
-%
-% PHREEQC resets "sim" for independent USE blocks, can report internal
-% working-solution identifiers in "soln", and may change where initial rows
-% appear for larger batches. The step sign reliably distinguishes initial
-% rows from kinetics rows; execution order is preserved within each group.
-% Reducing sequentialCompositionalPhreeqcBatchSize to 1
-% always avoids this code path entirely.
-cellRangeText = cellRangeDescription(cellIdx);
-assert(iscell(raw) && size(raw, 1) >= 2 && size(raw, 2) >= 1, ...
-    ['PHREEQC batched selected output for cells %s does not follow the required ', ...
-     'compositional PHREEQC GetSelectedOutputArray schema.'], cellRangeText);
-headers = normalizeHeaders(raw(1, :));
-nCells = numel(cellIdx);
-expectedRows = nCells*rowsPerCell;
-dataRows = raw(2:end, :);
-if size(dataRows, 1) ~= expectedRows
-    error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
-        ['PHREEQC batched selected output for cells %s returned %d rows, expected %d ', ...
-         '(%d cells x %d rows/cell). Set sequentialCompositionalPhreeqcBatchSize to 1 to ', ...
-         'disable multi-cell RunString batching.'], ...
-        cellRangeText, size(dataRows, 1), expectedRows, nCells, rowsPerCell);
-end
-stepColumn = find(ismember(headers, {'step'}), 1);
-if isempty(stepColumn)
-    error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
-        ['PHREEQC batched selected output for cells %s is missing the "step" ', ...
-         'identifier columns required to split multi-cell RunString batches. Set ', ...
-         'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], cellRangeText);
-end
-stepValues = cellfun(@toNumericScalar, dataRows(:, stepColumn));
+    % Split one RunString batch's combined SELECTED_OUTPUT array back into the
+    % per-cell raw arrays expected by parseSelectedOutput.
+    %
+    % Splitting relies on two self-checked pieces of information:
+    %   1. A fixed, a-priori known row count with one negative-step initial
+    %      SOLUTION row and a nonnegative-step KINETICS block per cell.
+    %   2. Every KINETICS block must repeat the same PHREEQC "step" sequence.
+    %
+    % PHREEQC resets "sim" for independent USE blocks, can report internal
+    % working-solution identifiers in "soln", and may change where initial rows
+    % appear for larger batches. The step sign reliably distinguishes initial
+    % rows from kinetics rows; execution order is preserved within each group.
+    % A batch size of 1 avoids multi-cell association but still validates the
+    % selected-output layout and kinetics-step sequence.
+    cellRangeText = cellRangeDescription(cellIdx);
+    nCells = numel(cellIdx);
+    [dataRows, stepValues] = validateBatchSelectedOutput( ...
+        raw, cellRangeText, nCells, rowsPerCell);
 
-cellRaw = cell(1, nCells);
-kineticsRowsPerCell = rowsPerCell - 1;
-initialRows = find(stepValues < 0);
-allKineticsRows = find(stepValues >= 0);
-if numel(initialRows) ~= nCells || ...
-        numel(allKineticsRows) ~= nCells*kineticsRowsPerCell
-    error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
-        ['PHREEQC batched selected output for cells %s contains %d initial ', ...
-         'rows and %d kinetics rows; expected %d and %d. Observed steps: %s.'], ...
-        cellRangeText, numel(initialRows), numel(allKineticsRows), nCells, ...
-        nCells*kineticsRowsPerCell, summarizeNumericVector(stepValues));
-end
-referenceSteps = stepValues(allKineticsRows(1:kineticsRowsPerCell));
-if numel(unique(referenceSteps)) ~= kineticsRowsPerCell
-    error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
-        ['PHREEQC batched selected output for cells %s has an invalid first ', ...
-         'kinetics-step sequence: %s.'], ...
-        cellRangeText, mat2str(referenceSteps(:).'));
-end
-for i = 1:nCells
-    kineticsRows = allKineticsRows((i - 1)*kineticsRowsPerCell + ...
-        (1:kineticsRowsPerCell));
-    cellSteps = stepValues(kineticsRows);
-    if ~isequal(cellSteps, referenceSteps)
-        error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
-            ['PHREEQC batched selected output for cells %s misattributed rows: cell %d ', ...
-             'does not repeat the expected selected-output step sequence. Observed steps: ', ...
-             '%s; expected: %s. Set ', ...
-             'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], ...
-            cellRangeText, cellIdx(i), mat2str(cellSteps(:).'), ...
-            mat2str(referenceSteps(:).'));
+    cellRaw = cell(1, nCells);
+    kineticsRowsPerCell = rowsPerCell - 1;
+    [initialRows, allKineticsRows, referenceSteps] = identifyBatchRowGroups( ...
+        stepValues, nCells, kineticsRowsPerCell, cellRangeText);
+    for i = 1:nCells
+        kineticsRows = allKineticsRows((i - 1)*kineticsRowsPerCell + ...
+            (1:kineticsRowsPerCell));
+        cellSteps = stepValues(kineticsRows);
+        if ~isequal(cellSteps, referenceSteps)
+            error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
+                ['PHREEQC batched selected output for cells %s misattributed rows: cell %d ', ...
+                 'does not repeat the expected selected-output step sequence. Observed steps: ', ...
+                 '%s; expected: %s. Set ', ...
+                 'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], ...
+                cellRangeText, cellIdx(i), mat2str(cellSteps(:).'), ...
+                mat2str(referenceSteps(:).'));
+        end
+        cellRaw{i} = [raw(1, :); dataRows(initialRows(i), :); ...
+            dataRows(kineticsRows, :)];
     end
-    cellRaw{i} = [raw(1, :); dataRows(initialRows(i), :); ...
-        dataRows(kineticsRows, :)];
 end
+
+function [dataRows, stepValues] = validateBatchSelectedOutput(raw, cellRangeText, nCells, rowsPerCell)
+    % Check the schema and row count before interpreting any row as a cell.
+    assert(iscell(raw) && size(raw, 1) >= 2 && size(raw, 2) >= 1, ...
+        ['PHREEQC batched selected output for cells %s does not follow the required ', ...
+         'compositional PHREEQC GetSelectedOutputArray schema.'], cellRangeText);
+    headers = normalizeHeaders(raw(1, :));
+    expectedRows = nCells*rowsPerCell;
+    dataRows = raw(2:end, :);
+    if size(dataRows, 1) ~= expectedRows
+        error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
+            ['PHREEQC batched selected output for cells %s returned %d rows, expected %d ', ...
+             '(%d cells x %d rows/cell). Set sequentialCompositionalPhreeqcBatchSize to 1 to ', ...
+             'disable multi-cell RunString batching.'], ...
+            cellRangeText, size(dataRows, 1), expectedRows, nCells, rowsPerCell);
+    end
+    stepColumn = find(ismember(headers, {'step'}), 1);
+    if isempty(stepColumn)
+        error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
+            ['PHREEQC batched selected output for cells %s is missing the "step" ', ...
+             'identifier columns required to split multi-cell RunString batches. Set ', ...
+             'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], cellRangeText);
+    end
+    stepValues = cellfun(@toNumericScalar, dataRows(:, stepColumn));
+end
+
+function [initialRows, allKineticsRows, referenceSteps] = ...
+        identifyBatchRowGroups(stepValues, nCells, kineticsRowsPerCell, cellRangeText)
+    % Initial and kinetics rows retain their own engine execution order.
+    initialRows = find(stepValues < 0);
+    allKineticsRows = find(stepValues >= 0);
+    if numel(initialRows) ~= nCells || ...
+            numel(allKineticsRows) ~= nCells*kineticsRowsPerCell
+        error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
+            ['PHREEQC batched selected output for cells %s contains %d initial ', ...
+             'rows and %d kinetics rows; expected %d and %d. Observed steps: %s.'], ...
+            cellRangeText, numel(initialRows), numel(allKineticsRows), nCells, ...
+            nCells*kineticsRowsPerCell, summarizeNumericVector(stepValues));
+    end
+    referenceSteps = stepValues(allKineticsRows(1:kineticsRowsPerCell));
+    if numel(unique(referenceSteps)) ~= kineticsRowsPerCell
+        error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
+            ['PHREEQC batched selected output for cells %s has an invalid first ', ...
+             'kinetics-step sequence: %s.'], ...
+            cellRangeText, mat2str(referenceSteps(:).'));
+    end
 end
 
 function text = summarizeNumericVector(values)
-maxShown = 30;
-values = values(:).';
-if numel(values) <= maxShown
-    text = mat2str(values);
-else
-    text = sprintf('%s ... %s (%d values)', ...
-        mat2str(values(1:maxShown/2)), ...
-        mat2str(values(end-maxShown/2+1:end)), numel(values));
-end
+    maxShown = 30;
+    values = values(:).';
+    if numel(values) <= maxShown
+        text = mat2str(values);
+    else
+        text = sprintf('%s ... %s (%d values)', ...
+            mat2str(values(1:maxShown/2)), ...
+            mat2str(values(end-maxShown/2+1:end)), numel(values));
+    end
 end
 
 function value = toNumericScalar(entry)
-if ischar(entry) || (isstring(entry) && isscalar(entry))
-    value = str2double(entry);
-else
-    value = entry;
-end
+    if ischar(entry) || (isstring(entry) && isscalar(entry))
+        value = str2double(entry);
+    else
+        value = entry;
+    end
 end
 
 function message = getPhreeqcError(iph)
-try
-    message = char(iph.GetErrorString());
-catch
-    message = 'No PHREEQC error string was available from IPhreeqc.';
+    try
+        message = char(iph.GetErrorString());
+    catch
+        message = 'No PHREEQC error string was available from IPhreeqc.';
+    end
+    if isempty(strtrim(message))
+        message = 'IPhreeqc did not provide an error message.';
+    end
 end
-if isempty(strtrim(message))
-    message = 'IPhreeqc did not provide an error message.';
-end
-end
+
 
 function result = parseSelectedOutput(raw, cellNo)
 assert(iscell(raw) && size(raw, 1) >= 2 && size(raw, 2) >= 1, ...

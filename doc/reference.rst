@@ -173,6 +173,24 @@ configured. Selected-output row counts and kinetic-step sequences are checked
 before mapping results back to cells. Linux uses native IPhreeqc; Windows uses
 COM. Engine creation is deferred until at least one cell needs execution.
 
+Compositional PHREEQC batch output
+----------------------------------
+
+The coupling function retains ownership of its engine session through element
+auditing and state reconstruction. Its batch executor builds independent cell
+blocks, calls the engine and assigns parsed output back to the original grid
+indices. ``sequentialCompositionalPhreeqcInputCell1String`` contains the first
+executed batch, despite the historical field name; it is empty if no cells run.
+
+Selected-output validation requires one initial row and the configured number
+of kinetics rows per cell, a ``step`` column, and matching unique kinetics-step
+sequences across cells. Initial rows have negative step values; kinetics rows
+have nonnegative values. Rows can be grouped or interleaved, provided execution
+order is retained within each group. Mapping does not rely on PHREEQC's ``sim``
+or ``soln`` identifiers. A batch size of one still validates the output layout.
+Malformed multi-cell output retains the existing
+``H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch`` error.
+
 PHREEQC model equation assembly
 -------------------------------
 
