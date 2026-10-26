@@ -23,6 +23,7 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
         maxDt
         resultState
         report
+        wellNames
     end
 
     methods (TestClassSetup)
@@ -67,16 +68,45 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
             testCase.dt = 0.65*day;
             testCase.model = convertToSequentialBiochemistryPhreeqcModel(baseModel, ...
                 'reactionSubstepMaxDt', testCase.maxDt);
-            testCase.state0 = testCase.model.validateState(state0);
             forces = schedule.control(1);
+            % Match simulateScheduleAD: initialize the outer model's controls
+            % before passing its state as the inner flow solver's initial guess.
+            testCase.model = testCase.model.validateModel(forces);
+            schedule = testCase.model.validateSchedule(schedule);
+            forces = schedule.control(1);
+            testCase.state0 = testCase.model.validateState(state0);
+            [testCase.model, testCase.state0] = ...
+                testCase.model.updateForChangedControls(testCase.state0, forces);
+            testCase.wellNames = {forces.W.name};
 
+            % Run the outer solver's preparation hooks before the direct call.
+            forces.controlId = 1;
+            guess = testCase.state0;
+            [testCase.model, guess] = testCase.model.prepareReportstep( ...
+                guess, testCase.state0, testCase.dt, forces);
+            [testCase.model, guess] = testCase.model.prepareTimestep( ...
+                guess, testCase.state0, testCase.dt, forces);
+            guess.time = testCase.dt;
             [testCase.resultState, testCase.report] = testCase.model.stepFunction( ...
-                testCase.state0, testCase.state0, testCase.dt, forces, [], [], 1);
+                guess, testCase.state0, testCase.dt, forces, [], [], 1);
         end
     end
 
     methods (Test)
         %% Report structure: one flow solve, expected reaction substeps.
+        function testFlowWellOutputsAreRestored(testCase)
+            wells = testCase.resultState.wellSol;
+            testCase.verifyEqual(numel(wells), numel(testCase.wellNames));
+            testCase.verifyEqual({wells.name}, testCase.wellNames);
+            testCase.verifyTrue(all(isfinite([wells.bhp])));
+        end
+
+        function testInjectedHydrogenDrivesLocalReactions(testCase)
+            consumed = testCase.resultState. ...
+                sequentialH2BiochemPhreeqcCumulativeH2ConsumptionMoles;
+            testCase.verifyGreaterThan(sum(value(consumed(:))), 0);
+        end
+
         function testStepConverged(testCase)
             testCase.verifyTrue(testCase.report.Converged);
         end
