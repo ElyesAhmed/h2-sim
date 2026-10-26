@@ -150,6 +150,29 @@ The ProgID properties remain configuration metadata on Linux. Constructor
 validation does not establish runtime engine availability. Backend-specific
 coupling options are documented in the corresponding coupling utility.
 
+Compositional PHREEQC coupling inputs
+-------------------------------------
+
+``runSequentialCompositionalPhreeqcCoupling(model, state, dt)`` accepts an
+already converged state and a positive duration in seconds. It validates
+configuration and positive liquid water mass before constructing chemistry
+inputs. Recognized ``phreeqcCouplingOptions`` fields override utility defaults,
+including the database/ProgID values seeded from model properties.
+
+Water mass is in kg per cell, input concentrations in mol/kg water and gas
+volume in litres/kg water. The first call retains the historical biomass
+normalization for reference compatibility and equilibrates all wet cells
+(liquid saturation at least 1e-3). A stored state flag prevents repeating that
+normalization. Subsequent calls can skip inactive cells; this defaults to true
+only above 1000 grid cells. The normal state update restores inactive chemistry.
+
+Each coupling invocation creates one engine session and loads its database
+once; all batches in that invocation share it. Sessions do not persist between
+timesteps. Batch size defaults to 50 and chemistry substeps to five, unless
+configured. Selected-output row counts and kinetic-step sequences are checked
+before mapping results back to cells. Linux uses native IPhreeqc; Windows uses
+COM. Engine creation is deferred until at least one cell needs execution.
+
 PHREEQC model equation assembly
 -------------------------------
 
