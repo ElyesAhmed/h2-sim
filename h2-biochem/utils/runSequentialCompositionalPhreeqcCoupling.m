@@ -1,244 +1,293 @@
 function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
-% Run the optional compositional PHREEQC split after convergence.
+%Apply compositional PHREEQC chemistry after an accepted flow timestep
 %
-% This backend uses the h2_biogeochemistry.dat IPhreeqcCOM input and
-% SELECTED_OUTPUT convention. Native IPhreeqc on Linux and IPhreeqcCOM on
-% Windows share the session adapter. PHREEQC owns MET/ACE/SRB
-% kinetics and its biomass state, while MRST retains flow and tracer
-% transport. Its split conventions match the storage-cycle reference.
+% SYNOPSIS:
+%   state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
 %
-% Cells are processed through one persistent IPhreeqcCOM object and one
-% h2_biogeochemistry.dat database load per coupling invocation (actxserver
-% activation and LoadDatabase are the expensive per-call operations).
-% model.phreeqcCouplingOptions.sequentialCompositionalPhreeqcBatchSize
-% (default 50) controls how many independent cell blocks share a RunString
-% call. Set it to 1 for one call per cell. Each block ends explicitly before
-% the next cell is defined. Unique local entity numbers isolate cell inputs.
-% Selected-output rows are checked by row count and repeated kinetic-step
-% sequences before being assigned in execution order; mismatches raise
-% H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch.
+% PARAMETERS:
+%   model - BiochemistryPhreeqcModel with timestep coupling enabled and
+%           phreeqcBackend = 'sequential-compositional-phreeqc'.
+%   state - Accepted reservoir state, including flashed liquid/gas data,
+%           aqueous tracers and any existing chemistry/biomass history.
+%   dt    - Positive, finite coupling duration in seconds.
+%
+% RETURNS:
+%   state - Updated aqueous/mineral chemistry, PHREEQC biomass, reaction
+%           consumption and element-audit diagnostics, followed by EOS
+%           reflash. H2sim retains flow and tracer transport; PHREEQC owns
+%           MET/ACE/SRB kinetics and separate biomass fields, not nbact.
+%
+% CONFIGURATION:
+%   Recognized fields of model.phreeqcCouplingOptions override the utility
+%   defaults, including databaseFile and comProgId seeded from model
+%   properties. Other fields are ignored here. The constructor's separate
+%   configuration validation still applies.
+%   databaseFile must be an existing absolute h2_biogeochemistry.dat path.
+%   Linux uses native IPhreeqc and Windows uses IPhreeqcCOM. comProgId is
+%   retained as compatibility metadata on Linux.
+%   sequentialCompositionalPhreeqcSteps (default 5) sets chemistry substeps;
+%   sequentialCompositionalPhreeqcBatchSize (default 50) sets independent
+%   cell blocks per engine call. A batch size of 1 processes cells singly.
+%   See getCouplingOptions below for kinetic, brine and audit defaults.
+%
+% NOTES:
+%   Water mass is in kg per cell; PHREEQC input concentrations use mol/kg
+%   water and gas volume uses litres/kg water. Initialization retains the
+%   historical first-step biomass normalization used by the reference case;
+%   its state flag prevents applying that convention again on later calls.
+%   The first coupling equilibrates every wet cell (liquid saturation at
+%   least 1e-3). Later calls can omit inactive cells when
+%   sequentialCompositionalPhreeqcSkipInactiveCells is enabled (default only for grids larger than 1000 cells). Inactive
+%   chemistry is restored; unavailable rate/TDS diagnostics remain explicit.
+%
+%   Each invocation opens one engine session, loads the database once and
+%   reuses that session across its batches. It is released on completion or
+%   error; sessions are not retained between timesteps. Unique local entity
+%   numbers isolate cell inputs. Selected-output row counts and kinetic-step
+%   sequences are checked before assigning rows in execution order.
+%
+% SEE ALSO:
+%   BiochemistryPhreeqcModel, createH2simIPhreeqc,
+%   runSequentialH2BiochemPhreeqcEquilibrium
 
-assert(isa(model, 'BiochemistryPhreeqcModel'), ...
-    'compositional PHREEQC coupling requires a BiochemistryPhreeqcModel instance.');
-assert(model.phreeqcTimestepCoupling && model.isSequentialCompositionalPhreeqcBackend(), ...
-    'compositional PHREEQC IPhreeqcCOM timestep coupling is not enabled on this model.');
-validateattributes(dt, {'numeric'}, {'scalar', 'real', 'finite', 'positive'}, ...
-    mfilename, 'dt');
+    validateCouplingRequest(model, dt);
 
-opt = getCouplingOptions(model);
-nc = model.G.cells.num;
-validateCouplingOptions(opt, nc);
+    opt = getCouplingOptions(model);
+    nc = model.G.cells.num;
+    validateCouplingOptions(opt, nc);
 
-rhoWater = opt.waterDensity;
-waterMass = getWaterMass(model, state, rhoWater);
-assert(all(isfinite(waterMass) & waterMass > 0), ...
-    'compositional PHREEQC coupling requires positive liquid water mass in every cell.');
+    [state, phase, mineral, waterMass, firstCouplingStep] = ...
+        preparePhreeqcInput(model, state, opt, nc);
 
-state = initializeSequentialCompositionalPhreeqcState(state, opt, nc);
-[state, firstCouplingStep] = ...
-    applyReferenceFirstStepBiomassConvention(state, waterMass);
-phase = getPhaseData(model, state, waterMass, rhoWater);
-if firstCouplingStep
-    % H2Storage1D equilibrates every water-containing cell on its first
-    % bio-geochemical split, before applying the normal H2 activity mask.
-    phase.activeCells = phase.sL >= 1e-3;
-end
-mineral = getMineralData(state, waterMass, nc);
-state = storePhreeqcInputDiagnostics(state, phase);
-
-results = repmat(emptyResult(), nc, 1);
-% Inactive chemistry is restored verbatim by updateStateFromResults. Large
-% grids therefore need not execute PHREEQC calls whose physical output is
-% discarded. First-step equilibration still runs for every wet cell.
-executeCells = true(nc, 1);
-if opt.sequentialCompositionalPhreeqcSkipInactiveCells && ~firstCouplingStep
-    executeCells = phase.activeCells;
-end
-state.sequentialCompositionalPhreeqcExecutedCells = executeCells;
-indices = find(executeCells);
-if ~isempty(indices)
-    iph = openPhreeqcSession(opt);
-    cleanupIph = onCleanup(@() releasePhreeqcSession(iph));
-    preamble = buildPhreeqcPreamble(opt);
-    rowsPerCell = 1 + opt.sequentialCompositionalPhreeqcSteps;
-    batchSize = round(opt.sequentialCompositionalPhreeqcBatchSize);
-    firstBatch = true;
-    for cellStart = 1:batchSize:numel(indices)
-        cellIdx = indices(cellStart:min(cellStart + batchSize - 1, numel(indices)));
-        input = buildPhreeqcBatchInput(preamble, opt, phase, mineral, state, cellIdx, dt);
-        if firstBatch
-            state.sequentialCompositionalPhreeqcInputCell1String = input;
-            firstBatch = false;
-        end
-        output = runIPhreeqcCOMBatch(iph, input, cellIdx);
-        cellOutputs = splitBatchedSelectedOutput(output, cellIdx, rowsPerCell);
-        for k = 1:numel(cellIdx)
-            results(cellIdx(k)) = parseSelectedOutput(cellOutputs{k}, cellIdx(k));
-        end
+    results = repmat(emptyResult(), nc, 1);
+    % Inactive chemistry is restored verbatim by updateStateFromResults. Large
+    % grids therefore need not execute PHREEQC calls whose physical output is
+    % discarded. First-step equilibration still runs for every wet cell.
+    executeCells = true(nc, 1);
+    if opt.sequentialCompositionalPhreeqcSkipInactiveCells && ~firstCouplingStep
+        executeCells = phase.activeCells;
     end
-else
-    state.sequentialCompositionalPhreeqcInputCell1String = '';
-end
-for cellNo = find(~executeCells).'
-    results(cellNo).water = 1;
-    % No PHREEQC RATES evaluation occurred in these cells. NaN labels the
-    % unavailable diagnostic explicitly; it never enters any rate/closure.
-    results(cellNo).tds = NaN;
+    state.sequentialCompositionalPhreeqcExecutedCells = executeCells;
+    indices = find(executeCells);
+    if ~isempty(indices)
+        iph = openPhreeqcSession(opt);
+        cleanupIph = onCleanup(@() releasePhreeqcSession(iph));
+        preamble = buildPhreeqcPreamble(opt);
+        rowsPerCell = 1 + opt.sequentialCompositionalPhreeqcSteps;
+        batchSize = round(opt.sequentialCompositionalPhreeqcBatchSize);
+        firstBatch = true;
+        for cellStart = 1:batchSize:numel(indices)
+            cellIdx = indices(cellStart:min(cellStart + batchSize - 1, numel(indices)));
+            input = buildPhreeqcBatchInput(preamble, opt, phase, mineral, state, cellIdx, dt);
+            if firstBatch
+                state.sequentialCompositionalPhreeqcInputCell1String = input;
+                firstBatch = false;
+            end
+            output = runIPhreeqcCOMBatch(iph, input, cellIdx);
+            cellOutputs = splitBatchedSelectedOutput(output, cellIdx, rowsPerCell);
+            for k = 1:numel(cellIdx)
+                results(cellIdx(k)) = parseSelectedOutput(cellOutputs{k}, cellIdx(k));
+            end
+        end
+    else
+        state.sequentialCompositionalPhreeqcInputCell1String = '';
+    end
+    for cellNo = find(~executeCells).'
+        results(cellNo).water = 1;
+        % No PHREEQC RATES evaluation occurred in these cells. NaN labels the
+        % unavailable diagnostic explicitly; it never enters any rate/closure.
+        results(cellNo).tds = NaN;
+    end
+
+    state = auditElementBalance(state, opt, phase, ...
+        mineral, results, waterMass);
+    state = updateStateFromResults(model, state, opt, phase, mineral, results, waterMass, dt);
 end
 
-state = auditElementBalance(state, opt, phase, ...
-    mineral, results, waterMass);
-state = updateStateFromResults(model, state, opt, phase, mineral, results, waterMass, dt);
+function validateCouplingRequest(model, dt)
+    assert(isa(model, 'BiochemistryPhreeqcModel'), ...
+        'compositional PHREEQC coupling requires a BiochemistryPhreeqcModel instance.');
+    assert(model.phreeqcTimestepCoupling && model.isSequentialCompositionalPhreeqcBackend(), ...
+        'compositional PHREEQC IPhreeqcCOM timestep coupling is not enabled on this model.');
+    validateattributes(dt, {'numeric'}, {'scalar', 'real', 'finite', 'positive'}, ...
+        mfilename, 'dt');
+end
+
+function [state, phase, mineral, waterMass, firstCouplingStep] = ...
+        preparePhreeqcInput(model, state, opt, nc)
+    % Establish the exact water basis and first-step convention before batching.
+    rhoWater = opt.waterDensity;
+    waterMass = getWaterMass(model, state, rhoWater);
+    assert(all(isfinite(waterMass) & waterMass > 0), ...
+        'compositional PHREEQC coupling requires positive liquid water mass in every cell.');
+
+    state = initializeSequentialCompositionalPhreeqcState(state, opt, nc);
+    [state, firstCouplingStep] = ...
+        applyReferenceFirstStepBiomassConvention(state, waterMass);
+    phase = getPhaseData(model, state, waterMass, rhoWater);
+    if firstCouplingStep
+        % H2Storage1D equilibrates every water-containing cell on its first
+        % bio-geochemical split, before applying the normal H2 activity mask.
+        phase.activeCells = phase.sL >= 1e-3;
+    end
+    mineral = getMineralData(state, waterMass, nc);
+    state = storePhreeqcInputDiagnostics(state, phase);
 end
 
 function state = storePhreeqcInputDiagnostics(state, phase)
-% Retain the exact mol/kg-water PHREEQC basis for diagnostics.
-state.sequentialCompositionalPhreeqcInputWaterMass = phase.waterMass;
-state.sequentialCompositionalPhreeqcInputH2Moles = phase.gasH2;
-state.sequentialCompositionalPhreeqcInputCO2Moles = phase.gasCO2;
-state.sequentialCompositionalPhreeqcInputCH4Moles = phase.gasCH4;
-state.sequentialCompositionalPhreeqcInputH2SMoles = phase.gasH2S;
-state.sequentialCompositionalPhreeqcInputGasVolumeLPerKg = phase.gasVolumeLPerKg;
-state.sequentialCompositionalPhreeqcInputPH = phase.pH;
-state.sequentialCompositionalPhreeqcInputC4 = phase.C4;
-state.sequentialCompositionalPhreeqcInputS6 = phase.S6;
-state.sequentialCompositionalPhreeqcInputCa = phase.Ca;
-state.sequentialCompositionalPhreeqcInputMg = phase.Mg;
-state.sequentialCompositionalPhreeqcInputActiveCells = phase.activeCells;
+    % Retain the exact mol/kg-water PHREEQC basis for diagnostics.
+    state.sequentialCompositionalPhreeqcInputWaterMass = phase.waterMass;
+    state.sequentialCompositionalPhreeqcInputH2Moles = phase.gasH2;
+    state.sequentialCompositionalPhreeqcInputCO2Moles = phase.gasCO2;
+    state.sequentialCompositionalPhreeqcInputCH4Moles = phase.gasCH4;
+    state.sequentialCompositionalPhreeqcInputH2SMoles = phase.gasH2S;
+    state.sequentialCompositionalPhreeqcInputGasVolumeLPerKg = phase.gasVolumeLPerKg;
+    state.sequentialCompositionalPhreeqcInputPH = phase.pH;
+    state.sequentialCompositionalPhreeqcInputC4 = phase.C4;
+    state.sequentialCompositionalPhreeqcInputS6 = phase.S6;
+    state.sequentialCompositionalPhreeqcInputCa = phase.Ca;
+    state.sequentialCompositionalPhreeqcInputMg = phase.Mg;
+    state.sequentialCompositionalPhreeqcInputActiveCells = phase.activeCells;
 end
 
 function opt = getCouplingOptions(model)
-opt = struct( ...
-    'databaseFile', model.phreeqcDatabaseFile, ...
-    'comProgId', model.phreeqcComProgId, ...
-    'waterDensity', 1000, ...
-    'Na', 2.865, ...
-    'K', 0, ...
-    'Ca', 0.2857, ...
-    'Mg', 0.1144, ...
-    'Cl', 3.655, ...
-    'Si', 9.723e-5, ...
-    'Fe3', 0, ...
-    'Fe2', 0, ...
-    'sequentialCompositionalPhreeqcSteps', 5, ...
-    'sequentialCompositionalPhreeqcBatchSize', 50, ...
-    'sequentialCompositionalPhreeqcMuMET', 1.109, ...
-    'sequentialCompositionalPhreeqcMuACE', 0.872, ...
-    'sequentialCompositionalPhreeqcMuSRB', 1.048, ...
-    'sequentialCompositionalPhreeqcBMET', 0.01109, ...
-    'sequentialCompositionalPhreeqcBACE', 0.00872, ...
-    'sequentialCompositionalPhreeqcBSRB', 0.01048, ...
-    'sequentialCompositionalPhreeqcYMET', 0.03*4, ...
-    'sequentialCompositionalPhreeqcYACE', 0.07*4, ...
-    'sequentialCompositionalPhreeqcYSRB', 0.08*4, ...
-    'sequentialCompositionalPhreeqcKDMET', 10e-6, ...
-    'sequentialCompositionalPhreeqcKDACE', 2.5e-6, ...
-    'sequentialCompositionalPhreeqcKDSRB', 2.9e-6, ...
-    'sequentialCompositionalPhreeqcKAMET', 230e-6, ...
-    'sequentialCompositionalPhreeqcKAACE', 115.5e-6, ...
-    'sequentialCompositionalPhreeqcKASRB', 2751.5e-6, ...
-    'sequentialCompositionalPhreeqcN0', 1e9, ...
-    'sequentialCompositionalPhreeqcNmax', 1e13, ...
-    'sequentialCompositionalPhreeqcCellMass', 1e-14, ...
-    'sequentialCompositionalPhreeqcBiomassMW', 24.6, ...
-    'sequentialCompositionalPhreeqcSkipInactiveCells', model.G.cells.num > 1000, ...
-    'sequentialCompositionalPhreeqcPinTDS', false, ...
-    'phreeqcElementBalanceAbsoluteTolerance', 1e-7, ...
-    'phreeqcElementBalanceRelativeTolerance', 1e-8);
+    opt = struct( ...
+        'databaseFile', model.phreeqcDatabaseFile, ...
+        'comProgId', model.phreeqcComProgId, ...
+        'waterDensity', 1000, ...
+        'Na', 2.865, ...
+        'K', 0, ...
+        'Ca', 0.2857, ...
+        'Mg', 0.1144, ...
+        'Cl', 3.655, ...
+        'Si', 9.723e-5, ...
+        'Fe3', 0, ...
+        'Fe2', 0, ...
+        'sequentialCompositionalPhreeqcSteps', 5, ...
+        'sequentialCompositionalPhreeqcBatchSize', 50, ...
+        'sequentialCompositionalPhreeqcMuMET', 1.109, ...
+        'sequentialCompositionalPhreeqcMuACE', 0.872, ...
+        'sequentialCompositionalPhreeqcMuSRB', 1.048, ...
+        'sequentialCompositionalPhreeqcBMET', 0.01109, ...
+        'sequentialCompositionalPhreeqcBACE', 0.00872, ...
+        'sequentialCompositionalPhreeqcBSRB', 0.01048, ...
+        'sequentialCompositionalPhreeqcYMET', 0.03*4, ...
+        'sequentialCompositionalPhreeqcYACE', 0.07*4, ...
+        'sequentialCompositionalPhreeqcYSRB', 0.08*4, ...
+        'sequentialCompositionalPhreeqcKDMET', 10e-6, ...
+        'sequentialCompositionalPhreeqcKDACE', 2.5e-6, ...
+        'sequentialCompositionalPhreeqcKDSRB', 2.9e-6, ...
+        'sequentialCompositionalPhreeqcKAMET', 230e-6, ...
+        'sequentialCompositionalPhreeqcKAACE', 115.5e-6, ...
+        'sequentialCompositionalPhreeqcKASRB', 2751.5e-6, ...
+        'sequentialCompositionalPhreeqcN0', 1e9, ...
+        'sequentialCompositionalPhreeqcNmax', 1e13, ...
+        'sequentialCompositionalPhreeqcCellMass', 1e-14, ...
+        'sequentialCompositionalPhreeqcBiomassMW', 24.6, ...
+        'sequentialCompositionalPhreeqcSkipInactiveCells', model.G.cells.num > 1000, ...
+        'sequentialCompositionalPhreeqcPinTDS', false, ...
+        'phreeqcElementBalanceAbsoluteTolerance', 1e-7, ...
+        'phreeqcElementBalanceRelativeTolerance', 1e-8);
 
-configured = model.phreeqcCouplingOptions;
-names = fieldnames(opt);
-for i = 1:numel(names)
-    name = names{i};
-    if isfield(configured, name)
-        opt.(name) = configured.(name);
+    configured = model.phreeqcCouplingOptions;
+    names = fieldnames(opt);
+    for i = 1:numel(names)
+        name = names{i};
+        if isfield(configured, name)
+            opt.(name) = configured.(name);
+        end
     end
-end
 end
 
 function validateCouplingOptions(opt, nc)
-assert(ischar(opt.databaseFile) || ...
-    (isstring(opt.databaseFile) && isscalar(opt.databaseFile)), ...
-    'sequential-compositional-phreeqc databaseFile must be a character vector or scalar string.');
-databaseFile = char(opt.databaseFile);
-assert(~isempty(strtrim(databaseFile)) && isAbsolutePath(databaseFile), ...
-    ['sequential-compositional-phreeqc requires an explicit absolute databaseFile path to ', ...
-     'h2_biogeochemistry.dat.']);
-assert(isfile(databaseFile), ...
-    'compositional PHREEQC database not found: %s', databaseFile);
-[~, databaseName, extension] = fileparts(databaseFile);
-assert(strcmpi(extension, '.dat') && contains(lower(databaseName), 'h2_biogeochemistry'), ...
-    ['sequential-compositional-phreeqc requires h2_biogeochemistry.dat, not a standard PHREEQC ', ...
-     'Pitzer database: %s'], databaseFile);
-assert(ischar(opt.comProgId) || (isstring(opt.comProgId) && isscalar(opt.comProgId)), ...
-    'sequential-compositional-phreeqc comProgId must identify a registered IPhreeqcCOM server.');
-assert(~isempty(strtrim(char(opt.comProgId))), ...
-    'sequential-compositional-phreeqc comProgId must identify a registered IPhreeqcCOM server.');
-validateattributes(opt.waterDensity, {'numeric'}, {'scalar', 'real', 'finite', 'positive'});
-validateattributes(opt.sequentialCompositionalPhreeqcSteps, {'numeric'}, ...
-    {'scalar', 'integer', 'finite', 'positive'});
-validateattributes(opt.sequentialCompositionalPhreeqcBatchSize, {'numeric'}, ...
-    {'scalar', 'integer', 'finite', 'positive'}, mfilename, ...
-    'sequentialCompositionalPhreeqcBatchSize');
+    assert(ischar(opt.databaseFile) || ...
+        (isstring(opt.databaseFile) && isscalar(opt.databaseFile)), ...
+        'sequential-compositional-phreeqc databaseFile must be a character vector or scalar string.');
+    databaseFile = char(opt.databaseFile);
+    assert(~isempty(strtrim(databaseFile)) && isAbsolutePath(databaseFile), ...
+        ['sequential-compositional-phreeqc requires an explicit absolute databaseFile path to ', ...
+         'h2_biogeochemistry.dat.']);
+    assert(isfile(databaseFile), ...
+        'compositional PHREEQC database not found: %s', databaseFile);
+    [~, databaseName, extension] = fileparts(databaseFile);
+    assert(strcmpi(extension, '.dat') && contains(lower(databaseName), 'h2_biogeochemistry'), ...
+        ['sequential-compositional-phreeqc requires h2_biogeochemistry.dat, not a standard PHREEQC ', ...
+         'Pitzer database: %s'], databaseFile);
+    assert(ischar(opt.comProgId) || (isstring(opt.comProgId) && isscalar(opt.comProgId)), ...
+        'sequential-compositional-phreeqc comProgId must identify a registered IPhreeqcCOM server.');
+    assert(~isempty(strtrim(char(opt.comProgId))), ...
+        'sequential-compositional-phreeqc comProgId must identify a registered IPhreeqcCOM server.');
+    validateattributes(opt.waterDensity, {'numeric'}, {'scalar', 'real', 'finite', 'positive'});
+    validateattributes(opt.sequentialCompositionalPhreeqcSteps, {'numeric'}, ...
+        {'scalar', 'integer', 'finite', 'positive'});
+    validateattributes(opt.sequentialCompositionalPhreeqcBatchSize, {'numeric'}, ...
+        {'scalar', 'integer', 'finite', 'positive'}, mfilename, ...
+        'sequentialCompositionalPhreeqcBatchSize');
 
-positive = {'sequentialCompositionalPhreeqcYMET', 'sequentialCompositionalPhreeqcYACE', 'sequentialCompositionalPhreeqcYSRB', ...
-    'sequentialCompositionalPhreeqcKDMET', 'sequentialCompositionalPhreeqcKDACE', 'sequentialCompositionalPhreeqcKDSRB', ...
-    'sequentialCompositionalPhreeqcKAMET', 'sequentialCompositionalPhreeqcKAACE', 'sequentialCompositionalPhreeqcKASRB', ...
-    'sequentialCompositionalPhreeqcN0', 'sequentialCompositionalPhreeqcNmax', 'sequentialCompositionalPhreeqcCellMass', 'sequentialCompositionalPhreeqcBiomassMW'};
-for i = 1:numel(positive)
-    validateattributes(opt.(positive{i}), {'numeric'}, ...
-        {'scalar', 'real', 'finite', 'positive'}, mfilename, positive{i});
-end
-nonnegative = {'sequentialCompositionalPhreeqcMuMET', 'sequentialCompositionalPhreeqcMuACE', 'sequentialCompositionalPhreeqcMuSRB', ...
-    'sequentialCompositionalPhreeqcBMET', 'sequentialCompositionalPhreeqcBACE', 'sequentialCompositionalPhreeqcBSRB', ...
-    'Na', 'K', 'Ca', 'Mg', 'Cl', 'Si'};
-for i = 1:numel(nonnegative)
-    validateattributes(opt.(nonnegative{i}), {'numeric'}, ...
-        {'scalar', 'real', 'finite', 'nonnegative'}, mfilename, nonnegative{i});
-end
-for name = {'Fe3', 'Fe2'}
-    values = opt.(name{1});
-    validateattributes(values, {'numeric'}, ...
-        {'vector', 'real', 'finite', 'nonnegative'}, mfilename, name{1});
-    assert(isscalar(values) || numel(values) == nc, ...
-        '%s must be scalar or contain one value per grid cell.', name{1});
-end
-assert(opt.sequentialCompositionalPhreeqcNmax >= opt.sequentialCompositionalPhreeqcN0, ...
-    'sequentialCompositionalPhreeqcNmax must be at least sequentialCompositionalPhreeqcN0.');
-validateattributes(opt.sequentialCompositionalPhreeqcSkipInactiveCells, {'logical'}, {'scalar'});
-validateattributes(opt.sequentialCompositionalPhreeqcPinTDS, {'logical'}, {'scalar'}, ...
-    mfilename, 'sequentialCompositionalPhreeqcPinTDS');
+    positive = {'sequentialCompositionalPhreeqcYMET', ...
+        'sequentialCompositionalPhreeqcYACE', 'sequentialCompositionalPhreeqcYSRB', ...
+        'sequentialCompositionalPhreeqcKDMET', 'sequentialCompositionalPhreeqcKDACE', ...
+        'sequentialCompositionalPhreeqcKDSRB', 'sequentialCompositionalPhreeqcKAMET', ...
+        'sequentialCompositionalPhreeqcKAACE', 'sequentialCompositionalPhreeqcKASRB', ...
+        'sequentialCompositionalPhreeqcN0', 'sequentialCompositionalPhreeqcNmax', ...
+        'sequentialCompositionalPhreeqcCellMass', 'sequentialCompositionalPhreeqcBiomassMW'};
+    for i = 1:numel(positive)
+        validateattributes(opt.(positive{i}), {'numeric'}, ...
+            {'scalar', 'real', 'finite', 'positive'}, mfilename, positive{i});
+    end
+    nonnegative = {'sequentialCompositionalPhreeqcMuMET', ...
+        'sequentialCompositionalPhreeqcMuACE', 'sequentialCompositionalPhreeqcMuSRB', ...
+        'sequentialCompositionalPhreeqcBMET', 'sequentialCompositionalPhreeqcBACE', ...
+        'sequentialCompositionalPhreeqcBSRB', ...
+        'Na', 'K', 'Ca', 'Mg', 'Cl', 'Si'};
+    for i = 1:numel(nonnegative)
+        validateattributes(opt.(nonnegative{i}), {'numeric'}, ...
+            {'scalar', 'real', 'finite', 'nonnegative'}, mfilename, nonnegative{i});
+    end
+    for name = {'Fe3', 'Fe2'}
+        values = opt.(name{1});
+        validateattributes(values, {'numeric'}, ...
+            {'vector', 'real', 'finite', 'nonnegative'}, mfilename, name{1});
+        assert(isscalar(values) || numel(values) == nc, ...
+            '%s must be scalar or contain one value per grid cell.', name{1});
+    end
+    assert(opt.sequentialCompositionalPhreeqcNmax >= opt.sequentialCompositionalPhreeqcN0, ...
+        'sequentialCompositionalPhreeqcNmax must be at least sequentialCompositionalPhreeqcN0.');
+    validateattributes(opt.sequentialCompositionalPhreeqcSkipInactiveCells, {'logical'}, {'scalar'});
+    validateattributes(opt.sequentialCompositionalPhreeqcPinTDS, {'logical'}, {'scalar'}, ...
+        mfilename, 'sequentialCompositionalPhreeqcPinTDS');
 end
 
 function state = initializeSequentialCompositionalPhreeqcState(state, opt, nc)
-% Stored biomass is mol/kg water and never aliases MRST's nbact field.
-initialBiomass = opt.sequentialCompositionalPhreeqcN0*opt.sequentialCompositionalPhreeqcCellMass/opt.sequentialCompositionalPhreeqcBiomassMW;
-biomassFields = {'sequentialCompositionalPhreeqcBiomassMET', 'sequentialCompositionalPhreeqcBiomassACE', ...
-    'sequentialCompositionalPhreeqcBiomassSRB'};
-for i = 1:numel(biomassFields)
-    field = biomassFields{i};
-    if isfield(state, field)
-        values = asCellVector(value(state.(field)), nc, field);
-        assert(all(isfinite(values) & values >= 0), ...
-            '%s must be finite and non-negative.', field);
-        state.(field) = values;
-    else
-        state.(field) = repmat(initialBiomass, nc, 1);
+    % Stored biomass is mol/kg water and never aliases MRST's nbact field.
+    initialBiomass = opt.sequentialCompositionalPhreeqcN0*opt.sequentialCompositionalPhreeqcCellMass/opt.sequentialCompositionalPhreeqcBiomassMW;
+    biomassFields = {'sequentialCompositionalPhreeqcBiomassMET', 'sequentialCompositionalPhreeqcBiomassACE', ...
+        'sequentialCompositionalPhreeqcBiomassSRB'};
+    for i = 1:numel(biomassFields)
+        field = biomassFields{i};
+        if isfield(state, field)
+            values = asCellVector(value(state.(field)), nc, field);
+            assert(all(isfinite(values) & values >= 0), ...
+                '%s must be finite and non-negative.', field);
+            state.(field) = values;
+        else
+            state.(field) = repmat(initialBiomass, nc, 1);
+        end
+    end
+
+    mineralFields = {'phreeqcMineralCalcite', 'phreeqcMineralDolomite', ...
+        'phreeqcMineralAnhydrite', 'phreeqcMineralQuartz', ...
+        'phreeqcMineralGoethite', 'phreeqcMineralBrucite', ...
+        'phreeqcMineralPortlandite', 'phreeqcMineralPyrite', ...
+        'phreeqcMineralGypsum'};
+    for i = 1:numel(mineralFields)
+        field = mineralFields{i};
+        if ~isfield(state, field)
+            state.(field) = zeros(nc, 1);
+        end
     end
 end
 
-mineralFields = {'phreeqcMineralCalcite', 'phreeqcMineralDolomite', ...
-    'phreeqcMineralAnhydrite', 'phreeqcMineralQuartz', ...
-    'phreeqcMineralGoethite', 'phreeqcMineralBrucite', ...
-    'phreeqcMineralPortlandite', 'phreeqcMineralPyrite', ...
-    'phreeqcMineralGypsum'};
-for i = 1:numel(mineralFields)
-    field = mineralFields{i};
-    if ~isfield(state, field)
-        state.(field) = zeros(nc, 1);
-    end
-end
-end
 
 function [state, firstCouplingStep] = ...
         applyReferenceFirstStepBiomassConvention(state, waterMass)
@@ -700,11 +749,9 @@ block = sprintf([ ...
 end
 
 function iph = openPhreeqcSession(opt)
-% Create and initialize the single IPhreeqcCOM object reused for every
-% cell (and every batch) in one coupling invocation. actxserver activation
-% and LoadDatabase are the expensive, one-time-per-invocation operations;
-% RunString/GetSelectedOutputArray are designed to be called repeatedly on
-% the same loaded instance.
+% Create one session per invocation and reuse its database across batches.
+% Engine activation and LoadDatabase happen once; RunString and selected
+% output retrieval are repeated on the same instance within this call.
 try
     iph = createH2simIPhreeqc(opt.comProgId);
 catch ME
@@ -732,7 +779,7 @@ end
 end
 
 function releasePhreeqcSession(iph)
-% Release the persistent IPhreeqcCOM object. Called both on normal
+% Release this invocation's IPhreeqc session. Called both on normal
 % completion (via onCleanup in runSequentialCompositionalPhreeqcCoupling)
 % and on early error paths in openPhreeqcSession.
 try
