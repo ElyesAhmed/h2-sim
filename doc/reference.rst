@@ -208,6 +208,34 @@ time increments, divided by the final reported kinetic time. The existing
 last-value fallback applies when that final time is nonpositive. Parsing does
 not convert the stored units or change kinetics, mineral correction or reflash.
 
+PHREEQC audit reporting and failure files
+-----------------------------------------
+
+Element conservation is checked on every audited call using the existing
+absolute and relative tolerances. By default, warning output is limited per
+state history and backend: report newly failing elements, then repeat only
+when the worst residual-to-limit ratio for a reported element grows tenfold.
+All per-cell inventories, residuals and pass/fail flags remain stored on every
+call, including calls without printed warnings. The history and reporting
+counters travel with saved states; independent cases start fresh histories.
+
+To retain the previous one-warning-per-failing-call behavior, set this before
+packing or running the model::
+
+   model.phreeqcCouplingOptions.phreeqcElementBalanceWarningMode = 'always';
+
+The default is ``'once'``. This setting changes reporting only; a quiet console
+does not turn a failed audit into a pass or establish that the residual is
+harmless. Hybrid chemistry's unavailable independent element audit remains
+unavailable; the reporting option does not create a new audit there.
+
+Invalid output/mineral inventories still raise their original errors. The
+compositional coupling saves the existing diagnostic variables to uniquely
+named ``invalid_inventory_*.mat`` files under ``build/phreeqc-failures`` in the
+working directory. Saving first uses a local temporary file for WSL shares.
+If writing fails, the original inventory error is rethrown with the filesystem
+failure attached as a cause, rather than being replaced by a save error.
+
 PHREEQC model equation assembly
 -------------------------------
 

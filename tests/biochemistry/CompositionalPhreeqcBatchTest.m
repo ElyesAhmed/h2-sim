@@ -49,6 +49,21 @@ classdef CompositionalPhreeqcBatchTest < matlab.unittest.TestCase
         end
     end
     methods (Test)
+        function auditReportingHistorySurvivesAcceptedSteps(test)
+            first = test.baseline{1};
+            second = test.baseline{2};
+            if all(first.phreeqcElementBalancePass(:)) || ...
+                    all(second.phreeqcElementBalancePass(:))
+                return
+            end
+            test.assertTrue(isfield(first, 'phreeqcElementBalanceWarningHistory'));
+            test.assertTrue(isfield(second, 'phreeqcElementBalanceWarningHistory'));
+            before = first.phreeqcElementBalanceWarningHistory;
+            after = second.phreeqcElementBalanceWarningHistory;
+            test.verifyGreaterThan(after.failedCalls, before.failedCalls);
+            test.verifyLessThanOrEqual(after.reportedCalls, after.failedCalls);
+            test.verifyEqual(after.failedCalls, after.reportedCalls + after.suppressedCalls);
+        end
         function skippingInactiveCellsRetainsPhysicalStates(test)
             [~,candidate,schedule,state0]=setupH2StorageExampleWithSRB_benchmark( ...
                 'gridCells',4,'domainLength',5,'rate','highrate', ...
