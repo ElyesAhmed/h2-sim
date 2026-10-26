@@ -7,9 +7,9 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
 % TestClassSetup; every Test method below only inspects the resulting
 % report/state, so no test method contains control-flow logic of its own.
 %
-% This requires a registered IPhreeqcCOM server and an on-disk
-% h2_biogeochemistry.dat (both are needed because every accepted coarse
-% step runs one real PHREEQC equilibrium call); the whole class
+% This requires a working native IPhreeqc or IPhreeqcCOM interface and an on-disk
+% h2_biogeochemistry.dat (both are needed because every accepted
+% reaction substep runs one real PHREEQC equilibrium call); the whole class
 % is skipped cleanly via assumeTrue in TestClassSetup when either is
 % unavailable.
 %
@@ -30,7 +30,7 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
             mrstModule add ad-core ad-props compositional deckformat 
             databaseFile = resolveStepTestDatabaseFile();
             testCase.assumeTrue(~isempty(databaseFile) && isIPhreeqcComAvailable(), ...
-                ['A registered IPhreeqcCOM server and an on-disk ', ...
+                ['A working IPhreeqc interface and an on-disk ', ...
                  'h2_biogeochemistry.dat are required for this test.']);
 
             % Small grid and a short single control period keep this test
