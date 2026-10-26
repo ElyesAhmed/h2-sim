@@ -249,6 +249,34 @@ fallbacks are converted from mol per liquid volume using EOS water density.
 pH and carbonate pKa1 are dimensionless. Existing defaults, validation,
 resource limits, reaction accounting and convergence policies are retained.
 
+Hybrid PE and restart reproducibility
+-------------------------------------
+
+The hybrid backend currently initializes each PHREEQC ``SOLUTION`` with
+``pe 4``. Returned ``state.phreeqcPE`` is a diagnostic; its value does not
+replace that initial setting and is not part of the kinetic-feedback snapshot.
+The returned equilibrium PE can differ from the initial value: PHREEQC uses
+hydrogen and oxygen mole balances in batch-reaction equilibrium calculations
+(`USGS PHREEQC introduction <https://water.usgs.gov/water-resources/software/PHREEQC/documentation/phreeqc3-html/phreeqc3-2.htm>`_).
+
+Local Windows COM benchmark replays showed PE sensitivity both to tiny input
+roundoff and to engine history. Identical input was reproducible in fresh
+engines but could return a different PE in a reused engine. ``DELETE -all``
+did not remove that effect; database reload did for identical input, while
+the sensitivity to different rounded inputs remained. A nonzero
+iron/pyrite/goethite probe was much less sensitive. These observations are
+consistent with a weakly constrained redox diagnostic in the tested cases;
+they do not establish the behavior of all redox-sensitive configurations.
+
+Assess restart consistency using aqueous and mineral inventories, chemistry
+feedback and reaction consumption alongside PE. In the tested short hybrid
+cases, those physical differences were near floating-point roundoff despite
+a larger PE difference. Replacing returned PE with a constant, passing it back
+as a different initial condition, or changing redox constraints would alter
+the scientific interpretation. No such change or tolerance relaxation is
+applied here. Engine reload alone is not a complete restart-reproducibility
+fix when the generated input also differs by roundoff.
+
 PHREEQC selected-output definitions
 -----------------------------------
 

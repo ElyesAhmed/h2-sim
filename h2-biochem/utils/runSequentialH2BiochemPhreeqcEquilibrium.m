@@ -22,7 +22,9 @@ function state = runSequentialH2BiochemPhreeqcEquilibrium(model, state, varargin
 % engine is reused across cells/calls; existing recovery behavior is retained.
 % refreshOutputs is a scalar logical (default true). False skips requested
 % output state functions, but still reconstructs inventories and performs
-% the volume-constrained EOS reflash. The independent element audit remains
+% the volume-constrained EOS reflash. SOLUTION retains fixed initial pe=4;
+% returned phreeqcPE is diagnostic and is not a kinetic-feedback field.
+% The independent element audit remains
 % unavailable; this cleanup does not enable it.
 
     runtimeOpt = merge_options(struct('refreshOutputs', true), varargin{:});
@@ -161,6 +163,7 @@ phase.waterMass = waterMass;
 phase.temperature = asCellVector(value(state.T), nc, 'temperature');
 phase.pressureAtm = asCellVector(value(state.pressure)./101325, nc, 'pressure');
 phase.pH = getStateVector(state, 'phreeqcPH', nc, model.carbonateBufferPH);
+% Validate stored PE; buildPhreeqcInput retains the fixed initial pe=4.
 phase.pe = getStateVector(state, 'phreeqcPE', nc, 4);
 phase.C4 = max(getStateVector(state, 'tracerHCO3', nc, 0)./rhoWater, 0);
 phase.S6 = max(getStateVector(state, 'tracerSO4', nc, 0)./rhoWater, 0);
@@ -266,7 +269,8 @@ end
 
 function input = buildPhreeqcInput(opt, phase, mineral, cellNo)
 % No GAS_PHASE block: the EOS owns gas-liquid partitioning (see
-% getPhaseData). PHREEQC receives the aqueous inventory only.
+% getPhaseData). PHREEQC receives the aqueous inventory only. Initial pe
+% stays at the historical value 4, rather than the returned state diagnostic.
 input = sprintf([ ...
     '%s' ...
     'KNOBS\n' ...
@@ -356,8 +360,9 @@ function iph = getPersistentIPhreeqcCom(opt, forceNew)
 % Keep one activated IPhreeqcCOM server with the database already loaded
 % across all cells/substeps/control steps: actxserver activation and
 % LoadDatabase parsing, not RunString, dominate per-call cost. Each
-% RunString input fully redefines SOLUTION 1/EQUILIBRIUM_PHASES 1, so
-% reusing the server across cells does not leak state between them.
+% RunString input redefines SOLUTION 1/EQUILIBRIUM_PHASES 1. Numerical
+% engine history can still affect sensitive PE diagnostics even for identical
+% inputs; the engine session is not serialized with the MATLAB state.
 persistent server progId dbFile
 thisProgId = char(opt.comProgId);
 thisDbFile = char(opt.phreeqcDatabaseFile);
