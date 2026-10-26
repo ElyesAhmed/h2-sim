@@ -86,7 +86,7 @@ function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
 
     state = auditElementBalance(state, opt, phase, ...
         mineral, results, waterMass);
-    state = updateStateFromResults(model, state, opt, phase, mineral, results, waterMass, dt);
+    state = updateStateFromResults(model, state, opt, phase, results, waterMass, dt);
 end
 
 function [state, results] = executePhreeqcBatches(iph, opt, phase, mineral, state, indices, dt, results)
@@ -1212,134 +1212,158 @@ function average = timeAverage(time, rate)
 end
 
 
-function state = updateStateFromResults(model, state, opt, phase, mineral, result, waterMass, dt) %#ok<INUSD>
-nc = model.G.cells.num;
-rhoWater = opt.waterDensity;
-result = result(:);
-stateBefore = state;
-inactive = ~phase.activeCells;
+function state = updateStateFromResults(model, state, opt, phase, result, waterMass, dt)
+    % Commit chemistry before rebuilding EOS composition and refreshing outputs.
+    result = result(:);
+    stateBefore = state;
+    inactive = ~phase.activeCells;
+    state = storeAqueousChemistry(model, state, result, opt.waterDensity, phase);
+    state = storeMineralInventories(state, result, waterMass);
+    state = storeReactionResults(state, result, waterMass, dt, phase.activeCells);
+    state = restoreInactiveChemistry(state, stateBefore, inactive);
+    state = reconstructEOSComposition(model, state, phase, result, waterMass, inactive);
 
-state.phreeqcPH = reshape([result.pH], [], 1);
-state.phreeqcHCO3Molality = max(reshape([result.hco3], [], 1), 0);
-state.phreeqcCO2Molality = max(reshape([result.aqCO2], [], 1), 0);
-state.phreeqcTotalCarbon = max(reshape([result.totalCarbon], [], 1), 0);
-state.tracerHCO3 = max(state.phreeqcTotalCarbon - state.phreeqcCO2Molality, 0).*rhoWater;
-state.tracerSO4 = max(reshape([result.sulfate], [], 1), 0).*rhoWater;
-state.tracerHS = max(reshape([result.sulfide], [], 1), 0).*rhoWater;
-state.tracerCa = max(reshape([result.ca], [], 1), 0).*rhoWater;
-state.tracerMg = max(reshape([result.mg], [], 1), 0).*rhoWater;
-state.phreeqcFe2Molality = max(reshape([result.fe2], [], 1), 0);
-state.phreeqcFe3Molality = max(reshape([result.fe3], [], 1), 0);
-state.sequentialCompositionalPhreeqcAcetate = max(reshape([result.acetate], [], 1), 0);
-% Diagnostic: the TDS PHREEQC's RATES blocks actually evaluated this call
-% (RHO-based unless sequentialCompositionalPhreeqcPinTDS pins it to
-% phase.brineTDS), alongside the pre-call brine-only estimate, so the two
-% can be compared directly instead of assumed.
-state.sequentialCompositionalPhreeqcTDS = reshape([result.tds], [], 1);
-state.sequentialCompositionalPhreeqcBrineTDS = phase.brineTDS;
+    state = clearStateFunctionCaches(model, state);
+    model = updateEOSSalinityForReflash(model, state);
+    state = model.computeFlash(state, inf);
+    state = refreshOutputStateFunctions(model, state);
+end
 
-pka = state.phreeqcPH - log10(state.phreeqcHCO3Molality./ ...
-    max(state.phreeqcCO2Molality, 1e-30));
-previousPka = getStateVector(state, 'phreeqcCarbonatePka1', nc, ...
-    model.carbonateBufferPka1);
-pka(~isfinite(pka)) = previousPka(~isfinite(pka));
-state.phreeqcCarbonatePka1 = pka;
+function state = storeAqueousChemistry(model, state, result, rhoWater, phase)
+    % PHREEQC concentrations are mol/kg water; transported tracers use
+    % mol/m^3 liquid with the configured water density [kg/m^3]. pH and pKa
+    % are dimensionless. Retain the previous pKa where speciation is singular.
+    nc = model.G.cells.num;
+    state.phreeqcPH = reshape([result.pH], [], 1);
+    state.phreeqcHCO3Molality = max(reshape([result.hco3], [], 1), 0);
+    state.phreeqcCO2Molality = max(reshape([result.aqCO2], [], 1), 0);
+    state.phreeqcTotalCarbon = max(reshape([result.totalCarbon], [], 1), 0);
+    state.tracerHCO3 = max(state.phreeqcTotalCarbon - state.phreeqcCO2Molality, 0).*rhoWater;
+    state.tracerSO4 = max(reshape([result.sulfate], [], 1), 0).*rhoWater;
+    state.tracerHS = max(reshape([result.sulfide], [], 1), 0).*rhoWater;
+    state.tracerCa = max(reshape([result.ca], [], 1), 0).*rhoWater;
+    state.tracerMg = max(reshape([result.mg], [], 1), 0).*rhoWater;
+    state.phreeqcFe2Molality = max(reshape([result.fe2], [], 1), 0);
+    state.phreeqcFe3Molality = max(reshape([result.fe3], [], 1), 0);
+    state.sequentialCompositionalPhreeqcAcetate = max(reshape([result.acetate], [], 1), 0);
+    % Diagnostic: the TDS PHREEQC's RATES blocks actually evaluated this call
+    % (RHO-based unless sequentialCompositionalPhreeqcPinTDS pins it to
+    % phase.brineTDS), alongside the pre-call brine-only estimate, so the two
+    % can be compared directly instead of assumed.
+    state.sequentialCompositionalPhreeqcTDS = reshape([result.tds], [], 1);
+    state.sequentialCompositionalPhreeqcBrineTDS = phase.brineTDS;
 
-state.phreeqcMineralCalcite = max(reshape([result.calcite], [], 1), 0).*waterMass;
-state.phreeqcMineralDolomite = max(reshape([result.dolomite], [], 1), 0).*waterMass;
-state.phreeqcMineralAnhydrite = max(reshape([result.anhydrite], [], 1), 0).*waterMass;
-state.phreeqcMineralQuartz = max(reshape([result.quartz], [], 1), 0).*waterMass;
-state.phreeqcMineralGoethite = max(reshape([result.goethite], [], 1), 0).*waterMass;
-state.phreeqcMineralBrucite = max(reshape([result.brucite], [], 1), 0).*waterMass;
-state.phreeqcMineralPortlandite = max(reshape([result.portlandite], [], 1), 0).*waterMass;
-state.phreeqcMineralPyrite = max(reshape([result.pyrite], [], 1), 0).*waterMass;
-state.phreeqcMineralGypsum = max(reshape([result.gypsum], [], 1), 0).*waterMass;
+    pka = state.phreeqcPH - log10(state.phreeqcHCO3Molality./ ...
+        max(state.phreeqcCO2Molality, 1e-30));
+    previousPka = getStateVector(state, 'phreeqcCarbonatePka1', nc, ...
+        model.carbonateBufferPka1);
+    pka(~isfinite(pka)) = previousPka(~isfinite(pka));
+    state.phreeqcCarbonatePka1 = pka;
+end
 
-biomassMET = max(reshape([result.biomassMET], [], 1), 0);
-biomassACE = max(reshape([result.biomassACE], [], 1), 0);
-biomassSRB = max(reshape([result.biomassSRB], [], 1), 0);
-biomassMET(inactive) = state.sequentialCompositionalPhreeqcBiomassMET(inactive);
-biomassACE(inactive) = state.sequentialCompositionalPhreeqcBiomassACE(inactive);
-biomassSRB(inactive) = state.sequentialCompositionalPhreeqcBiomassSRB(inactive);
-state.sequentialCompositionalPhreeqcBiomassMET = biomassMET;
-state.sequentialCompositionalPhreeqcBiomassACE = biomassACE;
-state.sequentialCompositionalPhreeqcBiomassSRB = biomassSRB;
-reactionRates = [reshape([result.rateMET], [], 1), ...
-    reshape([result.rateACE], [], 1), reshape([result.rateSRB], [], 1)];
-reactionRates(inactive, :) = 0;
-state.sequentialCompositionalPhreeqcReactionRates = reactionRates;
-state.sequentialCompositionalPhreeqcActiveCells = phase.activeCells;
-state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate = reactionRates.*waterMass;
-state.sequentialCompositionalPhreeqcH2ConsumptionByReactionMoles = ...
-    state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate.*dt;
-state.sequentialCompositionalPhreeqcH2ConsumptionRate = sum(reactionRates, 2).*waterMass;
-state.sequentialCompositionalPhreeqcH2ConsumptionMoles = ...
-    state.sequentialCompositionalPhreeqcH2ConsumptionRate.*dt;
-state.h2ConsumptionRate = reactionRates.*waterMass;
-state = restoreInactiveChemistry(state, stateBefore, inactive);
+function state = storeMineralInventories(state, result, waterMass)
+    % Selected-output mineral amounts use the unit-water input basis.
+    % Store nonnegative inventories in mol/cell using cell water mass [kg].
+    state.phreeqcMineralCalcite = max(reshape([result.calcite], [], 1), 0).*waterMass;
+    state.phreeqcMineralDolomite = max(reshape([result.dolomite], [], 1), 0).*waterMass;
+    state.phreeqcMineralAnhydrite = max(reshape([result.anhydrite], [], 1), 0).*waterMass;
+    state.phreeqcMineralQuartz = max(reshape([result.quartz], [], 1), 0).*waterMass;
+    state.phreeqcMineralGoethite = max(reshape([result.goethite], [], 1), 0).*waterMass;
+    state.phreeqcMineralBrucite = max(reshape([result.brucite], [], 1), 0).*waterMass;
+    state.phreeqcMineralPortlandite = max(reshape([result.portlandite], [], 1), 0).*waterMass;
+    state.phreeqcMineralPyrite = max(reshape([result.pyrite], [], 1), 0).*waterMass;
+    state.phreeqcMineralGypsum = max(reshape([result.gypsum], [], 1), 0).*waterMass;
+end
 
-componentMoles = phase.componentMoles;
-names = model.EOSModel.CompositionalMixture.names;
-waterIndex = findComponent(names, {'H2O', 'Water'});
-assert(~isempty(waterIndex), 'compositional PHREEQC requires the EOS H2O component.');
-waterMolarMass = model.EOSModel.CompositionalMixture.molarMass(waterIndex);
-componentMoles(:, waterIndex) = max(componentMoles(:, waterIndex) + ...
-    (reshape([result.water], [], 1) - 1).*waterMass./waterMolarMass, 0);
-componentMoles = replaceComponentMoles(componentMoles, names, {'H2', 'Hydrogen'}, ...
-    (reshape([result.gasH2], [], 1) + reshape([result.aqH2], [], 1)).*waterMass, true);
-componentMoles = replaceComponentMoles(componentMoles, names, {'CO2', 'CarbonDioxide'}, ...
-    (reshape([result.gasCO2], [], 1) + reshape([result.aqCO2], [], 1)).*waterMass, true);
-componentMoles = replaceComponentMoles(componentMoles, names, {'C1', 'CH4', 'Methane'}, ...
-    (reshape([result.gasCH4], [], 1) + reshape([result.aqCH4], [], 1)).*waterMass, true);
-componentMoles = replaceComponentMoles(componentMoles, names, {'H2S', 'HydrogenSulfide'}, ...
-    reshape([result.gasH2S], [], 1).*waterMass, true);
-componentMoles = replaceComponentMoles(componentMoles, names, {'N2', 'Nitrogen'}, ...
-    (reshape([result.gasN2], [], 1) + reshape([result.aqN2], [], 1)).*waterMass, false);
-componentMoles = replaceComponentMoles(componentMoles, names, ...
-    {'CH3COOH', 'AceticAcid', 'Acetate'}, ...
-    max(reshape([result.acetate], [], 1), 0).*waterMass, false);
-componentMoles(inactive, :) = phase.componentMoles(inactive, :);
-assert(all(isfinite(componentMoles(:)) & componentMoles(:) >= 0), ...
-    'compositional PHREEQC returned invalid EOS component inventories.');
+function state = storeReactionResults(state, result, waterMass, dt, activeCells)
+    % Biomass is mol/kg water, independent of MRST nbact. Preserve inactive
+    % biomass and zero inactive rates. MET/ACE/SRB rates [mol H2/(kg water s)]
+    % become mol H2/s per cell and integrated mol H2 over this step [s].
+    inactive = ~activeCells;
+    biomassMET = max(reshape([result.biomassMET], [], 1), 0);
+    biomassACE = max(reshape([result.biomassACE], [], 1), 0);
+    biomassSRB = max(reshape([result.biomassSRB], [], 1), 0);
+    biomassMET(inactive) = state.sequentialCompositionalPhreeqcBiomassMET(inactive);
+    biomassACE(inactive) = state.sequentialCompositionalPhreeqcBiomassACE(inactive);
+    biomassSRB(inactive) = state.sequentialCompositionalPhreeqcBiomassSRB(inactive);
+    state.sequentialCompositionalPhreeqcBiomassMET = biomassMET;
+    state.sequentialCompositionalPhreeqcBiomassACE = biomassACE;
+    state.sequentialCompositionalPhreeqcBiomassSRB = biomassSRB;
+    reactionRates = [reshape([result.rateMET], [], 1), ...
+        reshape([result.rateACE], [], 1), reshape([result.rateSRB], [], 1)];
+    reactionRates(inactive, :) = 0;
+    state.sequentialCompositionalPhreeqcReactionRates = reactionRates;
+    state.sequentialCompositionalPhreeqcActiveCells = activeCells;
+    state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate = reactionRates.*waterMass;
+    state.sequentialCompositionalPhreeqcH2ConsumptionByReactionMoles = ...
+        state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate.*dt;
+    state.sequentialCompositionalPhreeqcH2ConsumptionRate = sum(reactionRates, 2).*waterMass;
+    state.sequentialCompositionalPhreeqcH2ConsumptionMoles = ...
+        state.sequentialCompositionalPhreeqcH2ConsumptionRate.*dt;
+    state.h2ConsumptionRate = reactionRates.*waterMass;
+end
 
-totalMoles = sum(componentMoles, 2);
-assert(all(isfinite(totalMoles) & totalMoles > 0), ...
-    'compositional PHREEQC produced invalid total EOS inventory.');
-state.components = bsxfun(@rdivide, componentMoles, totalMoles);
-assert(all(abs(sum(state.components, 2) - 1) < 100*eps), ...
-    'compositional PHREEQC produced EOS compositions that do not sum to one.');
+function state = reconstructEOSComposition(model, state, phase, result, waterMass, inactive)
+    % Rebuild mol/cell from aqueous plus gas inventories, retaining the EOS
+    % water inventory plus PHREEQC's net water change. Inactive cells retain
+    % their input inventory. Normalize only after validating all inventories.
+    componentMoles = phase.componentMoles;
+    names = model.EOSModel.CompositionalMixture.names;
+    waterIndex = findComponent(names, {'H2O', 'Water'});
+    assert(~isempty(waterIndex), 'compositional PHREEQC requires the EOS H2O component.');
+    waterMolarMass = model.EOSModel.CompositionalMixture.molarMass(waterIndex);
+    componentMoles(:, waterIndex) = max(componentMoles(:, waterIndex) + ...
+        (reshape([result.water], [], 1) - 1).*waterMass./waterMolarMass, 0);
+    componentMoles = replaceComponentMoles(componentMoles, names, {'H2', 'Hydrogen'}, ...
+        (reshape([result.gasH2], [], 1) + reshape([result.aqH2], [], 1)).*waterMass, true);
+    componentMoles = replaceComponentMoles(componentMoles, names, {'CO2', 'CarbonDioxide'}, ...
+        (reshape([result.gasCO2], [], 1) + reshape([result.aqCO2], [], 1)).*waterMass, true);
+    componentMoles = replaceComponentMoles(componentMoles, names, {'C1', 'CH4', 'Methane'}, ...
+        (reshape([result.gasCH4], [], 1) + reshape([result.aqCH4], [], 1)).*waterMass, true);
+    componentMoles = replaceComponentMoles(componentMoles, names, {'H2S', 'HydrogenSulfide'}, ...
+        reshape([result.gasH2S], [], 1).*waterMass, true);
+    componentMoles = replaceComponentMoles(componentMoles, names, {'N2', 'Nitrogen'}, ...
+        (reshape([result.gasN2], [], 1) + reshape([result.aqN2], [], 1)).*waterMass, false);
+    componentMoles = replaceComponentMoles(componentMoles, names, ...
+        {'CH3COOH', 'AceticAcid', 'Acetate'}, ...
+        max(reshape([result.acetate], [], 1), 0).*waterMass, false);
+    componentMoles(inactive, :) = phase.componentMoles(inactive, :);
+    assert(all(isfinite(componentMoles(:)) & componentMoles(:) >= 0), ...
+        'compositional PHREEQC returned invalid EOS component inventories.');
 
-state = clearStateFunctionCaches(model, state);
-model = updateEOSSalinityForReflash(model, state);
-state = model.computeFlash(state, inf);
-state = refreshOutputStateFunctions(model, state);
+    totalMoles = sum(componentMoles, 2);
+    assert(all(isfinite(totalMoles) & totalMoles > 0), ...
+        'compositional PHREEQC produced invalid total EOS inventory.');
+    state.components = bsxfun(@rdivide, componentMoles, totalMoles);
+    assert(all(abs(sum(state.components, 2) - 1) < 100*eps), ...
+        'compositional PHREEQC produced EOS compositions that do not sum to one.');
 end
 
 function state = restoreInactiveChemistry(state, stateBefore, inactive)
-fields = {'phreeqcPH', 'phreeqcHCO3Molality', 'phreeqcCO2Molality', ...
-    'phreeqcTotalCarbon', 'tracerHCO3', 'tracerSO4', 'tracerHS', ...
-    'tracerCa', 'tracerMg', 'phreeqcFe2Molality', 'phreeqcFe3Molality', ...
-    'sequentialCompositionalPhreeqcAcetate', 'phreeqcCarbonatePka1', ...
-    'phreeqcMineralCalcite', 'phreeqcMineralDolomite', ...
-    'phreeqcMineralAnhydrite', 'phreeqcMineralQuartz', ...
-    'phreeqcMineralGoethite', 'phreeqcMineralBrucite', ...
-    'phreeqcMineralPortlandite', 'phreeqcMineralPyrite', ...
-    'phreeqcMineralGypsum'};
-for i = 1:numel(fields)
-    field = fields{i};
-    if isfield(stateBefore, field)
-        state.(field)(inactive, :) = stateBefore.(field)(inactive, :);
+    fields = {'phreeqcPH', 'phreeqcHCO3Molality', 'phreeqcCO2Molality', ...
+        'phreeqcTotalCarbon', 'tracerHCO3', 'tracerSO4', 'tracerHS', ...
+        'tracerCa', 'tracerMg', 'phreeqcFe2Molality', 'phreeqcFe3Molality', ...
+        'sequentialCompositionalPhreeqcAcetate', 'phreeqcCarbonatePka1', ...
+        'phreeqcMineralCalcite', 'phreeqcMineralDolomite', ...
+        'phreeqcMineralAnhydrite', 'phreeqcMineralQuartz', ...
+        'phreeqcMineralGoethite', 'phreeqcMineralBrucite', ...
+        'phreeqcMineralPortlandite', 'phreeqcMineralPyrite', ...
+        'phreeqcMineralGypsum'};
+    for i = 1:numel(fields)
+        field = fields{i};
+        if isfield(stateBefore, field)
+            state.(field)(inactive, :) = stateBefore.(field)(inactive, :);
+        end
     end
-end
 end
 
 function componentMoles = replaceComponentMoles(componentMoles, names, aliases, values, required)
-index = findComponent(names, aliases);
-if isempty(index)
-    assert(~required, 'compositional PHREEQC requires EOS component %s.', aliases{1});
-    return;
-end
-componentMoles(:, index) = max(values, 0);
+    index = findComponent(names, aliases);
+    if isempty(index)
+        assert(~required, 'compositional PHREEQC requires EOS component %s.', aliases{1});
+        return;
+    end
+    componentMoles(:, index) = max(values, 0);
 end
 
 function [rhoL, rhoV, sL, sV] = getPhaseProperties(model, state)

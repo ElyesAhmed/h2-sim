@@ -208,6 +208,24 @@ time increments, divided by the final reported kinetic time. The existing
 last-value fallback applies when that final time is nonpositive. Parsing does
 not convert the stored units or change kinetics, mineral correction or reflash.
 
+PHREEQC result writeback
+------------------------
+
+The compositional backend writes aqueous chemistry, mineral inventories and
+MET/ACE/SRB reaction results before reconstructing EOS composition. Aqueous
+molalities use mol/kg water; transported tracers use mol/m\ :sup:`3` liquid
+with the configured water density. Mineral inventories use mol per cell.
+Biomass remains separate from MRST's ``nbact``. Reaction rates retain the
+MET/ACE/SRB column order and are integrated over the coupling duration for
+per-cell H2 consumption.
+
+Inactive cells retain their previous chemistry, biomass and EOS component
+inventories; their reaction rates are zero. The EOS composition combines the
+reported aqueous and gas component inventories with the net water change.
+State-function caches are cleared before salinity feedback and EOS reflash;
+requested output state functions are refreshed afterwards. The ordering,
+nonnegative clipping and carbonate pKa fallback retain the existing behavior.
+
 PHREEQC state initialization and restarts
 -----------------------------------------
 
