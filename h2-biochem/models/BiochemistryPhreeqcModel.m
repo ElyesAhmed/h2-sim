@@ -402,31 +402,28 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
             end
         end
         function [eqs, names, types, state] = getModelEquations(model, state0, state, dt, drivingForces, varargin)
-            % As BiochemistryModel.getModelEquations, with two additions:
-            % when carbonateBuffer is active, the pre-step aqueous carbon
-            % inventory is cached (carbonSubstrateMoles/Dt) so the
-            % methanogenic/acetogenic growth rate can be capped by the
-            % carbon actually available (see CarbonLimitedGrowthRate); and
-            % an hco3Sink accumulator tracks the carbonate drawn down by
-            % the buffer, used later in this method to close its balance.
-            % None of this touches PHREEQC directly -- PHREEQC coupling
-            % happens after the timestep converges (see the run*Coupling
-            % utilities and BiochemistryPhreeqcModel's class-level docs).
+            % Assemble component, biomass, tracer and facility equations.
+            % dt is in seconds. Cache the pre-step carbon budget [mol]
+            % before evaluating reaction sources; the shared bicarbonate
+            % sink [mol/s] then couples the EOS CO2 and HCO3 balances.
+            % Preserve component density scaling and subtract signed
+            % reaction sources from the corresponding residuals.
+            % Local reaction stages omit spatial divergence. Reaction-free
+            % stages omit biological sources. PHREEQC chemistry runs only
+            % after convergence, outside equation assembly.
             %
             % Discretize
-            [eqs, flux, names, types] = model.FlowDiscretization.componentConservationEquations(model, state, state0, dt);
-            if model.bacteriamodel && model.carbonateBuffer && model.reactionsEnabled
-                % Use the pre-step aqueous inventory to bound this step's
-                % growth. Using the evolving Newton state here would make
-                % the rate cap consume its own final-state availability.
-                state.carbonSubstrateDt = dt;
-                state.carbonSubstrateMoles = getAqueousCarbonMoles(model, state0);
-            end
+            [eqs, flux, names, types] = ...
+                model.FlowDiscretization.componentConservationEquations( ...
+                    model, state, state0, dt);
+            state = cacheReactionCarbonBudget(model, state0, state, dt);
             src = model.FacilityModel.getComponentSources(state);
             % Assemble equations and add in sources
-            [pressures, sat, mob, rho, X] = model.getProps(state, 'PhasePressures', 's', 'Mobility', 'Density', 'ComponentPhaseMassFractions');
-            comps = cellfun(@(x, y) {x, y}, X(:, model.getLiquidIndex), X(:, model.getVaporIndex), 'UniformOutput', false);
-
+            [pressures, sat, mob, rho, X] = model.getProps(state, ...
+                'PhasePressures', 's', 'Mobility', 'Density', ...
+                'ComponentPhaseMassFractions');
+            comps = cellfun(@(x, y) {x, y}, X(:, model.getLiquidIndex), ...
+                X(:, model.getVaporIndex), 'UniformOutput', false);
 
             eqs = model.addBoundaryConditionsAndSources(eqs, names, types, state, ...
                 pressures, sat, mob, rho, ...
@@ -435,8 +432,7 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
 
             % Add sources
             eqs = model.insertSources(eqs, src);
-            % Assemble equations
-
+            % Couple microbial sources to the component and tracer balances.
             hco3Sink = 0;
             if model.bacteriamodel && model.reactionsEnabled
                 cnames = model.EOSModel.getComponentNames();
@@ -451,34 +447,13 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
                 end
 
                 if model.carbonateBuffer
-                    idxCO2 = find(strcmpi(cnames, 'CO2'), 1);
-                    assert(~isempty(idxCO2), ...
-                        'carbonateBuffer requires an EOS CO2 component.');
-
-                    hco3 = model.getProp(state, 'hco3');
-                    pv = model.PVTPropertyFunctions.get(model, state, 'PoreVolume');
-                    s = model.getProp(state, 's');
-                    if iscell(s)
-                        sL = max(s{L_ix}, 0);
-                    else
-                        sL = max(s(:, L_ix), 0);
-                    end
-
-                    molarMassCO2 = model.EOSModel.CompositionalMixture.molarMass(idxCO2);
-                    co2Demand = max(-src_rate{idxCO2}./rhoL./molarMassCO2, 0);
-                    hco3Available = pv.*sL.*hco3./dt;
-                    hco3Sink = min(co2Demand, hco3Available);
-
-                    % Bicarbonate supplies the CO2 consumed by MET/ACE.
-                    % src_rate is later divided by rhoL in the component
-                    % equation, so apply the inverse scaling here.
-                    src_rate{idxCO2} = src_rate{idxCO2} + ...
-                        hco3Sink.*molarMassCO2.*rhoL;
+                    [src_rate, hco3Sink] = applyBicarbonateSupply( ...
+                        model, state, dt, src_rate, rhoL, cnames, L_ix);
                 end
 
                 for i = 1:ncomp
                     if ~isempty(src_rate{i})
-                        eqs{i} = eqs{i} -src_rate{i}./rhoL;
+                        eqs{i} = eqs{i} - src_rate{i}./rhoL;
                     end
                 end
             end
@@ -505,18 +480,23 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
                     % and zero flux the equation only re-derives
                     % nbact == nbact0 every step, so skip assembling it
                     % rather than spending a Newton unknown on it.
-                    beqs = {}; bnames = {}; btypes = {};
+                    beqs = {};
+                    bnames = {};
+                    btypes = {};
                 else
                     % Bacterial mass balance: d(M)/dt + div(flux) = source
                     % where M = pv * S_l * nbact [kg]
-                    [beqs, bflux, bnames, btypes] = model.FlowDiscretization.bacteriaConservationEquation(model, state, state0, dt);
+                    [beqs, bflux, bnames, btypes] = ...
+                        model.FlowDiscretization.bacteriaConservationEquation( ...
+                            model, state, state0, dt);
                     if model.reactionsEnabled
-                        src_growthdecay = model.FacilityModel.getBacteriaSources(fd, state, state0, dt);
+                        src_growthdecay = model.FacilityModel.getBacteriaSources( ...
+                            fd, state, state0, dt);
                     end
 
                     % Assemble accumulation and flux divergence
-                    nbioreact=model.biochemFluid.nbioreact;
-                    for i=1:nbioreact
+                    nbioreact = model.biochemFluid.nbioreact;
+                    for i = 1:nbioreact
                         if model.localReactionMode
                             % No spatial coupling in local-reaction mode.
                         elseif model.bactDiffusion && ~model.chemotaxisEffect && ~isempty(bflux{i})
@@ -531,7 +511,6 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
                             beqs{i} = model.addBacterialDiffusionBC(beqs{i}, state, drivingForces, i);
                         else
                             % No diffusion: just accumulation term (pore-scale diffusion only)
-                             %beqs{1} = model.operators.AccDiv(beqs{1},0);
                         end
 
                         if model.reactionsEnabled
@@ -541,26 +520,8 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
                 end
 
                 if model.hasMobileAqueousTracers()
-                    % Aqueous tracers are advected with the liquid phase.
-                    % SO4/HS retain their SRB sources; HCO3 carries the
-                    % existing biological carbon sink, while Ca/Mg have no
-                    % MRST reaction source and are updated by PHREEQC.
-                    [tacc, tflux, tnames, ttypes] = model.FlowDiscretization.tracerConservationEquation(model, state, state0, dt);
-                    if model.reactionsEnabled
-                        src_tracer = model.FacilityModel.getAqueousTracerSources(fd, state, state0, dt);
-                        hco3Index = find(strcmp(tnames, 'HCO3'), 1);
-                        if ~isempty(hco3Index)
-                            src_tracer{hco3Index} = src_tracer{hco3Index} - hco3Sink;
-                        end
-                    end
-                    for i = 1:numel(tacc)
-                        if ~model.localReactionMode
-                            tacc{i} = model.operators.AccDiv(tacc{i}, tflux{i});
-                        end
-                        if model.reactionsEnabled
-                            tacc{i} = tacc{i} - src_tracer{i};
-                        end
-                    end
+                    [tacc, tnames, ttypes] = assembleAqueousTracerEquations( ...
+                        model, state0, state, dt, hco3Sink);
                     beqs  = [beqs, tacc];
                     bnames = [bnames, tnames];
                     btypes = [btypes, ttypes];
@@ -573,10 +534,11 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
             names = [names, bnames];
             types = [types, btypes];
 
-
-            [weqs, wnames, wtypes, state] = model.FacilityModel.getModelEquations(state0, state, dt, drivingForces);
+            [weqs, wnames, wtypes, state] = ...
+                model.FacilityModel.getModelEquations( ...
+                    state0, state, dt, drivingForces);
             % Concatenate
-            eqs   = [eqs  , weqs  ];
+            eqs   = [eqs, weqs];
             names = [names, wnames];
             types = [types, wtypes];
 
@@ -1200,6 +1162,72 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
             nbact = num2cell(zeros(1, nbioreact));
         end
 
+    end
+end
+
+function state = cacheReactionCarbonBudget(model, state0, state, dt)
+    % The limiter uses the initial inventory [mol], not the Newton iterate.
+    if model.bacteriamodel && model.carbonateBuffer && model.reactionsEnabled
+        % Use the pre-step aqueous inventory to bound this step's
+        % growth. Using the evolving Newton state here would make
+        % the rate cap consume its own final-state availability.
+        state.carbonSubstrateDt = dt;
+        state.carbonSubstrateMoles = getAqueousCarbonMoles(model, state0);
+    end
+end
+
+function [src_rate, hco3Sink] = applyBicarbonateSupply(model, state, dt, src_rate, rhoL, cnames, L_ix)
+    % hco3 is mol/m3 liquid; hco3Sink is a cellwise mol/s transfer to CO2.
+    idxCO2 = find(strcmpi(cnames, 'CO2'), 1);
+    assert(~isempty(idxCO2), ...
+        'carbonateBuffer requires an EOS CO2 component.');
+
+    hco3 = model.getProp(state, 'hco3');
+    pv = model.PVTPropertyFunctions.get(model, state, 'PoreVolume');
+    s = model.getProp(state, 's');
+    if iscell(s)
+        sL = max(s{L_ix}, 0);
+    else
+        sL = max(s(:, L_ix), 0);
+    end
+
+    molarMassCO2 = model.EOSModel.CompositionalMixture.molarMass(idxCO2);
+    co2Demand = max(-src_rate{idxCO2}./rhoL./molarMassCO2, 0);
+    hco3Available = pv.*sL.*hco3./dt;
+    hco3Sink = min(co2Demand, hco3Available);
+
+    % Bicarbonate supplies the CO2 consumed by MET/ACE.
+    % src_rate is later divided by rhoL in the component
+    % equation, so apply the inverse scaling here.
+    src_rate{idxCO2} = src_rate{idxCO2} + ...
+        hco3Sink.*molarMassCO2.*rhoL;
+end
+
+function [tacc, tnames, ttypes] = assembleAqueousTracerEquations(model, state0, state, dt, hco3Sink)
+    % Tracer accumulation/divergence and signed sources are in mol/s.
+    fd = model.FlowDiscretization;
+    % Aqueous tracers are advected with the liquid phase.
+    % SO4/HS retain their SRB sources; HCO3 carries the
+    % existing biological carbon sink, while Ca/Mg have no
+    % MRST reaction source and are updated by PHREEQC.
+    [tacc, tflux, tnames, ttypes] = ...
+        model.FlowDiscretization.tracerConservationEquation( ...
+            model, state, state0, dt);
+    if model.reactionsEnabled
+        src_tracer = model.FacilityModel.getAqueousTracerSources( ...
+            fd, state, state0, dt);
+        hco3Index = find(strcmp(tnames, 'HCO3'), 1);
+        if ~isempty(hco3Index)
+            src_tracer{hco3Index} = src_tracer{hco3Index} - hco3Sink;
+        end
+    end
+    for i = 1:numel(tacc)
+        if ~model.localReactionMode
+            tacc{i} = model.operators.AccDiv(tacc{i}, tflux{i});
+        end
+        if model.reactionsEnabled
+            tacc{i} = tacc{i} - src_tracer{i};
+        end
     end
 end
 

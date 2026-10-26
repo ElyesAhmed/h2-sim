@@ -150,6 +150,29 @@ The ProgID properties remain configuration metadata on Linux. Constructor
 validation does not establish runtime engine availability. Backend-specific
 coupling options are documented in the corresponding coupling utility.
 
+PHREEQC model equation assembly
+-------------------------------
+
+``BiochemistryPhreeqcModel.getModelEquations`` assembles component conservation,
+biomass, aqueous tracer and facility equations in that order. PHREEQC engine
+calls occur after convergence, outside the Newton equation assembly.
+
+When bacterial reactions and the carbonate buffer are enabled, the finite
+carbon limiter uses the start-of-step aqueous CO2 plus bicarbonate inventory
+in mol and the current timestep in seconds. The evolving Newton state does
+not replace that initial budget. Bicarbonate supplies a bounded part of the
+microbial CO2 demand through a shared cellwise sink in mol/s: its contribution
+is added to the CO2 source with the existing molar-mass and density scaling,
+and subtracted from the HCO3 tracer source. Signed sources are then subtracted
+from their residuals; tracer residuals are in mol/s.
+
+Reaction-disabled stages omit biological sources. Local reaction stages omit
+spatial flux divergence. Compositional PHREEQC owns its microbial reactions and
+omits the inactive H2sim biomass equations; the hybrid workflow retains H2sim
+reaction and biomass equations. SO4/HS keep their existing sources, while Ca/Mg
+have no H2sim reaction source and are updated by PHREEQC. This organization
+does not change stoichiometry, source scaling or conservation tolerances.
+
 Accepted-step PHREEQC coupling
 ------------------------------
 
