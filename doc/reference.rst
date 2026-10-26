@@ -208,6 +208,25 @@ time increments, divided by the final reported kinetic time. The existing
 last-value fallback applies when that final time is nonpositive. Parsing does
 not convert the stored units or change kinetics, mineral correction or reflash.
 
+PHREEQC shared rate definitions
+-------------------------------
+
+The shared ``RATES`` preamble defines methanogenesis (MET), sulfate reduction
+(SRB) and acetogenesis (ACE), followed by their biomass rates. Each chemistry
+builder keeps its own substrate limitation, temperature and pH response.
+All three retain the existing TDS suppression curve, using either PHREEQC's
+solution-density estimate or the pinned brine TDS parameter.
+
+Chemistry rates write ``PUT`` slots 1, 2 and 3 for MET, SRB and ACE,
+respectively. The corresponding biomass definitions read those same slots
+through ``GET``. Selected-output diagnostic columns retain the separate
+MET/ACE/SRB order. Growth and decay parameters supplied per day are converted
+to per second in the generated BASIC code.
+
+The biomass definitions share one template with explicit reaction name,
+slot, yield and decay parameters. Their existing ``SAVE`` sign convention,
+minimum biomass, carrying-capacity limit and numeric formatting are retained.
+
 PHREEQC cell input blocks
 -------------------------
 
