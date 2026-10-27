@@ -1,5 +1,5 @@
 classdef H2StoreWaterDensityTest < matlab.unittest.TestCase
-    %H2STOREWATERDENSITYTEST Preserve the two-input legacy approximation.
+    %H2STOREWATERDENSITYTEST Temperature-salinity density and array inputs.
     methods (Test)
         function scalarReferences(test)
             ref = reference();

@@ -38,8 +38,8 @@ The original two simulations use immiscible `GenericBlackOilModel`, constant
 temperature, and zero gravity. The phase-transfer tests below extend this
 coverage. Hysteresis, single-phase transitions, full aquifer setups, external
 pure-fluid data generation, and paper figures still need separate coverage.
-The legacy fixed-pi density approximation is covered numerically below; its
-physical fixed-pressure assumption remains undocumented.
+The temperature-salinity density approximation is covered numerically below;
+these checks do not establish its physical accuracy.
 
 ## Dissolution and vaporization
 
@@ -123,7 +123,7 @@ by hand. The phase-transfer fixture additionally checks the public helper
 against its independent component accounting for disgas, vapoil and combined
 models. Existing numerical reference files and tolerances are unchanged.
 
-## Legacy temperature-salinity density
+## Temperature-salinity density
 
 `H2StoreWaterDensityTest` adds five tests: twelve frozen scalar values,
 paired row/column vectors, a temperature-salinity grid, scalar expansion,
@@ -131,11 +131,10 @@ and a basic density/salinity sanity check. Scalar references were captured
 from the unmodified two-input implementation. They establish numerical
 preservation, not independent experimental accuracy.
 
-The helper still accepts only `T,S` and retains its historical fixed `pi`
-terms. Array multiplications involving salinity are now element-wise. The
+The helper accepts `T,S`, with element-wise salinity operations. The
 coefficient convention uses salt mass fraction, not g/L as previously stated
 in the help. Hassanzadeh et al. (2008), Appendix B, Eqs. B6-B14, documents
 that convention and the pressure-dependent form:
 https://doi.org/10.1016/S1750-5836(07)00010-2.
-The legacy choice of a fixed pi value is not established as a physical
-calibration; no pressure argument or new pressure model is introduced.
+Pressure is not an input. The reference values test the implemented
+approximation rather than a pressure-dependent density model.

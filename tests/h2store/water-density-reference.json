@@ -1,6 +1,6 @@
 {
   "source": "6f891940247e0d5835a3466f710e7862137aedfb",
-  "description": "Legacy fixed-pi approximation: numerical preservation, not independent physical validation. T in K; S salt mass fraction.",
+  "description": "Two-input temperature-salinity approximation: numerical references, not independent physical validation. T in K; S salt mass fraction.",
   "temperature": [
     288.15,
     313.15,

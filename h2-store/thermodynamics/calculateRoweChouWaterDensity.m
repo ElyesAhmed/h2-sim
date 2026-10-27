@@ -1,5 +1,5 @@
 function rho = calculateRoweChouWaterDensity(T, S)
-%CALCULATEROWECHOUWATERDENSITY Legacy temperature-salinity density estimate.
+%CALCULATEROWECHOUWATERDENSITY Temperature-salinity density estimate.
 %
 % SYNOPSIS:
 %   rho = calculateRoweChouWaterDensity(T, S)
@@ -7,18 +7,16 @@ function rho = calculateRoweChouWaterDensity(T, S)
 % PARAMETERS:
 %   T - Temperature [K].
 %   S - Salt mass fraction [kg salt/kg solution], consistent with the
-%       coefficients below. The former help text incorrectly stated g/L.
+%       coefficients below.
 %       Convert other salinity measures before calling this function.
 %       Inputs may be scalars or arrays with compatible sizes.
 %
 % RETURNS:
 %   rho - Density [kg/m^3], with MATLAB implicit expansion of T and S.
 %
-% This two-input implementation retains the historical fixed value pi in
-% the pressure-like terms. It has no pressure input and is not the general
-% pressure-dependent Rowe-Chou correlation. The physical rationale for that
-% fixed value is undocumented. Scalar results are preserved for compatibility;
-% this cleanup does not establish physical accuracy of the legacy choice.
+% Density is evaluated as a function of temperature and salinity. Pressure
+% is not an input. For the pressure-dependent form of the correlation,
+% see the references below.
 %
 % REFERENCES:
 %   Rowe and Chou (1970), J. Chem. Eng. Data 15(1), 61-66.
@@ -57,7 +55,7 @@ a6 = -0.0014814 + 0.829639e-5 .* T - 0.12469e-7 .* T.^2;
 a7 = 0.0027141 - 0.15391e-4 .* T + 0.22655e-7 * T.^2;
 a8 = 0.62158e-6 - 0.40075e-8 .* T + 0.65972e-11 .* T.^2;
 
-% Preserve the legacy fixed pi terms; combine salinity arrays element-wise.
+% Evaluate specific volume using element-wise salinity operations.
 rho_inverse = (a1 - a2 * pi - a3 .* pi^2 + a4 .* S + a5 .* S.^2 - a6 *pi.* S ...
     - a7 * pi .* S.^2 - 0.5 .* a8 * pi^2 .* S).*10^-3;
 
