@@ -16,12 +16,14 @@ classdef TracerDiffusivity < StateFunction
     %   D_disp is the same isotropic mechanical-dispersion approximation
     %   as DispersiveDiffusivity (liquid dispersivities only, since the
     %   tracers only exist in the liquid phase). D_diff_i uses fixed
-    %   reference aqueous molecular diffusivities for SO4^2- and HS-,
-    %   scaled by Millington-Quirk tortuosity.
+    %   reference aqueous molecular diffusivities in getAqueousTracerNames
+    %   order (SO4, HS, HCO3, and, when coupled, Ca/Mg). The molecular term
+    %   uses the existing Millington-Quirk tortuosity. All coefficients
+    %   include phi*S_l and have units m^2/s.
     %
     % REQUIRED PARAMETERS:
-    %   model - BiochemistryModel with sulfateReduction enabled and
-    %           molecularDiffusion/molecularDispersion flags set.
+    %   model - Model with mobile aqueous tracers and
+    %           molecularDiffusion/molecularDispersion flags.
     %
     % SEE ALSO:
     %   DispersiveDiffusivity, TracerTransmissibility, DiffusiveTracerFlux
@@ -89,23 +91,7 @@ classdef TracerDiffusivity < StateFunction
                 sL = max(s(:, L_ix), 0);
             end
 
-            % --- Mechanical dispersion (liquid phase) ---
-            D_disp = zeros(G.cells.num, 1);
-            if model.molecularDispersion
-                op = model.operators;
-                phase_flux = model.getProp(state, 'PhaseFlux');
-                u_face = ifcell(phase_flux, L_ix);
-                internalFaces = find(op.internalConn);
-                internalFaceMap = sparse(internalFaces, ...
-                    1:numel(internalFaces), 1, G.faces.num, ...
-                    numel(internalFaces));
-                u_face_all = internalFaceMap*u_face;
-
-                v_mag = faceFlux2cellSpeed(G, u_face_all);
-
-                D_disp = ((d.alphaL_water + 2*d.alphaT_water)/3) .* v_mag;
-                D_disp = max(D_disp, 0);
-            end
+            D_disp = liquidMechanicalDispersion(d, model, state, G, L_ix);
 
             % --- Molecular diffusion (Millington-Quirk tortuosity) ---
             if ismethod(model, 'getAqueousTracerNames')
@@ -132,6 +118,26 @@ classdef TracerDiffusivity < StateFunction
 end
 
 % ------------------------------------------------------------------------
+function D_disp = liquidMechanicalDispersion(d, model, state, G, L_ix)
+% Use the same isotropic Darcy-speed approximation as EOS dispersion.
+D_disp = zeros(G.cells.num, 1);
+if model.molecularDispersion
+    op = model.operators;
+    phase_flux = model.getProp(state, 'PhaseFlux');
+    u_face = ifcell(phase_flux, L_ix);
+    internalFaces = find(op.internalConn);
+    internalFaceMap = sparse(internalFaces, ...
+        1:numel(internalFaces), 1, G.faces.num, ...
+        numel(internalFaces));
+    u_face_all = internalFaceMap*u_face;
+
+    v_mag = faceFlux2cellSpeed(G, u_face_all);
+
+    D_disp = ((d.alphaL_water + 2*d.alphaT_water)/3) .* v_mag;
+    D_disp = max(D_disp, 0);
+end
+end
+
 function val = ifcell(field, ph)
 if iscell(field)
     val = field{ph};

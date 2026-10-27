@@ -18,11 +18,16 @@ classdef DispersiveDiffusivity < StateFunction
     %   The class checks the model flags:
     %       model.molecularDispersion  (true/false)
     %       model.molecularDiffusion   (true/false)
-    %   and activates the corresponding physics automatically.
+    %   and activates the corresponding physics automatically. Mechanical
+    %   dispersion uses ((alphaL + 2*alphaT)/3)*DarcySpeed. Molecular
+    %   diffusion retains the existing porosity/saturation tortuosity and
+    %   gas-mixture mixing rules. All returned coefficients include phi*S.
+    %   The configured floors and diffusion database values are unchanged.
     %
     % REQUIRED PARAMETERS:
-    %   model - Model instance with dispersion/diffusion flags and
-    %           parameters (alphaL_water, alphaT_water, etc.)
+    %   model - Reservoir model with grid, phase data, and transport flags.
+    %           Dispersivities and reference data are properties of this
+    %           state function, configured through property/value pairs.
     %
     % PROPERTIES (optional, set via property/value pairs):
     %   minPorosity = 1e-12
@@ -124,15 +129,11 @@ classdef DispersiveDiffusivity < StateFunction
                 return;
             end
 
-            op = model.operators;
-            G = model.G;
-
             ncomp = model.getNumberOfComponents();
             nph = model.getNumberOfPhases();
             L_ix = model.getLiquidIndex();
             V_ix = model.getVaporIndex();
             nm = model.getPhaseNames();
-            ncells = G.cells.num;
 
             % --- Porosity (cell-based) ----------------------------------------
             if isprop(model, 'rock') && isa(model.rock.poro, 'function_handle')
@@ -144,43 +145,8 @@ classdef DispersiveDiffusivity < StateFunction
             end
             phi = max(phi, d.minPorosity);
 
-            % --- Pre-compute mechanical dispersion (phase-only) ---------------
-            % D_disp{ph} computed ONCE per phase, not per component
-            D_disp_ph = cell(nph, 1);
-            [D_disp_ph{:}] = deal(zeros(ncells, 1));
-
-            if model.molecularDispersion
-                phase_flux = model.getProp(state, 'PhaseFlux');
-
-                % Dispersivity coefficients
-                aL = zeros(1, nph);
-                aT = zeros(1, nph);
-                aL(L_ix) = d.alphaL_water;
-                aT(L_ix) = d.alphaT_water;
-                if V_ix ~= L_ix
-                    aL(V_ix) = d.alphaL_gas;
-                    aT(V_ix) = d.alphaT_gas;
-                end
-
-                % Compute dispersion for each phase (ONCE)
-                for ph = 1:nph
-                    u_face = ifcell(phase_flux, ph);
-                    internalFaces = find(op.internalConn);
-                    internalFaceMap = sparse(internalFaces, ...
-                        1:numel(internalFaces), 1, G.faces.num, ...
-                        numel(internalFaces));
-                    u_face_all = internalFaceMap*u_face;
-
-                    v_mag = faceFlux2cellSpeed(G, u_face_all);
-
-                    % Isotropic dispersive diffusivity (Scheidegger)
-                    % D_disp = aL*|v| for longitudinal
-                    % Full tensor: D = aL*(vv'/|v|^2) + aT*(I - vv'/|v|^2)
-                    % Isotropic approximation: D = ((aL + 2*aT)/3)*|v|
-                    D_disp_ph{ph} = ((aL(ph) + 2*aT(ph))/3) .* v_mag;
-                    D_disp_ph{ph} = max(D_disp_ph{ph}, 0);
-                end
-            end
+            % Mechanical dispersion is common to all components in a phase.
+            D_disp_ph = mechanicalDispersion(d, model, state, nph, L_ix, V_ix);
 
             % --- Pre-compute molecular diffusion parameters -------------------
             if model.molecularDiffusion
@@ -216,22 +182,8 @@ classdef DispersiveDiffusivity < StateFunction
                             % Liquid diffusion
                             D_i = Dliq_ref(c);
                         elseif ph == V_ix
-                            % Gas diffusion (Wilke multi-component)
-                            % D_i,mix = (1 - y_i) / sum(y_j/D_ij) for j!=i
-                            yAll = model.getProp(state, 'y');
-                            yc_curr = localGetComponentVector(yAll, c);
-                            numerator = max(1 - yc_curr, 1e-6);
-
-                            invDi = 0;
-                            for j = 1:ncomp
-                                if j == c, continue; end
-                                yj = localGetComponentVector(yAll, j);
-                                Dij = Dij_ref(c, j) .* gasScale;
-                                Dij = max(Dij, d.minDiffusivity);
-                                invDi = invDi + yj ./ Dij;
-                            end
-                            Di_mix = numerator ./ max(invDi, d.minDiffusivity);
-                            D_i = Di_mix;
+                            D_i = gasMixtureDiffusivity( ...
+                                d, model, state, c, ncomp, Dij_ref, gasScale);
                         end
 
                         D_i = max(D_i, d.minDiffusivity);
@@ -256,6 +208,65 @@ end
 % ------------------------------------------------------------------------
 % Helper functions
 % ------------------------------------------------------------------------
+function D_disp_ph = mechanicalDispersion(d, model, state, nph, L_ix, V_ix)
+% Isotropic Darcy-speed approximation, evaluated once per phase.
+G = model.G;
+op = model.operators;
+ncells = G.cells.num;
+D_disp_ph = cell(nph, 1);
+[D_disp_ph{:}] = deal(zeros(ncells, 1));
+
+if model.molecularDispersion
+    phase_flux = model.getProp(state, 'PhaseFlux');
+
+    % Dispersivity coefficients
+    aL = zeros(1, nph);
+    aT = zeros(1, nph);
+    aL(L_ix) = d.alphaL_water;
+    aT(L_ix) = d.alphaT_water;
+    if V_ix ~= L_ix
+        aL(V_ix) = d.alphaL_gas;
+        aT(V_ix) = d.alphaT_gas;
+    end
+
+    % Compute dispersion for each phase (ONCE)
+    for ph = 1:nph
+        u_face = ifcell(phase_flux, ph);
+        internalFaces = find(op.internalConn);
+        internalFaceMap = sparse(internalFaces, ...
+            1:numel(internalFaces), 1, G.faces.num, ...
+            numel(internalFaces));
+        u_face_all = internalFaceMap*u_face;
+
+        v_mag = faceFlux2cellSpeed(G, u_face_all);
+
+        % Isotropic approximation: D = ((aL + 2*aT)/3)*DarcySpeed.
+        D_disp_ph{ph} = ((aL(ph) + 2*aT(ph))/3) .* v_mag;
+        D_disp_ph{ph} = max(D_disp_ph{ph}, 0);
+    end
+end
+end
+
+function D_i = gasMixtureDiffusivity(d, model, state, c, ncomp, Dij_ref, gasScale)
+% Wilke mixture coefficient from the unchanged binary-reference matrix.
+% Gas diffusion (Wilke multi-component)
+% D_i,mix = (1 - y_i) / sum(y_j/D_ij) for j!=i
+yAll = model.getProp(state, 'y');
+yc_curr = localGetComponentVector(yAll, c);
+numerator = max(1 - yc_curr, 1e-6);
+
+invDi = 0;
+for j = 1:ncomp
+    if j == c, continue; end
+    yj = localGetComponentVector(yAll, j);
+    Dij = Dij_ref(c, j) .* gasScale;
+    Dij = max(Dij, d.minDiffusivity);
+    invDi = invDi + yj ./ Dij;
+end
+Di_mix = numerator ./ max(invDi, d.minDiffusivity);
+D_i = Di_mix;
+end
+
 function val = ifcell(field, ph)
 % Extract phase from cell array or matrix.
 if iscell(field)

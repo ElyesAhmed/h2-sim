@@ -132,6 +132,35 @@ saturation floor of ``1e-8``, and cell-volume scaling are preserved.
 The compositional PHREEQC backend suppresses these in-step conversion
 sources because its post-convergence chemistry owns those reactions.
 
+Transport coefficients and face fluxes
+-------------------------------------
+
+``DispersiveDiffusivity`` and ``TracerDiffusivity`` combine the existing
+isotropic mechanical-dispersion approximation with optional molecular
+diffusion. Mechanical dispersion uses ``(alphaL + 2*alphaT)/3`` times the
+reconstructed Darcy speed. EOS molecular diffusion retains its liquid
+reference data, gas-mixture rule, and pressure/temperature scaling; tracers
+use their fixed aqueous reference coefficients. The existing porosity,
+saturation, tortuosity, and diffusivity floors are preserved.
+
+``MicrobialDiffusivity`` returns ``bactdiff * phi * max(sL, 0)``.
+``MicrobialChemotaxis`` includes the volume-filling factor
+``theta * (1-theta)``, with ``theta`` clipped to ``[0, 1]`` from
+``nbact/bact_maxProp``. Non-positive configured coefficients retain their
+existing warning behavior and arithmetic; this cleanup adds no clamping.
+
+``DynamicFlowTransmissibility`` converts these cell coefficients to TPFA
+face conductances using grid geometry and harmonic averaging. For
+diffusivity inputs the conductance has units m3/s. Numeric/AD conductivity
+uses the ``allFaces`` flag; legacy cell-array conductivity returns all grid
+faces regardless of that flag. Transport wrappers select internal faces.
+Component phase fluxes retain their correction for zero net diffusive phase
+mass flux; tracer fluxes use molar concentrations without a density factor.
+
+For direct state-function evaluations outside the solver, initialize AD
+variables through ``model.AutoDiffBackend.initVariablesAD`` so their type
+matches the model's discrete operators.
+
 Saved backend figures
 ---------------------
 

@@ -10,7 +10,9 @@ classdef MicrobialDiffusivity < StateFunction
     %   as phi * S_l * D_b, where D_b is the bacterial diffusion coefficient
     %   (`model.biochemFluid.bactdiff`) and phi is the current porosity
     %   (possibly dynamic due to bio-clogging). If bacterial diffusion is
-    %   disabled or D_b is non-positive, a zero value is returned.
+    %   disabled, zero coefficients are returned. Non-positive configured
+    %   coefficients emit the existing warning; this class still evaluates
+    %   the configured formula and does not clamp negative values.
     %
     % REQUIRED PARAMETERS:
     %   model - Model instance, must have fields `bactDiffusion` (logical)
@@ -25,10 +27,6 @@ classdef MicrobialDiffusivity < StateFunction
     % SEE ALSO:
     %   StateFunction, DynamicFlowTransmissibility
 
-    properties
-        % No additional properties needed
-    end
-
     methods
         %-----------------------------------------------------------------%
         function md = MicrobialDiffusivity(model, varargin)
@@ -36,43 +34,41 @@ classdef MicrobialDiffusivity < StateFunction
             md = merge_options(md, varargin{:});
 
             % Dependencies: pressure, saturation, and nbact (for dynamic porosity)
-            md = md.dependsOn({'s','pressure','nbact'}, 'state');
+            md = md.dependsOn({'s', 'pressure', 'nbact'}, 'state');
             md = md.dependsOn('PoreVolume', 'PVTPropertyFunctions');
             md.label = 'D_{bact}^{eff}';
         end
 
         %-----------------------------------------------------------------%
-        function dN = evaluateOnDomain(prop, model, state)
-            bcrm=model.biochemFluid;
-            nbioreact=bcrm.nbioreact;
+        function dN = evaluateOnDomain(~, model, state)
+            bcrm = model.biochemFluid;
+            nbioreact = bcrm.nbioreact;
             % Fetch primary state variables
-            [ s, p, nbact] = model.getProps(state, 's', 'pressure','nbact');
+            [s, p, nbact] = model.getProps(state, 's', 'pressure', 'nbact');
 
             % Porosity - dynamic (bio-clogging) or static
             if isprop(model, 'rock') && isa(model.rock.poro, 'function_handle')
-                nbact = model.getProp(state, 'nbact');
                 nbactArray = model.extractBactValues(nbact);
-                phi = model.rock.poro(p, nbactArray{:}); % Apply both modifications
+                phi = model.rock.poro(p, nbactArray{:}); % Pressure/population-dependent porosity.
             else
                 phi = model.rock.poro;
             end
 
 
-            % Initialize with zero growth rate
-            dN=cell(1,nbioreact);
+            % One effective coefficient per microbial population.
+            dN = cell(1, nbioreact);
             [dN{:}] = deal(0);
 
-            % Liquid saturation
-            for i=1:nbioreact
-                L_ix = model.getLiquidIndex();
-                if iscell(s)
-                    sL = s{L_ix};
-                else
-                    sL = s(:, L_ix);
-                end
+            % Liquid saturation is common to all microbial populations.
+            L_ix = model.getLiquidIndex();
+            if iscell(s)
+                sL = s{L_ix};
+            else
+                sL = s(:, L_ix);
+            end
+            liquidSaturation = max(sL, 0);
 
-                Voln = max(sL, 0);
-
+            for i = 1:nbioreact
                 % Effective microbial diffusivity
                 if model.bactDiffusion
                     if model.biochemFluid.bactdiff(i) <= 0
@@ -80,7 +76,7 @@ classdef MicrobialDiffusivity < StateFunction
                                  'bactdiff coefficient is zero or negative for species %d. ' ...
                                  'Diffusion will be inactive.'], i);
                     end
-                    dN{i} = model.biochemFluid.bactdiff(i) .* phi .* Voln;
+                    dN{i} = model.biochemFluid.bactdiff(i) .* phi .* liquidSaturation;
                 end
             end
         end
