@@ -45,7 +45,7 @@ function getFluidH2BrineProps(tab_h2o, tab_h2, tab_sol, varargin)
 %   generateSolubilityTable, generateComponentTable.
 
 %{
-Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
 
@@ -366,23 +366,26 @@ for i = 1:M
     p_usat = linspace(p(i), 1.2 * max(p), nusat + 1); % Unsaturated pressure values
     p_usat = p_usat(2:end); % Exclude first element (equal to p(i))
 
-    % Write data for each unsaturated pressure point
-    for j = 1:nusat
-        rho_w_j = interp1(p, pure_water_density, p_usat(j), 'linear', 'extrap'); % Interpolate water density
-        rho_w_dissolved = WaterDensity(T, rho_w_j, X_h2); % Calculate density with dissolved hydrogen
-        bO_usat = shrinkageFactor(rho_w_dissolved, X_h2, rhoOS, rhoGS); % Calculate shrinkage factor
-        rho_new = bO_usat * (rhoOS + Rs(i) * rhoGS); % New density calculation
-        assert(abs(rho_w_dissolved - rho_new) < 1e-3, 'Density mismatch exceeds tolerance.');
+    % Interpolate and evaluate every undersaturated pressure in one call.
+    rho_w = interp1(p, pure_water_density, p_usat, 'linear', 'extrap');
+    rho_w_dissolved = WaterDensity(T, rho_w, X_h2);
+    bO_usat = shrinkageFactor(rho_w_dissolved, X_h2, rhoOS, rhoGS);
+    rho_new = bO_usat * (rhoOS + Rs(i) * rhoGS);
+    assert(all(abs(rho_w_dissolved - rho_new) < 1e-3), ...
+        'Density mismatch exceeds tolerance.');
 
-        % Write unsaturated pressure, FVF, and viscosity values to file
-        fprintf(fn, '           %-4.10g %-4.10g %-4.10g', ...
-            p_usat(j) * u.press, ub * (1 / bO_usat), u.viscosity * mu);
-        if j == nusat
-            fprintf(fn, ' /\n'); % End of line for last entry
-        else
-            fprintf(fn, '\n'); % New line for subsequent entries
+    % fprintf consumes columns, preserving the original row order and the
+    % terminating slash on the last undersaturated record of each Rs block.
+    if nusat > 0
+        records = [p_usat * u.press; ...
+                   ub * (1 ./ bO_usat); ...
+                   repmat(u.viscosity * mu, size(p_usat))];
+        if nusat > 1
+            fprintf(fn, '           %-4.10g %-4.10g %-4.10g\n', records(:, 1:end-1));
         end
+        fprintf(fn, '           %-4.10g %-4.10g %-4.10g /\n', records(:, end));
     end
+
 end
 
 % Close the file

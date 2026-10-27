@@ -81,3 +81,12 @@ These calculations do not call `computeGasVolumes`, whose accounting audit
 remains separate. MRST currently prints an SGOF warning for oil-gas-only decks
 without a separate water relative-permeability table; its zero connate-water
 fallback is appropriate here. The tests do not suppress warnings globally.
+
+## Undersaturated PVTO pressure grids
+
+`H2StorePVTOTest` checks 1, 3 and 30 undersaturated pressure points per Rs
+block. The generated deck must parse into the expected number of records,
+with finite positive formation volume factors and viscosities, increasing
+pressures and the expected final pressure. This covers the scalar case and
+multi-record formatting in the vectorized PVTO writer. Numerical regression
+references and tolerances are unchanged.
