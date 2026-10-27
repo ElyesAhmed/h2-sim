@@ -90,3 +90,26 @@ with finite positive formation volume factors and viscosities, increasing
 pressures and the expected final pressure. This covers the scalar case and
 multi-record formatting in the vectorized PVTO writer. Numerical regression
 references and tolerances are unchanged.
+
+## Solubility tables
+
+`H2StoreSolubilityTest` adds 18 checks for the water and brine generators:
+scalar-reference values at 1 and 3 temperatures and 0, 1 and 3 mol/kg salt,
+temperature-major row order, the smallest supported grid, pressure-count errors,
+CSV pressure metadata, and reuse of an existing CSV without rewriting it.
+`solubility-reference.json` contains values captured from the original scalar
+implementations at the recorded source revision. In-memory comparisons use
+2e-13 relative and 1e-15 absolute tolerances; cached values retain the existing
+CSV precision and are checked at 6e-5 relative and 1e-12 absolute tolerance.
+The original solubility correlations and CSV numeric formats are unchanged.
+
+The generators evaluate the complete temperature-pressure grid in array
+operations and write the table once. With `reCompute=false`, existing tables
+can be reused without recalculating solubility. The water model ignores its
+legacy `ms` option; use the brine generator for salinity. The two correlations
+remain distinct, including at zero salt. Existing filename conventions are
+preserved, including their misleading historical `bar` label for Pa numbers.
+Use separate folders for the two models, and regenerate when changing grid
+resolution because the filename does not include point counts. These tests
+check numerical preservation and table handling, not independent validation
+of the empirical correlations.
