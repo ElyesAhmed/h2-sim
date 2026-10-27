@@ -23,7 +23,10 @@ function results = runH2StoreTests(mrstRoot)
     mrstModule add ad-core ad-props ad-blackoil deckformat;
     addpath(genpath(fullfile(root, 'h2-store')));
     addpath(folder);
-    results = runtests(fullfile(folder, 'H2StoreTest.m'));
+    suite = matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreTest.m'));
+    suite = [suite, matlab.unittest.TestSuite.fromFile( ...
+        fullfile(folder, 'H2StorePhaseTransferTest.m'))];
+    results = run(suite);
     assert(~isempty(results) && all([results.Passed]), ...
         'h2sim:h2store:TestFailure', 'All h2-store tests must pass without skips.');
 end
