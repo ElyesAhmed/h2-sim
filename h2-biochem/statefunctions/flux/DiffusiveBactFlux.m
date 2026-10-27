@@ -19,9 +19,6 @@ classdef DiffusiveBactFlux < StateFunction
     % SEE ALSO:
     %   StateFunction, MicrobialTransmissibility
 
-    properties
-    end
-
     methods
         %-----------------------------------------------------------------%
         function df = DiffusiveBactFlux(model, varargin)
@@ -39,8 +36,8 @@ classdef DiffusiveBactFlux < StateFunction
         %-----------------------------------------------------------------%
         function DN = evaluateOnDomain(prop, model, state)
             op = model.operators;
-            bcrm=model.biochemFluid;
-            nbioreact=bcrm.nbioreact;
+            bcrm = model.biochemFluid;
+            nbioreact = bcrm.nbioreact;
 
             % Retrieve microbial transmissibility
             T = prop.getEvaluatedDependencies(state, 'MicrobialTransmissibility');
@@ -48,24 +45,25 @@ classdef DiffusiveBactFlux < StateFunction
             % State variables and properties
             [nbact, rho] = model.getProps(state, 'nbact', 'Density');
 
-            % Initialize with zero growth rate
-            DN=cell(1,nbioreact);
+            % One internal-face mass flux per microbial population [kg/s].
+            DN = cell(1, nbioreact);
             [DN{:}] = deal(0);
 
-            % Liquid density (face averaged)
-            for i=1:nbioreact
-                L_ix = model.getLiquidIndex();
-                if iscell(rho)
-                    rhoL = rho{L_ix};
-                else
-                    rhoL = rho(:, L_ix);
-                end
+            % Liquid density is shared by all microbial populations.
+            L_ix = model.getLiquidIndex();
+            if iscell(rho)
+                rhoL = rho{L_ix};
+            else
+                rhoL = rho(:, L_ix);
+            end
+            rhoLf = op.faceAvg(rhoL);
+
+            for i = 1:nbioreact
                 if iscell(nbact)
-                    nbacti=nbact{i};
+                    nbacti = nbact{i};
                 else
-                    nbacti=nbact(:,i);
+                    nbacti = nbact(:, i);
                 end
-                rhoLf = model.operators.faceAvg(rhoL);
 
                 % Diffusive flux (all faces)
                 DN{i} = - rhoLf .* T{i} .* op.Grad(nbacti);

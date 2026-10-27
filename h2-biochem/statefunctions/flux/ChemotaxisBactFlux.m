@@ -1,27 +1,18 @@
 classdef ChemotaxisBactFlux < StateFunction
-    % Diffusive flux of bacteria (mass‑fraction based).
+    % Chemotactic bacterial mass flux driven by dissolved H2 gradients.
     %
     % SYNOPSIS:
     %   flux = ChemotaxisBactFlux(model)
     %
     % DESCRIPTION:
-    %   Computes the face-wise diffusive flux of bacteria in the liquid
-    %   phase as
-    %Jchemotaxis = Kchemo * nbact *(1 - nbact) * Grad(xH2)
-    % (volume-filling effect, generalized Keller-Segel model)
-    %   where T is the chemotaxis transmissibility provided by
-    %   `chemotaxisTransmissibility` and rho_l^f is the face-averaged liquid
-    %   density.
-    %
-    % REQUIRED PARAMETERS:
-    %   model - Model with `MicrobialTransmissibility` state function
-    %           registered and bacterial modelling enabled.
+    %   Computes J_i = rhoL_face .* T_i .* Grad(xH2_i) [kg/s].
+    %   ChemotaxisTransmissibility contains the effective chemotactic
+    %   coefficient and geometry. The volume-filling population factor
+    %   is evaluated by MicrobialChemotaxis. Positive flux follows the
+    %   increasing dissolved-H2 mole fraction, opposite to diffusion.
     %
     % SEE ALSO:
-    %   StateFunction, MicrobialTransmissibility
-
-    properties
-    end
+    %   MicrobialChemotaxis, ChemotaxisTransmissibility, DiffusiveBactFlux
 
     methods
         %-----------------------------------------------------------------%
@@ -40,18 +31,18 @@ classdef ChemotaxisBactFlux < StateFunction
         %-----------------------------------------------------------------%
         function DN = evaluateOnDomain(prop, model, state)
             op = model.operators;
-            bcrm=model.biochemFluid;
-            nbioreact=bcrm.nbioreact;
+            bcrm = model.biochemFluid;
+            nbioreact = bcrm.nbioreact;
 
 
-            % Retrieve microbial transmissibility
+            % Retrieve chemotactic transmissibility
             T = prop.getEvaluatedDependencies(state, 'ChemotaxisTransmissibility');
 
             % State variables and properties
             [x, rho] = model.getProps(state, 'x', 'Density');
 
-            % Initialize with zero growth rate
-            DN=cell(1,nbioreact);
+            % One internal-face mass flux per microbial population [kg/s].
+            DN = cell(1, nbioreact);
             [DN{:}] = deal(0);
 
             % Liquid density (face averaged)
@@ -64,15 +55,15 @@ classdef ChemotaxisBactFlux < StateFunction
             end
             rhoLf = model.operators.faceAvg(rhoL);
 
-            for i=1:nbioreact
-                indH2= find(strcmpi(namecp, bcrm.rH2(i)), 1);
+            for i = 1:nbioreact
+                indH2 = find(strcmpi(namecp, bcrm.rH2(i)), 1);
                 if iscell(x)
-                    xH2=x{indH2};
+                    xH2 = x{indH2};
                 else
-                    xH2=x(:,indH2);
+                    xH2 = x(:, indH2);
                 end
 
-                % Diffusive flux (all faces)
+                % Chemotactic flux on internal faces
                 DN{i} = + rhoLf .* T{i} .* op.Grad(xH2);
             end
         end

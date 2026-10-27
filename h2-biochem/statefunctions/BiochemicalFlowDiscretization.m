@@ -1,11 +1,18 @@
 classdef BiochemicalFlowDiscretization < FlowDiscretization
-    % BiochemicalFlowDiscretization
-    % Discretization and state function grouping for bio-chemical flow
-    % within a compositional model with microbial growth.
-
-    properties
-        % No additional properties needed
-    end
+    % State-function grouping and finite-volume biochemical balances.
+    %
+    % SYNOPSIS:
+    %   fd = BiochemicalFlowDiscretization(model)
+    %
+    % DESCRIPTION:
+    %   Registers optional component dispersion, microbial diffusion and
+    %   chemotaxis, and aqueous-tracer transport. Conservation methods
+    %   return accumulation rates and internal-face fluxes separately;
+    %   BiochemistryModel adds divergence, boundary fluxes, and sources.
+    %   Bacterial rates are in kg/s and tracer rates are in mol/s.
+    %
+    % SEE ALSO:
+    %   BiochemistryModel, BacterialMass, AqueousTracerMass
 
     methods
         %-----------------------------------------------------------------%
@@ -52,7 +59,7 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
                         MicrobialTransmissibility(model));
                     props = props.setStateFunction('BactFlux', DiffusiveBactFlux(model));
                 end
-                 if model.chemotaxisEffect
+                if model.chemotaxisEffect
                     props = props.setStateFunction('MicrobialChemotaxis', MicrobialChemotaxis(model));
                     props = props.setStateFunction('ChemotaxisTransmissibility', ...
                         ChemotaxisTransmissibility(model));
@@ -66,7 +73,7 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
                 end
                 if hasTracers
                     if model.sulfateReduction
-                    props = props.setStateFunction('SRBTracerConvRate', SRBTracerConvRate(model));
+                        props = props.setStateFunction('SRBTracerConvRate', SRBTracerConvRate(model));
                     end
 
                     if (isprop(model, 'molecularDispersion') && model.molecularDispersion) || ...
@@ -93,34 +100,35 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
             bactmass0 = model.getProp(state0, 'BacterialMass');
 
             % Accumulation term: d(bactmass)/dt
-            nbioreact=model.biochemFluid.nbioreact;
-            acc=cell(1,nbioreact);
+            nbioreact = model.biochemFluid.nbioreact;
+            acc = cell(1, nbioreact);
             [acc{:}] = deal(0);
-            for i=1:nbioreact
+            for i = 1:nbioreact
                 acc{i} = (bactmass{i} - bactmass0{i}) ./ dt;
             end
-            % Add microbial diffusion contributions if present
-             bflux =cell(1,nbioreact);
+            % Build the transport state only when a spatial mechanism is active.
+            bflux = cell(1, nbioreact);
             [bflux{:}] = deal(0);
-            if (model.bactDiffusion && ~model.chemotaxisEffect)
+            if model.bactDiffusion || model.chemotaxisEffect
                 flowState = fd.buildFlowState(model, state, state0, dt);
-                bflux = model.getProp(flowState, 'BactFlux');
-            elseif (~model.bactDiffusion && model.chemotaxisEffect)
-                flowState = fd.buildFlowState(model, state, state0, dt);
-                bflux = model.getProp(flowState, 'ChemoBactFlux');
-            elseif (model.bactDiffusion && model.chemotaxisEffect)
-                flowState = fd.buildFlowState(model, state, state0, dt);
-                BactFlux = model.getProp(flowState, 'BactFlux');
-                ChemoFlux = model.getProp(flowState, 'ChemoBactFlux');
-                bflux = cell(size(BactFlux));
-                for i = 1:numel(BactFlux)
-                    bflux{i} = BactFlux{i} + ChemoFlux{i};
+                if model.bactDiffusion
+                    bflux = model.getProp(flowState, 'BactFlux');
+                end
+                if model.chemotaxisEffect
+                    chemoFlux = model.getProp(flowState, 'ChemoBactFlux');
+                    if model.bactDiffusion
+                        for i = 1:numel(bflux)
+                            bflux{i} = bflux{i} + chemoFlux{i};
+                        end
+                    else
+                        bflux = chemoFlux;
+                    end
                 end
             end
 
             % Output variable names and types
             name = model.biochemFluid.bactnames;
-            type=cell(1,nbioreact);
+            type = cell(1, nbioreact);
             [type{:}] = deal('cell');
         end
 

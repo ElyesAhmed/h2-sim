@@ -154,7 +154,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             nbioreact = numel(model.biochemFluid.metabolicReaction);
             namecp = compFluid.names;
             model.gammak = zeros(nbioreact, ncomp);
-           for i=1:nbioreact
+            for i = 1:nbioreact
                 indH2   = find(strcmp(namecp, model.biochemFluid.rH2(i)));
                 indH2O  = find(strcmp(namecp, model.biochemFluid.pH2O(i)));
                 indsub  = find(strcmp(namecp, model.biochemFluid.rsub(i)));
@@ -305,7 +305,8 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             cnames = model.EOSModel.getComponentNames();
             extra = model.getNonEoSPhaseNames();
             ne = numel(extra);
-            enames = cell(1, ne); evars = cell(1, ne);
+            enames = cell(1, ne);
+            evars  = cell(1, ne);
             for i = 1:ne
                 sn = ['s', extra(i)];
                 enames{i} = sn;
@@ -381,7 +382,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
 
                 for i = 1:ncomp
                     if ~isempty(src_rate{i})
-                        eqs{i} = eqs{i} -src_rate{i}./rhoL;
+                        eqs{i} = eqs{i} - src_rate{i}./rhoL;
                     end
                 end
             end
@@ -397,56 +398,12 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 end
             end
             if model.bacteriamodel
-                % Bacterial mass balance: d(M)/dt + div(flux) = source
-                % where M = pv * S_l * nbact [kg]
-                [beqs, bflux, bnames, btypes] = model.FlowDiscretization.bacteriaConservationEquation(model, state, state0, dt);
-                fd = model.FlowDiscretization;
-                if model.reactionsEnabled
-                    src_growthdecay = model.FacilityModel.getBacteriaSources(fd, state, state0, dt);
-                end
-
-                % Assemble accumulation and flux divergence
-                nbioreact=model.biochemFluid.nbioreact;
-                for i=1:nbioreact
-                    if model.localReactionMode
-                        % No spatial coupling in local-reaction mode.
-                    elseif model.bactDiffusion && ~model.chemotaxisEffect && ~isempty(bflux{i})
-                        beqs{i} = model.operators.AccDiv(beqs{i}, bflux{i});
-                        % Dirichlet boundary conditions for bacterial diffusion
-                        beqs{i} = model.addBacterialDiffusionBC(beqs{i}, state, drivingForces, i);
-                    elseif model.chemotaxisEffect && ~model.bactDiffusion && ~isempty(bflux{i})
-                        beqs{i} = model.operators.AccDiv(beqs{i}, bflux{i});
-                    elseif model.bactDiffusion && model.chemotaxisEffect && ~isempty(bflux{i})
-                        beqs{i} = model.operators.AccDiv(beqs{i}, bflux{i});
-                        % Dirichlet boundary conditions for bacterial diffusion
-                        beqs{i} = model.addBacterialDiffusionBC(beqs{i}, state, drivingForces, i);
-                    else
-                        % No diffusion: just accumulation term (pore-scale diffusion only)
-                    end
-
-                    if model.reactionsEnabled
-                        beqs{i} = beqs{i} - src_growthdecay{i};
-                    end
-                end
-
+                [beqs, bnames, btypes] = model.getBacterialBalanceEquations( ...
+                    state0, state, dt, drivingForces);
                 if model.sulfateReduction
-                    % SO4/HS aqueous tracer mass balance: pure advection
-                    % with the liquid phase plus SRB reaction source, no
-                    % EOS/flash coupling (see SoreideWhitsonEos and
-                    % SRBTracerConvRate).
-                    [tacc, tflux, tnames, ttypes] = model.FlowDiscretization.tracerConservationEquation(model, state, state0, dt);
-                    if model.reactionsEnabled
-                        src_tracer = model.FacilityModel.getSRBTracerSources(fd, state, state0, dt);
-                    end
-                    for i = 1:2
-                        if ~model.localReactionMode
-                            tacc{i} = model.operators.AccDiv(tacc{i}, tflux{i});
-                        end
-                        if model.reactionsEnabled
-                            tacc{i} = tacc{i} - src_tracer{i};
-                        end
-                    end
-                    beqs  = [beqs, tacc];
+                    [teqs, tnames, ttypes] = model.getSRBTracerBalanceEquations( ...
+                        state0, state, dt);
+                    beqs   = [beqs, teqs];
                     bnames = [bnames, tnames];
                     btypes = [btypes, ttypes];
                 end
@@ -531,7 +488,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             N  = G.faces.normals(faces, :);
             cn = abs(sum(C.*N, 2))./sum(C.*C, 2);
 
-            % Cell-centred microbial diffusivity D_b = bactdiff*pv*sL
+            % Cell-centred effective diffusivity D_b = bactdiff*phi*sL
             D = model.getProp(state, 'MicrobialDiffusivity');
             if iscell(D)
                 D = D{species};
@@ -749,7 +706,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             end
         end
 
-function scale = getEquationScaling(model, eqs, names, state0, dt)
+        function scale = getEquationScaling(model, eqs, names, state0, dt)
             % Get scaling for the residual equations to determine convergence
 
             scale = cell(1, numel(eqs));
@@ -1066,6 +1023,57 @@ function scale = getEquationScaling(model, eqs, names, state0, dt)
             nbact = num2cell(zeros(1, nbioreact));
         end
 
+    end
+
+    methods (Access = private)
+        function [eqs, names, types] = getBacterialBalanceEquations( ...
+                model, state0, state, dt, forces)
+            % Accumulation [kg/s], transport, and reaction/well sources.
+            % nbact is a liquid mass fraction: M = pv*sL*rhoL*nbact.
+            fd = model.FlowDiscretization;
+            [eqs, flux, names, types] = fd.bacteriaConservationEquation( ...
+                model, state, state0, dt);
+            if model.reactionsEnabled
+                source = model.FacilityModel.getBacteriaSources( ...
+                    fd, state, state0, dt);
+            end
+
+            for i = 1:model.biochemFluid.nbioreact
+                if ~model.localReactionMode && ...
+                        (model.bactDiffusion || model.chemotaxisEffect) && ...
+                        ~isempty(flux{i})
+                    eqs{i} = model.operators.AccDiv(eqs{i}, flux{i});
+                    if model.bactDiffusion
+                        eqs{i} = model.addBacterialDiffusionBC( ...
+                            eqs{i}, state, forces, i);
+                    end
+                end
+                if model.reactionsEnabled
+                    eqs{i} = eqs{i} - source{i};
+                end
+            end
+        end
+
+        function [eqs, names, types] = getSRBTracerBalanceEquations( ...
+                model, state0, state, dt)
+            % SO4/HS balances [mol/s], with transport and reaction/well sources.
+            % Tracers are non-volatile and do not enter the EOS flash.
+            fd = model.FlowDiscretization;
+            [eqs, flux, names, types] = fd.tracerConservationEquation( ...
+                model, state, state0, dt);
+            if model.reactionsEnabled
+                source = model.FacilityModel.getSRBTracerSources( ...
+                    fd, state, state0, dt);
+            end
+            for i = 1:2
+                if ~model.localReactionMode
+                    eqs{i} = model.operators.AccDiv(eqs{i}, flux{i});
+                end
+                if model.reactionsEnabled
+                    eqs{i} = eqs{i} - source{i};
+                end
+            end
+        end
     end
 end
 
