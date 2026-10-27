@@ -1,29 +1,33 @@
 function rho = calculateRoweChouWaterDensity(T, S)
-% This function computes the water density using the Rowe correlation.
+%CALCULATEROWECHOUWATERDENSITY Temperature-salinity density estimate.
 %
 % SYNOPSIS:
 %   rho = calculateRoweChouWaterDensity(T, S)
 %
-% DESCRIPTION:
-%   This function calculates the water density based on the Rowe correlation,
-%   incorporating temperature (T) and salinity (S). The correlation is derived
-%   from empirical coefficients obtained for water properties.
+% PARAMETERS:
+%   T - Temperature [K].
+%   S - Salt mass fraction [kg salt/kg solution], consistent with the
+%       coefficients below.
+%       Convert other salinity measures before calling this function.
+%       Inputs may be scalars or arrays with compatible sizes.
 %
-% INPUTS:
-%   T - Temperature in Kelvin (K)
-%   S - Salinity in grams per liter (g/L)
+% RETURNS:
+%   rho - Density [kg/m^3], with MATLAB implicit expansion of T and S.
 %
-% OUTPUTS:
-%   rho - Water density in kilograms per cubic meter (kg/m^3)
+% Density is evaluated as a function of temperature and salinity. Pressure
+% is not an input. For the pressure-dependent form of the correlation,
+% see the references below.
 %
-% REFERENCE:
-%   Safari Raad, Seyed Mostafa, Ranjbar, Ehsan, Hassanzadeh, Hassan,
-%   Leonenko, Yuri, 2023. Hydrogen-brine mixture PVT data for reservoir
-%   simulation of hydrogen storage in deep saline aquifers.
-%   Int. J. Hydrog. Energy (ISSN: 0360-3199) 48 (2), 696–708.
- 
+% REFERENCES:
+%   Rowe and Chou (1970), J. Chem. Eng. Data 15(1), 61-66.
+%   https://doi.org/10.1021/je60044a016
+%   Hassanzadeh et al. (2008), Appendix B, Eqs. B6-B14, specifies T in K,
+%   salt mass fraction and a pressure variable in kgf/cm^2.
+%   https://doi.org/10.1016/S1750-5836(07)00010-2
+%   Safari Raad et al. (2023), Int. J. Hydrog. Energy 48(2), 696-708.
+%
 %{
-Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
 
@@ -51,9 +55,9 @@ a6 = -0.0014814 + 0.829639e-5 .* T - 0.12469e-7 .* T.^2;
 a7 = 0.0027141 - 0.15391e-4 .* T + 0.22655e-7 * T.^2;
 a8 = 0.62158e-6 - 0.40075e-8 .* T + 0.65972e-11 .* T.^2;
 
-% Calculate density using Rowe correlation
-rho_inverse = (a1 - a2 * pi - a3 .* pi^2 + a4 * S + a5 .* S.^2 - a6 *pi.* S ...
-    - a7 * pi * S.^2 - 0.5 .* a8 * pi^2 * S).*10^-3;
+% Evaluate specific volume using element-wise salinity operations.
+rho_inverse = (a1 - a2 * pi - a3 .* pi^2 + a4 .* S + a5 .* S.^2 - a6 *pi.* S ...
+    - a7 * pi .* S.^2 - 0.5 .* a8 * pi^2 .* S).*10^-3;
 
 % Density is the inverse of rho_inverse
 rho = 1 ./ rho_inverse; % Convert to kg/m^3
