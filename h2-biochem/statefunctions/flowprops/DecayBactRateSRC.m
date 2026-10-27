@@ -5,28 +5,16 @@ classdef DecayBactRateSRC < StateFunction
     %   decay = DecayBactRateSRC(model, 'property1', value1, ...)
     %
     % DESCRIPTION:
-    %   Computes the bacterial decay rate in each grid cell, accounting for:
-    %   - Bacterial concentration (nbact)
-    %   - Liquid phase saturation
-    %   - Pore volume
-    %   - Phase densities
-    %   - Presence of required components (H2 and CO2)
-    %
-    % REQUIRED PARAMETERS:
-    %   model - Reservoir model with bacterial modeling enabled
-    %
-    % OPTIONAL PARAMETERS:
-    %   None
-    %
-    % RETURNS:
-    %   Class instance ready for use in simulation
+    %   Returns one specific decay coefficient [1/s] per population.
+    %   First-order decay returns b + 0*nbact, preserving the AD shape.
+    %   Legacy quadratic decay returns b*max(nbact, 0). The facility applies
+    %   these coefficients to BacterialMass to form a mass sink [kg/s].
+    %   Inactive bacteria or liquid phase return zero coefficients. The
+    %   existing MET/ACE component guard returns all zeros if a required
+    %   H2 or substrate component is missing.
     %
     % SEE ALSO:
-    %   CompositionalModel, EquationsCompositional
-
-    properties
-        % No additional properties needed
-    end
+    %   GrowthBactRateSRC, BacterialMass, BiochemistryGenericFacilityModel
 
     methods
         function gp = DecayBactRateSRC(model, varargin)
@@ -42,11 +30,10 @@ classdef DecayBactRateSRC < StateFunction
             gp.label = 'Psi_{decay}';
         end
 
-        function Psidecay = evaluateOnDomain(prop, model, state)
+        function Psidecay = evaluateOnDomain(~, model, state)
             % Compute the specific decay rate coefficient [1/s].
             %
             % PARAMETERS:
-            %   prop  - Property function instance
             %   model - Reservoir model instance
             %   state - State struct with fields
             %
@@ -59,12 +46,12 @@ classdef DecayBactRateSRC < StateFunction
             else
                 rm = model;
             end
-            bcrm=rm.biochemFluid;
-            nbioreact=bcrm.nbioreact;
+            bcrm = rm.biochemFluid;
+            nbioreact = bcrm.nbioreact;
 
 
             % Initialize with zeros
-            Psidecay=cell(1,nbioreact);
+            Psidecay = cell(1, nbioreact);
             [Psidecay{:}] = deal(0);
 
             % Check if bacterial modeling is active
@@ -75,7 +62,7 @@ classdef DecayBactRateSRC < StateFunction
             % Get component names and indices
             namecp = rm.getComponentNames();
             % Validate required components
-            for i=1:nbioreact
+            for i = 1:nbioreact
                 idx_H2 = find(strcmpi(namecp, bcrm.rH2(i)), 1);     % Case-insensitive search
                 idx_sub = find(strcmpi(namecp, bcrm.rsub(i)), 1);   % Case-insensitive search
                 if strcmp(bcrm.metabolicReaction(i), 'MethanogenicArchae') || ...
@@ -89,11 +76,11 @@ classdef DecayBactRateSRC < StateFunction
             % Get required state variables
             nbact = rm.getProp(state, 'nbact');
 
-            for i=1:nbioreact
+            for i = 1:nbioreact
                 if iscell(nbact)
-                    nbacti=nbact{i};
+                    nbacti = nbact{i};
                 else
-                    nbacti=nbact(:,i);
+                    nbacti = nbact(:, i);
                 end
                 bbact = bcrm.bbact(i);
                 decayOrder = 2;

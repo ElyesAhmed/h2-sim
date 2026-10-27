@@ -89,6 +89,29 @@ liquid well outflow before advancing cell-local reactions. The existing
 zero tracer concentration assigned to injected liquid is unchanged.
 The shared ``BiochemistryModel`` behavior described above is unchanged.
 
+Microbial rates and facility sources
+------------------------------------
+
+``GrowthBactRateSRC`` returns a specific Monod growth coefficient in 1/s,
+not a mass source. Sulfate uses a liquid molar-fraction proxy, while the
+carbonate buffer supplies a pH-dependent CO2 proxy. Active hybrid chemistry
+feedback supplies its fixed sulfate and inorganic-carbon snapshot instead.
+``CarbonLimitedGrowthRate`` separately applies the finite aqueous carbon
+budget before the facility forms a microbial mass source.
+
+``DecayBactRateSRC`` returns ``b`` for first-order decay or
+``b * max(nbact, 0)`` for the legacy quadratic formulation. The facility
+applies the growth-minus-decay coefficient to ``BacterialMass`` in kg,
+retains the existing ``1e-10 * BacterialMass`` regularization sink, and
+suppresses negative reaction sources at the active biomass floor.
+
+``BiochemistryGenericFacilityModel`` keeps reaction sources separate from
+well transport. Bacterial well rates include liquid density and have units
+kg/s; aqueous tracer well rates use molar concentrations and have units
+mol/s. Repeated perforations are summed into reservoir cells. The aqueous
+tracer API independently gates SRB reaction sources; the legacy bacterial
+and SO4/HS source APIs retain their caller-controlled reaction gating.
+
 Saved backend figures
 ---------------------
 
