@@ -138,3 +138,13 @@ that convention and the pressure-dependent form:
 https://doi.org/10.1016/S1750-5836(07)00010-2.
 Pressure is not an input. The reference values test the implemented
 approximation rather than a pressure-dependent density model.
+
+## Relative-permeability table I/O
+
+`H2StoreSGOFTest` adds eight checks: one- and two-region files at 2, 11 and
+100 saturation points, existing-file reuse, and malformed-input handle closure.
+The round trips check region order, endpoints, permeability bounds and
+monotonicity, finite capillary pressures and the metric pressure conversion.
+The writer uses array-based output within each region. The reader returns a
+column cell array without converting the file's units and takes ownership of
+the supplied file handle. Numerical formulas and existing references are unchanged.
