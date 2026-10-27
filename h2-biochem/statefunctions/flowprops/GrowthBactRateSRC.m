@@ -1,5 +1,5 @@
 classdef GrowthBactRateSRC < StateFunction
-    % Bacterial growth rate computation for compositional simulations
+    % Specific Monod growth coefficients for each microbial population [1/s].
     %
     % SYNOPSIS:
     %   gr = GrowthBactRateSRC(model, 'property1', value1, ...)
@@ -14,11 +14,12 @@ classdef GrowthBactRateSRC < StateFunction
     %   and converted to mole fraction using the liquid molar density.
     %   During an active sequential-h2biochem-phreeqc Picard solve, the PHREEQC pH,
     %   DIC/CO2, and sulfate snapshot replaces only those kinetic
-    %   substrate terms; all conserved-state balances remain unchanged.
-
-    properties
-        % No additional properties
-    end
+    %   substrate terms. The carbonate buffer supplies a kinetic CO2 proxy;
+    %   CarbonLimitedGrowthRate applies the separate finite-carbon budget.
+    %   This property returns coefficients, not mass or molar source rates.
+    %
+    % SEE ALSO:
+    %   CarbonLimitedGrowthRate, DecayBactRateSRC, BacterialMass
 
     methods
         function gp = GrowthBactRateSRC(model, varargin)
@@ -46,7 +47,7 @@ classdef GrowthBactRateSRC < StateFunction
             gp.label = '\Psi_{growth}';
         end
 
-        function Psigrowth = evaluateOnDomain(prop, model, state)
+        function Psigrowth = evaluateOnDomain(~, model, state)
             % Compute specific growth rate coefficient [1/s]
             %
             % Returns: Psigrowthmax * axH2 * axsub [1/s]
@@ -59,7 +60,6 @@ classdef GrowthBactRateSRC < StateFunction
             end
             bcrm = rm.biochemFluid;
             namecp = rm.getComponentNames();
-%            namecp = model.EOSModel.getComponentNames();
             nbioreact = bcrm.nbioreact;
             feedback = [];
             if ismethod(rm, 'getSequentialH2BiochemPhreeqcChemistryFeedback')
@@ -100,27 +100,7 @@ classdef GrowthBactRateSRC < StateFunction
 
                 % Handle substrate depending on reaction type
                 if strcmp(bcrm.metabolicReaction(i), 'SulfateReducingBacteria')
-                    % SRB: substrate is sulfate tracer (not in EOS)
-                    if ~isempty(feedback)
-                        so4_conc = feedback.sulfateMolality .* rm.EOSModel.rho_water;
-                    elseif isfield(state, 'tracerSO4')
-                        so4_conc = state.tracerSO4;   % mol/m3 liquid
-                    else
-                        so4_conc = zeros(size(xH2));
-                    end
-                    % Compute liquid molar density from Z_L
-                    if isfield(state, 'Z_L')
-                        Z_L = state.Z_L;
-                    else
-                        Z_L = ones(size(xH2));
-                    end
-                    R = 8.314;   % Pa·m3/(mol·K)
-                    % pressure, T may be ADI objects; use value() if needed
-                    P = state.pressure;
-                    T = state.T;
-                    rho_molar = P ./ (Z_L .* R .* T);   % mol/m3
-                    % Convert tracer to mole fraction
-                    xsub = so4_conc ./ rho_molar;
+                    xsub = sulfateSubstrateFraction(rm, state, feedback, xH2);
                     % Use the half‑saturation constant for sulfate (already in mol/mol)
                     alphasub = bcrm.alphasub(i);
                 else
@@ -139,54 +119,8 @@ classdef GrowthBactRateSRC < StateFunction
                     if isprop(rm, 'carbonateBuffer') && rm.carbonateBuffer && ...
                             strcmpi(bcrm.rsub(i), 'CO2') && ...
                             (~isempty(feedback) || isfield(state, 'tracerHCO3'))
-                        if isfield(state, 'Z_L')
-                            Z_L = state.Z_L;
-                        else
-                            Z_L = ones(size(xsub));
-                        end
-                        R = 8.314;
-                        rho_molar = state.pressure ./ (Z_L .* R .* state.T);
-                        if ~isempty(feedback)
-                            hco3 = feedback.hco3Molality .* rm.EOSModel.rho_water;
-                            pH = feedback.pH;
-                            pKa1 = feedback.carbonatePka1;
-                            if isfield(feedback, 'totalCarbonMolality')
-                                totalCarbon = feedback.totalCarbonMolality;
-                            else
-                                totalCarbon = feedback.co2Molality + ...
-                                    feedback.hco3Molality;
-                            end
-                            % PHREEQC MET and ACE kinetics use
-                            % tot("Carbonate(4)"), not free aqueous CO2.
-                            xsub = totalCarbon .* ...
-                                rm.EOSModel.rho_water ./ rho_molar;
-                        else
-                            hco3 = state.tracerHCO3;
-                            % tracerHCO3 transports non-CO2 DIC so that
-                            % carbonate species omitted from the EOS are not
-                            % discarded. For pH-dependent kinetics use the
-                            % actual bicarbonate species returned by PHREEQC.
-                            if isfield(state, 'phreeqcHCO3Molality')
-                                hco3 = state.phreeqcHCO3Molality .* rm.EOSModel.rho_water;
-                            end
-                            if isfield(state, 'phreeqcPH')
-                                pH = state.phreeqcPH;
-                            else
-                                pH = rm.carbonateBufferPH;
-                            end
-                            if isfield(state, 'phreeqcCarbonatePka1')
-                                pKa1 = state.phreeqcCarbonatePka1;
-                            else
-                                pKa1 = rm.carbonateBufferPka1;
-                            end
-                        end
-                        if isempty(feedback)
-                            hydrogenIon = 10.^(-pH);
-                            Ka1 = 10.^(-pKa1);
-                            co2FromBuffer = hco3 ./ rho_molar .* ...
-                                hydrogenIon ./ Ka1;
-                            xsub = max(xsub, co2FromBuffer);
-                        end
+                        xsub = carbonateSubstrateFraction( ...
+                            rm, state, feedback, xsub);
                     end
                 end
 
@@ -211,6 +145,80 @@ classdef GrowthBactRateSRC < StateFunction
             end
         end
     end
+end
+
+function xsub = sulfateSubstrateFraction(rm, state, feedback, template)
+% Convert sulfate [mol/m^3 liquid] to the legacy molar-fraction proxy.
+% SRB: substrate is sulfate tracer (not in EOS)
+if ~isempty(feedback)
+    so4_conc = feedback.sulfateMolality .* rm.EOSModel.rho_water;
+elseif isfield(state, 'tracerSO4')
+    so4_conc = state.tracerSO4;   % mol/m3 liquid
+else
+    so4_conc = zeros(size(template));
+end
+% Compute liquid molar density from Z_L
+if isfield(state, 'Z_L')
+    Z_L = state.Z_L;
+else
+    Z_L = ones(size(template));
+end
+R = 8.314;   % Pa·m3/(mol·K)
+% Retain pressure and temperature dependence for AD evaluations.
+P = state.pressure;
+T = state.T;
+rho_molar = P ./ (Z_L .* R .* T);   % mol/m3
+% Convert tracer to mole fraction
+xsub = so4_conc ./ rho_molar;
+end
+
+function xsub = carbonateSubstrateFraction(rm, state, feedback, xsub)
+% Retain the existing feedback-DIC or pH-dependent bicarbonate CO2 proxy.
+if isfield(state, 'Z_L')
+    Z_L = state.Z_L;
+else
+    Z_L = ones(size(xsub));
+end
+R = 8.314;
+rho_molar = state.pressure ./ (Z_L .* R .* state.T);
+if ~isempty(feedback)
+    if isfield(feedback, 'totalCarbonMolality')
+        totalCarbon = feedback.totalCarbonMolality;
+    else
+        totalCarbon = feedback.co2Molality + ...
+            feedback.hco3Molality;
+    end
+    % PHREEQC MET and ACE kinetics use
+    % tot("Carbonate(4)"), not free aqueous CO2.
+    xsub = totalCarbon .* ...
+        rm.EOSModel.rho_water ./ rho_molar;
+else
+    hco3 = state.tracerHCO3;
+    % tracerHCO3 transports non-CO2 DIC so that
+    % carbonate species omitted from the EOS are not
+    % discarded. For pH-dependent kinetics use the
+    % actual bicarbonate species returned by PHREEQC.
+    if isfield(state, 'phreeqcHCO3Molality')
+        hco3 = state.phreeqcHCO3Molality .* rm.EOSModel.rho_water;
+    end
+    if isfield(state, 'phreeqcPH')
+        pH = state.phreeqcPH;
+    else
+        pH = rm.carbonateBufferPH;
+    end
+    if isfield(state, 'phreeqcCarbonatePka1')
+        pKa1 = state.phreeqcCarbonatePka1;
+    else
+        pKa1 = rm.carbonateBufferPka1;
+    end
+end
+if isempty(feedback)
+    hydrogenIon = 10.^(-pH);
+    Ka1 = 10.^(-pKa1);
+    co2FromBuffer = hco3 ./ rho_molar .* ...
+        hydrogenIon ./ Ka1;
+    xsub = max(xsub, co2FromBuffer);
+end
 end
 
 function threshold = getH2ActivationThreshold(model)
@@ -268,3 +276,22 @@ aboveOptimum = input >= optimum & input < upper;
 response(aboveOptimum) = -(input(aboveOptimum) - upper).* ...
     (input(aboveOptimum) + upper - 2*optimum)./(optimum - upper)^2;
 end
+
+%{
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+
+This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
+
+MRST is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+MRST is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with MRST.  If not, see <http://www.gnu.org/licenses/>.
+%}
