@@ -38,7 +38,8 @@ The original two simulations use immiscible `GenericBlackOilModel`, constant
 temperature, and zero gravity. The phase-transfer tests below extend this
 coverage. Hysteresis, single-phase transitions, full aquifer setups, external
 pure-fluid data generation, and paper figures still need separate coverage.
-The Rowe–Chou density implementation still needs a separate correlation audit.
+The legacy fixed-pi density approximation is covered numerically below; its
+physical fixed-pressure assumption remains undocumented.
 
 ## Dissolution and vaporization
 
@@ -121,3 +122,20 @@ Constant PVT factors make the expected surface-volume inventories calculable
 by hand. The phase-transfer fixture additionally checks the public helper
 against its independent component accounting for disgas, vapoil and combined
 models. Existing numerical reference files and tolerances are unchanged.
+
+## Legacy temperature-salinity density
+
+`H2StoreWaterDensityTest` adds five tests: twelve frozen scalar values,
+paired row/column vectors, a temperature-salinity grid, scalar expansion,
+and a basic density/salinity sanity check. Scalar references were captured
+from the unmodified two-input implementation. They establish numerical
+preservation, not independent experimental accuracy.
+
+The helper still accepts only `T,S` and retains its historical fixed `pi`
+terms. Array multiplications involving salinity are now element-wise. The
+coefficient convention uses salt mass fraction, not g/L as previously stated
+in the help. Hassanzadeh et al. (2008), Appendix B, Eqs. B6-B14, documents
+that convention and the pressure-dependent form:
+https://doi.org/10.1016/S1750-5836(07)00010-2.
+The legacy choice of a fixed pi value is not established as a physical
+calibration; no pressure argument or new pressure model is introduced.

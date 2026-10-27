@@ -1,0 +1,37 @@
+{
+  "source": "6f891940247e0d5835a3466f710e7862137aedfb",
+  "description": "Legacy fixed-pi approximation: numerical preservation, not independent physical validation. T in K; S salt mass fraction.",
+  "temperature": [
+    288.15,
+    313.15,
+    373.15
+  ],
+  "salinity": [
+    0,
+    0.035,
+    0.1,
+    0.25
+  ],
+  "density": [
+    [
+      999.1982333526964,
+      1024.3597414680396,
+      1072.6563671861222,
+      1191.5217311383872
+    ],
+    [
+      992.3300353313476,
+      1016.3717369793246,
+      1062.6945926198448,
+      1178.0146832615935
+    ],
+    [
+      958.4998200308498,
+      981.9788847780723,
+      1027.3444291402811,
+      1141.097436228995
+    ]
+  ],
+  "sourceSHA256": "071ab52dd18b9310b3c6ffa1ac1b422a469dff3bea7290391a75e637092dea33",
+  "matlab": "R2026a Update 5"
+}
