@@ -38,10 +38,7 @@ The original two simulations use immiscible `GenericBlackOilModel`, constant
 temperature, and zero gravity. The phase-transfer tests below extend this
 coverage. Hysteresis, single-phase transitions, full aquifer setups, external
 pure-fluid data generation, and paper figures still need separate coverage.
-In particular,
-the gas-inventory formulas in `computeGasVolumes` need an accounting audit
-before being accepted as reference values. These tests do not certify that
-utility or the Rowe–Chou density implementation.
+The Rowe–Chou density implementation still needs a separate correlation audit.
 
 ## Dissolution and vaporization
 
@@ -77,8 +74,8 @@ formation volume factors. In surface-volume units the two components are:
 - Brine: `PV * (sO*bO + Rv*sG*bG)`.
 - Hydrogen: `PV * (sG*bG + Rs*sO*bO)`.
 
-These calculations do not call `computeGasVolumes`, whose accounting audit
-remains separate. MRST currently prints an SGOF warning for oil-gas-only decks
+These independent calculations are now also compared against `computeGasVolumes`
+for every initial and accepted state in all three phase-transfer cases. MRST currently prints an SGOF warning for oil-gas-only decks
 without a separate water relative-permeability table; its zero connate-water
 fallback is appropriate here. The tests do not suppress warnings globally.
 
@@ -113,3 +110,14 @@ Use separate folders for the two models, and regenerate when changing grid
 resolution because the filename does not include point counts. These tests
 check numerical preservation and table handling, not independent validation
 of the empirical correlations.
+
+## Hydrogen inventory accounting
+
+`H2StoreInventoryTest` provides seven analytical checks for heterogeneous
+porosity, unequal liquid/gas fractions, liquid-only and gas-only limits,
+immiscible states without saved Rs/PVT data, selected/duplicate/empty steps,
+pressure-dependent pore volume, and oil/gas phase indices in a WOG model.
+Constant PVT factors make the expected surface-volume inventories calculable
+by hand. The phase-transfer fixture additionally checks the public helper
+against its independent component accounting for disgas, vapoil and combined
+models. Existing numerical reference files and tolerances are unchanged.

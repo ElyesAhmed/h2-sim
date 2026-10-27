@@ -36,3 +36,17 @@ the Research Council of Norway HYSTORM project (Grant No. 315804)
 
 See [the h2-store test instructions](../tests/h2store/README.md) for quick
 unit checks and numerical regressions. These checks run locally.
+
+## Hydrogen inventories
+
+`computeGasVolumes` returns per-cell hydrogen component volumes at surface
+conditions [m³], split into dissolved and gas-phase contributions. It uses
+model pore volume (including rock compressibility), liquid saturation for
+dissolved hydrogen, and reciprocal formation volume factors. It can evaluate
+states without saved PVT caches, and returns zero dissolved inventory when
+`disgas` is disabled. Vaporized brine is not counted as hydrogen.
+
+This corrects older postprocessing that used bulk cell volume and gas
+saturation in the dissolved term. Recompute inventory plots and dissolved
+fractions produced with older versions. The correction changes postprocessing;
+it does not change the reservoir simulation equations or stored states.
