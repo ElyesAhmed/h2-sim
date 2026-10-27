@@ -1,22 +1,25 @@
 function tab_sol = HenrySetschenowH2BrineEos(T, mNaCl, p)
-% HENRYSETSCHENOW: Calculates the mole fraction of dissolved H2 (xH2)
-% in solution using the Henry–Setschenow equation with temperature and
-% salinity dependence.
+%HENRYSETSCHENOWH2BRINEEOS Tabulate dissolved hydrogen mole fractions.
 %
-% INPUTS:
-% T      - Temperature in Kelvin (K)
-% mNaCl  - Salinity in mol/kg (molal concentration of NaCl)
-% p      - Partial pressure of H2 in Pascal
+% SYNOPSIS:
+%   tab = HenrySetschenowH2BrineEos(T, mNaCl, p)
 %
-% OUTPUT:
-% xH2    - Mole fraction of H2 in solution
-% REFRENCE
+% PARAMETERS:
+%   T     - Temperature [K]. Use matching T and p array sizes.
+%   mNaCl - NaCl molality [mol/kg water]; scalar or matching T and p.
+%   p     - Hydrogen partial pressure [Pa].
 %
-%   Ahmed, E., et al. (2024). Phase behavior and black-oil simulations of 
-%   hydrogen storage in saline aquifers. Advances in Water Resources, 191, 104772.
+% RETURNS:
+%   tab - Table with column vectors: temperature [degrees C], pressure [Pa]
+%         and dissolved hydrogen mole fraction (x_H2).
+%
+% REFERENCE:
+%   Ahmed, E., et al. (2024). Phase behavior and black-oil simulations of
+%   hydrogen storage in saline aquifers. Advances in Water Resources,
+%   191, 104772.
 %
 %{
-Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
 
@@ -46,7 +49,7 @@ e = 0.0185;
 f = -0.3019;
 
 % Calculate reduced temperature
-Tr = T / 647.096;  % Reference temperature (298.15 K)
+Tr = T / 647.096;  % Reduced temperature using the water critical temperature [K]
 
 % Calculate log(kH) based on temperature dependence
 log_kH = log(kH0 ./ kH1) + a + b ./ Tr + c * log(Tr) + d .* Tr;

@@ -1,0 +1,53 @@
+function results = runH2StoreTests(mrstRoot)
+%RUNH2STORETESTS Run local unit and small numerical regression tests.
+%
+% SYNOPSIS:
+%   results = runH2StoreTests()
+%   results = runH2StoreTests('/path/to/pinned/mrst')
+%
+% The default uses this repository's MRST submodule. No PHREEQC engine,
+% downloaded fluid data or full paper examples are needed. Every test must
+% pass; failed or incomplete tests cause this runner to raise an error.
+    folder = fileparts(mfilename('fullpath'));
+    root = fileparts(fileparts(folder));
+    if nargin == 0
+        mrstRoot = fullfile(root, 'submodules', 'mrst');
+    end
+    startupFile = fullfile(mrstRoot, 'startup.m');
+    assert(isfile(startupFile), 'h2sim:h2store:MissingMRST', ...
+        'Initialize the pinned MRST submodule or pass its location.');
+    originalPath = path;
+    originalFolder = pwd;
+    cleanup = onCleanup(@() restoreEnvironment(originalPath, originalFolder));
+    run(startupFile);
+    mrstModule add ad-core ad-props ad-blackoil deckformat;
+    addpath(genpath(fullfile(root, 'h2-store')));
+    addpath(folder);
+    results = runtests(fullfile(folder, 'H2StoreTest.m'));
+    assert(~isempty(results) && all([results.Passed]), ...
+        'h2sim:h2store:TestFailure', 'All h2-store tests must pass without skips.');
+end
+
+function restoreEnvironment(originalPath, originalFolder)
+    path(originalPath);
+    cd(originalFolder);
+end
+
+%{
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
+
+This file is part of h2sim.
+
+h2sim is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+h2sim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
+%}
