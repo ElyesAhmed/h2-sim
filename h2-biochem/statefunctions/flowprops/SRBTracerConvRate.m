@@ -21,19 +21,25 @@ classdef SRBTracerConvRate < StateFunction
     %   that stays volatile (H2S); the complementary f_H2S fraction is
     %   applied to the H2S EOS component source in BactConvertionRate.
     %
-    %   Additionally, a sulfate source from anhydrite dissolution is added:
-    %       q_SO4_source = k_dissolve * specific_surface_area * (1 - C_SO4 / C_eq)
+    %   Optional anhydrite dissolution adds a positive sulfate rate:
+    %       drive = 1 - C_SO4/C_eq
+    %       smooth_drive = 0.5*(drive + sqrt(drive^2 + 1e-6))
+    %       q_dissolve = k_dissolve * specific_surface_area ...
+    %                    * max(sL, 1e-8)^sw_exponent * smooth_drive * V_cell
+    %   The smoothing and saturation floor are part of the existing model.
+    %   This is a kinetic source, not a PHREEQC mineral-equilibrium call.
     %
     % RETURNS:
-    %   q - {qSO4, qHS} cell array of molar rates [mol/s], qSO4 <= 0
+    %   q - {qSO4, qHS} molar rates [mol/s]. Biological SO4 consumption is
+    %       negative; dissolution can make the net sulfate rate positive.
     %
     % SEE ALSO:
     %   BactConvertionRate, AqueousTracerMass, SoreideWhitsonEos
 
     properties
-        % --- Sulfate source parameters (anhydrite dissolution) ---
+        % Optional kinetic anhydrite dissolution, independent of PHREEQC.
         k_dissolve = 4.1e-7;          % Base dissolution constant (mol/m2/s)
-        specific_surface_area = 1500; % Realistic reservoir mineral area (m2_mineral / m3_bulk)
+        specific_surface_area = 1500; % Mineral area per bulk volume [m2/m3]
         C_eq = 20;                    % Equilibrium threshold (mol/m3)
         sw_exponent = 1.5;            % Saturation scaling factor (n)
         enable_sulfate_source = true; % Toggle flag
@@ -128,38 +134,41 @@ classdef SRBTracerConvRate < StateFunction
             end
             fH2S = rm.EOSModel.fractionH2SVolatile(state.T, pH);
 
-            % Add Sulfate source from Anhydrous dissolution
+            % Add optional kinetic anhydrite dissolution to the sulfate sink.
             if scr.enable_sulfate_source
-                s = rm.getProps(state, 's');
-                SO4_conc = rm.getProps(state, 'so4');
-                            
-                if iscell(s)
-                    sL = max(s{L_ix}, 1.0e-8);
-                else
-                    sL = max(s(:, L_ix), 1.0e-8);
-                end
-
-                % 3. Calculate chemical driving force safely for AD objects
-                % Uses smooth clipping function to prevent sharp derivative jumps
-                drive = 1 - (SO4_conc ./ scr.C_eq);
-                smooth_drive = 0.5 * (drive + (drive.^2 + 1e-6).^0.5);
-
-                % 4. Compute dynamic dissolution rate density (mol/m3_bulk / s)
-                % Scaled by water saturation: No water contact = no dissolution
-                r_density = scr.k_dissolve.* scr.specific_surface_area.* ...
-                            (sL.^scr.sw_exponent).* smooth_drive;
-
-                % 5. Integrate across cell volumes to achieve exact molar rate (mol/s)
-                V_cell = rm.G.cells.volumes;
-                r_dissolution = r_density .* V_cell;
-
-                % 6. Combine kinetic generation (+) with microbial consumption (-)
+                r_dissolution = scr.getAnhydriteSource(rm, state, L_ix);
                 q{1} = qSO4_bio + r_dissolution;
             else
                 q{1} = qSO4_bio;
             end
 
             q{2} = (1 - fH2S) .* qS2_bio;
+        end
+    end
+
+    methods (Access = private)
+        function r_dissolution = getAnhydriteSource(scr, rm, state, L_ix)
+            % Optional positive sulfate source in the model's liquid phase.
+            s = rm.getProps(state, 's');
+            SO4_conc = rm.getProps(state, 'so4');
+
+            if iscell(s)
+                sL = max(s{L_ix}, 1.0e-8);
+            else
+                sL = max(s(:, L_ix), 1.0e-8);
+            end
+
+            % Smoothed positive driving force, retaining AD derivatives.
+            drive = 1 - (SO4_conc ./ scr.C_eq);
+            smooth_drive = 0.5 * (drive + (drive.^2 + 1e-6).^0.5);
+
+            % Rate density [mol/(m3 bulk*s)] with the existing saturation floor.
+            r_density = scr.k_dissolve.* scr.specific_surface_area.* ...
+                        (sL.^scr.sw_exponent).* smooth_drive;
+
+            % Integrate over cell bulk volumes to obtain mol/s.
+            V_cell = rm.G.cells.volumes;
+            r_dissolution = r_density .* V_cell;
         end
     end
 end
