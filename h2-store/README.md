@@ -1,4 +1,9 @@
-# h2store: Simulation of hydrogen storage in aquifers
+# h2-store: Hydrogen storage in aquifers
+
+This is H2sim's maintained version of MRST's h2store module, with H2sim-specific
+changes. MRST remains the simulation framework. Inherited files retain their
+MRST copyright and license notices; development here does not require matching
+changes in MRST's copy.
 
 This module provides simulation tools for modeling a hydrogen (H₂) and brine mixture within the **ad-blackoil** module in the **MATLAB Reservoir Simulation Toolbox (MRST)**.
 
@@ -26,3 +31,8 @@ This code assumes that you are running in **MATLAB R2021a** or newer.
 ## Funding
 - This work was funded by Norwegian Research and Innovation Centre for Hydrogen and Ammonia HYDROGENi (Grant No. 333118) and
 the Research Council of Norway HYSTORM project (Grant No. 315804)
+
+## Local tests
+
+See [the h2-store test instructions](../tests/h2store/README.md) for quick
+unit checks and numerical regressions. These checks run locally.
