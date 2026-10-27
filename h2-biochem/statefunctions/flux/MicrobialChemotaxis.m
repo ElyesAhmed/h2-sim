@@ -1,29 +1,24 @@
 classdef MicrobialChemotaxis < StateFunction
-    % Compute the effective microbial diffusivity in the liquid phase.
+    % Volume-filling chemotactic coefficient in the liquid phase.
     %
     % SYNOPSIS:
     %   d = MicrobialChemotaxis(model)
     %   d = MicrobialChemotaxis(model, 'pn', pv, ...)
     %
     % DESCRIPTION:
-    %   Evaluates the effective cell-centered microbial Chemotaxis [m^2/s]
-    %
-    % REQUIRED PARAMETERS:
-    %   model - Model instance, must have fields `bactDiffusion` (logical)
-    %           and `biochemFluid.bactdiff` (positive numeric).
-    %
-    % OPTIONAL PARAMETERS (property/value pairs):
-    %   (none defined in this base class; can be extended via `merge_options`)
+    %   Returns chi_i * phi * max(S_l, 0) * theta_i * (1-theta_i), where
+    %   theta_i = max(0, min(nbact_i/bact_maxProp, 1)). The coefficient
+    %   xch_seuil supplies chi_i; the volume-filling factor suppresses
+    %   migration at empty and capped populations. ChemotaxisBactFlux
+    %   applies its transmissibility to the dissolved-H2 mole-fraction jump.
+    %   Zero coefficients are returned when chemotaxisEffect is false.
+    %   Non-positive chi_i retains the existing warning and arithmetic.
     %
     % RETURNS:
-    %   dN - Cell-centered effective diffusivity (ncells x 1), units m^2/s.
+    %   dN - One cell-centered effective coefficient per population [m^2/s].
     %
     % SEE ALSO:
-    %   StateFunction, DynamicFlowTransmissibility
-
-    properties
-        % No additional properties needed
-    end
+    %   ChemotaxisTransmissibility, ChemotaxisBactFlux, MicrobialDiffusivity
 
     methods
         %-----------------------------------------------------------------%
@@ -32,21 +27,21 @@ classdef MicrobialChemotaxis < StateFunction
             md = merge_options(md, varargin{:});
 
             % Dependencies: pressure, saturation, and nbact (for dynamic porosity)
-            md = md.dependsOn({'s','pressure','nbact'}, 'state');
+            md = md.dependsOn({'s', 'pressure', 'nbact'}, 'state');
             md.label = 'D_{chemot}^{eff}';
         end
 
         %-----------------------------------------------------------------%
-        function dN = evaluateOnDomain(prop, model, state)
-            bcrm=model.biochemFluid;
-            nbioreact=bcrm.nbioreact;
+        function dN = evaluateOnDomain(~, model, state)
+            bcrm = model.biochemFluid;
+            nbioreact = bcrm.nbioreact;
             % Fetch primary state variables
-            [ s, nbact, p] = model.getProps(state, 's','nbact', 'pressure');
+            [s, nbact, p] = model.getProps(state, 's', 'nbact', 'pressure');
 
             % Porosity - dynamic (bio-clogging) or static
             if isprop(model, 'rock') && isa(model.rock.poro, 'function_handle')
                 nbactArray = model.extractBactValues(nbact);
-                phi = model.rock.poro(p, nbactArray{:}); % Apply both modifications
+                phi = model.rock.poro(p, nbactArray{:}); % Pressure/population-dependent porosity.
             else
                 phi = model.rock.poro;
             end
@@ -60,18 +55,18 @@ classdef MicrobialChemotaxis < StateFunction
                 sL = s(:, L_ix);
             end
 
-            Voln = max(sL, 0);
+            liquidSaturation = max(sL, 0);
 
-            % Initialize with zero growth rate
-            dN=cell(1,nbioreact);
+            % One effective coefficient per microbial population.
+            dN = cell(1, nbioreact);
             [dN{:}] = deal(0);
 
             % Effective microbial chemotaxis
-            for i=1:nbioreact
+            for i = 1:nbioreact
                 if iscell(nbact)
-                    nbacti=nbact{i};
+                    nbacti = nbact{i};
                 else
-                    nbacti=nbact(:,i);
+                    nbacti = nbact(:, i);
                 end
                 % Effective microbial chemotaxis (volume-filling term)
                 if model.chemotaxisEffect
@@ -81,7 +76,7 @@ classdef MicrobialChemotaxis < StateFunction
                                  'Chemotaxis will be inactive.'], i);
                     end
                     populationFraction = max(0, min(nbacti ./ model.bact_maxProp, 1));
-                    dN{i} = model.biochemFluid.xch_seuil(i) .* phi .* Voln .* ...
+                    dN{i} = model.biochemFluid.xch_seuil(i) .* phi .* liquidSaturation .* ...
                         populationFraction .* (1.0 - populationFraction);
                 else
                     dN{i} = 0;
