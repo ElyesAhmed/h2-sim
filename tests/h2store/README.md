@@ -148,3 +148,19 @@ monotonicity, finite capillary pressures and the metric pressure conversion.
 The writer uses array-based output within each region. The reader returns a
 column cell array without converting the file's units and takes ownership of
 the supplied file handle. Numerical formulas and existing references are unchanged.
+
+## PVDO and PVTG writers
+
+`H2StorePVTWriterTest` adds six checks: PVTG block parsing with dissolution
+enabled/disabled, PVDO pressure/FVF/viscosity conversion, and existing-file
+reuse for each of PVDO, PVTO and PVTG. Synthetic inputs avoid external data
+services. Saturated Rv is checked against the input mole fraction converted
+to a surface-volume ratio; every pressure block must include its zero-Rv
+record and finite positive volume factors. Existing regression references
+and tolerances remain unchanged.
+
+The writers use array-based PVDO/PVTG output and scoped file cleanup. PVTO
+retains its per-Rs block structure and vectorized undersaturated-pressure
+calculation. The table generator's help lists actual required columns,
+conditional solubility fields, temperature selection, filenames and the
+absence of dry-gas output when rv is false. Mixture formulas are unchanged.

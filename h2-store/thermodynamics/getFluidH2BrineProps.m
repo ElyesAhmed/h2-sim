@@ -1,48 +1,42 @@
 function getFluidH2BrineProps(tab_h2o, tab_h2, tab_sol, varargin)
-% getFluidH2BrineProps - Write fluid property tables based on gas dissolution state.
+%GETFLUIDH2BRINEPROPS Write hydrogen-brine black-oil PVT tables.
 %
-% This function computes the thermodynamic properties for a fluid system
-% consisting of hydrogen (H2) and brine (water with dissolved salts). It
-% utilizes input data tables for pure water, pure hydrogen, and solubility
-% data to determine properties such as density, viscosity, vapor-liquid
-% ratios, and mole fractions. The calculated results are written to output
-% text files for subsequent analysis or simulation use.
+% SYNOPSIS:
+%   getFluidH2BrineProps(water, hydrogen, solubility, 'plot', false)
 %
-% Syntax:
-%   getFluidH2BrineProps(tab_h2o, tab_h2, tab_sol, varargin)
+% PARAMETERS:
+%   water, hydrogen - Tables with columns '# temperature [°C]',
+%       'pressure [Pa]', 'density [kg/m3]' and 'viscosity [Pa.s]'.
+%   solubility - Table with temperature and pressure columns as above,
+%       x_H2 (hydrogen mole fraction in brine) when rs is enabled, and
+%       y_H2O (water mole fraction in gas) when rv is enabled.
 %
-% Input Parameters:
-%   tab_h2o (table):
-%       A structured dataset containing thermodynamic properties of pure water.
-%       It should include parameters such as temperature, density, viscosity,
-%       and saturation properties essential for calculations involving the water phase.
+% All inputs are filtered to the first hydrogen-table temperature. Filtered
+% tables must have equal row counts and matching pressures within 1e-3 bar.
+% Supply increasing pressure samples for interpolation. The oil phase
+% represents brine; Rs and Rv use surface-volume ratios.
 %
-%   tab_h2 (table):
-%       A structured dataset containing thermodynamic properties of pure hydrogen.
-%       This dataset must encompass relevant parameters like density and viscosity
-%       at varying pressures and temperatures, which are critical for understanding
-%       hydrogen behavior in the mixture.
+% OPTIONAL PARAMETERS:
+%   rs          - Write PVTO for dissolved hydrogen, default true. If false,
+%                 write PVDO for immiscible brine instead.
+%   rv          - Write PVTG for vaporized water, default true. No gas table
+%                 is written when false; provide a dry-gas table separately.
+%   nusat       - Undersaturated pressure points per PVTO block, default 10.
+%   plot        - Display property curves, default true.
+%   units       - Output unit system, default 'metric'; input units are SI.
+%   outputPath  - Output folder; empty selects MRST's UHS_PVT/PVT_H2STORAGE.
+%   reCompute   - Overwrite output files, default true. If false, each
+%                 existing file is kept without reading it.
+%   PVTOFile, PVDOFile, PVTGFile - Filenames, defaults 'PVTO_UHS.txt',
+%                 'PVDO_UHS.txt' and 'PVTG_UHS.txt', respectively.
 %
-%   tab_sol (array or table):
-%       A structured dataset representing the solubility of hydrogen in brine.
-%       It should include information on how hydrogen concentration changes with
-%       pressure and temperature, along with any relevant properties for calculating
-%       the phase behavior of the system.
+% No values are returned. Files contain Eclipse keyword records with
+% formation volume factors and viscosities, not density columns. Mole
+% fractions are converted to mass fractions before evaluating mixture PVT.
 %
-%   varargin (optional):
-%       A variable-length input argument list that allows for additional options
-%       and configurations. This can include parameters such as file output directory
-%       or specific flags to control the function's behavior, enabling more flexible usage.
-%
-% Output:
-%   The function does not return outputs directly. Instead, it writes calculated
-%   properties to text files, including:
-%   - PVTO.txt: Contains pressure, solution gas ratio, water density, and viscosity
-%     for the brine phase.
-%   - PVTG.txt: Contains pressure, vapor-liquid ratio, gas density, and viscosity
-%     for the hydrogen phase.
 % SEE ALSO:
-%   generateSolubilityTable, generateComponentTable.
+%   getFluidH2BrineSGOF, generateH2BrineSolubilityTable,
+%   generateH2WaterSolubilityTable.
 
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
@@ -114,7 +108,7 @@ fprintf('Tabulating PVT data for pressure range: [%.2f, %.2f] Pa at temperature:
 assert(~isempty(tab_sol) && ~isempty(tab_h2o) && ~isempty(tab_h2), 'Filtered tables are empty.');
 assert(height(tab_sol) == height(tab_h2o) && height(tab_sol) == height(tab_h2), 'Mismatch in table sizes.');
 
-% Check if pressures are consistent within a tolerance of 0.001 Pa
+% Check pressure agreement within 0.001 bar.
 tolerance = 1e-3;
 assert(all(abs(p_sol - p_h2o)./barsa() < tolerance), 'Error: Pressure mismatch detected between H2O and solution.');
 assert(all(abs(p_sol - p_h2)./barsa() < tolerance), 'Error: Pressure mismatch detected between H2 and solution.');
@@ -146,7 +140,8 @@ end
 
 %% Plot densities if enabled
 if do_plot
-    figure; hold on;
+    figure;
+    hold on;
     saturated_water_density = WaterDensity(T, pure_water_density, X_H2);
 
     subplot(1, 2, 1);
@@ -189,7 +184,7 @@ if do_plot
         plot(p_sol, R_s, 'LineWidth', 2);
         title('Saturated R_s');
         xlabel('Pressure (Pa)');
-        ylabel('R_s (kg/m³)');
+        ylabel('R_s (surface gas/brine volume)');
         grid on;
     end
 
@@ -199,7 +194,7 @@ if do_plot
         plot(p_sol, R_v, 'LineWidth', 2);
         title('Saturated R_v');
         xlabel('Pressure (Pa)');
-        ylabel('R_v (kg/m³)');
+        ylabel('R_v (surface brine/gas volume)');
         grid on;
     end
 end
@@ -209,14 +204,15 @@ bO = shrinkageFactor(WaterDensity(T, pure_water_density, X_H2), Y_h2o, rhoOS, rh
 bG = shrinkageFactor(pure_gas_density, Y_h2o, rhoGS, rhoOS);
 
 if do_plot
-    figure; hold on;
+    figure;
+    hold on;
 
     % Plot b_g (Gas Formation Volume Factor)
     subplot(1, 2, 1);
     plot(p, bG, 'LineWidth', 2);
     title('Saturated b_g');
     xlabel('Pressure (Pa)');
-    ylabel('b_g (m³/Sm³)');
+    ylabel('b_g (surface m^3 / reservoir m^3)');
     grid on;
 
     % Plot b_o (Oil Formation Volume Factor)
@@ -224,14 +220,14 @@ if do_plot
     plot(p, bO, 'LineWidth', 2);
     title('Saturated b_o');
     xlabel('Pressure (Pa)');
-    ylabel('b_o (m³/Sm³)');
+    ylabel('b_o (surface m^3 / reservoir m^3)');
     grid on;
 end
 
 
 %% Write fluid property tables based on dissolution state
 if dissolve_gas
-    writePVTO(p_sol, R_s, pure_water_density, water_viscosity, T, X_H2, Y_h2o, rhoOS, rhoGS, opts);
+    writePVTO(p_sol, R_s, pure_water_density, water_viscosity, T, X_H2, rhoOS, rhoGS, opts);
 else
     writeIMMISC(p_sol, pure_water_density ./ rhoOS, water_viscosity, 'PVDO', opts);
 end
@@ -246,7 +242,7 @@ function writeIMMISC(p, b, mu, title, opts)
 % Function to write immiscible properties to a text file
 % Inputs:
 %   p     - Pressure values (vector)
-%   b     - Formation volume factor (vector)
+%   b     - Reciprocal formation volume factor (vector)
 %   mu    - Viscosity values (vector)
 %   title - Title/name for the output file (string)
 %   opts  - Options structure containing directory path and units
@@ -255,16 +251,13 @@ function writeIMMISC(p, b, mu, title, opts)
 filePath = fullfile(opts.outputPath, opts.PVDOFile);
 fileName = opts.PVDOFile;
 if exist(filePath, 'file')&&(~opts.reCompute)
-    fprintf('File %s already exists. Loading data...\n', fileName); 
+    fprintf('File %s already exists. Keeping existing file...\n', fileName);
     return; % Exit the function as the table already exists
 end
 
-fn = fopen(filePath, 'w');
+fn = openPVTFile(filePath);
+fileCleanup = onCleanup(@() fclose(fn));
 
-% Check if the file was opened successfully
-if fn == -1
-    error('Cannot open file: %s', filePath);
-end
 
 % Get unit conversion factors based on specified units
 u = unitConversionFactors('si', opts.units);
@@ -280,22 +273,18 @@ end
 fprintf(fn, '-- PRES    FVF      VISC\n');
 fprintf(fn, '%s\n', title);  % Write the title
 
-% Loop through each pressure value and write data to file
-for i = 1:numel(p)
-    fprintf(fn, '%-4.10g %-4.10g %-4.10g\n', ...
-        p(i) * u.press, ...        % Pressure in proper units
-        fvf_u / b(i), ...         % Formation volume factor
-        u.viscosity * mu(i));     % Viscosity in proper units
-end
+% Each column is one pressure record for fprintf.
+records = [(p(:) * u.press).'; (fvf_u ./ b(:)).'; (u.viscosity * mu(:)).'];
+fprintf(fn, '%-4.10g %-4.10g %-4.10g\n', records);
 
 fprintf(fn, '/\n');  % End of the data block
-fclose(fn);          % Close the file
+clear fileCleanup;
 
 % Display confirmation message
 fprintf('%s written!\n', filePath);
 end
 
-function writePVTO(p, Rs, pure_water_density, water_viscosity, T, X_h2_sat, Y_h2o_sat, rhoOS, rhoGS, opts)
+function writePVTO(p, Rs, pure_water_density, water_viscosity, T, X_h2_sat, rhoOS, rhoGS, opts)
 % Function to write PVTO data to a file.
 % Inputs:
 % p: Pressure values (vector)
@@ -303,29 +292,24 @@ function writePVTO(p, Rs, pure_water_density, water_viscosity, T, X_h2_sat, Y_h2
 % pure_water_density: Density of pure water (vector)
 % water_viscosity: Viscosity of water (vector)
 % T: Temperature (scalar)
-% X_h2_sat: Saturation of hydrogen (vector)
-% Y_h2o_sat: Saturation of water (vector)
+% X_h2_sat: Hydrogen mass fraction in brine (vector)
 % rhoOS: Oil phase density (scalar)
 % rhoGS: Gas phase density (scalar)
-% n: Number of saturation pressure points
 % opts: Options structure containing directory path and units
 
 % Prepare file path and open the file for writing
 filePath = fullfile(opts.outputPath, opts.PVTOFile); % Use the filename from opts
 fileName = opts.PVTOFile;
 if exist(filePath, 'file')&&(~opts.reCompute)
-    fprintf('File %s already exists. Loading data...\n', fileName);
+    fprintf('File %s already exists. Keeping existing file...\n', fileName);
     return;
 end
 
-fn = fopen(filePath, 'w');
+fn = openPVTFile(filePath);
+fileCleanup = onCleanup(@() fclose(fn));
 nusat = opts.nusat;
 
 
-% Check if the file was opened successfully
-if fn == -1
-    error('Cannot open file: %s', filePath);
-end
 
 % Write header for the file
 fprintf(fn, '-- RS    PRES    FVF      VISC\n');
@@ -342,7 +326,6 @@ rhoW_min = interp1(p, pure_water_density, p_zero, 'linear', 'extrap');
 p = [p_zero; p];                     % Extend pressure vector
 Rs = [Rs_min; Rs];                   % Extend Rs vector
 X_h2_sat = [X_h2_min; X_h2_sat];     % Extend X_h2 saturation
-Y_h2o_sat = [Y_h2o_sat(1); Y_h2o_sat]; % Extend Y_h2o saturation
 pure_water_density = [rhoW_min; pure_water_density]; % Extend water density
 water_viscosity = [water_viscosity(1); water_viscosity]; % Extend water viscosity
 
@@ -389,7 +372,7 @@ for i = 1:M
 end
 
 % Close the file
-fclose(fn);
+clear fileCleanup;
 fprintf('%s written!\n', filePath); % Confirmation message
 end
 
@@ -410,15 +393,12 @@ function writePVTG(p, Rv, pure_gas_density, gas_viscosity, Y_h2o, rhoGS, rhoOS, 
 filePath = fullfile(opts.outputPath, opts.PVTGFile);
 fileName = opts.PVTGFile;
 if exist(filePath, 'file')&&(~opts.reCompute)
-    fprintf('File %s already exists. Loading data...\n', fileName); 
+    fprintf('File %s already exists. Keeping existing file...\n', fileName);
     return; % Exit the function as the table already exists
 end
-fn = fopen(filePath, 'w');
+fn = openPVTFile(filePath);
+fileCleanup = onCleanup(@() fclose(fn));
 
-% Check if the file was opened successfully
-if fn == -1
-    error('Cannot open file: %s', filePath);
-end
 
 % Write header for the file
 fprintf(fn, '-- PRES       RV       FVF       VISC\n');
@@ -433,21 +413,17 @@ urv = u.liqvol_r / u.gasvol_s;  % Liquid volume to gas volume conversion factor
 ub = u.gasvol_r / u.gasvol_s;   % Gas volume conversion factor
 umu = u.viscosity;     % Viscosity conversion factor
 
-% Loop through each Rv and write data
-M = numel(Rv);
-for i = 1:M
-    mu = gas_viscosity(i); % Gas viscosity for current index
-    % Now you can index into bG
-    fprintf(fn, '%-10.5g %-10.12g %-10.8g %-10.12g\n', ...
-        p(i) * uk, Rv(i) * urv, ub / bG(i), mu * umu);
-    fprintf(fn, '             %-10.5g %-10.8g %-10.12g\n', 0.0, ub / bG(i), mu * umu);
-
-
-    fprintf(fn, ' /\n'); % End of data block
-end
+% One output column contains the saturated record, the zero-Rv record
+% and the terminating slash for a single pressure block.
+formationVolume = ub ./ bG(:);
+viscosity = gas_viscosity(:) * umu;
+records = [(p(:) * uk).'; (Rv(:) * urv).'; formationVolume.'; viscosity.'; ...
+           zeros(1, numel(Rv)); formationVolume.'; viscosity.'];
+fprintf(fn, ['%-10.5g %-10.12g %-10.8g %-10.12g\n' ...
+             '             %-10.5g %-10.8g %-10.12g\n /\n'], records);
 
 % Close the file
-fclose(fn);
+clear fileCleanup;
 fprintf('%s written!\n', filePath); % Confirmation message
 end
 
@@ -492,11 +468,11 @@ function rhoW = WaterDensity(T, pure_water_density, X_h2)
 % Inputs:
 % T: Temperature in Celsius (scalar)
 % pure_water_density: Density of pure water (kg/m^3)
-% X_h2: Mole fraction of hydrogen (scalar)
+% X_h2: Hydrogen mass fraction in the mixture
 % Outputs:
 % rhoW: Density of the mixture (kg/m^3)
 
-% Calculate the mole fraction of water
+% Calculate the water mass fraction
 X_h2o = 1 - X_h2;
 
 % Compute the volume contributions from water and hydrogen
@@ -510,13 +486,13 @@ function bO = shrinkageFactor(rhoO, X_h2, rhoOS, rhoGS)
 % Computes the shrinkage factor for a mixture of oil and gas based on density and composition.
 % Inputs:
 % rhoO: Density of the oil phase (kg/m^3)
-% X_h2: Mole fraction of hydrogen (scalar)
+% X_h2: Mass fraction of the component represented by rhoGS
 % rhoOS: Density of oil-saturated phase (kg/m^3)
 % rhoGS: Density of gas-saturated phase (kg/m^3)
 % Outputs:
-% bO: Shrinkage factor (dimensionless)
+% bO: Reciprocal formation volume factor [surface volume/reservoir volume]
 
-% Calculate the ratio of oil saturation to gas saturation
+% Calculate the dissolved-to-base component surface-volume ratio
 Rs = rhoOS .* X_h2./ (rhoGS.*(1-X_h2));
 
 % Calculate the shrinkage factor
@@ -556,4 +532,10 @@ function [rho_w, rho_g, mu_w, mu_g] = extractFluidProperties(tab_h2o, tab_h2)
     rho_g = tab_h2.('density [kg/m3]');
     mu_w = tab_h2o.('viscosity [Pa.s]');
     mu_g = tab_h2.('viscosity [Pa.s]');
+end
+
+function fid = openPVTFile(filePath)
+%OPENPVTFILE Open a PVT output file and check the file identifier.
+    fid = fopen(filePath, 'w');
+    assert(fid >= 0, 'h2sim:PVT:OpenFailed', 'Cannot open file: %s', filePath);
 end
