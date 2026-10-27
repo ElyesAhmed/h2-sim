@@ -34,9 +34,50 @@ Pressure tolerances are 0.01 Pa absolute and 1e-9 relative; saturation
 tolerances are 1e-9 absolute and 1e-7 relative. Property tolerances are 1e-12
 relative. References detect change; they are not independent physical validation.
 
-The simulations use immiscible `GenericBlackOilModel`, constant temperature,
-and zero gravity. Dissolution, vaporization, hysteresis, full aquifer setups,
-PVT-file generation, and paper figures need separate coverage. In particular,
+The original two simulations use immiscible `GenericBlackOilModel`, constant
+temperature, and zero gravity. The phase-transfer tests below extend this
+coverage. Hysteresis, single-phase transitions, full aquifer setups, external
+pure-fluid data generation, and paper figures still need separate coverage.
+In particular,
 the gas-inventory formulas in `computeGasVolumes` need an accounting audit
 before being accepted as reference values. These tests do not certify that
 utility or the Rowe–Chou density implementation.
+
+## Dissolution and vaporization
+
+`H2StorePhaseTransferTest` adds three closed-domain, four-cell cases:
+`disgas` alone, `vapoil` alone, and both enabled. Each runs two 10-second steps
+from pressures [38, 39, 41, 42] bar and brine/gas saturations [0.8, 0.2].
+Temperature is 313.15 K, NaCl molality is 1 mol/kg, and gravity is zero.
+Both phases remain present; these tests do not cover phase disappearance.
+
+Each case generates local SGOF and PVTO/PVDO/PVTG files, reads them through
+MRST's Eclipse deck reader, and initializes the actual black-oil fluid model.
+Pure-fluid density and viscosity inputs are synthetic; hydrogen density uses
+the local Z correlation and solubility uses the local Henry correlation.
+Water vapor is prescribed by a 7 kPa partial pressure, not predicted by an EOS.
+For the dissolution-only case, a test-only dry-gas PVDG table completes the
+deck because the local PVT writer does not emit PVDG when vaporization is off.
+
+`phase-transfer-reference.json` freezes the initial state and every accepted
+state from the merged, unmodified production code identified in its metadata.
+It records pressure, saturation, Rs, Rv, dissolved gas, vaporized brine and both
+component inventories. Existing immiscible references are unchanged.
+The pressure and saturation tolerances match the original suite; other fields
+use 1e-12 absolute and 1e-7 relative tolerances. References are never regenerated
+by the runner.
+
+Independent checks require positive pressure, two bounded phase fractions,
+unit saturation sum, nonzero evolution of enabled Rs/Rv and phase-transfer
+inventories, and zero values for disabled transfer paths. Closed-domain
+component inventories must remain constant within 1e-10 absolute and 1e-6
+relative tolerance. Inventories use pore volume, phase pressure and reciprocal
+formation volume factors. In surface-volume units the two components are:
+
+- Brine: `PV * (sO*bO + Rv*sG*bG)`.
+- Hydrogen: `PV * (sG*bG + Rs*sO*bO)`.
+
+These calculations do not call `computeGasVolumes`, whose accounting audit
+remains separate. MRST currently prints an SGOF warning for oil-gas-only decks
+without a separate water relative-permeability table; its zero connate-water
+fallback is appropriate here. The tests do not suppress warnings globally.
