@@ -21,7 +21,7 @@ classdef BacterialMass < StateFunction & ComponentProperty
     %   Class instance ready for use in simulation
     %
     % SEE ALSO:
-    %   CompositionalModel, EquationsCompositional
+    %   BiochemistryModel, AqueousTracerMass, BiochemicalFlowDiscretization
 
     properties (Access = protected)
         minimumDerivatives = 1.0e-3; % Minimum derivative cutoff value
@@ -60,9 +60,9 @@ classdef BacterialMass < StateFunction & ComponentProperty
             % Get pore volume
             pv = model.PVTPropertyFunctions.get(model, state, 'PoreVolume');
             rho = model.PVTPropertyFunctions.get(model, state, 'Density');
-            bcm=model.biochemFluid;
-            nbioreact=bcm.nbioreact;
-            mb=cell(1,nbioreact);
+            bcm = model.biochemFluid;
+            nbioreact = bcm.nbioreact;
+            mb = cell(1, nbioreact);
             [mb{:}] = deal(0);
             % Get liquid saturation
             L_ix = model.getLiquidIndex();
@@ -78,14 +78,14 @@ classdef BacterialMass < StateFunction & ComponentProperty
                 rhoL = rho(:, L_ix);
             end
 
-            for i=1:nbioreact
+            for i = 1:nbioreact
                 % Compute bacterial mass: pv * S_l * rho_l * nbact
                 % where nbact is the model's dimensionless bacterial mass
                 % fraction and rhoL converts it to a mass concentration.
                 if iscell(nbact)
-                    nbacti=nbact{i};
+                    nbacti = nbact{i};
                 else
-                    nbacti=nbact(:,i);
+                    nbacti = nbact(:, i);
                 end
                 mb{i} = pv .* sL .* rhoL .* nbacti;
 

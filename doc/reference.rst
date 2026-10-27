@@ -48,6 +48,39 @@ Entry points
    * - ``profilePhreeqcWorkflows``
      - Paired profiling and state comparisons
 
+Base microbial balances
+-----------------------
+
+``BiochemistryModel`` is the base class for the microbial compositional
+models. It assembles EOS component balances first, then bacterial population
+balances and, when sulfate reduction is enabled, the SO4/HS tracer balances.
+Facility equations are appended last. The class does not call PHREEQC.
+
+``BiochemicalFlowDiscretization`` returns accumulation rates and internal-face
+fluxes separately. ``BiochemistryModel`` adds flux divergence, prescribed
+bacterial diffusion boundary fluxes, and reaction sources. Bacterial mass is
+``pv * sL * rhoL * nbact`` in kg: ``nbact`` is a liquid mass fraction.
+``AqueousTracerMass`` instead returns ``pv * sL * concentration`` in mol,
+with tracer concentrations in mol/m3 of liquid. Both mass state functions
+retain their existing liquid-saturation floor of ``1e-8``.
+
+Microbial diffusion follows decreasing bacterial mass fraction; chemotaxis
+follows increasing dissolved-H2 mole fraction. When both mechanisms are
+active, their face fluxes are added. Prescribed bacterial boundary values
+contribute only when bacterial diffusion is active; ``NaN`` retains the
+natural no-flux condition. See ``addBacterialBC`` for boundary setup.
+
+In the base class, ``reactionsEnabled = false`` omits component-conversion
+sources and the bacterial/SRB facility source calls. Those facility calls
+combine reaction and well-advection sources, so the flag also omits their
+well contributions; internal-face transport remains active.
+``localReactionMode = true`` omits spatial flux divergence and bacterial
+diffusion boundary contributions while retaining accumulation and enabled
+sources. The flag alone does not remove wells or component boundary sources.
+These switches support the multirate model's separate flow and local-reaction
+stages, whose setup supplies the corresponding controls. Equation ordering
+and convergence tolerances are preserved.
+
 Saved backend figures
 ---------------------
 
