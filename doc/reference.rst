@@ -133,7 +133,7 @@ The compositional PHREEQC backend suppresses these in-step conversion
 sources because its post-convergence chemistry owns those reactions.
 
 Transport coefficients and face fluxes
--------------------------------------
+--------------------------------------
 
 ``DispersiveDiffusivity`` and ``TracerDiffusivity`` combine the existing
 isotropic mechanical-dispersion approximation with optional molecular
