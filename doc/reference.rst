@@ -112,6 +112,26 @@ mol/s. Repeated perforations are summed into reservoir cells. The aqueous
 tracer API independently gates SRB reaction sources; the legacy bacterial
 and SO4/HS source APIs retain their caller-controlled reaction gating.
 
+Stoichiometric conversion sources
+---------------------------------
+
+``BactConvertionRate`` retains its public class name and accumulates EOS
+component coefficients for MET, ACE, and SRB. The existing convention is
+``qbase = growth * BacterialMass / Y_H2`` and
+``gamma_norm = nbactMax * gamma * molarMass / abs(gamma_H2)``.
+The reservoir inserts ``qbiot / rhoL`` into the component balances.
+``SRBTracerConvRate`` uses the same density scaling for its mol/s sources,
+so comparisons with raw EOS coefficients must include that conversion.
+
+SRB consumes sulfate and produces total sulfide according to its reaction
+stoichiometry. The EOS H2S source receives the volatile fraction; the HS-
+tracer receives the complementary fraction. Optional kinetic anhydrite
+release is added separately to the sulfate source, so the net sulfate rate
+can be positive. Its existing smooth positive driving force, liquid
+saturation floor of ``1e-8``, and cell-volume scaling are preserved.
+The compositional PHREEQC backend suppresses these in-step conversion
+sources because its post-convergence chemistry owns those reactions.
+
 Saved backend figures
 ---------------------
 

@@ -6,44 +6,32 @@ classdef BactConvertionRate < StateFunction
     %   bcr = BactConvertionRate(model, 'pn', pv, ...)
     %
     % DESCRIPTION:
-    %   Computes component conversion rates due to bacterial growth for
-    %   methanogenic archaea. The conversion rate follows the stoichiometry
-    %   of the metabolic reaction:
+    %   Accumulates mass-weighted EOS conversion coefficients for MET,
+    %   ACE, and SRB. For each reaction i and EOS component c:
     %
-    %       4 H2 + CO2 -> CH4 + 2 H2O
+    %       qbase = growth_i .* BacterialMass_i ./ Y_H2_i
+    %       gamma_norm = nbactMax_i .* gamma_i .* molarMass ./ abs(gamma_H2)
+    %       qbiot{c} = qbiot{c} + gamma_norm(c) .* qbase
     %
-    %   The conversion rate for each component c is computed as:
+    %   These coefficients retain the legacy model normalization. The
+    %   reservoir model inserts qbiot{c}/rhoL into its component balance;
+    %   SRBTracerConvRate uses the same density factor for molar tracer
+    %   sources. Do not compare raw qbiot directly with mol/s tracer rates.
     %
-    %       qbiot(c) = gamma_norm(c) * CarbonLimitedGrowthRate * bmass / Y_H2
-    %
-    %   where:
-    %       gamma_norm = mass-weighted stoichiometric coefficient,
-    %                    normalized by hydrogen and nbactMax
-    %       bmass      = Bacterial mass in the liquid pore volume [kg]
-    %       Y_H2       = Reaction yield scale
-    %
-    %   The stoichiometric coefficients are normalized by the H2 coefficient
-    %   and scaled by the bacterial carrying capacity (nbactMax).
-    %
-    % REQUIRED PARAMETERS:
-    %   model - Model instance with:
-    %           .bacteriamodel (true)
-    %           .biochemFluid.metabolicReaction ('MethanogenicArchae')
-    %           .biochemFluid.rH2 (reactant component name, e.g., 'H2')
-    %           .biochemFluid.rsub (substrate component name, e.g., 'CO2')
-    %           .biochemFluid.Y_H2 (yield coefficient)
-    %           .biochemFluid.nbactMax (carrying capacity)
-    %           .gammak (stoichiometric coefficients)
+    %   SRB sulfate is an aqueous tracer, so it need not be an EOS
+    %   component. Only the volatile fraction of generated sulfide enters
+    %   the EOS H2S source; the complementary HS- source is handled by
+    %   SRBTracerConvRate. MET/ACE use the carbon-limited growth coefficient
+    %   on BiochemistryPhreeqcModel, and the ordinary coefficient on the
+    %   base model. The compositional PHREEQC backend owns its reactions
+    %   externally, so this property returns zero in that mode.
     %
     % RETURNS:
-    %   qbiot - Cell array of conversion rates for each component [kg/s]
+    %   qbiot - One cell per EOS component, containing the accumulated
+    %           coefficient for each reservoir cell (negative for sinks).
     %
     % SEE ALSO:
-    %   StateFunction, BiochemistryModel, ComponentSource
-
-    properties
-        % No additional properties needed - all parameters come from model
-    end
+    %   CarbonLimitedGrowthRate, SRBTracerConvRate, BiochemistryModel
 
     methods
         %-----------------------------------------------------------------%
@@ -78,7 +66,7 @@ classdef BactConvertionRate < StateFunction
         end
 
         %-----------------------------------------------------------------%
-        function qbiot = evaluateOnDomain(bcr, model, state)
+        function qbiot = evaluateOnDomain(~, model, state)
             % Compute bacterial conversion rate for each component.
             %
             % PARAMETERS:
@@ -87,7 +75,7 @@ classdef BactConvertionRate < StateFunction
             %
             % RETURNS:
             %   qbiot - Cell array qbiot{c} containing conversion rates
-            %           for component c (ncells × 1), units [kg/s]
+            %           for component c, before model density scaling.
 
             % Get reservoir model and number of components
             if isprop(model, 'ReservoirModel') && ~isempty(model.ReservoirModel)
@@ -117,14 +105,7 @@ classdef BactConvertionRate < StateFunction
             bcrm = rm.biochemFluid;
             nbioreact = bcrm.nbioreact;
 
-            % Validate reactor types
-            for i = 1:nbioreact
-                rxn = bcrm.metabolicReaction{i};
-                if ~ismember(rxn, {'MethanogenicArchae', 'AcetogenicBacteria', 'SulfateReducingBacteria'})
-                    error('BactConvertionRate:UnsupportedReaction', ...
-                        'Unsupported metabolic reaction: %s', rxn);
-                end
-            end
+            validateMetabolicReactions(bcrm, nbioreact);
 
             % Get component names
             compNames = rm.EOSModel.getComponentNames();
@@ -149,24 +130,8 @@ classdef BactConvertionRate < StateFunction
                 isSRB = strcmp(rxn, 'SulfateReducingBacteria');
 
                 % Find indices for this reactor's H2 and substrate
-                idxH2   = find(strcmpi(compNames, bcrm.rH2{i}), 1);
-                idxsub  = find(strcmpi(compNames, bcrm.rsub{i}), 1);
-                idxprod = find(strcmpi(compNames, bcrm.p2{i}), 1);
-
-                % Validate required components exist. For SRB, the
-                % substrate (SO4) and one of the products (HS-) are
-                % non-volatile aqueous tracers, not EOS components (see
-                % BiochemistryModel.sulfateReduction /
-                % SRBTracerConvRate), so they are legitimately absent
-                % from compNames -- only require H2 to be present.
-                if isempty(idxH2)
-                    error('BactConvertionRate:MissingH2', ...
-                        'Required component H2 (%s) not found for reactor %d', bcrm.rH2{i}, i);
-                end
-                if isempty(idxsub) && ~isSRB
-                    error('BactConvertionRate:MissingSubstrate', ...
-                        'Required component substrate (%s) not found for reactor %d', bcrm.rsub{i}, i);
-                end
+                [idxH2, idxprod] = reactionComponentIndices( ...
+                    compNames, bcrm, i, isSRB);
 
                 % Get bacterial mass and growth rate for this reactor
                 if iscell(bmass)
@@ -218,6 +183,34 @@ classdef BactConvertionRate < StateFunction
             end
         end
     end
+end
+
+function validateMetabolicReactions(bcrm, nreact)
+% Validate reactor types
+for i = 1:nreact
+    rxn = bcrm.metabolicReaction{i};
+    if ~ismember(rxn, {'MethanogenicArchae', 'AcetogenicBacteria', 'SulfateReducingBacteria'})
+        error('BactConvertionRate:UnsupportedReaction', ...
+            'Unsupported metabolic reaction: %s', rxn);
+    end
+end
+end
+
+function [idxH2, idxprod] = reactionComponentIndices(compNames, bcrm, i, isSRB)
+idxH2   = find(strcmpi(compNames, bcrm.rH2{i}), 1);
+idxsub  = find(strcmpi(compNames, bcrm.rsub{i}), 1);
+idxprod = find(strcmpi(compNames, bcrm.p2{i}), 1);
+
+% Sulfate is a tracer; SRB requires only its H2 EOS component here.
+% Retain the optional product lookup used by the existing sulfide split.
+if isempty(idxH2)
+    error('BactConvertionRate:MissingH2', ...
+        'Required component H2 (%s) not found for reactor %d', bcrm.rH2{i}, i);
+end
+if isempty(idxsub) && ~isSRB
+    error('BactConvertionRate:MissingSubstrate', ...
+        'Required component substrate (%s) not found for reactor %d', bcrm.rsub{i}, i);
+end
 end
 
 %{
