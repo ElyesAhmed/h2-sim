@@ -52,6 +52,16 @@ function cases = runH2StorePhaseTransferCases()
             'h2sim:h2store:PhaseTransferConvergence', 'Phase-transfer case failed.');
         snapshots = cellfun(@(s) snapshot(s, fluid, rock, G, disgas, vapoil), ...
             [{state0}; states], 'UniformOutput', false);
+        % Check the public inventory helper against the independent phase
+        % accounting above; retain the existing numerical reference fields.
+        [total, dissolved] = computeGasVolumes(model, [{state0}; states], 1:3);
+        for j = 1:3
+            expected = snapshots{j};
+            assert(max(abs(dissolved{j} - expected.dissolved)) < 1e-10, ...
+                'h2sim:h2store:DissolvedInventory', 'Dissolved inventory differs.');
+            assert(abs(sum(total{j}) - expected.inventory(2)) < 1e-9, ...
+                'h2sim:h2store:TotalInventory', 'Hydrogen inventory differs.');
+        end
         cases.(names{k}) = [snapshots{:}];
     end
 end
