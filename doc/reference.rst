@@ -81,6 +81,14 @@ These switches support the multirate model's separate flow and local-reaction
 stages, whose setup supplies the corresponding controls. Equation ordering
 and convergence tolerances are preserved.
 
+In ``BiochemistryPhreeqcModel`` the aqueous tracer source terms are split:
+well transport remains active when ``reactionsEnabled = false``, while SRB
+reaction sources and the biological bicarbonate sink are disabled. This
+allows the multirate flow stage to remove the cell's dissolved tracers with
+liquid well outflow before advancing cell-local reactions. The existing
+zero tracer concentration assigned to injected liquid is unchanged.
+The shared ``BiochemistryModel`` behavior described above is unchanged.
+
 Saved backend figures
 ---------------------
 

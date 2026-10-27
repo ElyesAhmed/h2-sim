@@ -207,7 +207,9 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             ntracer = numel(tracerNames);
             src_reaction = cell(1, ntracer);
             [src_reaction{:}] = deal(0);
-            if rm.sulfateReduction && ~(ismethod(rm, 'isSequentialCompositionalPhreeqcBackend') && ...
+            % Disable biological sources independently of aqueous well fluxes.
+            if rm.reactionsEnabled && rm.sulfateReduction && ...
+                    ~(ismethod(rm, 'isSequentialCompositionalPhreeqcBackend') && ...
                     rm.isSequentialCompositionalPhreeqcBackend())
                 flowState = fd.buildFlowState(model, state, state0, dt);
                 srbSource = model.getProps(flowState, 'SRBTracerConvRate');

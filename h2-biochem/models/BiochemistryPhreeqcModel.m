@@ -1225,9 +1225,11 @@ function [tacc, tnames, ttypes] = assembleAqueousTracerEquations(model, state0, 
     [tacc, tflux, tnames, ttypes] = ...
         model.FlowDiscretization.tracerConservationEquation( ...
             model, state, state0, dt);
+    % Well transport belongs to the flow stage even when reactions are off.
+    % The facility gates its SRB contribution independently of well sources.
+    src_tracer = model.FacilityModel.getAqueousTracerSources( ...
+        fd, state, state0, dt);
     if model.reactionsEnabled
-        src_tracer = model.FacilityModel.getAqueousTracerSources( ...
-            fd, state, state0, dt);
         hco3Index = find(strcmp(tnames, 'HCO3'), 1);
         if ~isempty(hco3Index)
             src_tracer{hco3Index} = src_tracer{hco3Index} - hco3Sink;
@@ -1237,9 +1239,7 @@ function [tacc, tnames, ttypes] = assembleAqueousTracerEquations(model, state0, 
         if ~model.localReactionMode
             tacc{i} = model.operators.AccDiv(tacc{i}, tflux{i});
         end
-        if model.reactionsEnabled
-            tacc{i} = tacc{i} - src_tracer{i};
-        end
+        tacc{i} = tacc{i} - src_tracer{i};
     end
 end
 
