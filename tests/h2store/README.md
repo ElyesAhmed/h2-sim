@@ -218,3 +218,9 @@ short intervals, BHP buildup levels, no-cushion cycles and discharge controls.
 Rate-mode checks cover zero and positive rates, four/six buildup pairs, closing
 ramp values, scheduled injected volume and independence from the BHP setting.
 BHP buildup levels remain covered by their separate assertions.
+
+Benchmark boundary/state tests cover the prescribed pressure formula with normal,
+rotated and zero gravity, area-dependent face selection, downward-facing
+boundaries and one/two-well initial states. They use synthetic Cartesian grids
+and do not require the external benchmark deck. The boundary helper reads current
+gravity; the benchmark still resets gravity after constructing its schedule.

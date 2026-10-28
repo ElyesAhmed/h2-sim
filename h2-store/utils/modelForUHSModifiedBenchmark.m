@@ -8,6 +8,11 @@ function [description, options, state0, model, schedule, plotOptions] = modelFor
 % Ahmed, E., et al. (2024). Phase behavior and black-oil simulations of hydrogen storage in saline aquifers. 
 % Advances in Water Resources, 191, 104772.
 %
+% Boundary pressures use the current gravity setting. The model then resets
+% gravity to the standard downward acceleration during deck initialization.
+% Initialize gravity with "gravity reset on" before requesting a full setup
+% to use the same acceleration for boundary pressures and flow.
+%
 % SEE ALSO:
 %   `MRSTExample`, `example_template`, `exampleSuiteTutorial`
 %{
@@ -100,7 +105,7 @@ gravity reset on;
 %% We reset a blackoil model and "oil" is the water phase
 model = GenericBlackOilModel(G, rock, fluid, 'water', false, 'disgas', true, 'inputdata', deck);
 %% Set up initial state
-state0 = setUpInitialState(model, schedule.control(1).W, options);
+state0 = makeBenchmarkInitialState(model, schedule.control(1).W, options);
 
 %% Plotting
 plotOptions = {'View'              , [0,0]         , ...
@@ -134,47 +139,11 @@ function schedule = setUpSchedule(G, rock, options)
     W = setUpWells(G, rock, options);
     schedule = makeBenchmarkStorageSchedule(W, options);
     if options.use_bc
-        bc = setUpBc(G, options);
+        bc = makeBenchmarkBoundaryConditions(G, options);
         for k = 1:numel(schedule.control)
             schedule.control(k).bc = bc;
         end
     end
-end
-
-function bc = setUpBc(G, options)
-    %% Get boundary faces of the grid
-    f = boundaryFaces(G);
-    
-    %% Select lateral faces
-    dis = 2.48;
-    f1 = (G.faces.normals(f, 3) > dis);
-    faces = f(~f1);
-
-    %% Calculate the displacement from a reference point (1140 units)
-    Depth = 1140;
-    dx = bsxfun(@minus, G.faces.centroids(faces, :), Depth);
-    
-    %% Calculate pressure drop due to gravity using omega and displacement
-    rhoOS = 9.98e+02;
-    dp = rhoOS .* (dx * reshape(gravity, [], 1));
-    
-    %% Define the pressure at the boundary (init pressure plus the gravity-induced pressure drop)
-    pressure = options.initPres + dp;
-
-    %% Set the boundary condition with the computed pressure and saturation
-    bc = addBC([], faces, 'pressure', pressure, 'sat', options.initSat);    
-end
-
-
-
-function state0 = setUpInitialState(model, W, options)
-    %% Initialize the reservoir solution based on the model grid and initial pressure
-    state0 = initResSol(model.G, options.initPres, options.initSat);    
-    state0.rs = zeros(size(state0.pressure));  % Set initial solution gas-to-oil ratio to zero
-    %% Initialize well solutions
-    wellSol = initWellSolAD(W, model, state0);
-    wellSol.bhp = options.initPres;  % Set initial bottom hole pressure for all wells
-    state0.wellSol = wellSol;  % Store well solutions in the state structure
 end
 
 
