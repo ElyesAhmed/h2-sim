@@ -1,32 +1,20 @@
 function [description, options, state0, model, schedule,deck, plotOptions] = modelForDome3DAquifer(deck, varargin)
-% This function sets up a conceptual dome-shaped aquifer model for hydrogen storage, 
-% focusing on the differences between immiscible and black-oil modeling approaches. 
+%MODELFORDOME3DAQUIFER Set up cyclic storage in a layered 3D dome aquifer.
+%   The default grid is 5000 m by 5000 m horizontally, with 51 by 51 by 32
+%   cells and a Gaussian dome centered at [2500, 2500] m. The model uses
+%   dissolved gas and vaporized brine, with gravity along negative z.
+%   See the returned options for rates, durations and initial conditions.
 %
-% The reservoir domain measures 5000 × 3000 × 1000 meters with a depth of 600 m, 
-% consisting of three geological layers: caprock, bedrock, and storage rock, 
-% each characterized by distinct porosities and permeabilities. 
-% The mesh is initially cartesian, with interior cell depths adjusted to form 
-% an anticlinal structure, comprising a total of 83,232 cells arranged in a 
-% [51 × 51 × 32] grid.
+%   Grid geometry and rock properties are constructed by makeDomeAquiferGrid
+%   and makeDomeAquiferRock. Model setup does not open a layer plot; run
+%   dome3DModel to display that plot separately.
 %
-% The simulation features a 10-cycle operational schedule, where each cycle includes 
-% charging, cushioning, idle, and discharging phases. The durations for these phases 
-% are set to 10 days for charging, 3 days for idle periods, and 10 days for 
-% discharging. Prior to the operational cycles, a 1-year buildup phase is implemented, 
-% followed by a 90-day shut-in period to stabilize the reservoir pressure. 
-%
-% Injection and discharge rates are maintained at 400,000 m³/day, with the maximum 
-% injection rate halved during the buildup phase to prevent overpressurization. 
-% The rates gradually increase, initially reaching 200,000 m³/day. 
-% PVT tables are generated for an initial reservoir pressure of 120 bar and a 
-% temperature of 323.15 K.
-%
-% For further details on this case, refer to:
-% Ahmed, E., et al. (2024). Phase behavior and black-oil simulations of hydrogen storage in saline aquifers. 
-% Advances in Water Resources, 191, 104772.
+% Reference: Ahmed, E., et al. (2024). Phase behavior and black-oil simulations
+% of hydrogen storage in saline aquifers. Advances in Water Resources, 191,
+% 104772.
 %
 % SEE ALSO:
-%   `MRSTExample`, `example_template`, `exampleSuiteTutorial`.
+%   makeDomeAquiferGrid, makeDomeAquiferRock, findDomeAquiferWellCells
 
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
@@ -91,41 +79,18 @@ options = struct( ...
 options = checkOptions(options); % Validate options
 
 if ~fullSetup, return; end
-require ad-core ad-props ad-blackoil
+require ad-core ad-props ad-blackoil deckformat vemmech
 
-%% Get the dome-shaped grid: low depth case with 40 bar at 600 meter depth
-% case can be adjusted for high depth and hig pressure (see paper)
-dome3DModel();
-
-%% We set up the Rock properties
-% porosity
-rock = makeRock(G, [1000, 1000, 100]*milli * darcy, 0.25);
-rock.poro(caprock)    = 0.1;    % Porosity of caprock
-rock.poro(bedrock)    = 0.1;    % Porosity of bedrock
-rock.poro(underrock)  = 0.15;   % Porosity of storage rock
-rock.poro(toprock)    = 0.15;   % Porosity of top rock
-
-% Layered permeability 
-rock.perm(caprock, :)   = 1.0e-04*milli*darcy;   % Permeability of caprock
-rock.perm(bedrock, :)   = 1.0e-02*milli*darcy;   % Permeability of bedrock
-rock.perm(toprock, :)   = 1.0e-03*milli*darcy;   % Permeability of top rock
-rock.perm(underrock, :) = 1.0e-03*milli*darcy; % Permeability of under rock
-
-%% We set saturation regions
+[G, layers] = makeDomeAquiferGrid();
+rock = makeDomeAquiferRock(G, layers);
 deck = convertDeckUnits(deck);
-deck.GRID.ACTNUM = ones(G.cells.num, 1);       % Active cells
-deck.REGIONS.SATNUM = repmat(1, G.cells.num, 1);  % Enforces size to match the number of cells
-deck.REGIONS.SATNUM(bedrock)    = 2;           % Set SATNUM for bedrock
-deck.REGIONS.SATNUM(toprock)    = 3;           % Set SATNUM for top rock
-deck.REGIONS.SATNUM(caprock)    = 3;           % Set SATNUM for caprock
-deck.REGIONS.SATNUM(underrock)  = 2;           % Set SATNUM for under rock
-
-rock.regions.saturation = deck.REGIONS.SATNUM; 
-G.cells.indexMap  = rock.regions.saturation;
-deck.GRID.PORO    =  rock.poro;
-deck.GRID.PERMX   = rock.perm(:,1);
-deck.GRID.PERMY   = rock.perm(:,2);
-deck.GRID.PERMZ   = rock.perm(:,3);
+deck.GRID.ACTNUM = ones(G.cells.num, 1);
+deck.REGIONS.SATNUM = rock.regions.saturation;
+G.cells.indexMap = rock.regions.saturation;
+deck.GRID.PORO = rock.poro;
+deck.GRID.PERMX = rock.perm(:, 1);
+deck.GRID.PERMY = rock.perm(:, 2);
+deck.GRID.PERMZ = rock.perm(:, 3);
 
 %% Deck conversion and initializationclose
 [~, model, ~] = initEclipseProblemAD(deck,'G',G,'getSchedule',false,'getInitialState', false);
@@ -157,45 +122,15 @@ plotOptions = {'View', [0, 0], ...
 end
 
 
-function W = setUpWells(G, rock, fluid, options)
-% setUpWells initializes the well structure for the reservoir model.
-%
-% This function adds production wells to the grid based on specified 
-% criteria and sets up group control if applicable.
-%
-% Inputs:
-%   G       - Grid structure containing cell information
-%   rock    - Rock properties structure
-%   fluid   - Fluid properties structure
-%   options - Options structure containing simulation parameters
-%
-% Outputs:
-%   W       - Well structure containing the initialized wells
-
-    %% Initialize the well structure
-    W = [];
-
-    %% Identify the cell indices for production wells based on coordinates
-    yd = 2500;
-    zd = 600;
-    wc = find(abs(G.cells.centroids(:, 1) - yd) < 0.45 & ...
-              abs(G.cells.centroids(:, 2) - yd) < 0.2 & ...
-              G.cells.centroids(:, 3) > -zd);
-    wc = wc(1:2);
-    %% Add  well to the well structure
-    W = addWell(W, G, rock, wc, ...
-                'Name', 'Prod', ...
-                'Radius', 12.5 * centi * meter, ...
-                'type', 'rate', ...
-                'val', options.rateCharge, ...
-                'compi', [0, 1]); % Composition indices for the well
-
-    %% Set groups if group control is enabled
+function W = setUpWells(G, rock, options)
+    cells = findDomeAquiferWellCells(G);
+    W = addWell([], G, rock, cells, 'Name', 'Prod', ...
+        'Radius', 12.5 * centi * meter, 'type', 'rate', ...
+        'val', options.rateCharge, 'compi', [0, 1]);
     if options.useGroupCtrl
-        [W.group] = deal({'Inj', 'Prod'}); % Assign group names to the wells
+        [W.group] = deal({'Inj', 'Prod'});
     end
 end
-
 
 function bc = setUpBc(G, rock, fluid, options)
 % setUpBc initializes boundary conditions for the reservoir model.
@@ -254,7 +189,7 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
 %   schedule - Schedule structure defining the operational phases
 
     %% Initialize wells based on grid, rock, fluid, and options
-    W = setUpWells(G0, rock, fluid, options);     
+    W = setUpWells(G0, rock, options);
     
     %% Cushioning phase configuration
     if options.use_cushion
@@ -290,7 +225,7 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
     end
 
     %% Set up wells again for the charging phase
-    W = setUpWells(G0, rock, fluid, options);    
+    W = setUpWells(G0, rock, options);
     W(1).type     = 'rate';
     W(1).name     = 'charge';    
     W(1).val      = options.rateCharge;

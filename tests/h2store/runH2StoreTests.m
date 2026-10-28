@@ -20,7 +20,7 @@ function results = runH2StoreTests(mrstRoot)
     originalFolder = pwd;
     cleanup = onCleanup(@() restoreEnvironment(originalPath, originalFolder));
     run(startupFile);
-    mrstModule add ad-core ad-props ad-blackoil deckformat;
+    mrstModule add ad-core ad-props ad-blackoil deckformat vemmech;
     addpath(genpath(fullfile(root, 'h2-store')));
     addpath(folder);
     suite = matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreTest.m'));
@@ -37,7 +37,8 @@ function results = runH2StoreTests(mrstRoot)
         matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreWellPlacementTest.m')), ...
         matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreBoundaryTest.m')), ...
         matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreScheduleTest.m')), ...
-        matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreInitializationTest.m'))];
+        matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreInitializationTest.m')), ...
+        matlab.unittest.TestSuite.fromFile(fullfile(folder, 'H2StoreDomeTest.m'))];
     results = run(suite);
     assert(~isempty(results) && all([results.Passed]), ...
         'h2sim:h2store:TestFailure', 'All h2-store tests must pass without skips.');
