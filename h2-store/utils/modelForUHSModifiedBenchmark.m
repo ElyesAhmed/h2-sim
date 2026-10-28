@@ -87,20 +87,15 @@ require ad-core ad-props ad-blackoil
 G = processGRDECL(deck.GRID, 'checkgrid', false);
 G = computeGeometry(G);
 deck = convertDeckUnits(deck);
-PERMX = deck.GRID.PERMX;
-PERMY = deck.GRID.PERMY;
-PERMZ = deck.GRID.PERMZ;
-perm =  [PERMX PERMY PERMZ];
-poro =  deck.GRID.PORO; clear p
-rock = makeRock(G, perm, poro);
+rock = makeBenchmarkRock(G, deck);
 
 %% Set up schedule and initiate model from deck
 gravity reset on;
 schedule = setUpSchedule(G, rock, options);
-[~, model, ~] = initEclipseProblemAD(deck,'getSchedule',false,'getInitialState', false);
+[~, model, ~] = initEclipseProblemAD(deck, 'G', G, ...
+    'getSchedule', false, 'getInitialState', false);
 fluid = model.fluid;
 deck = model.inputdata;
-rock.regions.saturation=deck.REGIONS.SATNUM;
 %% We reset a blackoil model and "oil" is the water phase
 model = GenericBlackOilModel(G, rock, fluid, 'water', false, 'disgas', true, 'inputdata', deck);
 %% Set up initial state
@@ -117,17 +112,21 @@ end
 
 function W = setUpWells(G, rock, options)
 
-    %% We also reset the well in the highest point: we reset Well coordinates (wc) and radii (r)
-    % ps this is slightly different from the benchmark
-    wc = [5891; 9612; 13333; 17054; 20775; 24496; 28217; 31938; 35659; 39380; 43101];
+    % Fixed logical deck-cell completions and radii for the modified benchmark.
+    logicalCells = [5891; 9612; 13333; 17054; 20775; 24496; 28217; 31938; 35659; 39380; 43101];
     r  = [0.9479; 0.7354; 0.7338; 2.2337; 2.2337; 2.6778; 2.6722; 5.1490; 5.1491; 0.7834; 0.7834];
     
-    %% Add production wells with specified parameters
+    [active, wc] = ismember(logicalCells, G.cells.indexMap);
+    assert(all(active), 'h2sim:h2store:InactiveBenchmarkCompletion', ...
+        'Benchmark completion cells must be active: missing logical cells %s.', ...
+        mat2str(logicalCells(~active)'));
+
+    % Construct the well using active-cell indices.
     W = addWell([], G, rock, wc, 'Name', 'Prod', ...
                 'Radius', r, 'type', 'rate', ...
                 'val', options.rateCharge, 'compi', [0, 1]);
     
-    %% Set groups if group control is used
+    % Assign the injection and production groups when requested.
     if options.useGroupCtrl
         [W.group] = deal({'Inj', 'Prod'});
     end

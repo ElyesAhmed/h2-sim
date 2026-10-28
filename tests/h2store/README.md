@@ -237,3 +237,10 @@ cushion-only schedules, using both BHP and rate controls. They verify pair count
 pressure levels, total duration, rate profiles and scheduled volume. Invalid
 counts are rejected. The default cushion-only count is now six; explicitly set
 `numCyclesCushions = 4` to retain its previous four-pair duration.
+
+Benchmark mapping tests check heterogeneous diagonal permeability, porosity and
+saturation-region IDs after removing logical cells. An actual benchmark setup on
+a synthetic deck removes the first cell and verifies properties, region lookup,
+state size and completion identity. A missing required completion must raise a
+descriptive error. The synthetic deck fixture is shared with the gravity tests;
+these integration checks construct models without advancing simulation time.
