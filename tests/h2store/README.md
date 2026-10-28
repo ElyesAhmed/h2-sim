@@ -202,3 +202,8 @@ noninteger remainders. The dome schedule now uses a one-day default cushion
 timestep, retains remainders and includes every injection timestep. Its schedules
 and injected volumes therefore differ from earlier versions; rerun affected cases.
 The other models retain their existing timestep helper and reference solutions.
+
+Dome mapping integration tests construct the default 83,232-cell model once
+without advancing a timestep. They check logical cell identity, deck saturation
+region lookup and deck-to-rock correspondence. This setup is larger than the
+small time-integration fixtures; it requires no downloaded data or plots.

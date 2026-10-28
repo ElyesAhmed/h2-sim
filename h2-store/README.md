@@ -59,3 +59,10 @@ default cushion timestep is one day. The default four-cycle schedule lasts
 of 10-day charge, 3-day idle and 10-day discharge stages. This correction changes
 stage timing and injected volumes. Recompute stored dome results and plots when
 adopting it. The other models keep their existing timestep construction.
+
+## Dome cell mapping
+
+The dome grid retains its logical cell indices in `G.cells.indexMap`. Saturation
+region IDs remain in `rock.regions.saturation` and `deck.REGIONS.SATNUM`. Keeping
+these arrays separate ensures that MRST deck-region and rock lookups select the
+corresponding cells rather than repeating the first few deck entries.
