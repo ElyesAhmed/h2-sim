@@ -189,50 +189,19 @@ plotOptions = {'View'              , [0,0]         , ...
 
 end
 
-function W = setUpWells(G, rock, fluid, options)
-    % setUpWells - Sets up the wells for the simulation
-    % 
-    % Syntax: W = setUpWells(G, rock, fluid, options)
-    %
-    % Inputs:
-    %   G      - Grid structure
-    %   rock   - Rock properties structure
-    %   fluid  - Fluid properties structure
-    %   options - Simulation options structure
-    %
-    % Outputs:
-    %   W      - Well structure containing the defined wells
-
-    % Initialize the well array
-    W = [];  
-    
-    % Identify cells for the production well based on specified coordinates
-    wc = find(abs(G.cells.centroids(:, 1) - 25) < 1e-1 & ...
-              abs(G.cells.centroids(:, 2)) > 25 & ...
-              abs(G.cells.centroids(:, 2)) < 29.5);
-    
-    if isempty(wc)
-        % Coarse teaching grids may not have a centroid within the original
-        % 0.1 m well tolerance. Choose the closest reservoir cell beneath the crest.
-        reservoir=rock.poro>0.1; candidates=find(reservoir);
-        [~,closest]=min(sum((G.cells.centroids(candidates,:)-[25,28.5]).^2,2));
-        wc=candidates(closest);
-    end
-
-    % Add a production well at the identified cells with specified properties
-    W = addWell(W, G, rock, wc, ...
-                'Name', 'Prod', ...                       % Well name
-                'Radius', 5 * centi * meter, ...        % Well radius
-                'Type', 'rate', ...                      % Well type (rate control)
-                'Val', options.rateCharge, ...           % Production rate
-                'Compi', [0, 1]);                        % Component indices
-
-    % Set well groups if group control is enabled
+function W = setUpWells(G, rock, options)
+    % Complete the gas well beneath the crest of the 2D aquifer.
+    cells = findAquifer2DWellCells(G, rock);
+    W = addWell([], G, rock, cells, ...
+        'Name', 'Prod', ...
+        'Radius', 5 * centi * meter, ...
+        'Type', 'rate', ...
+        'Val', options.rateCharge, ...
+        'Compi', [0, 1]);
     if options.useGroupCtrl
-        [W.group] = deal({'Inj', 'Prod'});         % Assign groups for injection and production
+        [W.group] = deal({'Inj', 'Prod'});
     end
 end
-
 
 function bc = setUpBc(G, rock, fluid, options)
     % setUpBc - Sets up boundary conditions for the simulation.
@@ -298,7 +267,7 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
     %   schedule - Schedule structure containing well control information
 
     % Set up wells
-    W = setUpWells(G0, rock, fluid, options); 
+    W = setUpWells(G0, rock, options);
 
     % Define cushion schedule if applicable
     if options.use_cushion
@@ -333,7 +302,7 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
     end
 
     % Define charge schedule
-    W = setUpWells(G0, rock, fluid, options); 
+    W = setUpWells(G0, rock, options);
     W(1).type = 'rate';
     W(1).name = 'charge';    
     W(1).val = options.rateCharge;
