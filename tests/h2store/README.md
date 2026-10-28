@@ -244,3 +244,9 @@ a synthetic deck removes the first cell and verifies properties, region lookup,
 state size and completion identity. A missing required completion must raise a
 descriptive error. The synthetic deck fixture is shared with the gravity tests;
 these integration checks construct models without advancing simulation time.
+
+Storage-summary tests check analytical surface inventories, arithmetic cell means,
+current dissolved fraction, signed single-well rates, zero inventory and empty
+histories. Mismatched histories and multiple-well entries raise descriptive errors.
+The benchmark and dome paper scripts share this helper; their dissolved-fraction
+plots describe stored inventory rather than cumulative operational losses.
