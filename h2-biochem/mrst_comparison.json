@@ -235,7 +235,7 @@
       "copyright_action": "MRST-format notice with software name h2sim"
     },
     {
-      "path": "h2-biochem/examples/2D_experiments/exampleBlackoilVsCompositional.m",
+      "path": "research/h2store/prototypes/exampleBlackoilVsCompositional.m",
       "status": "relocated-modified",
       "change_kind": "content",
       "upstream": "modules/h2-biochem/examples/exampleBlackoilVsCompositional.m",

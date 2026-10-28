@@ -28,7 +28,8 @@ classdef MicrobialDiffusivity < StateFunction
     %   StateFunction, DynamicFlowTransmissibility
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function md = MicrobialDiffusivity(model, varargin)
             md@StateFunction(model, varargin{:});
             md = merge_options(md, varargin{:});
@@ -39,7 +40,7 @@ classdef MicrobialDiffusivity < StateFunction
             md.label = 'D_{bact}^{eff}';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function dN = evaluateOnDomain(~, model, state)
             bcrm = model.biochemFluid;
             nbioreact = bcrm.nbioreact;
@@ -53,7 +54,6 @@ classdef MicrobialDiffusivity < StateFunction
             else
                 phi = model.rock.poro;
             end
-
 
             % One effective coefficient per microbial population.
             dN = cell(1, nbioreact);
@@ -73,13 +73,14 @@ classdef MicrobialDiffusivity < StateFunction
                 if model.bactDiffusion
                     if model.biochemFluid.bactdiff(i) <= 0
                         warning(['MicrobialDiffusivity: bactDiffusion flag enabled but ' ...
-                                 'bactdiff coefficient is zero or negative for species %d. ' ...
-                                 'Diffusion will be inactive.'], i);
+                            'bactdiff coefficient is zero or negative for species %d. ' ...
+                            'Diffusion will be inactive.'], i);
                     end
                     dN{i} = model.biochemFluid.bactdiff(i) .* phi .* liquidSaturation;
                 end
             end
         end
+
     end
 end
 

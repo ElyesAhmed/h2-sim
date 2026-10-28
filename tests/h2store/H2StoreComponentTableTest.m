@@ -1,10 +1,11 @@
 classdef H2StoreComponentTableTest < matlab.unittest.TestCase
-    %H2STORECOMPONENTTABLETEST Offline NIST response and CSV checks.
+    % H2STORECOMPONENTTABLETEST Offline NIST response and CSV checks.
     properties (TestParameter)
         generator = {@generateComponentProperties, @generatePureComponentProperties}
         responseType = {'char', 'string', 'bytes'}
     end
     methods (Test)
+
         function responseRoundTrip(test, generator, responseType)
             folder = tempname;
             mkdir(folder);
@@ -16,13 +17,13 @@ classdef H2StoreComponentTableTest < matlab.unittest.TestCase
                 'fileName', 'fluid.csv', 'webReader', reader);
             test.verifyEqual(data.Properties.VariableNames, ...
                 {'# temperature [°C]', 'pressure [Pa]', 'density [kg/m3]', ...
-                 'viscosity [Pa.s]', 'enthalpy [J/kg]'});
+                'viscosity [Pa.s]', 'enthalpy [J/kg]'});
             actual = table2array(data);
             % The two middle rows straddle a phase transition.
             expected = [10, 1e5, 2, 1e-5, 1000; ...
-                        10, 4e5, 5, 4e-5, 4000; ...
-                        20, 1e5, 2, 1e-5, 1000; ...
-                        20, 4e5, 5, 4e-5, 4000];
+                10, 4e5, 5, 4e-5, 4000; ...
+                20, 1e5, 2, 1e-5, 1000; ...
+                20, 4e5, 5, 4e-5, 4000];
             test.verifyEqual(actual, expected, 'AbsTol', 1e-12);
             original = fileread(fullfile(folder, 'fluid.csv'));
             cached = generator('outputPath', folder, 'fileName', 'fluid.csv', ...
@@ -30,6 +31,7 @@ classdef H2StoreComponentTableTest < matlab.unittest.TestCase
             test.verifyEqual(table2array(cached), expected, 'AbsTol', 1e-12);
             test.verifyEqual(fileread(fullfile(folder, 'fluid.csv')), original);
         end
+
         function singlePhase(test, generator)
             folder = tempname;
             mkdir(folder);
@@ -37,8 +39,9 @@ classdef H2StoreComponentTableTest < matlab.unittest.TestCase
             data = generator('n_temp', 1, 'outputPath', folder, ...
                 'fileName', 'fluid.csv', 'webReader', @singlePhaseResponse);
             test.verifySize(table2array(data), [4, 5]);
-            test.verifyEqual(table2array(data(:, 2)), (1:4)'*1e5);
+            test.verifyEqual(table2array(data(:, 2)), (1:4)' * 1e5);
         end
+
     end
 end
 

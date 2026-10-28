@@ -1,12 +1,12 @@
 function steps = rampupDomeTimesteps(duration, targetStep)
-%RAMPUPDOMETIMESTEPS Two geometric ramps with the requested total duration.
-%   steps = rampupDomeTimesteps(duration, targetStep) returns positive column
-%   timesteps bounded by targetStep. Both arguments use the same time units.
-%   Zero duration returns []. The eight-exponent ramps are scaled down when
-%   the interval is shorter than two target steps. Any positive remainder
-%   follows the decreasing ramp and is retained in full.
+    % RAMPUPDOMETIMESTEPS Two geometric ramps with the requested total duration.
+    %   steps = rampupDomeTimesteps(duration, targetStep) returns positive column
+    %   timesteps bounded by targetStep. Both arguments use the same time units.
+    %   Zero duration returns []. The eight-exponent ramps are scaled down when
+    %   the interval is shorter than two target steps. Any positive remainder
+    %   follows the decreasing ramp and is retained in full.
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -28,13 +28,13 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
     validateattributes(targetStep, {'numeric'}, {'scalar', 'real', 'finite', 'positive'});
     if duration == 0
         steps = [];
-        return;
+        return
     end
-    rampStep = min(targetStep, duration/2);
-    initial = (rampStep./2.^[8, 8:-1:1])';
-    remaining = max(duration - sum(2.*initial), 0);
-    middle = repmat(targetStep, floor(remaining/targetStep), 1);
-    final = duration - sum(2.*initial) - sum(middle);
+    rampStep = min(targetStep, duration / 2);
+    initial = (rampStep ./ 2.^[8, 8:-1:1])';
+    remaining = max(duration - sum(2 .* initial), 0);
+    middle = repmat(targetStep, floor(remaining / targetStep), 1);
+    final = duration - sum(2 .* initial) - sum(middle);
     if final <= 0
         final = [];
     end

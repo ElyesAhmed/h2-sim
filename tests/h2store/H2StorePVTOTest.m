@@ -1,20 +1,21 @@
 classdef H2StorePVTOTest < matlab.unittest.TestCase
-    %H2STOREPVTOTEST PVTO block ordering for scalar and vector pressure grids.
+    % H2STOREPVTOTEST PVTO block ordering for scalar and vector pressure grids.
     properties (TestParameter)
         nusat = {1, 3, 30}
     end
     methods (Test)
+
         function undersaturatedRecords(test, nusat)
             folder = tempname;
             mkdir(folder);
             cleanup = onCleanup(@() rmdir(folder, 's'));
-            p = [10; 20; 40; 60]*barsa;
+            p = [10; 20; 40; 60] * barsa;
             T = repmat(313.15, size(p));
-            water = table(T-273.15, p, 1000*exp(1e-9*(p-40*barsa)), ...
+            water = table(T - 273.15, p, 1000 * exp(1e-9 * (p - 40 * barsa)), ...
                 repmat(1e-3, size(p)), 'VariableNames', ...
                 {'# temperature [°C]', 'pressure [Pa]', 'density [kg/m3]', 'viscosity [Pa.s]'});
             gas = water;
-            gas.("density [kg/m3]") = p*0.002016./(8.314462618*T);
+            gas.("density [kg/m3]") = p * 0.002016 ./ (8.314462618 * T);
             gas.("viscosity [Pa.s]") = repmat(9e-6, size(p));
             sol = HenrySetschenowH2BrineEos(T, 1, p);
             getFluidH2BrineProps(water, gas, sol, 'rs', true, 'rv', false, ...
@@ -29,17 +30,18 @@ classdef H2StorePVTOTest < matlab.unittest.TestCase
             pvto = deck.PROPS.PVTO{1};
             % Four requested bubble points plus the writer's low-Rs endpoint.
             test.verifyNumElements(pvto.key, 5);
-            test.verifyEqual(diff(pvto.pos), repmat(nusat+1, 5, 1));
+            test.verifyEqual(diff(pvto.pos), repmat(nusat + 1, 5, 1));
             test.verifyTrue(all(isfinite(pvto.data), 'all'));
             test.verifyGreaterThan(pvto.data(:, 2:3), 0);
             for k = 1:5
-                rows = pvto.pos(k):pvto.pos(k+1)-1;
+                rows = pvto.pos(k):pvto.pos(k + 1) - 1;
                 pressures = pvto.data(rows, 1);
-                expected = linspace(pressures(1), 1.2*max(p), nusat+1)';
+                expected = linspace(pressures(1), 1.2 * max(p), nusat + 1)';
                 test.verifyEqual(pressures, expected, 'AbsTol', 1e-3);
                 test.verifyGreaterThan(diff(pressures), 0);
             end
         end
+
     end
 end
 

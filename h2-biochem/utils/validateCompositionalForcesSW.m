@@ -1,12 +1,12 @@
-function forces = validateCompositionalForcesSW(model, forces, it)
-% Soreide-Whitson specific extension of validateCompositionalForces.
-% Computes well compi using flash-based saturations for the SW EOS.
-%
-% This is called after the standard validateCompositionalForces and
-% overrides the compi values with flash-based saturations, which is
-% needed for water-containing mixtures with the Soreide-Whitson EOS.
+function forces = validateCompositionalForcesSW(model, forces, ~)
+    % Soreide-Whitson specific extension of validateCompositionalForces.
+    % Computes well compi using flash-based saturations for the SW EOS.
+    %
+    % This is called after the standard validateCompositionalForces and
+    % overrides the compi values with flash-based saturations, which is
+    % needed for water-containing mixtures with the Soreide-Whitson EOS.
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -38,8 +38,8 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
             for i = 1:numel(wellIndices)
                 wNo = wellIndices(i);
                 [sL, sV] = eos.computeSaturations(p, T, rhoL(i), rhoV(i), x(i, :), y(i, :), L(i), Z_L(i), Z_V(i));
-                L_mass = sL.*rhoL(i)./(sL.*rhoL(i) + sV.*rhoV(i));
-                comp = [L_mass, 1-L_mass];
+                L_mass = sL .* rhoL(i) ./ (sL .* rhoL(i) + sV .* rhoV(i));
+                comp = [L_mass, 1 - L_mass];
                 forces.W(wNo).compi = comp;
                 forces.W(wNo).rhoS = model.getSurfaceDensities();
                 if isfield(model.rock, 'regions')

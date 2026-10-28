@@ -1,12 +1,12 @@
 function root = h2simRoot()
-%Return the absolute root directory of this H2sim checkout
-%
-% SYNOPSIS:
-%   root = h2simRoot();
-%
-% RETURNS:
-%   root - Directory containing startupH2sim.m, independent of the caller's
-%          current folder. Resolve bundled data relative to this directory.
+    % Return the absolute root directory of this H2sim checkout
+    %
+    % SYNOPSIS:
+    %   root = h2simRoot();
+    %
+    % RETURNS:
+    %   root - Directory containing startupH2sim.m, independent of the caller's
+    %          current folder. Resolve bundled data relative to this directory.
 
     root = fileparts(fileparts(mfilename('fullpath')));
 end

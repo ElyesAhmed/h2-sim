@@ -2,3 +2,4 @@
 *.ipynb binary
 *.png binary
 *.sh text eol=lf
+*.m text eol=lf

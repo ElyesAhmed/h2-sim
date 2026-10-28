@@ -1,11 +1,11 @@
 function steps = benchmarkStorageTimesteps(duration, targetStep)
-%BENCHMARKSTORAGETIMESTEPS Exact-duration two-step ramps for storage stages.
-%   steps = benchmarkStorageTimesteps(duration, targetStep) uses the same time
-%   units for both inputs and returns positive column timesteps. Each ramp
-%   has two equal half-target steps. Short intervals scale both ramps to fit.
-%   The full positive remainder is retained; zero duration returns [].
+    % BENCHMARKSTORAGETIMESTEPS Exact-duration two-step ramps for storage stages.
+    %   steps = benchmarkStorageTimesteps(duration, targetStep) uses the same time
+    %   units for both inputs and returns positive column timesteps. Each ramp
+    %   has two equal half-target steps. Short intervals scale both ramps to fit.
+    %   The full positive remainder is retained; zero duration returns [].
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -23,11 +23,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with MRST.  If not, see <http://www.gnu.org/licenses/>.
 %}
-    validateattributes(duration, {'numeric'}, {'scalar','real','finite','nonnegative'});
-    validateattributes(targetStep, {'numeric'}, {'scalar','real','finite','positive'});
+    validateattributes(duration, {'numeric'}, {'scalar', 'real', 'finite', 'nonnegative'});
+    validateattributes(targetStep, {'numeric'}, {'scalar', 'real', 'finite', 'positive'});
     if duration == 0
         steps = [];
-        return;
+        return
     end
-    steps = rampupStorageTimesteps(duration, min(targetStep, duration/2), 1, false);
+    steps = rampupStorageTimesteps(duration, min(targetStep, duration / 2), 1, false);
 end

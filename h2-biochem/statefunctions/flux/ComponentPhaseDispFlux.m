@@ -33,7 +33,8 @@ classdef ComponentPhaseDispFlux < StateFunction
     end
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function df = ComponentPhaseDispFlux(model, varargin)
             % Constructor.
             %
@@ -56,7 +57,7 @@ classdef ComponentPhaseDispFlux < StateFunction
             df.label = 'J_{i,\\alpha}^{disp+diff}';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function J = evaluateOnDomain(df, model, state)
             % Evaluate the dispersive/diffusive flux on the domain.
             %
@@ -117,11 +118,12 @@ classdef ComponentPhaseDispFlux < StateFunction
                         J{c, ph} = rawFlux{c};
                     else
                         J{c, ph} = rawFlux{c} - ...
-                            op.faceAvg(w).*totalRawFlux;
+                            op.faceAvg(w) .* totalRawFlux;
                     end
                 end
             end
         end
+
     end
 end
 

@@ -1,5 +1,6 @@
 classdef H2BiochemVolumePressureTest < matlab.unittest.TestCase
     methods (Test)
+
         function localRootsInBothDirections(test)
             for correction = [-0.01, 0.01]
                 root = log(1e7) + correction;
@@ -48,7 +49,9 @@ classdef H2BiochemVolumePressureTest < matlab.unittest.TestCase
                 seen(end + 1) = p;
                 result = exp(10.01 - p) - 1;
             end
+
         end
+
     end
 end
 

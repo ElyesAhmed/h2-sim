@@ -1,48 +1,48 @@
 function results = profilePhreeqcWorkflows(varargin)
-%Measure PHREEQC batching and pressure-flash performance in paired runs
-%
-% SYNOPSIS:
-%   results = profilePhreeqcWorkflows()
-%   results = profilePhreeqcWorkflows('trials', 3, 'maximumFlowSteps', 2)
-%
-% DESCRIPTION:
-%   Profile the multirate and compositional PHREEQC workflows, then compare
-%   baseline and optimized timings in alternating run order. Multirate runs
-%   compare pressure brackets; compositional runs compare per-cell and
-%   batched chemistry calls. Each run uses the same grid, timesteps, and
-%   tolerances. State comparisons check that the optimization preserves the
-%   result within the specified absolute and relative tolerances.
-%
-% OPTIONAL PARAMETERS:
-%   trials               - Number of timing pairs per backend (default 3).
-%   maximumFlowSteps     - Number of flow steps per simulation (default 2).
-%   backends             - Cell array containing 'multirate' and/or
-%                          'compositional' (default both).
-%   collectProfiles      - Collect MATLAB profiler output before the timing
-%                          trials (default true). Timed pairs are unprofiled.
-%   profileOnly          - Skip timing pairs (default false).
-%   reuseCompletedTrials - Reuse pairs saved in outputDirectory
-%                          (default false).
-%   outputDirectory      - Checkpoint folder (default
-%                          build/phreeqc-performance under pwd).
-%
-% RETURNS:
-%   results - Profile data, paired timings, speedups, saved states, and
-%             per-field state comparisons for each selected backend.
-%
-% SEE ALSO:
-%   exampleSequentialBiochemistryPhreeqc1D,
-%   benchmarkSequentialPhreeqcVolumeFlash
+    % Measure PHREEQC batching and pressure-flash performance in paired runs
+    %
+    % SYNOPSIS:
+    %   results = profilePhreeqcWorkflows()
+    %   results = profilePhreeqcWorkflows('trials', 3, 'maximumFlowSteps', 2)
+    %
+    % DESCRIPTION:
+    %   Profile the multirate and compositional PHREEQC workflows, then compare
+    %   baseline and optimized timings in alternating run order. Multirate runs
+    %   compare pressure brackets; compositional runs compare per-cell and
+    %   batched chemistry calls. Each run uses the same grid, timesteps, and
+    %   tolerances. State comparisons check that the optimization preserves the
+    %   result within the specified absolute and relative tolerances.
+    %
+    % OPTIONAL PARAMETERS:
+    %   trials               - Number of timing pairs per backend (default 3).
+    %   maximumFlowSteps     - Number of flow steps per simulation (default 2).
+    %   backends             - Cell array containing 'multirate' and/or
+    %                          'compositional' (default both).
+    %   collectProfiles      - Collect MATLAB profiler output before the timing
+    %                          trials (default true). Timed pairs are unprofiled.
+    %   profileOnly          - Skip timing pairs (default false).
+    %   reuseCompletedTrials - Reuse pairs saved in outputDirectory
+    %                          (default false).
+    %   outputDirectory      - Checkpoint folder (default
+    %                          build/phreeqc-performance under pwd).
+    %
+    % RETURNS:
+    %   results - Profile data, paired timings, speedups, saved states, and
+    %             per-field state comparisons for each selected backend.
+    %
+    % SEE ALSO:
+    %   exampleSequentialBiochemistryPhreeqc1D,
+    %   benchmarkSequentialPhreeqcVolumeFlash
 
     %% Select workflows and timing options
     opt = struct('trials',                  3, ...
-                 'maximumFlowSteps',        2, ...
-                 'backends',                {{'multirate', 'compositional'}}, ...
-                 'collectProfiles',         true, ...
-                 'profileOnly',             false, ...
-                 'reuseCompletedTrials',    false, ...
-                 'outputDirectory',         ...
-                     fullfile(pwd, 'build', 'phreeqc-performance'));
+        'maximumFlowSteps',        2, ...
+        'backends',                {{'multirate', 'compositional'}}, ...
+        'collectProfiles',         true, ...
+        'profileOnly',             false, ...
+        'reuseCompletedTrials',    false, ...
+        'outputDirectory',         ...
+        fullfile(pwd, 'build', 'phreeqc-performance'));
     opt = merge_options(opt, varargin{:});
     validateOptions(opt);
     cleanupProfile = onCleanup(@() profile('off'));
@@ -52,10 +52,10 @@ function results = profilePhreeqcWorkflows(varargin)
     for backend = opt.backends
         name = backend{1};
         if opt.collectProfiles
-            profile clear
-            profile on
+            profile clear;
+            profile on;
             baseline = runCase(name, false, opt.maximumFlowSteps);
-            profile off
+            profile off;
             results.(name).profile = profile('info');
             results.(name).baseline = struct( ...
                 'states', {baseline.states}, ...
@@ -110,7 +110,7 @@ function results = profilePhreeqcWorkflows(varargin)
                 name, trial, seconds(trial, 1), seconds(trial, 2), difference(trial));
         end
         results.(name).seconds = seconds;
-        results.(name).speedup = median(seconds(:, 1))/median(seconds(:, 2));
+        results.(name).speedup = median(seconds(:, 1)) / median(seconds(:, 2));
         results.(name).maximumRelativeDifference = max(difference);
         saveCheckpoint(results, opt.outputDirectory, name);
         fprintf('%s: median %.6g -> %.6g s, speedup %.4g, difference %.4g\n', ...
@@ -242,15 +242,15 @@ function [difference, comparison] = compareStates(a, b, backend)
                     waterField = 'sequentialCompositionalPhreeqcInputWaterMass';
                 end
                 maximumConcentrationDifference = max(abs(x(:) - y(:)));
-                x = x(:).*a.states{k}.(waterField)/1000;
-                y = y(:).*b.states{k}.(waterField)/1000;
+                x = x(:) .* a.states{k}.(waterField) / 1000;
+                y = y(:) .* b.states{k}.(waterField) / 1000;
             end
             absoluteTolerance = comparisonTolerance(field{1});
             scale = max(abs(x(:)), abs(y(:)));
             residual = abs(x(:) - y(:));
-            limit = absoluteTolerance + 1e-6*scale;
-            normalized = max(residual./limit);
-            d = max(residual./max(scale, absoluteTolerance));
+            limit = absoluteTolerance + 1e-6 * scale;
+            normalized = max(residual ./ limit);
+            d = max(residual ./ max(scale, absoluteTolerance));
             fprintf('  %s step %d: absolute %.4g, tolerance fraction %.4g\n', ...
                 field{1}, k, max(residual), normalized);
             comparison(k).(field{1}) = struct( ...
@@ -275,7 +275,7 @@ function tolerance = comparisonTolerance(field)
         tolerance = 1e-8;
     end
     if startsWith(field, 'tracer') || startsWith(field, 'phreeqcMineral') || ...
-            endsWith(field, 'ActualMoles') || endsWith(field, 'ConsumptionMoles')
+        endsWith(field, 'ActualMoles') || endsWith(field, 'ConsumptionMoles')
         tolerance = 1e-7;
     end
 end

@@ -3,6 +3,7 @@ classdef AqueousTracerWellTransportTest < matlab.unittest.TestCase
     % These small equation/source checks require MRST, but no PHREEQC engine.
 
     methods (Test)
+
         function producerRemovesTracersFromReactionFreeBalances(test)
             [model, state0, state, problem, dt] = producerFixture();
             [names, wellSources] = aqueousWellSources(model, state);
@@ -13,7 +14,7 @@ classdef AqueousTracerWellTransportTest < matlab.unittest.TestCase
                 test.assertEqual(nnz(equation), 1);
                 % Internal face fluxes cancel in the domain-wide balance.
                 % A producer must remove the local aqueous concentration.
-                accumulation = sum(value(mass{i}) - value(mass0{i}))./dt;
+                accumulation = sum(value(mass{i}) - value(mass0{i})) ./ dt;
                 expected = accumulation - sum(wellSources{i});
                 test.verifyGreaterThan(-sum(wellSources{i}), 0, names{i});
                 test.verifyEqual(sum(value(problem.equations{equation})), ...
@@ -42,6 +43,7 @@ classdef AqueousTracerWellTransportTest < matlab.unittest.TestCase
             test.verifyGreaterThan(norm(value(active{sulfate}) - ...
                 value(inactive{sulfate}), inf), 1e-12);
         end
+
     end
 end
 
@@ -67,7 +69,7 @@ function [model, state0, state, problem, dt] = producerFixture()
     forces = schedule.control(1);
     state0 = model.validateState(state0);
     [model, state0] = model.updateForChangedControls(state0, forces);
-    dt = 0.1*day;
+    dt = 0.1 * day;
     [model, state] = model.prepareTimestep(state0, state0, dt, forces);
     % The benchmark disables dissolution on its registered state functions.
     % Re-enable both source computers, not only the model-level option.
@@ -80,7 +82,7 @@ function [model, state0, state, problem, dt] = producerFixture()
     rate.enable_sulfate_source = true;
     model.FacilityModel.FacilityFlowDiscretization = ...
         model.FacilityModel.FacilityFlowDiscretization.setStateFunction( ...
-            'SRBTracerConvRate', rate);
+        'SRBTracerConvRate', rate);
     [problem, state] = model.getEquations(state0, state, dt, forces);
 end
 
@@ -94,7 +96,7 @@ function [names, sources] = aqueousWellSources(model, state)
     sources = cell(size(names));
     for i = 1:numel(names)
         concentration = value(model.getProp(state, lower(names{i})));
-        rate = min(liquidFlux, 0).*concentration(map.cells);
+        rate = min(liquidFlux, 0) .* concentration(map.cells);
         sources{i} = accumarray(map.cells, rate, [model.G.cells.num, 1]);
     end
 end

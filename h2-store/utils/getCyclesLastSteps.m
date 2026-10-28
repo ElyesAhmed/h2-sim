@@ -1,15 +1,15 @@
 function lastSteps = getCyclesLastSteps(schedule)
-%GETCYCLESLASTSTEPS Last schedule step of each storage stage.
-%
-% SYNOPSIS:
-%   lastSteps = getCyclesLastSteps(schedule)
-%
-% RETURNS:
-%   lastSteps - Struct of step indices, grouped by the stage assigned to
-%               the first well in each control. Adjacent equal stage names
-%               form one stage, even when the control index changes.
-%               Well names are used when the stage field is absent.
-%               The standard stage fields are present for empty schedules.
+    % GETCYCLESLASTSTEPS Last schedule step of each storage stage.
+    %
+    % SYNOPSIS:
+    %   lastSteps = getCyclesLastSteps(schedule)
+    %
+    % RETURNS:
+    %   lastSteps - Struct of step indices, grouped by the stage assigned to
+    %               the first well in each control. Adjacent equal stage names
+    %               form one stage, even when the control index changes.
+    %               Well names are used when the stage field is absent.
+    %               The standard stage fields are present for empty schedules.
 
     lastSteps = struct('charge', [], 'discharge', [], 'shut', [], 'cushion', []);
     n = numel(schedule.step.control);

@@ -12,8 +12,8 @@
 % porosity/permeability changes.
 % ===========================================================================
 
-mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10
-mrstModule add compositional  
+mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10;
+mrstModule add compositional;
 
 %% 1. Load and setup the base model (common to all scenarios)
 baseName = 'H2_STORAGE_DOME_TRAP';
@@ -99,9 +99,9 @@ fprintf('>>> Scenario 1: No Diffusion, No Dispersion\n');
     'solverTolerance', 1e-4, ...
     'maxNonlinIter', 15);
 prob_00 = packSimulationProblem(state0, model_NoNo, schedule, ...
-     [baseName '_noDiff_noDisp'], 'NonLinearSolver', nls_00);
+    [baseName '_noDiff_noDisp'], 'NonLinearSolver', nls_00);
 tic;
-simulatePackedProblem(prob_00,'RestartStep',1);
+simulatePackedProblem(prob_00, 'RestartStep', 1);
 cpu_times.noDiff_noDisp = toc;
 [ws00, states00] = getPackedSimulatorOutput(prob_00);
 fprintf('   CPU Time: %.2f seconds\n\n', cpu_times.noDiff_noDisp);
@@ -117,7 +117,7 @@ state0_D = initCompositionalStateBacteria(model_D, state0.pressure, T0, state0.s
 prob_D = packSimulationProblem(state0_D, model_D, schedule, ...
     [baseName '_diffOnly'], 'NonLinearSolver', nls_D);
 tic;
-simulatePackedProblem(prob_D,'RestartStep',1);
+simulatePackedProblem(prob_D, 'RestartStep', 1);
 cpu_times.diffOnly = toc;
 [wsD, statesD] = getPackedSimulatorOutput(prob_D);
 fprintf('   CPU Time: %.2f seconds\n\n', cpu_times.diffOnly);
@@ -133,9 +133,9 @@ state0_Dp = initCompositionalStateBacteria(model_Dp, state0.pressure, T0, state0
 prob_Dp = packSimulationProblem(state0_Dp, model_Dp, schedule, ...
     [baseName '_dispOnly'], 'NonLinearSolver', nls_Dp);
 tic;
-simulatePackedProblem(prob_Dp, 'RestartStep',1);
+simulatePackedProblem(prob_Dp, 'RestartStep', 1);
 cpu_times.dispOnly = toc;
-%[wsDp, statesDp] = getPackedSimulatorOutput(prob_Dp);
+% [wsDp, statesDp] = getPackedSimulatorOutput(prob_Dp);
 fprintf('   CPU Time: %.2f seconds\n\n', cpu_times.dispOnly);
 
 % 6.4 Both diffusion and dispersion (highest complexity: conservative AMG settings)
@@ -149,11 +149,11 @@ state0_DD = initCompositionalStateBacteria(model_DD, state0.pressure, T0, state0
 prob_DD = packSimulationProblem(state0_DD, model_DD, schedule, ...
     [baseName '_bothDiffDisp'], 'NonLinearSolver', nls_DD);
 tic;
-simulatePackedProblem(prob_DD,'RestartStep',1);
+simulatePackedProblem(prob_DD, 'RestartStep', 1);
 cpu_times.bothDiffDisp = toc;
 [wsDD, statesDD] = getPackedSimulatorOutput(prob_DD);
 fprintf('   CPU Time: %.2f seconds\n\n', cpu_times.bothDiffDisp);
-% 
+%
 fprintf('========================================================\n');
 fprintf('All simulations completed!\n');
 fprintf('========================================================\n\n');
@@ -171,38 +171,54 @@ fprintf('==================================================\n');
 % Calculate speedup
 base_time = cpu_times.noDiff_noDisp;
 fprintf('\nSpeedup relative to No Diffusion/No Dispersion:\n');
-fprintf('  Diffusion Only:                  %.2fx\n', base_time/cpu_times.diffOnly);
-fprintf('  Dispersion Only:                 %.2fx\n', base_time/cpu_times.dispOnly);
-fprintf('  Both Diffusion & Dispersion:     %.2fx\n', base_time/cpu_times.bothDiffDisp);
+fprintf('  Diffusion Only:                  %.2fx\n', base_time / cpu_times.diffOnly);
+fprintf('  Dispersion Only:                 %.2fx\n', base_time / cpu_times.dispOnly);
+fprintf('  Both Diffusion & Dispersion:     %.2fx\n', base_time / cpu_times.bothDiffDisp);
 
 % Save CPU times
 save('cpu_times.mat', 'cpu_times');
 fprintf('\nCPU times saved to cpu_times.mat\n');
 
 %% 8. Visualise results – states (toolbar plots)
-figure; plotToolbar(model0.G, states00); title('No Diffusion, No Dispersion');
-figure; plotToolbar(model0.G, statesD);  title('Diffusion Only');
-figure; plotToolbar(model0.G, statesDp); title('Dispersion Only');
-figure; plotToolbar(model0.G, statesDD); title('Both Diffusion & Dispersion');
+figure;
+plotToolbar(model0.G, states00);
+title('No Diffusion, No Dispersion');
+figure;
+plotToolbar(model0.G, statesD);
+title('Diffusion Only');
+figure;
+plotToolbar(model0.G, statesDp);
+title('Dispersion Only');
+figure;
+plotToolbar(model0.G, statesDD);
+title('Both Diffusion & Dispersion');
 
 %% 9. Visualise well outputs – comparison
 % Collect well solutions for all scenarios
 ws_combined = {ws00, wsD, wsDp, wsDD};
 figure;
-plotWellSols(ws_combined, cumsum(schedule.step.val)/day, ...
+plotWellSols(ws_combined, cumsum(schedule.step.val) / day, ...
     'datasetnames', {'No Diff/No Disp', 'Diffusion Only', 'Dispersion Only', 'Both Diff & Disp'});
 title('Well Solutions Comparison');
 
 %% 10. Porosity comparison at final state
 figure;
-subplot(2,2,1); plotCellData(model0.G, states00{end}.rock.poro);
-title('No Diff/No Disp'); colorbar;
-subplot(2,2,2); plotCellData(model0.G, statesD{end}.rock.poro);
-title('Diffusion Only'); colorbar;
-subplot(2,2,3); plotCellData(model0.G, statesDp{end}.rock.poro);
-title('Dispersion Only'); colorbar;
-subplot(2,2,4); plotCellData(model0.G, statesDD{end}.rock.poro);
-title('Both Diff & Disp'); colorbar;
+subplot(2, 2, 1);
+plotCellData(model0.G, states00{end}.rock.poro);
+title('No Diff/No Disp');
+colorbar;
+subplot(2, 2, 2);
+plotCellData(model0.G, statesD{end}.rock.poro);
+title('Diffusion Only');
+colorbar;
+subplot(2, 2, 3);
+plotCellData(model0.G, statesDp{end}.rock.poro);
+title('Dispersion Only');
+colorbar;
+subplot(2, 2, 4);
+plotCellData(model0.G, statesDD{end}.rock.poro);
+title('Both Diff & Disp');
+colorbar;
 sgtitle('Final Porosity Comparison');
 
 %% 11. H2 Loss Analysis (if function exists)
@@ -245,10 +261,10 @@ end
 %% 13. Summary Statistics
 fprintf('\n==================== SUMMARY STATISTICS ====================\n');
 fprintf('Total simulation time (all scenarios): %.2f seconds (%.2f minutes)\n', ...
-    sum(cpu_values), sum(cpu_values)/60);
+    sum(cpu_values), sum(cpu_values) / 60);
 fprintf('Average time per scenario: %.2f seconds\n', mean(cpu_values));
 fprintf('============================================================\n');
-% 
+%
 % %% Copyright notice
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.

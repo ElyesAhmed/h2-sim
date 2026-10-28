@@ -1,7 +1,7 @@
 function data = readNISTFluidResponse(response)
-%READNISTFLUIDRESPONSE Read a tab-separated NIST fluid response.
-%   Accepts character, string and byte responses. The temporary file is
-%   unique to this call and is removed on both success and failure.
+    % READNISTFLUIDRESPONSE Read a tab-separated NIST fluid response.
+    %   Accepts character, string and byte responses. The temporary file is
+    %   unique to this call and is removed on both success and failure.
     file = [tempname, '.txt'];
     fileCleanup = onCleanup(@() deleteResponseFile(file));
     [fid, message] = fopen(file, 'w');

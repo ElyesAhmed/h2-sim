@@ -6,6 +6,7 @@ This inventory covers tracked files under `h2-biochem`, excluding these
 generated audit files. Relocated MATLAB examples
 are matched by basename. Modified files include code and documentation changes;
 line counts compare the files before this audit updates their notices.
+Links follow current file locations; these counts remain the original audit snapshot.
 
 New MATLAB files use the exact MRST notice with MRST replaced by h2sim. Existing
 MRST files keep their attribution with existing SINTEF end years updated to 2026.
@@ -42,7 +43,7 @@ Database, document and binary-asset provenance is unchanged.
 | [examples/1D_validation/simple1DBacterialExampleMetacet.m](examples/1D_validation/simple1DBacterialExampleMetacet.m) | new (new) | [modules/h2-biochem/examples/simple1DBacterialExample.m](https://github.com/SINTEF-AppliedCompSci/MRST/blob/fa4ff98c78a217d527ae0ec08ecd90c56f66809b/modules/h2-biochem/examples/simple1DBacterialExample.m) | — | Retain original notices; add MRST-format h2sim notice |
 | [examples/1D_validation/testAllDiffusionEffects.m](examples/1D_validation/testAllDiffusionEffects.m) | new (new) | — | — | MRST-format notice with software name h2sim |
 | [examples/2D_experiments/TestCompositionalBacterial2DWithMolecularDiff.m](examples/2D_experiments/TestCompositionalBacterial2DWithMolecularDiff.m) | new (new) | — | — | MRST-format notice with software name h2sim |
-| [examples/2D_experiments/exampleBlackoilVsCompositional.m](examples/2D_experiments/exampleBlackoilVsCompositional.m) | relocated-modified (content) | [modules/h2-biochem/examples/exampleBlackoilVsCompositional.m](https://github.com/SINTEF-AppliedCompSci/MRST/blob/fa4ff98c78a217d527ae0ec08ecd90c56f66809b/modules/h2-biochem/examples/exampleBlackoilVsCompositional.m) | +6 / -4 | Retain original attribution; update existing SINTEF end year to 2026 |
+| [../research/h2store/prototypes/exampleBlackoilVsCompositional.m](../research/h2store/prototypes/exampleBlackoilVsCompositional.m) | relocated-modified (content) | [modules/h2-biochem/examples/exampleBlackoilVsCompositional.m](https://github.com/SINTEF-AppliedCompSci/MRST/blob/fa4ff98c78a217d527ae0ec08ecd90c56f66809b/modules/h2-biochem/examples/exampleBlackoilVsCompositional.m) | +6 / -4 | Retain original attribution; update existing SINTEF end year to 2026 |
 | [examples/2D_experiments/exampleCompositionalBacterial2D.m](examples/2D_experiments/exampleCompositionalBacterial2D.m) | relocated-modified (content) | [modules/h2-biochem/examples/exampleCompositionalBacterial2D.m](https://github.com/SINTEF-AppliedCompSci/MRST/blob/fa4ff98c78a217d527ae0ec08ecd90c56f66809b/modules/h2-biochem/examples/exampleCompositionalBacterial2D.m) | +13 / -16 | Retain original attribution; update existing SINTEF end year to 2026 |
 | [examples/2D_experiments/exampleCompositionalBacterial2DThreeReactions.m](examples/2D_experiments/exampleCompositionalBacterial2DThreeReactions.m) | new (new) | — | — | MRST-format notice with software name h2sim |
 | [examples/2D_experiments/figures/H2_cumulative_loss_spatial.eps](examples/2D_experiments/figures/H2_cumulative_loss_spatial.eps) | new (new) | — | — | Data, documentation or binary asset: preserve existing provenance |

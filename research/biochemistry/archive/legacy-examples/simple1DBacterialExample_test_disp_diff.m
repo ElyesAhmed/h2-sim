@@ -15,8 +15,8 @@
 % Reference: https://www.sciencedirect.com/science/article/pii/S0360319925039473
 % ===========================================================================
 
-mrstModule add ad-core ad-props deckformat mrst-gui
-mrstModule add compositional 
+mrstModule add ad-core ad-props deckformat mrst-gui;
+mrstModule add compositional;
 mrstVerbose off;
 
 %% 1. Setup base compositional model (common geometry, fluids, wells)
@@ -40,8 +40,11 @@ model0.EOSModel = SoreideWhitsonEos( ...
     model0.G, model0.EOSModel.CompositionalMixture, 'msalt', 5);
 
 % Residual saturations and relperm
-swc   = 0.20; sor = 0.20; sgr = 0.10;
-swmax = 0.90; sgmax = 0.80;
+swc   = 0.20;
+sor = 0.20;
+sgr = 0.10;
+swmax = 0.90;
+sgmax = 0.80;
 model0.fluid = modifyRelPermForResidualSaturations( ...
     model0.fluid, swc, swmax, sgr, sor, sgmax);
 
@@ -60,18 +63,20 @@ clogModel = false;
 % Shut wells (no injection/production, flow driven by initial gradients)
 schedule.control.W(1).components = [0.001, 0.948, 0.001, 0.05];
 schedule.control.W(2).components = [0.001, 0.948, 0.001, 0.05];
-schedule.control.W(1).type = 'rate'; schedule.control.W(1).val = 0;
-schedule.control.W(2).type = 'rate'; schedule.control.W(2).val = 0;
+schedule.control.W(1).type = 'rate';
+schedule.control.W(1).val = 0;
+schedule.control.W(2).type = 'rate';
+schedule.control.W(2).val = 0;
 [schedule.control.W.status] = deal(false);
-assert(all(arrayfun(@(w) abs(sum(w.components)-1)<1e-12, schedule.control.W)));
+assert(all(arrayfun(@(w) abs(sum(w.components) - 1) < 1e-12, schedule.control.W)));
 
 %% 3. Define the four scenarios via model flags (bacteria always true)
 % We create a fresh BiochemistryModel for each scenario to ensure correct
 % state function registration.
 
 compFluid = TableCompositionalMixture( ...
-    {'Water','Hydrogen','Methane','CarbonDioxide'}, ...
-    {'H2O','H2','C1','CO2'});
+    {'Water', 'Hydrogen', 'Methane', 'CarbonDioxide'}, ...
+    {'H2O', 'H2', 'C1', 'CO2'});
 backend = DiagonalAutoDiffBackend('modifyOperators', true);
 biochemFluid = TableBioChemMixture({'MethanogenicArchae'});
 
@@ -84,81 +89,87 @@ createModel = @(doDiff, doDisp) BiochemistryModel( ...
     'bacteriamodel', true, ...
     'molecularDiffusion', doDiff, ...
     'molecularDispersion', doDisp, ...
-    'liquidPhase','O', 'vaporPhase','G');
+    'liquidPhase', 'O', 'vaporPhase', 'G');
 
 % 1) No diffusion, no dispersion
 model_00 = createModel(false, false);
 % Common initial state (bacteria concentration same)
-state0 = initCompositionalStateBacteria(model_00, initPress, initTemp, [0,1], ...
+state0 = initCompositionalStateBacteria(model_00, initPress, initTemp, [0, 1], ...
     initComp, initBact, model_00.EOSModel);
 prob00 = packSimulationProblem(state0, model_00, schedule, 'bio_noDiff_noDisp');
 prob00.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
-simulatePackedProblem(prob00, 'RestartStep',1);
+simulatePackedProblem(prob00, 'RestartStep', 1);
 [~, st00] = getPackedSimulatorOutput(prob00);
-scenarios{end+1} = struct('name','No Diff, No Disp', 'states',{st00}, 'color',[0.7 0 0], 'line','-');
+scenarios{end + 1} = struct('name', 'No Diff, No Disp', 'states', {st00}, 'color', [0.7 0 0], 'line', '-');
 
 % 2) Diffusion only
 model_Diff = createModel(true, false);
 probDiff = packSimulationProblem(state0, model_Diff, schedule, 'bio_diffOnly');
 probDiff.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
-simulatePackedProblem(probDiff,'RestartStep',1);
+simulatePackedProblem(probDiff, 'RestartStep', 1);
 [~, stDiff] = getPackedSimulatorOutput(probDiff);
-scenarios{end+1} = struct('name','Diffusion Only', 'states',{stDiff}, 'color',[0 0.7 0.7], 'line','--');
+scenarios{end + 1} = struct('name', 'Diffusion Only', 'states', {stDiff}, 'color', [0 0.7 0.7], 'line', '--');
 
 % 3) Dispersion only
 model_Disp = createModel(false, true);
 probDisp = packSimulationProblem(state0, model_Disp, schedule, 'bio_dispOnly');
 probDisp.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
-simulatePackedProblem(probDisp,'RestartStep',1);
+simulatePackedProblem(probDisp, 'RestartStep', 1);
 [~, stDisp] = getPackedSimulatorOutput(probDisp);
-scenarios{end+1} = struct('name','Dispersion Only', 'states',{stDisp}, 'color',[0 0.5 0], 'line','-.');
+scenarios{end + 1} = struct('name', 'Dispersion Only', 'states', {stDisp}, 'color', [0 0.5 0], 'line', '-.');
 
 % 4) Both
 model_Both = createModel(true, true);
 probBoth = packSimulationProblem(state0, model_Both, schedule, 'bio_diffAndDisp');
 probBoth.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
-simulatePackedProblem(probBoth,'RestartStep',1);
+simulatePackedProblem(probBoth, 'RestartStep', 1);
 [~, stBoth] = getPackedSimulatorOutput(probBoth);
-scenarios{end+1} = struct('name','Both Diff & Disp', 'states',{stBoth}, 'color',[0 0 0], 'line','-');
+scenarios{end + 1} = struct('name', 'Both Diff & Disp', 'states', {stBoth}, 'color', [0 0 0], 'line', '-');
 
 %% 4. Compare scenarios
 timeDays = cumsum(schedule.step.val) / day;
 timeYrs  = timeDays / 365;
 compNames = model_00.EOSModel.getComponentNames();
-idxH2  = find(strcmp(compNames,'H2'));
-idxCO2 = find(strcmp(compNames,'CO2'));
-idxCH4 = find(strcmp(compNames,'C1'));
+idxH2  = find(strcmp(compNames, 'H2'));
+idxCO2 = find(strcmp(compNames, 'CO2'));
+idxCH4 = find(strcmp(compNames, 'C1'));
 % Simple plot: final time step overall mole fraction profiles
-figure('Name','Final H2 profile');
+figure('Name', 'Final H2 profile');
 for i = 1:numel(scenarios)
-    x = scenarios{i}.states{100}.x(:,idxH2);
-    plot(model0.G.cells.centroids(:,1), x, 'Color', scenarios{i}.color, ...
+    x = scenarios{i}.states{100}.x(:, idxH2);
+    plot(model0.G.cells.centroids(:, 1), x, 'Color', scenarios{i}.color, ...
         'LineStyle', scenarios{i}.line, 'LineWidth', 1.5);
     hold on;
 end
-hold off; legend({scenarios.name}, 'Location','best');
-xlabel('Distance [m]'); ylabel('H2 mole fraction');
+hold off;
+legend({scenarios.name}, 'Location', 'best');
+xlabel('Distance [m]');
+ylabel('H2 mole fraction');
 
-figure('Name','Final CO2 profile');
+figure('Name', 'Final CO2 profile');
 for i = 1:numel(scenarios)
-    x = scenarios{i}.states{end}.x(:,idxCO2);
-    plot(model0.G.cells.centroids(:,1), x, 'Color', scenarios{i}.color, ...
+    x = scenarios{i}.states{end}.x(:, idxCO2);
+    plot(model0.G.cells.centroids(:, 1), x, 'Color', scenarios{i}.color, ...
         'LineStyle', scenarios{i}.line, 'LineWidth', 1.5);
     hold on;
 end
-hold off; legend({scenarios.name}, 'Location','best');
-xlabel('Distance [m]'); ylabel('CO2 mole fraction');
+hold off;
+legend({scenarios.name}, 'Location', 'best');
+xlabel('Distance [m]');
+ylabel('CO2 mole fraction');
 
 % Porosity profile (bio-clogging effect)
-figure('Name','Porosity profile');
+figure('Name', 'Porosity profile');
 for i = 1:numel(scenarios)
-    phi = model_00.rock.poro(scenarios{i}.states{end}.pressure,scenarios{i}.states{end}.nbact);
-    plot(model0.G.cells.centroids(:,1), phi, 'Color', scenarios{i}.color, ...
+    phi = model_00.rock.poro(scenarios{i}.states{end}.pressure, scenarios{i}.states{end}.nbact);
+    plot(model0.G.cells.centroids(:, 1), phi, 'Color', scenarios{i}.color, ...
         'LineStyle', scenarios{i}.line, 'LineWidth', 1.5);
     hold on;
 end
-hold off; legend({scenarios.name}, 'Location','best');
-xlabel('Distance [m]'); ylabel('Porosity');
+hold off;
+legend({scenarios.name}, 'Location', 'best');
+xlabel('Distance [m]');
+ylabel('Porosity');
 
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.

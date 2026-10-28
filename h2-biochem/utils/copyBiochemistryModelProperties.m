@@ -1,41 +1,41 @@
 function target = copyBiochemistryModelProperties(source, target)
-%Copy every shared public property from SOURCE onto TARGET.
-%
-% SYNOPSIS:
-%   target = copyBiochemistryModelProperties(source, target)
-%
-% DESCRIPTION:
-%   Copies every publicly gettable/settable property of TARGET that also
-%   exists (and is publicly readable) on SOURCE, using metaclass
-%   reflection. This is used by SequentialBiochemistryPhreeqcModel to
-%   build its internal flow-stage/reaction-stage sub-models so they share
-%   an identical configuration with the fully configured meta-model they
-%   were built from (including any options set after the base
-%   BiochemistryPhreeqcModel constructor ran, e.g. a custom EOSModel or
-%   bact_capProp/bact_maxProp), without maintaining a manually duplicated
-%   list of constructor option names. It is also reused by
-%   convertToSequentialBiochemistryPhreeqcModel to convert an existing,
-%   fully configured BiochemistryPhreeqcModel benchmark model into a
-%   SequentialBiochemistryPhreeqcModel.
-%
-%   Properties that are Constant, Transient, Dependent, or not publicly
-%   accessible on either SOURCE or TARGET are skipped, as are properties
-%   that only one of the two objects has (e.g. SequentialBiochemistry-
-%   PhreeqcModel-only properties are simply not present on the plain
-%   BiochemistryPhreeqcModel stage sub-models, so they are silently
-%   skipped when copying onto those sub-models).
-%
-% PARAMETERS:
-%   source - Fully configured model instance to copy FROM.
-%   target - Model instance to copy properties ONTO.
-%
-% RETURNS:
-%   target - TARGET with every shared public property set equal to the
-%            corresponding property on SOURCE.
-%
-% SEE ALSO:
-%   SequentialBiochemistryPhreeqcModel,
-%   convertToSequentialBiochemistryPhreeqcModel
+    % Copy every shared public property from SOURCE onto TARGET.
+    %
+    % SYNOPSIS:
+    %   target = copyBiochemistryModelProperties(source, target)
+    %
+    % DESCRIPTION:
+    %   Copies every publicly gettable/settable property of TARGET that also
+    %   exists (and is publicly readable) on SOURCE, using metaclass
+    %   reflection. This is used by SequentialBiochemistryPhreeqcModel to
+    %   build its internal flow-stage/reaction-stage sub-models so they share
+    %   an identical configuration with the fully configured meta-model they
+    %   were built from (including any options set after the base
+    %   BiochemistryPhreeqcModel constructor ran, e.g. a custom EOSModel or
+    %   bact_capProp/bact_maxProp), without maintaining a manually duplicated
+    %   list of constructor option names. It is also reused by
+    %   convertToSequentialBiochemistryPhreeqcModel to convert an existing,
+    %   fully configured BiochemistryPhreeqcModel benchmark model into a
+    %   SequentialBiochemistryPhreeqcModel.
+    %
+    %   Properties that are Constant, Transient, Dependent, or not publicly
+    %   accessible on either SOURCE or TARGET are skipped, as are properties
+    %   that only one of the two objects has (e.g. SequentialBiochemistry-
+    %   PhreeqcModel-only properties are simply not present on the plain
+    %   BiochemistryPhreeqcModel stage sub-models, so they are silently
+    %   skipped when copying onto those sub-models).
+    %
+    % PARAMETERS:
+    %   source - Fully configured model instance to copy FROM.
+    %   target - Model instance to copy properties ONTO.
+    %
+    % RETURNS:
+    %   target - TARGET with every shared public property set equal to the
+    %            corresponding property on SOURCE.
+    %
+    % SEE ALSO:
+    %   SequentialBiochemistryPhreeqcModel,
+    %   convertToSequentialBiochemistryPhreeqcModel
 
     assert(isobject(source) && isobject(target), ...
         'copyBiochemistryModelProperties requires two class instances.');
@@ -61,7 +61,7 @@ function target = copyBiochemistryModelProperties(source, target)
         names = cache(key);
     else
         names = computeCopyablePropertyNames(metaclass(source), metaclass(target));
-        cache(key) = names; %#ok<NASGU>
+        cache(key) = names;
     end
     for i = 1:numel(names)
         target.(names{i}) = source.(names{i});
@@ -69,10 +69,10 @@ function target = copyBiochemistryModelProperties(source, target)
 end
 
 function names = computeCopyablePropertyNames(mcSource, mcTarget)
-% Determine which property names are publicly gettable/settable,
-% non-Constant/Transient/Dependent, and present on both MCSOURCE and
-% MCTARGET's metaclasses. See the NOTE above the caller for why
-% PropertyList is searched directly (by name) instead of using findprop.
+    % Determine which property names are publicly gettable/settable,
+    % non-Constant/Transient/Dependent, and present on both MCSOURCE and
+    % MCTARGET's metaclasses. See the NOTE above the caller for why
+    % PropertyList is searched directly (by name) instead of using findprop.
     names = cell(numel(mcTarget.PropertyList), 1);
     n = 0;
     for i = 1:numel(mcTarget.PropertyList)
@@ -86,7 +86,7 @@ function names = computeCopyablePropertyNames(mcSource, mcTarget)
         end
         srcProp = findPropertyByName(mcSource, name);
         if isempty(srcProp) || srcProp.Constant || srcProp.Transient || ...
-                srcProp.Dependent || ~isPublicAccess(srcProp.GetAccess)
+            srcProp.Dependent || ~isPublicAccess(srcProp.GetAccess)
             continue
         end
         n = n + 1;
@@ -96,8 +96,8 @@ function names = computeCopyablePropertyNames(mcSource, mcTarget)
 end
 
 function prop = findPropertyByName(mc, name)
-% Search a matlab.metadata.Class/meta.class PropertyList by name. See the
-% NOTE above copyBiochemistryModelProperties for why findprop is avoided.
+    % Search a matlab.metadata.Class/meta.class PropertyList by name. See the
+    % NOTE above copyBiochemistryModelProperties for why findprop is avoided.
     prop = [];
     for i = 1:numel(mc.PropertyList)
         if strcmp(mc.PropertyList(i).Name, name)
@@ -108,10 +108,10 @@ function prop = findPropertyByName(mc, name)
 end
 
 function tf = isPublicAccess(access)
-% Property access specifiers ('SetAccess'/'GetAccess') are usually the
-% character vector 'public', but MATLAB returns a cell array of access
-% specifiers (one per class in the hierarchy) for some properties; be
-% conservative and require every listed specifier to be 'public'.
+    % Property access specifiers ('SetAccess'/'GetAccess') are usually the
+    % character vector 'public', but MATLAB returns a cell array of access
+    % specifiers (one per class in the hierarchy) for some properties; be
+    % conservative and require every listed specifier to be 'public'.
     if iscell(access)
         tf = ~isempty(access) && all(cellfun(@(a) ischar(a) && strcmp(a, 'public'), access));
     else

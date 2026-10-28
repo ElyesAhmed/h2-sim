@@ -26,6 +26,7 @@ classdef BactPermeability < StateFunction
     end
 
     methods
+
         function perm = BactPermeability(model)
             % Constructor for bacteria-permeability relationship
             perm@StateFunction(model);
@@ -40,7 +41,7 @@ classdef BactPermeability < StateFunction
             perm.label = 'K';  % Permeability label
         end
 
-        function perm = evaluateOnDomain(prop, model, state)
+        function perm = evaluateOnDomain(~, model, state)
             % Evaluate permeability modification
             %
             % PARAMETERS:
@@ -72,6 +73,7 @@ classdef BactPermeability < StateFunction
                 end
             end
         end
+
     end
 end
 

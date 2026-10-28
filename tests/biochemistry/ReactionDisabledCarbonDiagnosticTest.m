@@ -1,6 +1,7 @@
 classdef ReactionDisabledCarbonDiagnosticTest < matlab.unittest.TestCase
-% Carbon-budget diagnostics must not run in reaction-disabled stages.
+    % Carbon-budget diagnostics must not run in reaction-disabled stages.
     methods (Test)
+
         function disabledStageRetainsOtherDiagnostics(test)
             [model, schedule, state0] = fixture(false);
             requested = model.OutputStateFunctions;
@@ -34,6 +35,7 @@ classdef ReactionDisabledCarbonDiagnosticTest < matlab.unittest.TestCase
             test.verifyError(@() simulateScheduleAD(state0, model, schedule), ...
                 'BiochemistryPhreeqcModel:SequentialH2BiochemPhreeqcRequiresPicardDriver');
         end
+
     end
 end
 
@@ -45,7 +47,7 @@ function [model, schedule, state0] = fixture(coupled)
         'phreeqcTimestepCoupling', coupled, ...
         'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
         'phreeqcDatabaseFile', which('h2_biogeochemistry.dat'));
-    schedule.step.val = 0.1*day;
+    schedule.step.val = 0.1 * day;
     schedule.step.control = 1;
 end
 

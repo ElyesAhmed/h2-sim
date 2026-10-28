@@ -14,6 +14,7 @@ classdef ComponentTotalFluxForBio < ComponentTotalFlux
     end
 
     methods
+
         function sf = ComponentTotalFluxForBio(model, varargin)
             % Construct a ComponentTotalFluxForBio object.
             %
@@ -31,10 +32,10 @@ classdef ComponentTotalFluxForBio < ComponentTotalFlux
 
             % Cache model flags for performance
             sf.hasDispersion_ = isprop(model, 'molecularDispersion') && ...
-                                model.molecularDispersion;
+                model.molecularDispersion;
 
             sf.hasDiffusion_ = isprop(model, 'molecularDiffusion') && ...
-                               model.molecularDiffusion;
+                model.molecularDiffusion;
 
             % Add dependencies for the extra physics
             if sf.hasDispersion_ || sf.hasDiffusion_
@@ -72,6 +73,7 @@ classdef ComponentTotalFluxForBio < ComponentTotalFlux
             end
 
         end
+
     end
 
 end

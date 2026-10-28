@@ -1,73 +1,73 @@
 function result = exampleCompositionalPhreeqcValidation(varargin)
-%Validate compositional PHREEQC storage with an optional external comparison
-%
-% SYNOPSIS:
-%   result = exampleCompositionalPhreeqcValidation()
-%   result = exampleCompositionalPhreeqcValidation('referenceRoot', referenceRoot)
-%   result = exampleCompositionalPhreeqcValidation( ...
-%       'referenceRoot', referenceRoot, 'totalDays', 2, 'plotResults', false)
-%
-% DESCRIPTION:
-%   Simulate hydrogen injection, storage, and production in a 50 m, 1D
-%   reservoir. The default comparison uses 20 cells, high-rate microbial
-%   kinetics, and a 250-day schedule with injection ending at day 50 and
-%   production starting at day 200. Diffusion and chemotaxis are disabled.
-%
-%   The standalone case uses the Soreide-Whitson equation of state
-%   with 2.865 mol/kg NaCl and one PHREEQC update per two-day flow step.
-%   No external checkout is needed. If referenceRoot is supplied, an optional
-%   comparison uses the same thermodynamic parameters and the reference
-%   model's five chemistry substeps, retaining its kinetic equations.
-%
-%   Reference sources are copied to a temporary folder and adapted there;
-%   the supplied checkout is unchanged. The optional reference driver uses
-%   IPhreeqcCOM and requires Windows MATLAB. This restriction applies to
-%   the external reference, rather than H2sim's native Linux integration.
-%
-% OPTIONAL PARAMETERS:
-%   referenceRoot   - Optional external reference checkout containing
-%                     examples/H2Storage1D.m (default empty: H2sim only).
-%   injectionDays   - Injection duration in days. Must be 50 for this case.
-%   totalDays       - Prefix of the storage cycle in days: a positive
-%                     multiple of two, up to 250 (default 250). Runs ending
-%                     at day 50 or earlier contain injection only.
-%   gridCells       - Number of grid cells (default 20).
-%   rate            - Microbial rate case: 'medrate' or 'highrate'
-%                     (default 'highrate').
-%   plotResults     - Plot chemistry and any reference data (default true).
-%   outputDirectory - Folder for validation_results.mat and figures
-%                     (default build/phreeqc-validation under pwd).
-%
-% RETURNS:
-%   result - Structure with h2sim (model, initial state, selected schedule,
-%            accepted states, well solutions, reports, packed problem and
-%            elapsedSeconds), referenceRoot, description, and diagnostics.
-%            Includes reference outputs only when referenceRoot is supplied.
-%
-% NOTES:
-%   The selected schedule is hashed with the model and initial state before
-%   packing. Repeating an identical setup can reuse accepted packed states;
-%   changing totalDays selects a different cache. outputDirectory controls
-%   the MAT file and figure exports, not the packed simulation cache.
-%   elapsedSeconds includes cache lookup and output loading.
-%
-%   Each call writes validation_results.mat, even when plotResults is false.
-%   Diagnostics include cumulative reaction consumption and loss relative to
-%   total prescribed H2 injection over the selected schedule. Short runs do
-%   not reproduce the complete storage and production phases.
-%
-% SEE ALSO:
-%   runPhreeqcValidation, plotCompositionalPhreeqcValidation,
-%   collectPhreeqcValidationDiagnostics
+    % Validate compositional PHREEQC storage with an optional external comparison
+    %
+    % SYNOPSIS:
+    %   result = exampleCompositionalPhreeqcValidation()
+    %   result = exampleCompositionalPhreeqcValidation('referenceRoot', referenceRoot)
+    %   result = exampleCompositionalPhreeqcValidation( ...
+    %       'referenceRoot', referenceRoot, 'totalDays', 2, 'plotResults', false)
+    %
+    % DESCRIPTION:
+    %   Simulate hydrogen injection, storage, and production in a 50 m, 1D
+    %   reservoir. The default comparison uses 20 cells, high-rate microbial
+    %   kinetics, and a 250-day schedule with injection ending at day 50 and
+    %   production starting at day 200. Diffusion and chemotaxis are disabled.
+    %
+    %   The standalone case uses the Soreide-Whitson equation of state
+    %   with 2.865 mol/kg NaCl and one PHREEQC update per two-day flow step.
+    %   No external checkout is needed. If referenceRoot is supplied, an optional
+    %   comparison uses the same thermodynamic parameters and the reference
+    %   model's five chemistry substeps, retaining its kinetic equations.
+    %
+    %   Reference sources are copied to a temporary folder and adapted there;
+    %   the supplied checkout is unchanged. The optional reference driver uses
+    %   IPhreeqcCOM and requires Windows MATLAB. This restriction applies to
+    %   the external reference, rather than H2sim's native Linux integration.
+    %
+    % OPTIONAL PARAMETERS:
+    %   referenceRoot   - Optional external reference checkout containing
+    %                     examples/H2Storage1D.m (default empty: H2sim only).
+    %   injectionDays   - Injection duration in days. Must be 50 for this case.
+    %   totalDays       - Prefix of the storage cycle in days: a positive
+    %                     multiple of two, up to 250 (default 250). Runs ending
+    %                     at day 50 or earlier contain injection only.
+    %   gridCells       - Number of grid cells (default 20).
+    %   rate            - Microbial rate case: 'medrate' or 'highrate'
+    %                     (default 'highrate').
+    %   plotResults     - Plot chemistry and any reference data (default true).
+    %   outputDirectory - Folder for validation_results.mat and figures
+    %                     (default build/phreeqc-validation under pwd).
+    %
+    % RETURNS:
+    %   result - Structure with h2sim (model, initial state, selected schedule,
+    %            accepted states, well solutions, reports, packed problem and
+    %            elapsedSeconds), referenceRoot, description, and diagnostics.
+    %            Includes reference outputs only when referenceRoot is supplied.
+    %
+    % NOTES:
+    %   The selected schedule is hashed with the model and initial state before
+    %   packing. Repeating an identical setup can reuse accepted packed states;
+    %   changing totalDays selects a different cache. outputDirectory controls
+    %   the MAT file and figure exports, not the packed simulation cache.
+    %   elapsedSeconds includes cache lookup and output loading.
+    %
+    %   Each call writes validation_results.mat, even when plotResults is false.
+    %   Diagnostics include cumulative reaction consumption and loss relative to
+    %   total prescribed H2 injection over the selected schedule. Short runs do
+    %   not reproduce the complete storage and production phases.
+    %
+    % SEE ALSO:
+    %   runPhreeqcValidation, plotCompositionalPhreeqcValidation,
+    %   collectPhreeqcValidationDiagnostics
 
     %% Set comparison options
     opt = struct('referenceRoot',   '', ...
-                 'injectionDays',   50, ...
-                 'totalDays',       250, ...
-                 'gridCells',       20, ...
-                 'rate',            'highrate', ...
-                 'plotResults',     true, ...
-                 'outputDirectory', fullfile(pwd, 'build', 'phreeqc-validation'));
+        'injectionDays',   50, ...
+        'totalDays',       250, ...
+        'gridCells',       20, ...
+        'rate',            'highrate', ...
+        'plotResults',     true, ...
+        'outputDirectory', fullfile(pwd, 'build', 'phreeqc-validation'));
     opt = merge_options(opt, varargin{:});
     opt = validateOptions(opt);
     opt.outputDirectory = prepareOutputDirectory(opt.outputDirectory);
@@ -172,13 +172,13 @@ function summary = runH2simCase(opt)
     assert(ok, 'H2sim validation case did not complete.');
     [ws, states, reports] = getPackedSimulatorOutput(problem);
     summary = struct('model',          model, ...
-                     'state0',         state0, ...
-                     'schedule',       schedule, ...
-                     'states',         {states}, ...
-                     'wellSols',       {ws}, ...
-                     'reports',        {reports}, ...
-                     'packedProblem',  problem, ...
-                     'elapsedSeconds', toc(timer));
+        'state0',         state0, ...
+        'schedule',       schedule, ...
+        'states',         {states}, ...
+        'wellSols',       {ws}, ...
+        'reports',        {reports}, ...
+        'packedProblem',  problem, ...
+        'elapsedSeconds', toc(timer));
 end
 
 function [model, schedule, state0] = setupH2simCase(opt)
@@ -208,7 +208,7 @@ end
 
 function schedule = selectSchedule(schedule, totalDays)
     % Keep the original controls and take complete two-day flow steps.
-    nSteps = totalDays/2;
+    nSteps = totalDays / 2;
     schedule.step.val = schedule.step.val(1:nSteps);
     schedule.step.control = schedule.step.control(1:nSteps);
 end
@@ -259,7 +259,7 @@ function addTotalDICDiagnostic(modelDirectory)
         '$1 totalDIC(i) = output{end,6};');
     source = strrep(source, 'states{t,1}.Solution.C4        = C4;', ...
         ['states{t,1}.Solution.C4        = C4;', newline, ...
-         'states{t,1}.Solution.TotalDIC = totalDIC;']);
+        'states{t,1}.Solution.TotalDIC = totalDIC;']);
     writeReferenceSource(file, source);
 end
 
@@ -270,7 +270,7 @@ function source = adaptReferenceSetup(opt)
     source = regexprep(source, 'mrstModule add [^\n]*', '');
     marker = strfind(source, '%% Running the simulation');
     assert(~isempty(marker), 'Upstream setup marker changed.');
-    source = source(1:marker(1)-1);
+    source = source(1:marker(1) - 1);
     source = strrep(source, '[NX,NY,NZ]=deal(50,1,1);', ...
         sprintf('[NX,NY,NZ]=deal(%d,1,1);', opt.gridCells));
 
@@ -288,14 +288,14 @@ function source = adaptReferenceSetup(opt)
     source = strrep(source, ...
         'model = GenericOverallCompositionModel_Modified(arg{:});', ...
         ['model = GenericOverallCompositionModel_Modified(arg{:});', newline, ...
-         'model.EOSModel = SoreideWhitsonEos(G, mixture, ', ...
-         '''msalt'', 2.865, ''pH'', 6.24, ''initial_NaCl'', 2.865, ', ...
-         '''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
+        'model.EOSModel = SoreideWhitsonEos(G, mixture, ', ...
+        '''msalt'', 2.865, ''pH'', 6.24, ''initial_NaCl'', 2.865, ', ...
+        '''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
     source = strrep(source, ...
         'eos = EquationOfStateModel([], mixture, ''Peng-Robinson'');', ...
         ['eos = SoreideWhitsonEos([], mixture, ''msalt'', 2.865, ', ...
-         '''pH'', 6.24, ''initial_NaCl'', 2.865, ', ...
-         '''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
+        '''pH'', 6.24, ''initial_NaCl'', 2.865, ', ...
+        '''initial_SO4'', 4.664e-3, ''rho_water'', 1000);']);
 end
 
 function summary = runReferenceCase(opt, referenceRunRoot, source)
@@ -306,11 +306,11 @@ function summary = runReferenceCase(opt, referenceRunRoot, source)
     validateReferenceSetup(model, opt);
 
     model.parpool = false;
-    nSteps = opt.totalDays/2;
-    schedule.step.val = repmat(2*day, nSteps, 1);
+    nSteps = opt.totalDays / 2;
+    schedule.step.val = repmat(2 * day, nSteps, 1);
     schedule.step.control = ones(nSteps, 1);
-    schedule.step.control(cumsum(schedule.step.val) > 50*day) = 2;
-    schedule.step.control(cumsum(schedule.step.val) > 200*day) = 3;
+    schedule.step.control(cumsum(schedule.step.val) > 50 * day) = 2;
+    schedule.step.control(cumsum(schedule.step.val) > 200 * day) = 3;
     problem = packH2simSimulationProblem(state0, model, schedule, ...
         'PHREEQC_REFERENCE_CYCLE_SETUP');
 
@@ -324,13 +324,13 @@ function summary = runReferenceCase(opt, referenceRunRoot, source)
         problem.OutputHandlers.reports{k} = report.ControlstepReports{k};
     end
     summary = struct('model',          model, ...
-                     'state0',         state0, ...
-                     'schedule',       schedule, ...
-                     'states',         {states}, ...
-                     'wellSols',       {wellSol}, ...
-                     'report',         report, ...
-                     'packedProblem',  problem, ...
-                     'elapsedSeconds', toc(timer));
+        'state0',         state0, ...
+        'schedule',       schedule, ...
+        'states',         {states}, ...
+        'wellSols',       {wellSol}, ...
+        'report',         report, ...
+        'packedProblem',  problem, ...
+        'elapsedSeconds', toc(timer));
 end
 
 function [model, state0, schedule] = evaluateReferenceSetup(source)
@@ -359,7 +359,7 @@ end
 function validateReferenceOutput(states, report)
     assert(~report.Failure, 'External reference did not converge.');
     finiteState = @(state) all(isfinite(state.pressure)) && ...
-                           all(isfinite(state.x(:)));
+        all(isfinite(state.x(:)));
     assert(all(cellfun(finiteState, states)), ...
         'External reference returned non-finite pressure or composition.');
 end

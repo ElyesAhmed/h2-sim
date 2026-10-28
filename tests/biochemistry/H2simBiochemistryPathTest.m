@@ -1,11 +1,12 @@
 classdef H2simBiochemistryPathTest < matlab.unittest.TestCase
     % Verify that H2sim sessions select the standalone biochemistry code.
     methods (Test)
+
         function replacesPreviouslyAddedMRSTModule(test)
             [root, upstream] = moduleRoots();
             test.addTeardown(@() activateH2simBiochemistry(root));
             mrstPath('reregister', 'h2-biochem', upstream);
-            mrstModule add h2-biochem
+            mrstModule add h2-biochem;
             test.verifyEqual(which('BiochemistryModel'), ...
                 fullfile(upstream, 'models', 'BiochemistryModel.m'));
 
@@ -48,6 +49,7 @@ classdef H2simBiochemistryPathTest < matlab.unittest.TestCase
             test.verifyEqual(nnz(strcmp(modules, 'h2sim-biochem')), 1);
             verifyLocalModule(test, root);
         end
+
     end
 end
 
@@ -84,10 +86,10 @@ end
 
 function verifySupportedExamples(test)
     names = {'simple1DBacterialExampleMetacet', ...
-             'exampleCompositionalBacterial2DThreeReactions', ...
-             'exampleCompositionalBacterial1DPhreeqcMinerals', ...
-             'exampleSequentialBiochemistryPhreeqc1D', ...
-             'runThreeBackendComparison', 'exampleH2BrineSolubilityStudy'};
+        'exampleCompositionalBacterial2DThreeReactions', ...
+        'exampleCompositionalBacterial1DPhreeqcMinerals', ...
+        'exampleSequentialBiochemistryPhreeqc1D', ...
+        'runThreeBackendComparison', 'exampleH2BrineSolubilityStudy'};
     for k = 1:numel(names)
         test.verifyNotEmpty(which(names{k}), names{k});
     end

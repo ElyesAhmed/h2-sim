@@ -36,6 +36,7 @@
 % membership alone does not mean a case was included in the manuscript.
 % Archived and older 3D cases are under research/biochemistry, outside the
 % runtime module. Add the selected study folder explicitly to inspect them.
+% Early PVT/black-oil comparison prototypes are in research/h2store.
 % Website notebooks distinguish setup checks, tutorials and saved-result plots.
 
 %{

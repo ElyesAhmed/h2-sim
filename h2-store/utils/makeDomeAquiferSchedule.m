@@ -1,13 +1,13 @@
 function schedule = makeDomeAquiferSchedule(initialW, options)
-%MAKEDOMEAQUIFERSCHEDULE Build cyclic controls with exact stage durations.
-%   schedule = makeDomeAquiferSchedule(W, options) uses dome setup options.
-%   Boundary conditions are attached separately by modelForDome3DAquifer.
-%   Cushion and charge durations must be positive; idle and shut-in may be zero.
-%   Each positive stage retains its full final remainder. Charge rates stay
-%   constant through the final ramp; cushion rates scale with its timesteps.
-%   Idle controls retain rateIdle and sign -1, and discharge uses tempCushion.
+    % MAKEDOMEAQUIFERSCHEDULE Build cyclic controls with exact stage durations.
+    %   schedule = makeDomeAquiferSchedule(W, options) uses dome setup options.
+    %   Boundary conditions are attached separately by modelForDome3DAquifer.
+    %   Cushion and charge durations must be positive; idle and shut-in may be zero.
+    %   Each positive stage retains its full final remainder. Charge rates stay
+    %   constant through the final ramp; cushion rates scale with its timesteps.
+    %   Idle controls retain rateIdle and sign -1, and discharge uses tempCushion.
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -27,7 +27,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
 %}
     %% Initialize wells based on grid, rock, fluid, and options
     W = initialW;
-    
+
     %% Cushioning phase configuration
     if options.use_cushion
         W(1).type     = 'rate';
@@ -40,69 +40,68 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
         dtCushions = rampupDomeTimesteps(options.timeCushion, ...
             options.dtCushion);
         rateCushion = options.rateCushion .* dtCushions ./ max(dtCushions);
-        
+
         %% Create schedules for the initial cushioning phases
         scheduleCushions = cell(1, 19);
-        for i = 1:9    
+        for i = 1:9
             dtCushion = dtCushions(i);
             W(1).val  = rateCushion(10);
             scheduleCushions{i} = simpleSchedule(dtCushion, 'W', W);
         end
 
         %% Handle remaining cushioning phases
-        dtCushion = dtCushions(10:end-9);
+        dtCushion = dtCushions(10:end - 9);
         W(1).val  = rateCushion(10);
         scheduleCushions{10} = simpleSchedule(dtCushion, 'W', W);
-        
+
         %% Continue with final cushioning phases
-        for i = 1:9    
-            dtCushion = dtCushions(end-9+i);
-            W(1).val  = rateCushion(end-9+i);
-            scheduleCushions{i+10} = simpleSchedule(dtCushion, 'W', W);
+        for i = 1:9
+            dtCushion = dtCushions(end - 9 + i);
+            W(1).val  = rateCushion(end - 9 + i);
+            scheduleCushions{i + 10} = simpleSchedule(dtCushion, 'W', W);
         end
     end
 
     %% Set up wells again for the charging phase
     W = initialW;
     W(1).type     = 'rate';
-    W(1).name     = 'charge';    
+    W(1).name     = 'charge';
     W(1).val      = options.rateCharge;
     W(1).T        = options.tempCharge;
     W(1).sign     = 1;
-    
+
     %% Generate timesteps for the charging phase
     dtCharges = rampupDomeTimesteps(options.timeCharge, ...
         options.dtCharge);
     rateCharge = options.rateCharge .* dtCharges ./ max(dtCharges);
-    
+
     %% Create schedules for the initial charging phases
     scheduleCharges = cell(1, 19);
-    for i = 1:9    
+    for i = 1:9
         dtCharge = dtCharges(i);
         W(1).val  = rateCharge(10);
         scheduleCharges{i} = simpleSchedule(dtCharge, 'W', W);
     end
 
     %% Handle remaining charging phases
-    dtCharge = dtCharges(10:end-9);
+    dtCharge = dtCharges(10:end - 9);
     W(1).val  = rateCharge(10);
     scheduleCharges{10} = simpleSchedule(dtCharge, 'W', W);
 
     %% Continue with final charging phases
-    for i = 1:9    
-        dtCharge = dtCharges(end-9+i);
+    for i = 1:9
+        dtCharge = dtCharges(end - 9 + i);
         W(1).val  = rateCharge(10);
-        scheduleCharges{i+10} = simpleSchedule(dtCharge, 'W', W);
+        scheduleCharges{i + 10} = simpleSchedule(dtCharge, 'W', W);
     end
-    
 
     %% Idle phase configuration
     W(1).type     = 'rate';
     W(1).val      = options.rateIdle;
-    W(1).name     = 'shut';        
+    W(1).name     = 'shut';
     W(1).T        = options.tempCushion;
     W(1).sign     = -1;
-    
+
     %% Generate schedule for the idle phase
     dtIdle = rampupDomeTimesteps(options.timeIdle, ...
         options.dtIdle);
@@ -119,16 +118,15 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
 
     %% Discharge phase configuration
     W(1).type     = 'rate';
-    W(1).name     = 'discharge';    
+    W(1).name     = 'discharge';
     W(1).val      = -options.rateDischarge;
     W(1).sign     = -1;
-    
+
     %% Generate schedule for the discharge phase
     dtDischarge = rampupDomeTimesteps(options.timeDischarge, ...
         options.dtDischarge);
     scheduleDischarge = simpleSchedule(dtDischarge, 'W', W);
 
-    
     %% Combine schedules based on the specified options
     if options.chargeOnly
         schedule = combineSchedules(scheduleCharges{:}, 'makeConsistent', false);
@@ -136,7 +134,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
         schedule = scheduleDischarge;
     elseif options.cushionOnly
         schedule = combineSchedules(scheduleCushions{:}, 'makeConsistent', false);
-    else 
+    else
         %% Combine all schedules for normal operation
         if options.use_cushion
             schedule = combineSchedules(scheduleCharges{:}, scheduleIdle, scheduleDischarge, 'makeConsistent', false);
@@ -145,7 +143,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
         else
             schedule = combineSchedules(scheduleCharges{:}, scheduleIdle, scheduleDischarge, 'makeConsistent', false);
             schedule = repmat({schedule}, 1, options.numCycles);
-            schedule = combineSchedules(schedule{:}, 'makeConsistent', false);  
+            schedule = combineSchedules(schedule{:}, 'makeConsistent', false);
         end
     end
 

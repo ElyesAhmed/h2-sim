@@ -38,14 +38,15 @@ classdef SRBTracerConvRate < StateFunction
 
     properties
         % Optional kinetic anhydrite dissolution, independent of PHREEQC.
-        k_dissolve = 4.1e-7;          % Base dissolution constant (mol/m2/s)
-        specific_surface_area = 1500; % Mineral area per bulk volume [m2/m3]
-        C_eq = 20;                    % Equilibrium threshold (mol/m3)
-        sw_exponent = 1.5;            % Saturation scaling factor (n)
-        enable_sulfate_source = true; % Toggle flag
+        k_dissolve = 4.1e-7           % Base dissolution constant (mol/m2/s)
+        specific_surface_area = 1500  % Mineral area per bulk volume [m2/m3]
+        C_eq = 20                     % Equilibrium threshold (mol/m3)
+        sw_exponent = 1.5             % Saturation scaling factor (n)
+        enable_sulfate_source = true  % Toggle flag
     end
 
     methods
+
         function scr = SRBTracerConvRate(model, varargin)
             scr@StateFunction(model, varargin{:});
             if isprop(model, 'ReservoirModel') && ~isempty(model.ReservoirModel)
@@ -74,19 +75,19 @@ classdef SRBTracerConvRate < StateFunction
             end
             q = {0, 0};
             if isempty(rm) || ~isprop(rm, 'sulfateReduction') || ~rm.sulfateReduction
-                return;
+                return
             end
             if ismethod(rm, 'isSequentialCompositionalPhreeqcBackend') && ...
-                    rm.isSequentialCompositionalPhreeqcBackend()
+                rm.isSequentialCompositionalPhreeqcBackend()
                 % Kinetic sulfate/sulfide changes are supplied by the
                 % post-convergence compositional PHREEQC split in this mode.
-                return;
+                return
             end
 
             bcrm = rm.biochemFluid;
             idxS = find(strcmp(bcrm.metabolicReaction, 'SulfateReducingBacteria'), 1);
             if isempty(idxS)
-                return;
+                return
             end
 
             bmass = rm.PVTPropertyFunctions.get(rm, state, 'BacterialMass');
@@ -144,9 +145,11 @@ classdef SRBTracerConvRate < StateFunction
 
             q{2} = (1 - fH2S) .* qS2_bio;
         end
+
     end
 
     methods (Access = private)
+
         function r_dissolution = getAnhydriteSource(scr, rm, state, L_ix)
             % Optional positive sulfate source in the model's liquid phase.
             s = rm.getProps(state, 's');
@@ -163,13 +166,14 @@ classdef SRBTracerConvRate < StateFunction
             smooth_drive = 0.5 * (drive + (drive.^2 + 1e-6).^0.5);
 
             % Rate density [mol/(m3 bulk*s)] with the existing saturation floor.
-            r_density = scr.k_dissolve.* scr.specific_surface_area.* ...
-                        (sL.^scr.sw_exponent).* smooth_drive;
+            r_density = scr.k_dissolve .* scr.specific_surface_area .* ...
+                (sL.^scr.sw_exponent) .* smooth_drive;
 
             % Integrate over cell bulk volumes to obtain mol/s.
             V_cell = rm.G.cells.volumes;
             r_dissolution = r_density .* V_cell;
         end
+
     end
 end
 

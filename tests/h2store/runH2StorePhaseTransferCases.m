@@ -1,25 +1,25 @@
 function cases = runH2StorePhaseTransferCases()
-%RUNH2STOREPHASETRANSFERCASES Closed, four-cell black-oil PVT regressions.
-% Synthetic pure-fluid data avoid network access. Local solubility, SGOF and
-% PVT writers are exercised before MRST reads the generated deck tables.
-% Oil denotes brine, gas denotes hydrogen. Inventories are surface volumes.
+    % RUNH2STOREPHASETRANSFERCASES Closed, four-cell black-oil PVT regressions.
+    % Synthetic pure-fluid data avoid network access. Local solubility, SGOF and
+    % PVT writers are exercised before MRST reads the generated deck tables.
+    % Oil denotes brine, gas denotes hydrogen. Inventories are surface volumes.
     folder = tempname;
     mkdir(folder);
     cleanup = onCleanup(@() rmdir(folder, 's'));
     G = computeGeometry(cartGrid([4, 1, 1], [4, 1, 1]));
-    rock = makeRock(G, 100*milli*darcy, 0.2);
-    p = (5:5:100)'*barsa;
+    rock = makeRock(G, 100 * milli * darcy, 0.2);
+    p = (5:5:100)' * barsa;
     T = repmat(313.15, size(p));
-    water = table(T-273.15, p, 1000*exp(1e-9*(p-40*barsa)), ...
+    water = table(T - 273.15, p, 1000 * exp(1e-9 * (p - 40 * barsa)), ...
         repmat(1e-3, size(p)), 'VariableNames', ...
         {'# temperature [°C]', 'pressure [Pa]', 'density [kg/m3]', 'viscosity [Pa.s]'});
-    rhoG = p*0.002016./(8.314462618*T.*calculateBrillBreggsZfactorHydrogen(T, p));
+    rhoG = p * 0.002016 ./ (8.314462618 * T .* calculateBrillBreggsZfactorHydrogen(T, p));
     gas = water;
     gas.("density [kg/m3]") = rhoG;
     gas.("viscosity [Pa.s]") = repmat(9e-6, size(p));
     solubility = HenrySetschenowH2BrineEos(T, 1, p);
     % A prescribed 7 kPa water partial pressure, not a vapor-pressure model.
-    solubility.y_H2O = 7000./p;
+    solubility.y_H2O = 7000 ./ p;
     getFluidH2BrineSGOF('plot', false, 'n', 21, 'outputPath', folder);
     names = {'dissolution', 'vaporization', 'combined'};
     cases = struct();
@@ -35,7 +35,7 @@ function cases = runH2StorePhaseTransferCases()
         model = GenericBlackOilModel(G, rock, fluid, 'water', false, ...
             'disgas', disgas, 'vapoil', vapoil, 'gravity', [0, 0, 0]);
         model.minimumPressure = barsa;
-        state0 = initResSol(G, [38; 39; 41; 42]*barsa, [0.8, 0.2]);
+        state0 = initResSol(G, [38; 39; 41; 42] * barsa, [0.8, 0.2]);
         state0.rs = zeros(4, 1);
         state0.rv = zeros(4, 1);
         if disgas
@@ -80,12 +80,12 @@ function data = snapshot(state, fluid, rock, G, disgas, vapoil)
     else
         bG = fluid.bG(pG);
     end
-    oil = rock.poro.*G.cells.volumes.*state.s(:, 1).*bO;
-    gas = rock.poro.*G.cells.volumes.*state.s(:, 2).*bG;
+    oil = rock.poro .* G.cells.volumes .* state.s(:, 1) .* bO;
+    gas = rock.poro .* G.cells.volumes .* state.s(:, 2) .* bG;
     data = struct('pressure', p, 'saturation', state.s, ...
-        'rs', state.rs, 'rv', state.rv, 'dissolved', oil.*state.rs, ...
-        'vaporized', gas.*state.rv, ...
-        'inventory', [sum(oil + gas.*state.rv); sum(gas + oil.*state.rs)]);
+        'rs', state.rs, 'rv', state.rv, 'dissolved', oil .* state.rs, ...
+        'vaporized', gas .* state.rv, ...
+        'inventory', [sum(oil + gas .* state.rv); sum(gas + oil .* state.rs)]);
 end
 
 function file = writeFixtureDeck(folder, p, rhoG, disgas, vapoil)
@@ -113,7 +113,7 @@ function file = writeFixtureDeck(folder, p, rhoG, disgas, vapoil)
         % The local writer has no dry-gas PVDG output. This test-only table
         % supplies the disabled-vaporization branch from the same gas data.
         fprintf(fid, 'PVDG\n');
-        fprintf(fid, '%.12g %.12g %.12g\n', [p/barsa, 0.0851./rhoG, ...
+        fprintf(fid, '%.12g %.12g %.12g\n', [p / barsa, 0.0851 ./ rhoG, ...
             repmat(0.009, size(p))]');
         fprintf(fid, '/\n');
     end

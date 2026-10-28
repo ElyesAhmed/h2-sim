@@ -15,8 +15,8 @@
 % Related model publication:
 % https://www.sciencedirect.com/science/article/pii/S0360319925039473
 
-mrstModule add ad-core ad-props deckformat mrst-gui
-mrstModule add compositional
+mrstModule add ad-core ad-props deckformat mrst-gui;
+mrstModule add compositional;
 mrstVerbose off;
 
 %% Prepare the grid, fluid and schedule
@@ -26,7 +26,7 @@ mrstVerbose off;
 model.rock.poro([1, end]) = 0.90;
 model.fluid.rhoGS = 0.08988;
 model.fluid.rhoOS = 999.0140;
-schedule.step.val = schedule.step.val/3;
+schedule.step.val = schedule.step.val / 3;
 schedule.step.val = schedule.step.val(1:400);
 schedule.step.control = schedule.step.control(1:400);
 
@@ -43,12 +43,12 @@ model.fluid = modifyRelPermForResidualSaturations( ...
 % The composition follows H2O, H2, CH4, CO2, acetate and sums to one.
 initComp = [0.90, 0.045, 0.005, 0.05, 0.0];
 initTemp = 273.15 + 40;
-initPress = 82*barsa;
+initPress = 82 * barsa;
 biochemFluid = TableBioChemMixture( ...
     {'MethanogenicArchae', 'AcetogenicBacteria'}, {'nbactM', 'nbactA'});
 nbioreact = biochemFluid.nbioreact;
-initBact = ones(1, nbioreact)*9;
-nc = ones(1, nbioreact)*180;
+initBact = ones(1, nbioreact) * 9;
+nc = ones(1, nbioreact) * 180;
 cp = zeros(1, nbioreact);
 
 %% Configure the inherited bio-clogging formulation
@@ -121,15 +121,15 @@ compNames = model.EOSModel.getComponentNames();
 idxH2 = find(strcmp(compNames, 'H2'));
 idxCO2 = find(strcmp(compNames, 'CO2'));
 idxCH4 = find(strcmp(compNames, 'C1'));
-timeDays = cumsum(schedule.step.val)/day;
-timeYrs = timeDays/365;
+timeDays = cumsum(schedule.step.val) / day;
+timeYrs = timeDays / 365;
 scenarios = {
-    struct('name', 'Bio-Clog', 'model', model, 'states', {st1}, ...
-           'color', [0, 0.5, 0], 'line', '-'), ...
-    struct('name', 'Bio-NoClog', 'model', model2, 'states', {st2}, ...
-           'color', [0, 0.7, 0.7], 'line', '--'), ...
-    struct('name', 'Abiotic', 'model', model3, 'states', {st3}, ...
-           'color', [0.7, 0, 0], 'line', ':')};
+             struct('name', 'Bio-Clog', 'model', model, 'states', {st1}, ...
+                 'color', [0, 0.5, 0], 'line', '-'), ...
+                 struct('name', 'Bio-NoClog', 'model', model2, 'states', {st2}, ...
+                 'color', [0, 0.7, 0.7], 'line', '--'), ...
+                 struct('name', 'Abiotic', 'model', model3, 'states', {st3}, ...
+                 'color', [0.7, 0, 0], 'line', ':')};
 
 %% Plot the physical results
 plotComponentProfiles(scenarios, compNames, timeYrs);

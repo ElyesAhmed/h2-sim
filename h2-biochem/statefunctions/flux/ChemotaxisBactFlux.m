@@ -15,7 +15,8 @@ classdef ChemotaxisBactFlux < StateFunction
     %   MicrobialChemotaxis, ChemotaxisTransmissibility, DiffusiveBactFlux
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function df = ChemotaxisBactFlux(model, varargin)
             df@StateFunction(model, varargin{:});
             df = merge_options(df, varargin{:});
@@ -28,12 +29,11 @@ classdef ChemotaxisBactFlux < StateFunction
             df.label = 'J_{bact}^{chemo}';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function DN = evaluateOnDomain(prop, model, state)
             op = model.operators;
             bcrm = model.biochemFluid;
             nbioreact = bcrm.nbioreact;
-
 
             % Retrieve chemotactic transmissibility
             T = prop.getEvaluatedDependencies(state, 'ChemotaxisTransmissibility');
@@ -64,9 +64,10 @@ classdef ChemotaxisBactFlux < StateFunction
                 end
 
                 % Chemotactic flux on internal faces
-                DN{i} = + rhoLf .* T{i} .* op.Grad(xH2);
+                DN{i} = +rhoLf .* T{i} .* op.Grad(xH2);
             end
         end
+
     end
 end
 

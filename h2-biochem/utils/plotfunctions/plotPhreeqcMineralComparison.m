@@ -1,49 +1,49 @@
 function figures = plotPhreeqcMineralComparison(comparison, varargin)
-%Plot saved mineral-case hydrogen consumption and final aqueous pH
-%
-% SYNOPSIS:
-%   figures = plotPhreeqcMineralComparison(comparison);
-%   figures = plotPhreeqcMineralComparison(comparison, ...
-%       'dimension', 2, 'outputDirectory', '');
-%
-% PARAMETERS:
-%   comparison - Result struct array from the mineral-comparison examples.
-%                The first entry is the baseline; subsequent entries are
-%                PHREEQC mineral cases. Required fields: name, rock,
-%                h2ConsumedByReactionMoles, finalPH, timeDays and h2LossPercent.
-%                Reaction columns are MET, ACE and SRB, in mol H2. finalPH
-%                contains cellwise pH, or [] when unavailable. timeDays is
-%                in days. h2LossPercent uses cumulative injected H2 to date.
-%                Optional spatialH2LossPercent and xDimensionless supply
-%                per-cell contributions normalized by total injected H2,
-%                and dimensionless distance x/L, respectively.
-%
-% OPTIONAL PARAMETERS:
-%   dimension       - Dimension label for titles and filenames (default 1).
-%                     This does not change the data or perform a grid mapping.
-%   outputDirectory - PDF/PNG folder (default build/phreeqc-figures under pwd).
-%                     Pass an empty character vector, '', to disable export.
-%
-% RETURNS:
-%   figures - Two open figure handles owned by the caller:
-%               1. Reaction-specific H2 consumption bars and final-pH boxes.
-%               2. H2 loss over time and, when supplied, spatial contributions.
-%
-% DESCRIPTION:
-%   Redraw existing results without running simulations. Baseline kinetics
-%   and PHREEQC cases occupy separate bar panels; unavailable pH is omitted.
-%   The second figure shows all cases beside PHREEQC-only detail. Spatial
-%   curves are sorted by x/L and appear only when spatialH2LossPercent exists.
-%   Labels, values and normalization are taken from the supplied metrics.
-%   The final time in the first case is used in titles and time-axis limits.
-%
-%   Exports are vector PDF and 300-dpi PNG. Base names are
-%   minerals_<dimension>D_consumption_pH and
-%   minerals_<dimension>D_H2_consumption.
-%
-% SEE ALSO:
-%   exampleCompositionalBacterial1DPhreeqcMinerals,
-%   exampleCompositionalBacterial2DPhreeqcMinerals, paperExport
+    % Plot saved mineral-case hydrogen consumption and final aqueous pH
+    %
+    % SYNOPSIS:
+    %   figures = plotPhreeqcMineralComparison(comparison);
+    %   figures = plotPhreeqcMineralComparison(comparison, ...
+    %       'dimension', 2, 'outputDirectory', '');
+    %
+    % PARAMETERS:
+    %   comparison - Result struct array from the mineral-comparison examples.
+    %                The first entry is the baseline; subsequent entries are
+    %                PHREEQC mineral cases. Required fields: name, rock,
+    %                h2ConsumedByReactionMoles, finalPH, timeDays and h2LossPercent.
+    %                Reaction columns are MET, ACE and SRB, in mol H2. finalPH
+    %                contains cellwise pH, or [] when unavailable. timeDays is
+    %                in days. h2LossPercent uses cumulative injected H2 to date.
+    %                Optional spatialH2LossPercent and xDimensionless supply
+    %                per-cell contributions normalized by total injected H2,
+    %                and dimensionless distance x/L, respectively.
+    %
+    % OPTIONAL PARAMETERS:
+    %   dimension       - Dimension label for titles and filenames (default 1).
+    %                     This does not change the data or perform a grid mapping.
+    %   outputDirectory - PDF/PNG folder (default build/phreeqc-figures under pwd).
+    %                     Pass an empty character vector, '', to disable export.
+    %
+    % RETURNS:
+    %   figures - Two open figure handles owned by the caller:
+    %               1. Reaction-specific H2 consumption bars and final-pH boxes.
+    %               2. H2 loss over time and, when supplied, spatial contributions.
+    %
+    % DESCRIPTION:
+    %   Redraw existing results without running simulations. Baseline kinetics
+    %   and PHREEQC cases occupy separate bar panels; unavailable pH is omitted.
+    %   The second figure shows all cases beside PHREEQC-only detail. Spatial
+    %   curves are sorted by x/L and appear only when spatialH2LossPercent exists.
+    %   Labels, values and normalization are taken from the supplied metrics.
+    %   The final time in the first case is used in titles and time-axis limits.
+    %
+    %   Exports are vector PDF and 300-dpi PNG. Base names are
+    %   minerals_<dimension>D_consumption_pH and
+    %   minerals_<dimension>D_H2_consumption.
+    %
+    % SEE ALSO:
+    %   exampleCompositionalBacterial1DPhreeqcMinerals,
+    %   exampleCompositionalBacterial2DPhreeqcMinerals, paperExport
 
     opt = merge_options(struct('dimension', 1, 'outputDirectory', ...
         fullfile(pwd, 'build', 'phreeqc-figures')), varargin{:});
@@ -95,11 +95,11 @@ function [fig, lastTime] = plotConsumptionAndPH(comparison, labels, colors, h2, 
             title(ax, '(b) PHREEQC kinetics');
         end
         totals = sum(h2(indices, :), 2);
-        upper = max(totals)*1.18 + eps;
+        upper = max(totals) * 1.18 + eps;
         ylim(ax, [0, upper]);
         styleAxes(ax, 11);
         ax.XTickLabelRotation = 20;
-        text(ax, category, totals + 0.035*upper, ...
+        text(ax, category, totals + 0.035 * upper, ...
             cellstr(compose('%.3g', totals)), 'HorizontalAlignment', 'center', ...
             'FontName', 'Times New Roman', 'FontSize', 10);
         if panel == 1
@@ -117,7 +117,7 @@ function [fig, lastTime] = plotConsumptionAndPH(comparison, labels, colors, h2, 
     pHLabels = labels(pHMask);
     for k = 1:numel(comparison)
         if isempty(comparison(k).finalPH)
-            continue;
+            continue
         end
         boxchart(ax, repmat(categorical(labels(k), pHLabels, 'Ordinal', true), ...
             numel(comparison(k).finalPH), 1), comparison(k).finalPH(:), ...
@@ -145,7 +145,7 @@ function fig = plotHydrogenLoss(comparison, labels, colors, styles, lastTime, op
     fig = paperFigure(sizeCm, sprintf('%dD hydrogen consumption', opt.dimension));
     layout = tiledlayout(fig, 1 + hasSpatial, 2, ...
         'TileSpacing', 'compact', 'Padding', 'compact');
-    for panel = 1:2 + 2*hasSpatial
+    for panel = 1:2 + 2 * hasSpatial
         ax = nexttile(layout);
         hold(ax, 'on');
         if mod(panel, 2) == 1

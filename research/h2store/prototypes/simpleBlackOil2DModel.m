@@ -4,7 +4,7 @@
 % hydrogen storage simulations using MRST's black-oil model. The script shows:
 %
 % 1. Generation of SGOF tables for relative permeability
-% 2. Creation of solubility tables for H2-water systems  
+% 2. Creation of solubility tables for H2-water systems
 % 3. PVT table generation using equation of state
 % 4. Black-oil simulation with tabulated data
 %
@@ -14,22 +14,22 @@
 % - Region-dependent relative permeability
 % - Miscible and immiscible flow options
 %% Load Required MRST Modules
-mrstModule add ad-core ad-blackoil ad-props mrst-gui spe10 deckformat 
+mrstModule add ad-core ad-blackoil ad-props mrst-gui spe10 deckformat;
 
 %% Initialize Gravity
-gravity reset on
+gravity reset on;
 grav = [0, 0, -norm(gravity)];
 
 %% Define Grid (2D X-Z Domain)
 cartDims = [100, 1, 20];                  % Grid dimensions
-physDims = cartDims .* [0.5, 1, 1.25];    % Physical dimensions in ft
+physDims = cartDims .* [0.5, 1, 1.25];    % Physical dimensions in m
 G = cartGrid(cartDims, physDims);
 
 %% Apply Dome-Shaped Deformation in Z-Direction
-x = G.nodes.coords(:,1);
-z = G.nodes.coords(:,3);
-G.nodes.coords(:,3) = z + 10 * exp(-((x - physDims(1)/2).^2) / (2 * (physDims(1)/8)^2));
-G.nodes.coords(:,3) = G.nodes.coords(:,3) - 35;  % Shift dome downward
+x = G.nodes.coords(:, 1);
+z = G.nodes.coords(:, 3);
+G.nodes.coords(:, 3) = z + 10 * exp(-((x - physDims(1) / 2).^2) / (2 * (physDims(1) / 8)^2));
+G.nodes.coords(:, 3) = G.nodes.coords(:, 3) - 35;  % Shift dome downward
 G = computeGeometry(G);
 
 %% Define Geological Regions
@@ -47,7 +47,7 @@ caprock     = k > 14;
 % view(0, 180), axis tight
 
 %% Petrophysical Properties
-rock = makeRock(G, [10, 10, 10]*milli*darcy, 0.25);
+rock = makeRock(G, [10, 10, 10] * milli * darcy, 0.25);
 rock.poro(caprock)      = 0.10;
 rock.poro(underburden)  = 0.10;
 
@@ -65,31 +65,32 @@ G.cells.indexMap = rock.regions.saturation;
 
 %% Plot Log-Scale Permeability Field
 clf;
-plotCellData(G, log10(convertTo(rock.perm(:,1), milli*darcy)));
-view(0, 180), axis tight;
-title('Log-Scale Permeability Field')
+plotCellData(G, log10(convertTo(rock.perm(:, 1), milli * darcy)));
+view(0, 180);
+axis tight;
+title('Log-Scale Permeability Field');
 
 %% Define Well: Injector at to Cell behind caprock
 W = addWell([], G, rock, 1150, ...
     'Comp_i', [0, 1], ...
     'Type', 'rate', ...
-    'Val', 2 * kilogram/day, ...
+    'Val', 2 * kilogram / day, ...
     'Radius', 5 * centi * meter, ...
     'Dir', 'z', ...
     'sign', +1, ...
     'Name', 'I');
 
 %% Boundary Conditions: Hydrostatic Pressure on Lateral Faces
-rhoOS = 998 * kilogram/meter^3;
+rhoOS = 998 * kilogram / meter^3;
 boundFaces = boundaryFaces(G);
-maxX = max(G.cells.centroids(:,1));
-minX = min(G.cells.centroids(:,1));
+maxX = max(G.cells.centroids(:, 1));
+minX = min(G.cells.centroids(:, 1));
 lateralfaces = boundFaces( ...
-    abs(G.faces.centroids(boundFaces,1)) < minX | ...
-    abs(G.faces.centroids(boundFaces,1)) > maxX - eps);
+    abs(G.faces.centroids(boundFaces, 1)) < minX | ...
+    abs(G.faces.centroids(boundFaces, 1)) > maxX - eps);
 
 z_face = G.faces.centroids(lateralfaces, 3);
-z_ref  = max(G.nodes.coords(:,3));
+z_ref  = max(G.nodes.coords(:, 3));
 dp_bc = rhoOS * norm(grav) * (z_face - z_ref);
 pInit = 500 * psia;
 sat = [1.0, 0.0];
@@ -143,7 +144,6 @@ initFluid = initSimpleADIFluid( ...
     'cR',    6.0e-4 / barsa, ...                       % Rock compressibility [1/Pa]
     'phases', 'OG');                                   % 'O' = brine, 'G' = hydrogen
 
-
 % Replace synthetic rel. perm. and capillary pressure with SGOF data
 immiscFluid = initFluid;
 
@@ -156,13 +156,12 @@ fluid_kr = assignSGOF(immiscFluid, SGOF, struct( ...
 immiscFluid.krO = fluid_kr.krOG{1};     % 'O' = water/brine phase
 immiscFluid.krG = fluid_kr.krG{1};      % 'G' = gas/hydrogen phase
 
-
 %% Define Reservoir Model
 % Incompressible, immiscible H2/brine system using a two-phase oil/gas model
 model = GenericBlackOilModel(G, rock, immiscFluid, ...
     'gravity', grav, 'disgas', false, 'vapoil', false, ...
     'water', false, 'oil', true, 'gas', true);
-model.OutputStateFunctions{end+1}= 'ComponentPhaseMass';
+model.OutputStateFunctions{end + 1} = 'ComponentPhaseMass';
 
 %% Initialize Formation State
 state0_bo.pressure = pInit * ones(G.cells.num, 1);
@@ -171,8 +170,13 @@ state0_bo.s = repmat(sat, G.cells.num, 1);
 % Plot initial pressure
 clf;
 plotCellData(G, convertTo(state0_bo.pressure, psia));
-view(3), colorbar, axis tight, grid on;
-xlabel('x'), zlabel('Depth'), title('Initial Pressure [Psi]');
+view(3);
+colorbar;
+axis tight;
+grid on;
+xlabel('x');
+zlabel('Depth');
+title('Initial Pressure [Psi]');
 
 %% Define simple injection schedule
 timesteps = [0.01, 0.025, 0.075, 0.1, repmat(0.5, [1, 6]), ...
@@ -184,15 +188,25 @@ schedule_bo = simpleSchedule(timesteps, 'W', W, 'bc', bc);
 % We simulate a miscible hydrogen-brine model, tabulating solubility and generating PVT data.
 
 % Set parameters for temperature, pressure, and salinity
-min_temp = 60; max_temp = 61; min_pressure = 30 * atm; max_pressure = 100 * barsa(); nbp = 100; nbt = 10; ms = 0;
+min_temp = 60;
+max_temp = 61;
+min_pressure = 30 * atm;
+max_pressure = 100 * barsa();
+nbp = 100;
+nbt = 10;
+ms = 0;
 
 % Define output directories
 outputPathSol = fullfile(mrstOutputDirectory(), 'UHS_PVT_SIMPLE', 'H2SolubilityTable');
 outputPathPvt = fullfile(mrstOutputDirectory(), 'UHS_PVT_SIMPLE', 'PVT');
 
 % Ensure output directories exist
-if ~exist(outputPathSol, 'dir'), mkdir(outputPathSol); end
-if ~exist(outputPathPvt, 'dir'), mkdir(outputPathPvt); end
+if ~exist(outputPathSol, 'dir')
+    mkdir(outputPathSol);
+end
+if ~exist(outputPathPvt, 'dir')
+    mkdir(outputPathPvt);
+end
 
 % Generate solubility table for H2O and H2
 disp('Generating component table for H2O');
@@ -216,7 +230,8 @@ VAPOIL = true;
 DISGAS = true;
 % We reset our miscible fluid
 model.fluid.krOG = fluid_kr.krOG{1};
-model.fluid.krG = fluid_kr.krG{1}; clear fluid_kr
+model.fluid.krG = fluid_kr.krG{1};
+clear fluid_kr;
 deck = model2Deck(model, schedule_bo);
 
 % Add regions and PVT data
@@ -230,7 +245,7 @@ if DISGAS
     deck.PROPS.PVTO{1} = pvto{2};
     deck.RUNSPEC.DISGAS = true;
     % Add rs to state0
-    state0_bo.rs = state0_bo.pressure.*0;
+    state0_bo.rs = state0_bo.pressure .* 0;
 end
 
 if VAPOIL
@@ -239,7 +254,7 @@ if VAPOIL
     deck.PROPS.PVTG{1} = pvtg{2};
     deck.RUNSPEC.VAPOIL = true;
     % Add rv to state0
-    state0_bo.rv = state0_bo.pressure.*0;
+    state0_bo.rv = state0_bo.pressure .* 0;
 end
 
 % Convert deck units
@@ -254,14 +269,14 @@ fluid_bo = modeldeck.fluid;
 
 model_bo = GenericBlackOilModel(G, rock, fluid_bo, 'gravity', grav, ...
     'disgas', true, 'vapoil', true, 'water', false, 'oil', true, 'gas', true);
-model_bo.OutputStateFunctions{end+1} = 'ShrinkageFactors';
-model_bo.OutputStateFunctions{end+1} = 'ComponentPhaseMass';
+model_bo.OutputStateFunctions{end + 1} = 'ShrinkageFactors';
+model_bo.OutputStateFunctions{end + 1} = 'ComponentPhaseMass';
 model_bo.nonlinearTolerance = 1.0e-6;
 %% Copyright notice
 
 % <html>
 % <p><font size="-1">
-% Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+% Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 % </font></p>
 % <p><font size="-1">
 % This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).

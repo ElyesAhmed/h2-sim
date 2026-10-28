@@ -32,8 +32,8 @@ along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
 
 clearvars;
 
-mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10
-mrstModule add compositional
+mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10;
+mrstModule add compositional;
 
 baseName = 'H2_STORAGE_DOME_TRAP';
 dataPath = getDatasetPath('h2storage');
@@ -43,7 +43,7 @@ deck = readEclipseDeck(dataFile);
 warning('ComputationalCost:High', 'Running multiple cases; reduce cycles if needed.');
 
 %% Base black-oil setup
-[~, ~, state0Bo, modelBo, scheduleBo, ~] = modelForSimple2DAquifer(deck,'numcycles',10);
+[~, ~, state0Bo, modelBo, scheduleBo, ~] = modelForSimple2DAquifer(deck, 'numcycles', 10);
 
 %% Convert BO -> compositional (capture G/rock/fluid explicitly)
 tmp = convertBlackOilModelToCompositionalModel(modelBo);
@@ -105,78 +105,99 @@ pA_on  = runCase([baseName '_A_CLOG_MD_ON'],   G, rockA,      fluidA,      compF
 pB_off = runCase([baseName '_B_NOCLG_MD_OFF'], G, rockStatic, fluidStatic, compFluid, biochemFluid, EOS, modelBo.gravity, state0Base, comp0, schedule, nls, true,  false, nbact0);
 pB_on  = runCase([baseName '_B_NOCLG_MD_ON'],  G, rockStatic, fluidStatic, compFluid, biochemFluid, EOS, modelBo.gravity, state0Base, comp0, schedule, nls, true,  true,  nbact0);
 
-%pC_off = runCase([baseName '_C_NOBAC_MD_OFF'], G, rockStatic, fluidStatic, compFluid, EOS, modelBo.gravity, state0Base, comp0, schedule, nls, false, false, 0);
+% pC_off = runCase([baseName '_C_NOBAC_MD_OFF'], G, rockStatic, fluidStatic, compFluid, EOS, modelBo.gravity, state0Base, comp0, schedule, nls, false, false, 0);
 pC_on  = runCase([baseName '_C_NOBAC_MD_ON'],  G, rockStatic, fluidStatic, compFluid, biochemFluid, EOS, modelBo.gravity, state0Base, comp0, schedule, nls, false, true,  0);
 
 %% Extract results
 [wsA_off, stA_off] = getPackedSimulatorOutput(pA_off);
-[wsA_on,  stA_on ] = getPackedSimulatorOutput(pA_on);
+[wsA_on,  stA_on] = getPackedSimulatorOutput(pA_on);
 
 [wsB_off, stB_off] = getPackedSimulatorOutput(pB_off);
-[wsB_on,  stB_on ] = getPackedSimulatorOutput(pB_on);
+[wsB_on,  stB_on] = getPackedSimulatorOutput(pB_on);
 
 [wsC_off, stC_off] = getPackedSimulatorOutput(pC_off);
-[wsC_on,  stC_on ] = getPackedSimulatorOutput(pC_on);
+[wsC_on,  stC_on] = getPackedSimulatorOutput(pC_on);
 
 %% Plot (simple)
-figure('Name','A (clog) MD OFF','Color','w'); plotToolbar(pA_off.SimulatorSetup.model.G, stA_off); title('A (clog) MD OFF','Interpreter','none');
-figure('Name','A (clog) MD ON','Color','w');  plotToolbar(pA_on.SimulatorSetup.model.G,  stA_on ); title('A (clog) MD ON','Interpreter','none');
+figure('Name', 'A (clog) MD OFF', 'Color', 'w');
+plotToolbar(pA_off.SimulatorSetup.model.G, stA_off);
+title('A (clog) MD OFF', 'Interpreter', 'none');
+figure('Name', 'A (clog) MD ON', 'Color', 'w');
+plotToolbar(pA_on.SimulatorSetup.model.G,  stA_on);
+title('A (clog) MD ON', 'Interpreter', 'none');
 
-figure('Name','B (no clog) MD OFF','Color','w'); plotToolbar(pB_off.SimulatorSetup.model.G, stB_off); title('B (no clog) MD OFF','Interpreter','none');
-figure('Name','B (no clog) MD ON','Color','w');  plotToolbar(pB_on.SimulatorSetup.model.G,  stB_on ); title('B (no clog) MD ON','Interpreter','none');
+figure('Name', 'B (no clog) MD OFF', 'Color', 'w');
+plotToolbar(pB_off.SimulatorSetup.model.G, stB_off);
+title('B (no clog) MD OFF', 'Interpreter', 'none');
+figure('Name', 'B (no clog) MD ON', 'Color', 'w');
+plotToolbar(pB_on.SimulatorSetup.model.G,  stB_on);
+title('B (no clog) MD ON', 'Interpreter', 'none');
 
-figure('Name','C (no bact) MD OFF','Color','w'); plotToolbar(pC_off.SimulatorSetup.model.G, stC_off); title('C (no bact) MD OFF','Interpreter','none');
-figure('Name','C (no bact) MD ON','Color','w');  plotToolbar(pC_on.SimulatorSetup.model.G,  stC_on ); title('C (no bact) MD ON','Interpreter','none');
+figure('Name', 'C (no bact) MD OFF', 'Color', 'w');
+plotToolbar(pC_off.SimulatorSetup.model.G, stC_off);
+title('C (no bact) MD OFF', 'Interpreter', 'none');
+figure('Name', 'C (no bact) MD ON', 'Color', 'w');
+plotToolbar(pC_on.SimulatorSetup.model.G,  stC_on);
+title('C (no bact) MD ON', 'Interpreter', 'none');
 
-figure('Name','Wells A OFF vs ON','Color','w'); plotWellSols({wsA_off, wsA_on}); legend({'OFF','ON'},'Location','best'); title('Wells A (clog) OFF vs ON','Interpreter','none');
-figure('Name','Wells B OFF vs ON','Color','w'); plotWellSols({wsB_off, wsB_on}); legend({'OFF','ON'},'Location','best'); title('Wells B (no clog) OFF vs ON','Interpreter','none');
-figure('Name','Wells C OFF vs ON','Color','w'); plotWellSols({wsC_off, wsC_on}); legend({'OFF','ON'},'Location','best'); title('Wells C (no bact) OFF vs ON','Interpreter','none');
+figure('Name', 'Wells A OFF vs ON', 'Color', 'w');
+plotWellSols({wsA_off, wsA_on});
+legend({'OFF', 'ON'}, 'Location', 'best');
+title('Wells A (clog) OFF vs ON', 'Interpreter', 'none');
+figure('Name', 'Wells B OFF vs ON', 'Color', 'w');
+plotWellSols({wsB_off, wsB_on});
+legend({'OFF', 'ON'}, 'Location', 'best');
+title('Wells B (no clog) OFF vs ON', 'Interpreter', 'none');
+figure('Name', 'Wells C OFF vs ON', 'Color', 'w');
+plotWellSols({wsC_off, wsC_on});
+legend({'OFF', 'ON'}, 'Location', 'best');
+title('Wells C (no bact) OFF vs ON', 'Interpreter', 'none');
 
 %% Optional: save problems so you can plot later without rerunning
-save('mdiffPackedProblems.mat', 'pA_off','pA_on','pB_off','pB_on','pC_off','pC_on');
+save('mdiffPackedProblems.mat', 'pA_off', 'pA_on', 'pB_off', 'pB_on', 'pC_off', 'pC_on');
 
 function problem = runCase(caseName, G, rock, fluid, compFluid, biochemFluid, EOS, gravity, state0Base, comp0, schedule, nls, bacteriamodel, mdiff, nbact0)
-fprintf('Running case: %s\n', caseName);
+    fprintf('Running case: %s\n', caseName);
 
-backend = DiagonalAutoDiffBackend('modifyOperators', true);
+    backend = DiagonalAutoDiffBackend('modifyOperators', true);
 
-model = BiochemistryModel( ...
-    G, rock, fluid, compFluid, biochemFluid, ...
-    false, backend, ...
-    'oil', true, 'gas', true, ...
-    'bacteriamodel', bacteriamodel, ...
-    'molecularDiffusion', mdiff, ...
-    'liquidPhase', 'O', 'vaporPhase', 'G');
+    model = BiochemistryModel( ...
+        G, rock, fluid, compFluid, biochemFluid, ...
+        false, backend, ...
+        'oil', true, 'gas', true, ...
+        'bacteriamodel', bacteriamodel, ...
+        'molecularDiffusion', mdiff, ...
+        'liquidPhase', 'O', 'vaporPhase', 'G');
 
-model.EOSModel = EOS;
-model.gravity  = gravity;
-model.outputFluxes = false;
+    model.EOSModel = EOS;
+    model.gravity  = gravity;
+    model.outputFluxes = false;
 
-% Diagnostic: verify diffusion is actually wired into ComponentTotalFlux
-try
-    ctf = model.FlowDiscretization.getStateFunction('ComponentTotalFlux');
-    fprintf('  [diag] bacteriamodel=%d mdiff=%d: FlowDisc=%s, ComponentTotalFlux=%s\n', ...
-        bacteriamodel, mdiff, class(model.FlowDiscretization), class(ctf));
-catch me
-    fprintf('  [diag] Could not query flux SF: %s\n', me.message);
-end
-
-% Initial state
-T0 = schedule.control(1).W.T;
-if bacteriamodel
-    state0 = initCompositionalStateBacteria(model, state0Base.pressure, T0, state0Base.s, comp0, nbact0, EOS);
-else
-    state0 = initCompositionalState(model, state0Base.pressure, T0, state0Base.s, comp0, EOS);
-    if isfield(state0, 'nbact')
-        state0.nbact(:) = 0;
+    % Diagnostic: verify diffusion is actually wired into ComponentTotalFlux
+    try
+        ctf = model.FlowDiscretization.getStateFunction('ComponentTotalFlux');
+        fprintf('  [diag] bacteriamodel=%d mdiff=%d: FlowDisc=%s, ComponentTotalFlux=%s\n', ...
+            bacteriamodel, mdiff, class(model.FlowDiscretization), class(ctf));
+    catch me
+        fprintf('  [diag] Could not query flux SF: %s\n', me.message);
     end
-end
 
-% Linear solver
-lsolve = selectLinearSolverAD(model);
-nls.LinearSolver = lsolve;
+    % Initial state
+    T0 = schedule.control(1).W.T;
+    if bacteriamodel
+        state0 = initCompositionalStateBacteria(model, state0Base.pressure, T0, state0Base.s, comp0, nbact0, EOS);
+    else
+        state0 = initCompositionalState(model, state0Base.pressure, T0, state0Base.s, comp0, EOS);
+        if isfield(state0, 'nbact')
+            state0.nbact(:) = 0;
+        end
+    end
 
-% Pack + run
-problem = packSimulationProblem(state0, model, schedule, caseName, 'NonLinearSolver', nls);
-simulatePackedProblem(problem, 'RestartStep', 1);
+    % Linear solver
+    lsolve = selectLinearSolverAD(model);
+    nls.LinearSolver = lsolve;
+
+    % Pack + run
+    problem = packSimulationProblem(state0, model, schedule, caseName, 'NonLinearSolver', nls);
+    simulatePackedProblem(problem, 'RestartStep', 1);
 end

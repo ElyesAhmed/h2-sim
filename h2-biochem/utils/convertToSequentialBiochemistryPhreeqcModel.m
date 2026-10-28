@@ -1,68 +1,68 @@
 function seqModel = convertToSequentialBiochemistryPhreeqcModel(model, varargin)
-%Convert an existing BiochemistryPhreeqcModel to a SequentialBiochemistryPhreeqcModel.
-%
-% SYNOPSIS:
-%   seqModel = convertToSequentialBiochemistryPhreeqcModel(model, ...
-%       'reactionSubstepMaxDt', 0.4*day)
-%
-% DESCRIPTION:
-%   Converts an already fully configured BiochemistryPhreeqcModel -- for
-%   example the model returned by setupH2StorageExampleWithSRB_benchmark
-%   with phreeqcBackend='sequential-h2biochem-phreeqc' and
-%   phreeqcTimestepCoupling=true -- into an equivalent
-%   SequentialBiochemistryPhreeqcModel that runs the general
-%   coarse-flow/local-reaction split (one global flow+transport solve per
-%   control step, followed by local biochemical-reaction/PHREEQC
-%   substeps) instead of simulateSequentialH2BiochemPhreeqc's outer
-%   Picard iteration.
-%
-%   Every public property of MODEL -- including customization applied
-%   after its own constructor ran, such as a replaced EOSModel or
-%   bact_capProp/bact_maxProp -- is copied onto the new model; see
-%   copyBiochemistryModelProperties. Model-defining options that
-%   SequentialBiochemistryPhreeqcModel's own constructor validates
-%   immediately (phreeqcBackend, phreeqcTimestepCoupling, carbonateBuffer,
-%   ...) are also forwarded directly to that constructor so the model can
-%   be built in one step; this leaves nothing for the later property copy
-%   to disagree with.
-%
-% REQUIRED PARAMETERS:
-%   model - A BiochemistryPhreeqcModel (or subclass, but not already a
-%           SequentialBiochemistryPhreeqcModel) instance with
-%           phreeqcBackend='sequential-h2biochem-phreeqc' and
-%           phreeqcTimestepCoupling=true.
-%
-% OPTIONAL PARAMETERS:
-%   reactionSubstepMaxDt - Maximum duration of one local reaction/PHREEQC
-%                          substep. Required (no default): must be
-%                          supplied as a property/value pair.
-%   Any other property/value pair accepted by
-%   SequentialBiochemistryPhreeqcModel (e.g. flowNonLinearSolver,
-%   reactionNonLinearSolver), applied after the property copy so they take
-%   precedence over MODEL's own configuration.
-%
-% RETURNS:
-%   seqModel - SequentialBiochemistryPhreeqcModel instance, already
-%              validated (its flow-stage/reaction-stage sub-models are
-%              built and ready to simulate).
-%
-% SEE ALSO:
-%   SequentialBiochemistryPhreeqcModel, BiochemistryPhreeqcModel,
-%   copyBiochemistryModelProperties, setupH2StorageExampleWithSRB_benchmark
+    % Convert an existing BiochemistryPhreeqcModel to a SequentialBiochemistryPhreeqcModel.
+    %
+    % SYNOPSIS:
+    %   seqModel = convertToSequentialBiochemistryPhreeqcModel(model, ...
+    %       'reactionSubstepMaxDt', 0.4*day)
+    %
+    % DESCRIPTION:
+    %   Converts an already fully configured BiochemistryPhreeqcModel -- for
+    %   example the model returned by setupH2StorageExampleWithSRB_benchmark
+    %   with phreeqcBackend='sequential-h2biochem-phreeqc' and
+    %   phreeqcTimestepCoupling=true -- into an equivalent
+    %   SequentialBiochemistryPhreeqcModel that runs the general
+    %   coarse-flow/local-reaction split (one global flow+transport solve per
+    %   control step, followed by local biochemical-reaction/PHREEQC
+    %   substeps) instead of simulateSequentialH2BiochemPhreeqc's outer
+    %   Picard iteration.
+    %
+    %   Every public property of MODEL -- including customization applied
+    %   after its own constructor ran, such as a replaced EOSModel or
+    %   bact_capProp/bact_maxProp -- is copied onto the new model; see
+    %   copyBiochemistryModelProperties. Model-defining options that
+    %   SequentialBiochemistryPhreeqcModel's own constructor validates
+    %   immediately (phreeqcBackend, phreeqcTimestepCoupling, carbonateBuffer,
+    %   ...) are also forwarded directly to that constructor so the model can
+    %   be built in one step; this leaves nothing for the later property copy
+    %   to disagree with.
+    %
+    % REQUIRED PARAMETERS:
+    %   model - A BiochemistryPhreeqcModel (or subclass, but not already a
+    %           SequentialBiochemistryPhreeqcModel) instance with
+    %           phreeqcBackend='sequential-h2biochem-phreeqc' and
+    %           phreeqcTimestepCoupling=true.
+    %
+    % OPTIONAL PARAMETERS:
+    %   reactionSubstepMaxDt - Maximum duration of one local reaction/PHREEQC
+    %                          substep. Required (no default): must be
+    %                          supplied as a property/value pair.
+    %   Any other property/value pair accepted by
+    %   SequentialBiochemistryPhreeqcModel (e.g. flowNonLinearSolver,
+    %   reactionNonLinearSolver), applied after the property copy so they take
+    %   precedence over MODEL's own configuration.
+    %
+    % RETURNS:
+    %   seqModel - SequentialBiochemistryPhreeqcModel instance, already
+    %              validated (its flow-stage/reaction-stage sub-models are
+    %              built and ready to simulate).
+    %
+    % SEE ALSO:
+    %   SequentialBiochemistryPhreeqcModel, BiochemistryPhreeqcModel,
+    %   copyBiochemistryModelProperties, setupH2StorageExampleWithSRB_benchmark
 
     assert(isa(model, 'BiochemistryPhreeqcModel'), ...
         ['convertToSequentialBiochemistryPhreeqcModel requires a ', ...
-         'BiochemistryPhreeqcModel (or subclass) instance.']);
+        'BiochemistryPhreeqcModel (or subclass) instance.']);
     assert(~isa(model, 'SequentialBiochemistryPhreeqcModel'), ...
         'model is already a SequentialBiochemistryPhreeqcModel.');
     assert(model.phreeqcTimestepCoupling && model.isSequentialH2BiochemPhreeqcBackend(), ...
         ['model must use phreeqcBackend=''sequential-h2biochem-phreeqc'' ', ...
-         'with phreeqcTimestepCoupling=true for the coarse-flow/local-', ...
-         'reaction split to be meaningful.']);
+        'with phreeqcTimestepCoupling=true for the coarse-flow/local-', ...
+        'reaction split to be meaningful.']);
 
     maxDt = getRequiredOption(varargin, 'reactionSubstepMaxDt', ...
         ['convertToSequentialBiochemistryPhreeqcModel requires ', ...
-         '''reactionSubstepMaxDt'' to be supplied as a property/value pair.']);
+        '''reactionSubstepMaxDt'' to be supplied as a property/value pair.']);
 
     % Model-defining options that the constructor validates immediately
     % (before any later property copy could supply them), forwarded
@@ -99,15 +99,15 @@ function seqModel = convertToSequentialBiochemistryPhreeqcModel(model, varargin)
 end
 
 function value = getRequiredOption(options, name, errmsg)
-value = [];
-found = false;
-for i = 1:2:numel(options)
-    if strcmpi(options{i}, name)
-        value = options{i + 1};
-        found = true;
+    value = [];
+    found = false;
+    for i = 1:2:numel(options)
+        if strcmpi(options{i}, name)
+            value = options{i + 1};
+            found = true;
+        end
     end
-end
-assert(found && ~isempty(value), errmsg);
+    assert(found && ~isempty(value), errmsg);
 end
 
 %{

@@ -1,21 +1,21 @@
 function bc = makeBenchmarkBoundaryConditions(G, options)
-%MAKEBENCHMARKBOUNDARYCONDITIONS Set prescribed benchmark boundary pressures.
-%
-% SYNOPSIS:
-%   bc = makeBenchmarkBoundaryConditions(G, options)
-%
-% G is a three-dimensional grid. Boundary faces whose area-weighted normal
-% has a vertical component greater than 2.48 are excluded. This criterion
-% includes downward-facing boundaries and depends on face area.
-% Pressure is options.initPres [Pa] plus 998 kg/m^3 times the scalar product
-% of (face centroid - [1140, 1140, 1140]) [m] and the current gravity vector.
-% options.initSat supplies oil/gas saturations; brine occupies the oil phase.
-% The helper reads the current gravity setting without changing it.
-%
-% SEE ALSO:
-%   modelForUHSModifiedBenchmark, boundaryFaces, addBC
+    % MAKEBENCHMARKBOUNDARYCONDITIONS Set prescribed benchmark boundary pressures.
+    %
+    % SYNOPSIS:
+    %   bc = makeBenchmarkBoundaryConditions(G, options)
+    %
+    % G is a three-dimensional grid. Boundary faces whose area-weighted normal
+    % has a vertical component greater than 2.48 are excluded. This criterion
+    % includes downward-facing boundaries and depends on face area.
+    % Pressure is options.initPres [Pa] plus 998 kg/m^3 times the scalar product
+    % of (face centroid - [1140, 1140, 1140]) [m] and the current gravity vector.
+    % options.initSat supplies oil/gas saturations; brine occupies the oil phase.
+    % The helper reads the current gravity setting without changing it.
+    %
+    % SEE ALSO:
+    %   modelForUHSModifiedBenchmark, boundaryFaces, addBC
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -36,6 +36,6 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
     faces = boundaryFaces(G);
     faces = faces(~(G.faces.normals(faces, 3) > 2.48));
     displacement = bsxfun(@minus, G.faces.centroids(faces, :), 1140);
-    pressure = options.initPres + 998.*(displacement*reshape(gravity, [], 1));
+    pressure = options.initPres + 998 .* (displacement * reshape(gravity, [], 1));
     bc = addBC([], faces, 'pressure', pressure, 'sat', options.initSat);
 end

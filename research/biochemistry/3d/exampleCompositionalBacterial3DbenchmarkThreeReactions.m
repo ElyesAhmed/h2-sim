@@ -27,7 +27,7 @@
 
 clearvars;
 mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui vemmech ...
-    test-suite compositional h2store h2-biochem
+    test-suite compositional h2store h2-biochem;
 
 coarsenFactor = [4, 4, 4];   % 51x51x32 -> 13x13x8 (~1350 cells)
 caseName = 'H2_3D_DOME_3RXN_COARSE';
@@ -56,10 +56,12 @@ lo = min(Gf.nodes.coords);
 hi = max(Gf.nodes.coords);
 G = cartGrid(cdim, hi - lo);
 G.nodes.coords = G.nodes.coords + lo;
-xc = G.nodes.coords(:, 1);  yc = G.nodes.coords(:, 2);
-xm = mean([lo(1), hi(1)]);   ym = mean([lo(2), hi(2)]);
+xc = G.nodes.coords(:, 1);
+yc = G.nodes.coords(:, 2);
+xm = mean([lo(1), hi(1)]);
+ym = mean([lo(2), hi(2)]);
 zf = (G.nodes.coords(:, 3) - lo(3)) ./ max(hi(3) - lo(3), eps);   % 0 top .. 1 base
-bump = 100 .* exp(-((xc - xm).^2 + (yc - ym).^2) ./ (2*500^2));
+bump = 100 .* exp(-((xc - xm).^2 + (yc - ym).^2) ./ (2 * 500^2));
 G.nodes.coords(:, 3) = G.nodes.coords(:, 3) - bump .* (1 - zf);   % anticline
 G = computeGeometry(G);
 nc = G.cells.num;
@@ -71,14 +73,14 @@ for c = 1:nc
     [~, idx(c)] = min(d2);
 end
 rock = struct('poro', modelBo.rock.poro(idx), ...
-    'perm', max(modelBo.rock.perm(idx, :), 1e-6*milli*darcy));
+    'perm', max(modelBo.rock.perm(idx, :), 1e-6 * milli * darcy));
 fprintf('Coarsened %d -> %d cells (%dx%dx%d).\n', Gf.cells.num, nc, ...
     cdim(1), cdim(2), cdim(3));
 
 %% --------------------------------------------------------------- Fluid ---
 compFluid = TableCompositionalMixture( ...
     {'Water', 'Hydrogen', 'CarbonDioxide', 'Methane', ...
-     'HydrogenSulfide', 'AceticAcid'}, ...
+    'HydrogenSulfide', 'AceticAcid'}, ...
     {'H2O',   'H2',       'CO2',           'C1',      'H2S', 'CH3COOH'});
 reactNames   = {'MethanogenicArchae', 'AcetogenicBacteria', 'SulfateReducingBacteria'};
 biomassNames = {'bactM', 'bactA', 'bactS'};
@@ -104,7 +106,7 @@ model = BiochemistryModel(G, rock, compModelFine.fluid, ...
 model.EOSModel = EOS;
 model.gravity = modelBo.gravity;
 model.outputFluxes = false;
-model.OutputStateFunctions{end+1} = 'ComponentPhaseDensity';
+model.OutputStateFunctions{end + 1} = 'ComponentPhaseDensity';
 
 %% --------------------------------------------------------- Initial state --
 nbact0 = [15, 15, 15];
@@ -114,15 +116,15 @@ p0 = state0Bo.pressure(idx);
 s0 = state0Bo.s(idx, :);
 state0 = initCompositionalStateBacteria(model, p0, T0, s0, comp0, nbact0, EOS);
 if isa(model.EOSModel, 'SoreideWhitsonEos') && model.sulfateReduction
-    state0.tracerSO4       = repmat(initialSO4*1000, nc, 1);   % kg/m3
+    state0.tracerSO4       = repmat(initialSO4 * 1000, nc, 1);   % kg/m3
     state0.tracerHS        = zeros(nc, 1);
     state0.h2sDissolvedLag = zeros(nc, 1);
 end
 
 %% ------------------------- Remap wells + schedule to the coarse grid ----
 % Single vertical well at the crest of the dome, fully penetrating.
-wi = max(1, ceil(cdim(1)/2));
-wj = max(1, ceil(cdim(2)/2));
+wi = max(1, ceil(cdim(1) / 2));
+wj = max(1, ceil(cdim(2) / 2));
 schedule = scheduleBo;
 for i = 1:numel(schedule.control)
     Wf = schedule.control(i).W;
@@ -140,29 +142,38 @@ for i = 1:numel(schedule.control)
 end
 
 % Subdivide every step to <= 3 days and ramp the first control block up.
-maxDt = 3*day;
-dt = schedule.step.val(:);  ctl = schedule.step.control(:);
-nSub = max(1, ceil(dt./maxDt));
-newDt  = cell2mat(arrayfun(@(k) repmat(dt(k)/nSub(k), nSub(k), 1), ...
+maxDt = 3 * day;
+dt = schedule.step.val(:);
+ctl = schedule.step.control(:);
+nSub = max(1, ceil(dt ./ maxDt));
+newDt  = cell2mat(arrayfun(@(k) repmat(dt(k) / nSub(k), nSub(k), 1), ...
     (1:numel(dt)).', 'UniformOutput', false));
 newCtl = cell2mat(arrayfun(@(k) repmat(ctl(k), nSub(k), 1), ...
     (1:numel(dt)).', 'UniformOutput', false));
-first = newCtl(1);  i1 = find(newCtl == first);
+first = newCtl(1);
+i1 = find(newCtl == first);
 ramp  = rampupTimesteps(sum(newDt(i1)), maxDt, 8);
-schedule.step.val     = [ramp; newDt(i1(end)+1:end)];
-schedule.step.control = [repmat(first, numel(ramp), 1); newCtl(i1(end)+1:end)];
+schedule.step.val     = [ramp; newDt(i1(end) + 1:end)];
+schedule.step.control = [repmat(first, numel(ramp), 1); newCtl(i1(end) + 1:end)];
 
 %% --------------------------------------------- Rock-property figure -----
 yCut = G.cells.centroids(:, 2) > mean(G.cells.centroids(:, 2));
 fig = paperFigure([24, 10], '3D dome aquifer (coarse) - rock properties');
 layout = tiledlayout(fig, 1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
-ax = nexttile(layout); axes(ax); %#ok<LAXES>
-plotCellData(G, rock.poro, yCut, 'EdgeAlpha', 0.2); view(3); axis tight
-title(ax, 'Porosity'); colorbar(ax);
-ax = nexttile(layout); axes(ax); %#ok<LAXES>
-plotCellData(G, log10(rock.perm(:,1)/(milli*darcy)), yCut, 'EdgeAlpha', 0.2);
-view(3); axis tight
-title(ax, 'Permeability (log_{10} mD)'); colorbar(ax);
+ax = nexttile(layout);
+axes(ax);
+plotCellData(G, rock.poro, yCut, 'EdgeAlpha', 0.2);
+view(3);
+axis tight;
+title(ax, 'Porosity');
+colorbar(ax);
+ax = nexttile(layout);
+axes(ax);
+plotCellData(G, log10(rock.perm(:, 1) / (milli * darcy)), yCut, 'EdgeAlpha', 0.2);
+view(3);
+axis tight;
+title(ax, 'Permeability (log_{10} mD)');
+colorbar(ax);
 title(layout, '3D anticlinal-dome aquifer (coarsened), three reactions');
 paperExport(fig, 'threeReactions_3D_rock_properties');
 
@@ -181,7 +192,7 @@ assert(all(~cellfun(@isempty, states)), ...
     'The simulation did not complete all schedule steps.');
 
 %% ----------------------------------------------------------- Results ----
-timeDays = cumsum(schedule.step.val(:))./day;
+timeDays = cumsum(schedule.step.val(:)) ./ day;
 nR = model.biochemFluid.nbioreact;
 cumMol = zeros(numel(states), nR);
 for r = 1:nR
@@ -193,7 +204,8 @@ fprintf('  MET %.3e   ACE %.3e   SRB %.3e   total %.3e\n', ...
     cumMol(end, 1), cumMol(end, 2), cumMol(end, 3), sum(cumMol(end, :)));
 
 fig = paperFigure([20, 11], '3D three-reaction H2 consumption over time');
-ax = axes(fig); hold(ax, 'on');
+ax = axes(fig);
+hold(ax, 'on');
 lab = {'MET', 'ACE', 'SRB'};
 col = paperColors(nR + 1);
 for r = 1:nR
@@ -211,7 +223,9 @@ paperExport(fig, 'threeReactions_3D_H2_consumption_over_time');
 
 %% ---------------------------------------------- Interactive explorers ---
 figure('Name', 'States - three-reaction 3D dome (coarse)');
-plotToolbar(model.G, states); view(3); axis tight
+plotToolbar(model.G, states);
+view(3);
+axis tight;
 figure('Name', 'Well solutions');
 plotWellSols(ws);
 

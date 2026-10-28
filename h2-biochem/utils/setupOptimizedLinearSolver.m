@@ -1,29 +1,29 @@
 function [nls, lsolve] = setupOptimizedLinearSolver(model, varargin)
-% Setup optimized AMGCL CPR linear solver for compositional biochemical models
-%
-% SYNOPSIS:
-%   [nls, lsolve] = setupOptimizedLinearSolver(model)
-%   [nls, lsolve] = setupOptimizedLinearSolver(model, 'complexityLevel', 'high')
-%
-% PARAMETERS:
-%   model           - BiochemistryModel instance
-%   complexityLevel - 'low' (advection only), 'medium' (with diffusion),
-%                     'high' (with both diffusion & dispersion) [default: 'medium']
-%   solverTolerance - Tolerance for linear solver [default: 1e-4]
-%   maxNonlinIter   - Max nonlinear iterations [default: 15]
-%   linearThreads   - AMGCL OpenMP threads, no Parallel Toolbox [default: 4]
-%   cprDamp         - Retained for backward-compatible calls; AMGCL CPR
-%                     does not expose this setting.
-%
-% RETURNS:
-%   nls    - NonLinearSolver configured with linear solver
-%   lsolve - Selected linear solver; AMGCL CPR when available for a large model
+    % Setup optimized AMGCL CPR linear solver for compositional biochemical models
+    %
+    % SYNOPSIS:
+    %   [nls, lsolve] = setupOptimizedLinearSolver(model)
+    %   [nls, lsolve] = setupOptimizedLinearSolver(model, 'complexityLevel', 'high')
+    %
+    % PARAMETERS:
+    %   model           - BiochemistryModel instance
+    %   complexityLevel - 'low' (advection only), 'medium' (with diffusion),
+    %                     'high' (with both diffusion & dispersion) [default: 'medium']
+    %   solverTolerance - Tolerance for linear solver [default: 1e-4]
+    %   maxNonlinIter   - Max nonlinear iterations [default: 15]
+    %   linearThreads   - AMGCL OpenMP threads, no Parallel Toolbox [default: 4]
+    %   cprDamp         - Retained for backward-compatible calls; AMGCL CPR
+    %                     does not expose this setting.
+    %
+    % RETURNS:
+    %   nls    - NonLinearSolver configured with linear solver
+    %   lsolve - Selected linear solver; AMGCL CPR when available for a large model
 
     opt = struct('complexityLevel', 'medium', ...
-                 'solverTolerance', 1e-4, ...
-                 'maxNonlinIter', 15, ...
-                 'cprDamp', [], ...
-                 'linearThreads', 4);
+        'solverTolerance', 1e-4, ...
+        'maxNonlinIter', 15, ...
+        'cprDamp', [], ...
+        'linearThreads', 4);
     opt = merge_options(opt, varargin{:});
     validateattributes(opt.linearThreads, {'numeric'}, {'scalar', 'integer', 'positive'});
 

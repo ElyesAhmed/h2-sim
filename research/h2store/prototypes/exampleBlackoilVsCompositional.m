@@ -28,9 +28,9 @@ You should have received a copy of the GNU General Public License
 along with MRST.  If not, see <http://www.gnu.org/licenses/>.
 %}
 
-%clearvars; clc;
-mrstModule add ad-blackoil ad-core ad-props mrst-gui deckformat
-mrstModule add compositional  
+% clearvars; clc;
+mrstModule add ad-blackoil ad-core ad-props mrst-gui deckformat;
+mrstModule add compositional;
 
 %% ============ PART 1: BLACK-OIL MODEL (Original Script) =====================
 fprintf('=== Setting up Black-Oil Model ===\n');
@@ -44,10 +44,9 @@ compFluid = TableCompositionalMixture({'Water', 'Hydrogen', 'CarbonDioxide', 'Me
     {'H2O', 'H2', 'CO2', 'C1'});
 biochemFluid = TableBioChemMixture({'MethanogenicArchae'});
 
-
 %% Common Parameters for Compositional Models
 z0 = [1.0, 0.0, 0.00, 0.0];  % Initial composition [H2O, H2, CO2, C1]
-T0 =  273.15 +60;
+T0 =  273.15 + 60;
 %% Model 1: Compositional without Bacteria
 backend = DiagonalAutoDiffBackend('modifyOperators', true);
 model_comp_nobact = BiochemistryModel(G, rock, fluid_bo, compFluid, biochemFluid, ...
@@ -55,7 +54,7 @@ model_comp_nobact = BiochemistryModel(G, rock, fluid_bo, compFluid, biochemFluid
     'bacteriamodel', false, 'liquidPhase', 'O', 'vaporPhase', 'G');
 model_comp_nobact.gravity = grav;
 model_comp_nobact.nonlinearTolerance = 1.0e-6;
-model_comp_nobact.OutputStateFunctions{end+1} = 'ComponentPhaseMass';
+model_comp_nobact.OutputStateFunctions{end + 1} = 'ComponentPhaseMass';
 % Initialize compositional state without bacteria
 state0_comp_nobact = initCompositionalState(model_comp_nobact, pInit, T0, [1.0, 0.0], z0);
 
@@ -64,7 +63,7 @@ model_comp_bact = BiochemistryModel(G, rock, fluid_bo, compFluid, biochemFluid, 
     true, backend, 'water', false, 'oil', true, 'gas', true, ...
     'bacteriamodel', true, 'liquidPhase', 'O', 'vaporPhase', 'G');
 model_comp_bact.gravity = grav;
-model_comp_bact.OutputStateFunctions{end+1} = 'ComponentPhaseMass';
+model_comp_bact.OutputStateFunctions{end + 1} = 'ComponentPhaseMass';
 model_comp_bact.nonlinearTolerance = 1.0e-6;
 nbact0 = 100;
 model_comp_bact.biochemFluid.nbactMax = 1e8;
@@ -138,144 +137,151 @@ fprintf('\nH2 mass error - Blackoil vs Compositional (with bacteria): %.2f%%\n',
 
 fprintf('\n=== Simulation completed successfully ===\n');
 
-
 %% ============ SUPPORTING FUNCTIONS =====================
 
 function plotComparisonSummary(res_bo, res_comp_nobact, res_comp_bact)
-% Plot comparison between Black-Oil, Compositional (No Bacteria), and Compositional (With Bacteria)
+    % Plot comparison between Black-Oil, Compositional (No Bacteria), and Compositional (With Bacteria)
 
-figure('Position', [100, 100, 1200, 800]);
+    figure('Position', [100, 100, 1200, 800]);
 
-res_list = {res_bo, res_comp_nobact, res_comp_bact};
-labels   = {'Black-Oil', 'Comp (No Bact)', 'Comp (With Bact)'};
-colors   = {'b-', 'r-', 'g-'};
+    res_list = {res_bo, res_comp_nobact, res_comp_bact};
+    labels   = {'Black-Oil', 'Comp (No Bact)', 'Comp (With Bact)'};
+    colors   = {'b-', 'r-', 'g-'};
 
-% Create subplots
-subplot(2,3,1);
-plotSeries(res_list, 'pressure', 'Pressure (bar)', 'Pressure Evolution', false, colors);
-subplot(2,3,2);
-plotSeries(res_list, 'sG', 'H2 Saturation', 'Mean H2 Saturation', false, colors);
-subplot(2,3,3);
-plotSeries(res_list, 'H2_diss', ' H2 Mass in Water(kg)', 'Dissolved H2', true, colors);
+    % Create subplots
+    subplot(2, 3, 1);
+    plotSeries(res_list, 'pressure', 'Pressure (bar)', 'Pressure Evolution', false, colors);
+    subplot(2, 3, 2);
+    plotSeries(res_list, 'sG', 'H2 Saturation', 'Mean H2 Saturation', false, colors);
+    subplot(2, 3, 3);
+    plotSeries(res_list, 'H2_diss', ' H2 Mass in Water(kg)', 'Dissolved H2', true, colors);
 
-% Final state comparison
-subplot(2,3,4);
-pressures   = cellfun(@(r) r.pressure(end)/barsa, res_list);
-saturations = cellfun(@(r) r.sG(end), res_list);
-yyaxis left; bar(pressures); ylabel('Final Pressure (bar)');
-yyaxis right; plot(saturations, 'ro-', 'LineWidth', 2, 'MarkerSize', 8);
-set(gca, 'XTickLabel', labels); title('Final State Comparison'); grid on;
+    % Final state comparison
+    subplot(2, 3, 4);
+    pressures   = cellfun(@(r) r.pressure(end) / barsa, res_list);
+    saturations = cellfun(@(r) r.sG(end), res_list);
+    yyaxis left;
+    bar(pressures);
+    ylabel('Final Pressure (bar)');
+    yyaxis right;
+    plot(saturations, 'ro-', 'LineWidth', 2, 'MarkerSize', 8);
+    set(gca, 'XTickLabel', labels);
+    title('Final State Comparison');
+    grid on;
 
-% H2 mole fraction
-if isfield(res_comp_nobact, 'yH2')
-    subplot(2,3,5);
-    plotSeries(res_list, 'yH2', 'H2 Mole Fraction in Gas', 'Mean yH2', false, colors);
-end
+    % H2 mole fraction
+    if isfield(res_comp_nobact, 'yH2')
+        subplot(2, 3, 5);
+        plotSeries(res_list, 'yH2', 'H2 Mole Fraction in Gas', 'Mean yH2', false, colors);
+    end
 
-% Total H2 mass
-if isfield(res_comp_nobact, 'totMassH2')
-    subplot(2,3,6);
-    plotSeries(res_list, 'totMassH2', 'Total H2 Mass (kg)', 'H2 Mass in Reservoir', false, colors);
-end
+    % Total H2 mass
+    if isfield(res_comp_nobact, 'totMassH2')
+        subplot(2, 3, 6);
+        plotSeries(res_list, 'totMassH2', 'Total H2 Mass (kg)', 'H2 Mass in Reservoir', false, colors);
+    end
 
-legend(labels, 'Location', 'bestoutside');
-sgtitle('Hydrogen Storage: Black-Oil vs Compositional Model Comparison');
+    legend(labels, 'Location', 'bestoutside');
+    sgtitle('Hydrogen Storage: Black-Oil vs Compositional Model Comparison');
 
 end
 
 function plotSeries(res_list, field, ylab, ttl, cumulative, colors)
-% Helper function to plot series for multiple results
-hold on; grid on;
-for i = 1:numel(res_list)
-    if isfield(res_list{i}, field)
-        y = res_list{i}.(field);
-        if cumulative
-            y = cumsum(y);
-        end
-        plot(y, colors{i}, 'LineWidth', 2);
-    end
-end
-xlabel('Time Step'); ylabel(ylab); title(ttl);
-end
-
-function results = extractResults(states, ws, model)
-% Extract results from simulation (works for both black-oil and compositional models)
-%
-% Parameters:
-%   states - Cell array of state variables
-%   ws     - Well solution data
-%   model  - Simulation model (GenericBlackOilModel or BiochemistryModel)
-
-nT = numel(states);
-results.pressure     = zeros(nT, 1);
-results.yH2          = zeros(nT, 1);
-results.sG           = zeros(nT, 1);
-results.H2_diss  = zeros(nT, 1);
-results.totMassH2    = zeros(nT, 1);
-
-% Determine model type and setup indices
-isBlackOil      = isa(model, 'GenericBlackOilModel');
-isCompositional = isa(model, 'BiochemistryModel');
-
-if isBlackOil
-    % Black-oil model setup
-    rhoOS = model.fluid.rhoOS;
-    rhoGS = model.fluid.rhoGS;
-    names = model.getPhaseNames();
-    nph = model.getNumberOfPhases;
-    for ph = 1:nph
-        switch names(ph)
-            case 'O'
-                L_ix = ph;
-            case 'G'
-                V_ix = ph;
+    % Helper function to plot series for multiple results
+    hold on;
+    grid on;
+    for i = 1:numel(res_list)
+        if isfield(res_list{i}, field)
+            y = res_list{i}.(field);
+            if cumulative
+                y = cumsum(y);
+            end
+            plot(y, colors{i}, 'LineWidth', 2);
         end
     end
-    compIndex = V_ix; % Gas component index for total mass
-elseif isCompositional
-    % Compositional model setup
-    namecp   = model.EOSModel.getComponentNames();
-    indH2    = find(strcmp(namecp, 'H2'));
-    V_ix     = model.getVaporIndex();
-    L_ix     = model.getLiquidIndex();
-    compIndex = indH2; % H2 index in compositional model
-else
-    error('Unknown model type: %s', class(model));
+    xlabel('Time Step');
+    ylabel(ylab);
+    title(ttl);
 end
 
-% Loop over timesteps
-for i = 1:nT
-    state = states{i};
+function results = extractResults(states, ~, model)
+    % Extract results from simulation (works for both black-oil and compositional models)
+    %
+    % Parameters:
+    %   states - Cell array of state variables
+    %   ws     - Well solution data
+    %   model  - Simulation model (GenericBlackOilModel or BiochemistryModel)
 
-    % Common quantities
-    results.pressure(i) = mean(state.pressure);
-    results.sG(i)       = mean(state.s(:, V_ix));
+    nT = numel(states);
+    results.pressure     = zeros(nT, 1);
+    results.yH2          = zeros(nT, 1);
+    results.sG           = zeros(nT, 1);
+    results.H2_diss  = zeros(nT, 1);
+    results.totMassH2    = zeros(nT, 1);
+
+    % Determine model type and setup indices
+    isBlackOil      = isa(model, 'GenericBlackOilModel');
+    isCompositional = isa(model, 'BiochemistryModel');
 
     if isBlackOil
-        results.yH2(i) = mean(rhoGS .*state.rs./ (rhoGS + rhoOS .* state.rv));
-        results.H2_diss(i) =sum(state.FlowProps.ComponentPhaseMass{compIndex,L_ix});
+        % Black-oil model setup
+        rhoOS = model.fluid.rhoOS;
+        rhoGS = model.fluid.rhoGS;
+        names = model.getPhaseNames();
+        nph = model.getNumberOfPhases;
+        for ph = 1:nph
+            switch names(ph)
+                case 'O'
+                    L_ix = ph;
+                case 'G'
+                    V_ix = ph;
+            end
+        end
+        compIndex = V_ix; % Gas component index for total mass
+    elseif isCompositional
+        % Compositional model setup
+        namecp   = model.EOSModel.getComponentNames();
+        indH2    = find(strcmp(namecp, 'H2'));
+        V_ix     = model.getVaporIndex();
+        L_ix     = model.getLiquidIndex();
+        compIndex = indH2; % H2 index in compositional model
     else
-        results.yH2(i) = mean(state.y(:, indH2));
-        results.H2_diss(i) = sum(state.FlowProps.ComponentPhaseMass{compIndex,L_ix});
-
+        error('Unknown model type: %s', class(model));
     end
 
-    % Total H2 mass (if available)
-    if isfield(state, 'FlowProps') && isfield(state.FlowProps, 'ComponentTotalMass')
-        if length(state.FlowProps.ComponentTotalMass) >= compIndex
-            results.totMassH2(i) = sum(state.FlowProps.ComponentTotalMass{compIndex});
+    % Loop over timesteps
+    for i = 1:nT
+        state = states{i};
+
+        % Common quantities
+        results.pressure(i) = mean(state.pressure);
+        results.sG(i)       = mean(state.s(:, V_ix));
+
+        if isBlackOil
+            results.yH2(i) = mean(rhoGS .* state.rs ./ (rhoGS + rhoOS .* state.rv));
+            results.H2_diss(i) = sum(state.FlowProps.ComponentPhaseMass{compIndex, L_ix});
+        else
+            results.yH2(i) = mean(state.y(:, indH2));
+            results.H2_diss(i) = sum(state.FlowProps.ComponentPhaseMass{compIndex, L_ix});
+
+        end
+
+        % Total H2 mass (if available)
+        if isfield(state, 'FlowProps') && isfield(state.FlowProps, 'ComponentTotalMass')
+            if length(state.FlowProps.ComponentTotalMass) >= compIndex
+                results.totMassH2(i) = sum(state.FlowProps.ComponentTotalMass{compIndex});
+            end
         end
     end
-end
 end
 
 function metrics = calculateMetrics(results)
-% Calculate performance metrics
-metrics.avgPressure = mean(results.pressure);
-metrics.maxPressure = max(results.pressure);
-metrics.maxH2Saturation = max(results.sG);
-metrics.H2diss = sum(results.H2_diss);
-if isfield(results, 'totMassH2')
-    metrics.finalH2Mass = results.totMassH2(end);
-end
+    % Calculate performance metrics
+    metrics.avgPressure = mean(results.pressure);
+    metrics.maxPressure = max(results.pressure);
+    metrics.maxH2Saturation = max(results.sG);
+    metrics.H2diss = sum(results.H2_diss);
+    if isfield(results, 'totMassH2')
+        metrics.finalH2Mass = results.totMassH2(end);
+    end
 end

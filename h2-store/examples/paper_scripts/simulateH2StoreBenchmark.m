@@ -25,7 +25,7 @@ clearvars;
 warning('ComputationalCost:High', ...
     'This example runs a full storage schedule and may take substantial time.');
 %% Necessary MRST modules for simulation
-mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui test-suite
+mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui test-suite;
 
 % Define the name of the simulation for output files
 name = 'H2_STORAGE_RS_UHS_BENCHMARK';
@@ -71,7 +71,7 @@ title(name);
 diagnostics = summarizeH2StorageStates(model, states, ws);
 
 %% Plotting results over time (in months)
-timeMonths = convertTo(cumsum(schedule.step.val), 30*day);
+timeMonths = convertTo(cumsum(schedule.step.val), 30 * day);
 
 figure;
 subplot(4, 1, 1);
@@ -143,5 +143,3 @@ xlabel('Time (months)');
 % <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses</a>.
 % </font></p>
 % </html>
-
-

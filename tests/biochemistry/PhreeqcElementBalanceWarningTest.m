@@ -1,6 +1,7 @@
 classdef PhreeqcElementBalanceWarningTest < matlab.unittest.TestCase
-% Reporting frequency must not alter conservation results or leak across cases.
+    % Reporting frequency must not alter conservation results or leak across cases.
     methods (TestMethodSetup)
+
         function configureWarnings(test)
             saved = warning('query', 'H2Biochem:PhreeqcElementBalance');
             trace = warning('query', 'backtrace');
@@ -9,8 +10,10 @@ classdef PhreeqcElementBalanceWarningTest < matlab.unittest.TestCase
             warning('on', 'H2Biochem:PhreeqcElementBalance');
             warning('off', 'backtrace');
         end
+
     end
     methods (Test)
+
         function repeatedFailureRetainsFullAuditWithoutSpam(test)
             [input, output, options] = fixture();
             [state, first] = audit(struct(), input, output, options, 'case');
@@ -77,7 +80,8 @@ classdef PhreeqcElementBalanceWarningTest < matlab.unittest.TestCase
             [state, ~] = audit(struct(), input, output, options, 'case');
             file = [tempname, '.mat'];
             test.addTeardown(@() delete(file));
-            save(file, 'state', '-v7'); loaded = load(file, 'state');
+            save(file, 'state', '-v7');
+            loaded = load(file, 'state');
             [~, quiet] = audit(loaded.state, input, output, options, 'case');
             [~, fresh] = audit(struct(), input, output, options, 'case');
             [other, backend] = audit(state, input, output, options, 'other');
@@ -102,23 +106,28 @@ classdef PhreeqcElementBalanceWarningTest < matlab.unittest.TestCase
             test.verifyTrue(all(state.phreeqcElementBalancePass(:)));
             test.verifyFalse(isfield(state, 'phreeqcElementBalanceWarningHistory'));
             test.verifyFalse(contains(text, 'PHREEQC elemental conservation failed'));
-            bad = input; bad(1) = nan;
+            bad = input;
+            bad(1) = nan;
             test.verifyError(@() checkPhreeqcElementBalance(struct(), input, bad, ...
                 {'H', 'S'}, options, 'case'), ?MException);
             options.phreeqcElementBalanceWarningMode = 'off';
             test.verifyError(@() checkPhreeqcElementBalance(struct(), input, input, ...
                 {'H', 'S'}, options, 'case'), ?MException);
         end
+
     end
 end
 
 function [input, output, options] = fixture()
-    input = ones(2, 2); output = input; output(1, 1) = output(1, 1) + 2e-7;
+    input = ones(2, 2);
+    output = input;
+    output(1, 1) = output(1, 1) + 2e-7;
     options = struct('phreeqcElementBalanceAbsoluteTolerance', 1e-7, ...
         'phreeqcElementBalanceRelativeTolerance', 0);
 end
 
 function [state, text] = audit(state, input, output, options, backend)
+    % These argument names are used by the captured MATLAB expression below.
     text = evalc('state = checkPhreeqcElementBalance(state, input, output, {''H'', ''S''}, options, backend);');
 end
 

@@ -1,14 +1,14 @@
 function activateH2simBiochemistry(rootDirectory)
-%Activate H2sim biochemistry without MRST's separate h2-biochem module
-%
-% SYNOPSIS:
-%   activateH2simBiochemistry(rootDirectory)
-%
-% DESCRIPTION:
-%   Called by startupH2sim after MRST initialization. Remove previously
-%   added MRST h2-biochem paths and its module mapping for this session,
-%   then register and load this checkout as h2sim-biochem. Users initialize
-%   the complete toolbox with startupH2sim.
+    % Activate H2sim biochemistry without MRST's separate h2-biochem module
+    %
+    % SYNOPSIS:
+    %   activateH2simBiochemistry(rootDirectory)
+    %
+    % DESCRIPTION:
+    %   Called by startupH2sim after MRST initialization. Remove previously
+    %   added MRST h2-biochem paths and its module mapping for this session,
+    %   then register and load this checkout as h2sim-biochem. Users initialize
+    %   the complete toolbox with startupH2sim.
 
     if nargin == 0
         rootDirectory = fileparts(fileparts(mfilename('fullpath')));
@@ -37,15 +37,15 @@ function activateH2simBiochemistry(rootDirectory)
     end
     mrstPath('remove', 'h2-biochem');
     mrstPath('reregister', 'h2sim-biochem', localRoot);
-    mrstModule add h2sim-biochem
+    mrstModule add h2sim-biochem;
 
     % Clean paths left by an earlier startup or a manual recursive add.
     % These folders are deliberately outside the registered module root.
     excluded = {fullfile(rootDirectory, 'tests'), ...
-                fullfile(rootDirectory, 'research'), ...
-                fullfile(localRoot, 'tests'), ...
-                fullfile(localRoot, 'examples', 'trash'), ...
-                fullfile(localRoot, 'examples', '3D_experiments')};
+        fullfile(rootDirectory, 'research'), ...
+        fullfile(localRoot, 'tests'), ...
+        fullfile(localRoot, 'examples', 'trash'), ...
+        fullfile(localRoot, 'examples', '3D_experiments')};
     entries = strsplit(path, pathsep);
     normalized = strrep(entries, '\', '/');
     remove = false(size(entries));
@@ -72,7 +72,7 @@ function activateH2simBiochemistry(rootDirectory)
     end
     assert(localModel, 'H2sim:BiochemistryPathConflict', ...
         ['BiochemistryModel resolves to %s instead of %s. ', ...
-         'Restart MATLAB and run startupH2sim before loading any biochemistry model.'], ...
+        'Restart MATLAB and run startupH2sim before loading any biochemistry model.'], ...
         actual, expected);
 end
 

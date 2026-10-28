@@ -1,30 +1,30 @@
 function feedback = buildSequentialH2BiochemPhreeqcChemistryFeedback(model, state)
-%Build a fixed numerical PHREEQC snapshot for hybrid kinetic evaluation
-%
-% PHREEQC molalities take precedence over tracer/EOS fallbacks. Concentration
-% fields use mol/kg water, converted from mol/m^3 liquid using EOS rho_water;
-% pH and carbonate pKa1 are dimensionless. The existing phreeqcTDS diagnostic
-% is copied without conversion. Missing fields retain their existing defaults.
-% Refresh after every equilibrium call before evaluating local kinetics.
+    % Build a fixed numerical PHREEQC snapshot for hybrid kinetic evaluation
+    %
+    % PHREEQC molalities take precedence over tracer/EOS fallbacks. Concentration
+    % fields use mol/kg water, converted from mol/m^3 liquid using EOS rho_water;
+    % pH and carbonate pKa1 are dimensionless. The existing phreeqcTDS diagnostic
+    % is copied without conversion. Missing fields retain their existing defaults.
+    % Refresh after every equilibrium call before evaluating local kinetics.
 
     nc = model.G.cells.num;
     rhoWater = model.EOSModel.rho_water;
     feedback = struct( ...
         'pH', stateVector(state, 'phreeqcPH', nc, model.carbonateBufferPH), ...
         'carbonatePka1', stateVector(state, 'phreeqcCarbonatePka1', nc, ...
-            model.carbonateBufferPka1), ...
+        model.carbonateBufferPka1), ...
         'hco3Molality', [], ...
         'co2Molality', [], ...
         'totalCarbonMolality', [], ...
         'tds', stateVector(state, 'phreeqcTDS', nc, 0), ...
-        'sulfateMolality', stateVector(state, 'tracerSO4', nc, 0)./rhoWater);
+        'sulfateMolality', stateVector(state, 'tracerSO4', nc, 0) ./ rhoWater);
 
     if isfield(state, 'phreeqcHCO3Molality')
         feedback.hco3Molality = stateVector( ...
             state, 'phreeqcHCO3Molality', nc, 0);
     else
         feedback.hco3Molality = stateVector( ...
-            state, 'tracerHCO3', nc, 0)./rhoWater;
+            state, 'tracerHCO3', nc, 0) ./ rhoWater;
     end
     if isfield(state, 'phreeqcCO2Molality')
         feedback.co2Molality = stateVector( ...
@@ -52,9 +52,9 @@ function molality = dissolvedCO2Molality(model, state, rhoWater)
     else
         xCO2 = x(:, index);
     end
-    rhoMolar = value(state.pressure)./( ...
-        value(state.Z_L).*8.314.*value(state.T));
-    molality = max(rhoMolar.*value(xCO2)./rhoWater, 0);
+    rhoMolar = value(state.pressure) ./ ( ...
+        value(state.Z_L) .* 8.314 .* value(state.T));
+    molality = max(rhoMolar .* value(xCO2) ./ rhoWater, 0);
 end
 
 function values = stateVector(state, field, nc, default)
@@ -70,7 +70,7 @@ function values = stateVector(state, field, nc, default)
     end
     assert(numel(values) == nc && isreal(values) && all(isfinite(values)), ...
         ['sequential-h2biochem-phreeqc feedback field %s must be a ', ...
-         'finite cell vector.'], field);
+        'finite cell vector.'], field);
 end
 
 %{

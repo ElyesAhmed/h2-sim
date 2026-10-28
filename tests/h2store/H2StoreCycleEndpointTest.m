@@ -1,6 +1,7 @@
 classdef H2StoreCycleEndpointTest < matlab.unittest.TestCase
-    %H2STORECYCLEENDPOINTTEST Plot fields and times use selected state indices.
+    % H2STORECYCLEENDPOINTTEST Plot fields and times use selected state indices.
     methods (Test)
+
         function nonconsecutiveEndpoints(test)
             [model, states, schedule] = fixture();
             data = getH2CycleEndpointData(model, states, schedule);
@@ -8,13 +9,14 @@ classdef H2StoreCycleEndpointTest < matlab.unittest.TestCase
             test.verifyEqual(data.time, [3, 31, 127, 1023]);
             for k = 1:4
                 step = data.steps(k);
-                rs = [step; 2*step];
-                expected = 0.1*rs./(1000+0.1*rs);
+                rs = [step; 2 * step];
+                expected = 0.1 * rs ./ (1000 + 0.1 * rs);
                 test.verifyEqual(data.massFraction{k}, expected, 'AbsTol', 1e-18);
             end
-            firstSequential = 0.1*[1; 2]./(1000+0.1*[1; 2]);
+            firstSequential = 0.1 * [1; 2] ./ (1000 + 0.1 * [1; 2]);
             test.verifyNotEqual(data.massFraction{1}, firstSequential);
         end
+
         function stageMetadata(test)
             [model, states, schedule] = fixture();
             for k = 1:numel(schedule.control)
@@ -25,12 +27,14 @@ classdef H2StoreCycleEndpointTest < matlab.unittest.TestCase
             test.verifyEqual(data.steps, [2, 5, 7, 10]);
             test.verifyEqual(data.time, [3, 31, 127, 1023]);
         end
+
         function zeroDissolvedHydrogen(test)
             [model, states, schedule] = fixture();
             states{2}.rs(:) = 0;
             data = getH2CycleEndpointData(model, states, schedule);
             test.verifyEqual(data.massFraction{1}, zeros(2, 1));
         end
+
         function emptySchedule(test)
             [model, ~, schedule] = fixture();
             schedule.step.control = zeros(0, 1);
@@ -40,6 +44,7 @@ classdef H2StoreCycleEndpointTest < matlab.unittest.TestCase
             test.verifySize(data.time, [1, 0]);
             test.verifySize(data.massFraction, [1, 0]);
         end
+
     end
 end
 
@@ -53,7 +58,7 @@ function [model, states, schedule] = fixture()
     schedule.step.val = 2.^(0:9)';
     states = cell(10, 1);
     for k = 1:10
-        states{k} = struct('rs', [k; 2*k]);
+        states{k} = struct('rs', [k; 2 * k]);
     end
 end
 

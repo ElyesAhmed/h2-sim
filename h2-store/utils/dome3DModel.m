@@ -1,4 +1,4 @@
-%DOME3DMODEL Build and display the dome aquifer geological layers.
+% DOME3DMODEL Build and display the dome aquifer geological layers.
 % Leaves G and the five layer masks in the caller workspace.
 
 %{
@@ -29,10 +29,10 @@ aquifer = layers.aquifer;
 
 %% Visualize geological layers with color coding
 yd = 2500;
-plotGrid(G, caprock & G.cells.centroids(:,2) < yd, 'FaceColor', 'b');
-plotGrid(G, bedrock & G.cells.centroids(:,2) < yd, 'FaceColor', 'r');
-plotGrid(G, underrock & G.cells.centroids(:,2) < yd, 'FaceColor', 'g');
-plotGrid(G, toprock & G.cells.centroids(:,2) < yd, 'FaceColor', 'm');
-plotGrid(G, aquifer & G.cells.centroids(:,2) < yd);
+plotGrid(G, caprock & G.cells.centroids(:, 2) < yd, 'FaceColor', 'b');
+plotGrid(G, bedrock & G.cells.centroids(:, 2) < yd, 'FaceColor', 'r');
+plotGrid(G, underrock & G.cells.centroids(:, 2) < yd, 'FaceColor', 'g');
+plotGrid(G, toprock & G.cells.centroids(:, 2) < yd, 'FaceColor', 'm');
+plotGrid(G, aquifer & G.cells.centroids(:, 2) < yd);
 title('Geological Layers of the Dome Aquifer');
 view(0, 180);

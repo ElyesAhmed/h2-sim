@@ -1,34 +1,34 @@
 function getFluidH2BrineSGOF(varargin)
-%GETFLUIDH2BRINESGOF Write hydrogen-brine relative permeability tables.
-%
-% SYNOPSIS:
-%   getFluidH2BrineSGOF('plot', false, 'outputPath', folder)
-%
-% The oil phase represents brine. Each region contains gas saturation, gas
-% relative permeability, brine relative permeability and gas-oil capillary
-% pressure. The output is an Eclipse SGOF keyword with slash-delimited regions.
-%
-% OPTIONAL PARAMETERS:
-%   n           - Saturation points per region, default 100.
-%   nreg        - Number of regions, default 1.
-%   sw_imm      - Immobile brine saturation per region, default 0.1.
-%   sg_imm      - Immobile gas saturation per region, default 0.1.
-%   c_a1, c_a2  - Brine/gas relative permeability exponents, defaults 2.
-%   c_a3        - Capillary pressure exponent, default 1.5.
-%   Pe          - Entry-pressure coefficient [Pa] per region, default 0.4.
-%   P_c_max     - Capillary pressure bound [Pa] per region, default 9.5e4.
-%   units       - Output unit system, default 'metric'.
-%   plot        - Display property curves, default true.
-%   outputPath  - Output folder; empty selects MRST's UHS_PVT/PVT_H2STORAGE.
-%   fileName    - Output filename, default 'SGOF_UHS.txt'.
-%   reCompute   - Overwrite an existing file, default true. If false, an
-%                 existing file is kept without reading or regenerating it.
-%
-% Supply one value per region for sw_imm, sg_imm, Pe and P_c_max. Pressure
-% inputs are in SI units and converted to the requested output unit system.
-%
-% SEE ALSO:
-%   readSGOFTables, getFluidH2BrineProps.
+    % GETFLUIDH2BRINESGOF Write hydrogen-brine relative permeability tables.
+    %
+    % SYNOPSIS:
+    %   getFluidH2BrineSGOF('plot', false, 'outputPath', folder)
+    %
+    % The oil phase represents brine. Each region contains gas saturation, gas
+    % relative permeability, brine relative permeability and gas-oil capillary
+    % pressure. The output is an Eclipse SGOF keyword with slash-delimited regions.
+    %
+    % OPTIONAL PARAMETERS:
+    %   n           - Saturation points per region, default 100.
+    %   nreg        - Number of regions, default 1.
+    %   sw_imm      - Immobile brine saturation per region, default 0.1.
+    %   sg_imm      - Immobile gas saturation per region, default 0.1.
+    %   c_a1, c_a2  - Brine/gas relative permeability exponents, defaults 2.
+    %   c_a3        - Capillary pressure exponent, default 1.5.
+    %   Pe          - Entry-pressure coefficient [Pa] per region, default 0.4.
+    %   P_c_max     - Capillary pressure bound [Pa] per region, default 9.5e4.
+    %   units       - Output unit system, default 'metric'.
+    %   plot        - Display property curves, default true.
+    %   outputPath  - Output folder; empty selects MRST's UHS_PVT/PVT_H2STORAGE.
+    %   fileName    - Output filename, default 'SGOF_UHS.txt'.
+    %   reCompute   - Overwrite an existing file, default true. If false, an
+    %                 existing file is kept without reading or regenerating it.
+    %
+    % Supply one value per region for sw_imm, sg_imm, Pe and P_c_max. Pressure
+    % inputs are in SI units and converted to the requested output unit system.
+    %
+    % SEE ALSO:
+    %   readSGOFTables, getFluidH2BrineProps.
 
     %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
@@ -45,11 +45,10 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-
 You should have received a copy of the GNU General Public License
 along with MRST.  If not, see <http://www.gnu.org/licenses/>.
 %}
-    
+
     % Parse input arguments and set defaults
     opts = struct('n', 100, ...
         'plot', true, ...
@@ -75,9 +74,9 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
     end
 
     filePath = fullfile(opts.outputPath, opts.fileName);
-    if exist(filePath, 'file')&&(~opts.reCompute)
+    if exist(filePath, 'file') && (~opts.reCompute)
         fprintf('File %s already exists. Keeping existing file...\n', opts.fileName);
-        return; % Exit the function as the table already exists
+        return  % Exit the function as the table already exists
     end
     if ~exist(opts.outputPath, 'dir')
         mkdir(opts.outputPath);
@@ -93,7 +92,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
     % Compute properties for each region
     for reg = 1:opts.nreg
         s0 = opts.sg_imm(reg);  % Single value for immiscible gas saturation
-        sat = [0, linspace(s0, 1, opts.n-1)]; % Saturation points
+        sat = [0, linspace(s0, 1, opts.n - 1)]; % Saturation points
         sg = scale_saturation(sat, s0); % Scaled gas saturation
         so = scale_saturation(1 - sat, opts.sw_imm(reg)); % Scaled oil saturation
         krg = sg.^opts.c_a2; % Gas relative permeability
@@ -141,7 +140,6 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
             legend;
         end
 
-
         % Write computed properties to file
         records = [sat; krg; kro; pc_og * u.press];
         fprintf(fn, '%1.8f %1.8f %1.8f %1.8f\n', records);
@@ -154,6 +152,6 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
 end
 
 function s_scaled = scale_saturation(s, s_imm)
-%SCALE_SATURATION Normalize saturation above the immobile threshold.
+    % SCALE_SATURATION Normalize saturation above the immobile threshold.
     s_scaled = max((s - s_imm) / (1 - s_imm), 0);
 end

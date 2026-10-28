@@ -17,6 +17,7 @@ classdef DecayBactRateSRC < StateFunction
     %   GrowthBactRateSRC, BacterialMass, BiochemistryGenericFacilityModel
 
     methods
+
         function gp = DecayBactRateSRC(model, varargin)
             % Constructor for bacterial decay rate calculator
             gp@StateFunction(model, varargin{:});
@@ -49,14 +50,13 @@ classdef DecayBactRateSRC < StateFunction
             bcrm = rm.biochemFluid;
             nbioreact = bcrm.nbioreact;
 
-
             % Initialize with zeros
             Psidecay = cell(1, nbioreact);
             [Psidecay{:}] = deal(0);
 
             % Check if bacterial modeling is active
             if ~(rm.bacteriamodel && rm.liquidPhase)
-                return;
+                return
             end
 
             % Get component names and indices
@@ -66,9 +66,9 @@ classdef DecayBactRateSRC < StateFunction
                 idx_H2 = find(strcmpi(namecp, bcrm.rH2(i)), 1);     % Case-insensitive search
                 idx_sub = find(strcmpi(namecp, bcrm.rsub(i)), 1);   % Case-insensitive search
                 if strcmp(bcrm.metabolicReaction(i), 'MethanogenicArchae') || ...
-                        strcmp(bcrm.metabolicReaction(i), 'AcetogenicBacteria')
+                    strcmp(bcrm.metabolicReaction(i), 'AcetogenicBacteria')
                     if isempty(idx_H2) || isempty(idx_sub)
-                        return;
+                        return
                     end
                 end
             end
@@ -89,13 +89,14 @@ classdef DecayBactRateSRC < StateFunction
                 end
                 if decayOrder == 1
                     % Paper kinetics: biomass loss is b*M.
-                    Psidecay{i} = bbact + 0.*nbacti;
+                    Psidecay{i} = bbact + 0 .* nbacti;
                 else
                     % Legacy h2-biochem kinetics: biomass loss is b*n*M.
                     Psidecay{i} = bbact .* max(nbacti, 0);
                 end
             end
         end
+
     end
 end
 

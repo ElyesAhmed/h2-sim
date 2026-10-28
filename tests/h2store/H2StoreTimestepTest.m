@@ -1,10 +1,11 @@
 classdef H2StoreTimestepTest < matlab.unittest.TestCase
-    %H2STORETIMESTEPTEST Ramp ordering and aquifer remainder conventions.
+    % H2STORETIMESTEPTEST Ramp ordering and aquifer remainder conventions.
     properties (TestParameter)
         cap = {false, true}
         rampCount = {1, 2}
     end
     methods (Test)
+
         function rampAndRemainder(test, cap, rampCount)
             actual = rampupStorageTimesteps(49, 10, rampCount, cap);
             if rampCount == 1
@@ -22,18 +23,22 @@ classdef H2StoreTimestepTest < matlab.unittest.TestCase
             test.verifyLessThanOrEqual(actual, 10);
             test.verifyEqual(sum(actual), 40 + final);
         end
+
         function exactInterval(test, cap)
             steps = rampupStorageTimesteps(40, 10, 2, cap);
             test.verifyEqual(steps, [2.5; 2.5; 5; 10; 10; 5; 2.5; 2.5]);
             test.verifyEqual(sum(steps), 40);
         end
+
         function zeroInterval(test)
             test.verifyEmpty(rampupStorageTimesteps(0, 10, 8));
         end
+
         function defaultRemainder(test)
             test.verifyEqual(rampupStorageTimesteps(49, 10, 2), ...
                 rampupStorageTimesteps(49, 10, 2, false));
         end
+
     end
 end
 

@@ -1,28 +1,28 @@
 function problem = packH2simSimulationProblem(state0, model, schedule, baseName, varargin)
-%Pack an H2sim simulation using the complete setup as its cache identity
-%
-% SYNOPSIS:
-%   problem = packH2simSimulationProblem(state0, model, schedule, baseName)
-%   problem = packH2simSimulationProblem(..., 'NonLinearSolver', solver)
-%
-% DESCRIPTION:
-%   Validate the initial state and schedule, then hash all serialized input
-%   bytes to identify the packed simulation. Changing the setup selects a
-%   separate output directory. Save the setup beside the packed states,
-%   well solutions, and reports so that the run can be reproduced.
-%
-% PARAMETERS:
-%   state0   - Initial reservoir state.
-%   model    - Configured simulation model.
-%   schedule - Controls and timesteps for the simulation.
-%   baseName - Base name passed to packSimulationProblem.
-%   varargin - Additional name/value options for packSimulationProblem.
-%
-% RETURNS:
-%   problem - Packed simulation problem with an input-dependent name.
-%
-% SEE ALSO:
-%   packSimulationProblem, simulatePackedProblem, validateH2simSimulationInputs
+    % Pack an H2sim simulation using the complete setup as its cache identity
+    %
+    % SYNOPSIS:
+    %   problem = packH2simSimulationProblem(state0, model, schedule, baseName)
+    %   problem = packH2simSimulationProblem(..., 'NonLinearSolver', solver)
+    %
+    % DESCRIPTION:
+    %   Validate the initial state and schedule, then hash all serialized input
+    %   bytes to identify the packed simulation. Changing the setup selects a
+    %   separate output directory. Save the setup beside the packed states,
+    %   well solutions, and reports so that the run can be reproduced.
+    %
+    % PARAMETERS:
+    %   state0   - Initial reservoir state.
+    %   model    - Configured simulation model.
+    %   schedule - Controls and timesteps for the simulation.
+    %   baseName - Base name passed to packSimulationProblem.
+    %   varargin - Additional name/value options for packSimulationProblem.
+    %
+    % RETURNS:
+    %   problem - Packed simulation problem with an input-dependent name.
+    %
+    % SEE ALSO:
+    %   packSimulationProblem, simulatePackedProblem, validateH2simSimulationInputs
 
     validateH2simSimulationInputs(state0, model, schedule);
     serialized = getByteStreamFromArray({state0, model, schedule, varargin});

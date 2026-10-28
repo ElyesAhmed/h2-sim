@@ -1,9 +1,10 @@
 classdef H2ConsumptionTest < matlab.unittest.TestCase
     methods (Test)
+
         function integratesSavedRates(test)
             [model, schedule] = fixture();
             states = {struct('h2ConsumptionRate', [1, 3; 2, 4]), ...
-                      struct('h2ConsumptionRate', [5, 7; 6, 8])};
+                struct('h2ConsumptionRate', [5, 7; 6, 8])};
             [rate, cumulative] = computeH2Consumption(states, schedule, model, 2);
             test.verifyEqual(rate, [3, 7; 4, 8]);
             test.verifyEqual(cumulative, [6, 27; 8, 32]);
@@ -12,9 +13,9 @@ classdef H2ConsumptionTest < matlab.unittest.TestCase
         function cumulativeValuesOverrideRatesWithoutClipping(test)
             [model, schedule] = fixture();
             states = {struct('cumulativeH2ConsumptionMoles', [2, 6; 4, 8], ...
-                             'h2ConsumptionRate', 100*ones(2)), ...
-                      struct('cumulativeH2ConsumptionMoles', [1, 3; 10, 14], ...
-                             'h2ConsumptionRate', 100*ones(2))};
+                'h2ConsumptionRate', 100 * ones(2)), ...
+                struct('cumulativeH2ConsumptionMoles', [1, 3; 10, 14], ...
+                'h2ConsumptionRate', 100 * ones(2))};
             [rate, cumulative] = computeH2Consumption(states, schedule, model, 2);
             test.verifyEqual(cumulative, [6, 3; 8, 14]);
             test.verifyEqual(rate, [3, -1; 4, 2]);
@@ -23,7 +24,7 @@ classdef H2ConsumptionTest < matlab.unittest.TestCase
         function rejectsInconsistentCumulativeHistory(test)
             [model, schedule] = fixture();
             states = {struct('h2ConsumptionRate', ones(2)), ...
-                      struct('cumulativeH2ConsumptionMoles', ones(2))};
+                struct('cumulativeH2ConsumptionMoles', ones(2))};
             verifyFailure(test, @() computeH2Consumption(states, schedule, model, 1), ...
                 'Saved states contain an inconsistent cumulative H2 consumption history.');
         end
@@ -33,7 +34,7 @@ classdef H2ConsumptionTest < matlab.unittest.TestCase
             verifyFailure(test, @() computeH2Consumption({struct(), struct()}, ...
                 schedule, model, 1), ...
                 ['Saved states do not contain the converged H2 source rate. ', ...
-                 'Rerun the simulation before post-processing H2 consumption.']);
+                'Rerun the simulation before post-processing H2 consumption.']);
             verifyFailure(test, @() computeH2Consumption({struct()}, ...
                 schedule, model, 1), ...
                 'states and schedule must contain the same number of timesteps.');
@@ -48,6 +49,7 @@ classdef H2ConsumptionTest < matlab.unittest.TestCase
             verifyFailure(test, @() computeH2Consumption({}, schedule, model, 3), ...
                 'idxReaction must identify an existing biochemical reaction.');
         end
+
     end
 end
 

@@ -1,17 +1,17 @@
 function styleAxes(ax, fontSize)
-% Apply the module's shared paper-figure axis style: gridded, boxed,
-% Times New Roman, outward ticks, 12 pt. Shared by every example script that
-% produces analysis figures so the whole module has one visual style.
-%
-% SYNOPSIS:
-%   styleAxes(ax)
-%   styleAxes(ax, 14)   % override the default 12 pt font
-%
-% The font size is applied to the axes, its title, its x/y/z labels, and any
-% legend attached to it, so a single call is enough to standardise a plot.
-%
-% SEE ALSO:
-%   paperFigure, paperColors, paperExport
+    % Apply the module's shared paper-figure axis style: gridded, boxed,
+    % Times New Roman, outward ticks, 12 pt. Shared by every example script that
+    % produces analysis figures so the whole module has one visual style.
+    %
+    % SYNOPSIS:
+    %   styleAxes(ax)
+    %   styleAxes(ax, 14)   % override the default 12 pt font
+    %
+    % The font size is applied to the axes, its title, its x/y/z labels, and any
+    % legend attached to it, so a single call is enough to standardise a plot.
+    %
+    % SEE ALSO:
+    %   paperFigure, paperColors, paperExport
 
     if nargin < 1 || isempty(ax)
         ax = gca;

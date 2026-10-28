@@ -1,31 +1,35 @@
 classdef H2StoreDomeTimingTest < matlab.unittest.TestCase
-    %H2STOREDOMETIMINGTEST Requested durations and complete timestep coverage.
+    % H2STOREDOMETIMINGTEST Requested durations and complete timestep coverage.
     properties (TestParameter)
         duration = {0.01, 0.5, 1, 1.5, 2, 10, 10.35}
         target = {0.1, 1, 10}
         stage = {'cushion', 'charge', 'discharge'}
     end
     methods (Test)
+
         function exactInterval(test, duration, target)
             steps = rampupDomeTimesteps(duration, target);
             test.verifyEqual(sum(steps), duration, 'AbsTol', 1e-12);
             test.verifyGreaterThan(steps, 0);
             test.verifyLessThanOrEqual(steps, target);
         end
+
         function defaultSetupOptions(test)
             mrstModule add test-suite;
             [~, options] = modelForDome3DAquifer([], false);
             test.verifyEqual(options.dtCushion, 86400);
-            W = struct('name','Prod','type','rate','val',1,'sign',1, ...
-                'status',true,'compi',[0,1]);
+            W = struct('name', 'Prod', 'type', 'rate', 'val', 1, 'sign', 1, ...
+                'status', true, 'compi', [0, 1]);
             schedule = makeDomeAquiferSchedule(W, options);
             expected = options.timeCushion + options.timeShut + ...
-                options.numCycles*(options.timeCharge + options.timeIdle + options.timeDischarge);
+                options.numCycles * (options.timeCharge + options.timeIdle + options.timeDischarge);
             test.verifyEqual(sum(schedule.step.val), expected, 'AbsTol', 1e-7);
         end
+
         function zeroInterval(test)
             test.verifyEmpty(rampupDomeTimesteps(0, 1));
         end
+
         function selectedStage(test, stage)
             [W, options] = inputs();
             options.([stage, 'Only']) = true;
@@ -34,21 +38,23 @@ classdef H2StoreDomeTimingTest < matlab.unittest.TestCase
             test.verifyEqual(sum(schedule.step.val), options.(key), 'AbsTol', 1e-7);
             test.verifyGreaterThan(schedule.step.val, 0);
         end
+
         function fullCycleDurations(test)
             [W, options] = inputs();
             schedule = makeDomeAquiferSchedule(W, options);
             names = arrayfun(@(i) schedule.control(i).W.name, ...
                 schedule.step.control(:), 'UniformOutput', false);
-            totals = [sum(schedule.step.val(strcmp(names,'cushion'))), ...
-                sum(schedule.step.val(strcmp(names,'charge'))), ...
-                sum(schedule.step.val(strcmp(names,'shut'))), ...
-                sum(schedule.step.val(strcmp(names,'discharge')))];
+            totals = [sum(schedule.step.val(strcmp(names, 'cushion'))), ...
+                sum(schedule.step.val(strcmp(names, 'charge'))), ...
+                sum(schedule.step.val(strcmp(names, 'shut'))), ...
+                sum(schedule.step.val(strcmp(names, 'discharge')))];
             n = options.numCycles;
-            expected = [options.timeCushion, n*options.timeCharge, ...
-                options.timeShut+n*options.timeIdle, n*options.timeDischarge];
+            expected = [options.timeCushion, n * options.timeCharge, ...
+                options.timeShut + n * options.timeIdle, n * options.timeDischarge];
             test.verifyEqual(totals, expected, 'AbsTol', 1e-7);
             test.verifyEqual(sum(schedule.step.val), sum(expected), 'AbsTol', 1e-7);
         end
+
         function shortInjection(test)
             [W, options] = inputs();
             options.timeCharge = 0.5;
@@ -58,6 +64,7 @@ classdef H2StoreDomeTimingTest < matlab.unittest.TestCase
             test.verifyEqual(sum(schedule.step.val), 0.5, 'AbsTol', 1e-14);
             test.verifyGreaterThan(schedule.step.val, 0);
         end
+
         function rateConventions(test)
             [W, options] = inputs();
             options.chargeOnly = true;
@@ -68,20 +75,21 @@ classdef H2StoreDomeTimingTest < matlab.unittest.TestCase
                 test.verifyEqual(schedule.control(k).W.T, options.tempCharge);
             end
         end
+
     end
 end
 
 function [W, options] = inputs()
-    W = struct('name','Prod','type','rate','val',1,'sign',1, ...
-        'status',true,'compi',[0,1]);
-    options = struct('rateCushion',2e5/86400,'rateCharge',4e5/86400, ...
-        'rateDischarge',4e5/86400,'rateIdle',0,'tempCushion',323.15, ...
-        'tempCharge',323.15,'timeCushion',365*86400,'dtCushion',86400, ...
-        'timeCharge',10*86400,'dtCharge',86400,'timeDischarge',10*86400, ...
-        'dtDischarge',86400,'timeIdle',3*86400,'dtIdle',8.4*3600, ...
-        'timeShut',90*86400,'dtShut',8.4*3600,'numCycles',4, ...
-        'chargeOnly',false,'dischargeOnly',false,'cushionOnly',false, ...
-        'use_cushion',true,'useGroupCtrl',false);
+    W = struct('name', 'Prod', 'type', 'rate', 'val', 1, 'sign', 1, ...
+        'status', true, 'compi', [0, 1]);
+    options = struct('rateCushion', 2e5 / 86400, 'rateCharge', 4e5 / 86400, ...
+        'rateDischarge', 4e5 / 86400, 'rateIdle', 0, 'tempCushion', 323.15, ...
+        'tempCharge', 323.15, 'timeCushion', 365 * 86400, 'dtCushion', 86400, ...
+        'timeCharge', 10 * 86400, 'dtCharge', 86400, 'timeDischarge', 10 * 86400, ...
+        'dtDischarge', 86400, 'timeIdle', 3 * 86400, 'dtIdle', 8.4 * 3600, ...
+        'timeShut', 90 * 86400, 'dtShut', 8.4 * 3600, 'numCycles', 4, ...
+        'chargeOnly', false, 'dischargeOnly', false, 'cushionOnly', false, ...
+        'use_cushion', true, 'useGroupCtrl', false);
 end
 
 %{

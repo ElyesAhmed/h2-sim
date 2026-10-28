@@ -1,77 +1,77 @@
 function summary = exampleSequentialBiochemistryPhreeqc1D(varargin)
-%Simulate a 1D hydrogen-storage cycle with multirate microbial reactions
-%
-% SYNOPSIS:
-%   summary = exampleSequentialBiochemistryPhreeqc1D();
-%   summary = exampleSequentialBiochemistryPhreeqc1D( ...
-%       'phreeqcDatabaseFile', db, 'reactionSubstepMaxDt', 0.4*day);
-%
-% DESCRIPTION:
-%   Use one compositional flow-and-transport solve per coarse timestep,
-%   followed by local microbial-reaction substeps and PHREEQC equilibrium.
-%   MRST owns the microbial kinetics and biomass; PHREEQC supplies aqueous
-%   speciation and mineral feedback. There is no outer Picard iteration
-%   between the flow and reaction stages.
-%
-%   The high-rate storage benchmark uses initial N/N0 = 1, pH 6.24, and
-%   HCO3- = 1.370e-3 mol/kgw on a 50-cell, 50 m grid. Biomass uses
-%   N/N0 with N0 = 1e9 cells/kgw, first-order decay and Nmax/N0 = 1e4.
-%   Diffusion, dispersion, chemotaxis and clogging are disabled.
-%   The default 250-day injection/storage/production cycle
-%   uses two-day flow steps and reaction substeps of at most 0.4 day.
-%   Time options are in seconds; MRST's day converts days to seconds.
-%
-%   Packed output is reused when the complete serialized setup matches.
-%   maximumFlowSteps truncates the schedule before packing: changing this
-%   limit changes the cache identity, rather than extending a previous run.
-%   elapsedSeconds measures packing, simulation/cache access and output
-%   loading; it excludes setup, consumption metrics and plotting.
-%   A short run checks execution, not full-cycle numerical convergence.
-%
-% OPTIONAL PARAMETERS:
-%   phreeqcDatabaseFile  - Absolute path to h2_biogeochemistry.dat. Falls
-%                          back to the PHREEQC_DATABASE_FILE environment
-%                          variable, then to `which('h2_biogeochemistry.dat')`.
-%   reactionSubstepMaxDt - Maximum duration of one local reaction/PHREEQC
-%                          substep (default 0.4 day).
-%   flowTimestepMaxDt     - Maximum coarse compositional-flow timestep
-%                          (default 2 days, giving 125 flow steps over the
-%                          complete 250-day benchmark).
-%   maximumFlowSteps      - Optional positive integer limit for short
-%                          validation runs (default Inf: complete schedule).
-%   phreeqcReflashLocalBracket - Use a local pressure bracket with fzero
-%                          fallback (default true).
-%   phreeqcReflashParallel - Run the per-cell constant-volume flash with
-%                          parfor instead of a serial loop (default false;
-%                          requires Parallel Computing Toolbox).
-%   plotResults          - Create publication figures (default false).
-%   outputDirectory      - PDF/PNG output folder (build/phreeqc-figures).
-%                          Pass '' to display without export.
-%   simulationDirectory  - Packed simulation output directory. An empty
-%                          value uses the standard H2sim output directory.
-%   reactionSolverVerbose - Print local reaction Newton residuals
-%                          (default false).
-%
-% RETURNS:
-%   summary - Struct with the model, schedule, states, well solutions,
-%             report, packedProblem and metrics. injectedH2Moles is total
-%             prescribed H2 injection over the selected schedule;
-%             consumedH2Moles is cumulative biological H2 consumption (mol).
-%             h2LossPercent is 100*consumed/injected. elapsedSeconds is in s.
-%             Short-run summaries retain the truncated schedule and report.
-%
-% SEE ALSO:
-%   SequentialBiochemistryPhreeqcModel,
-%   convertToSequentialBiochemistryPhreeqcModel,
-%   setupH2StorageExampleWithSRB_benchmark, runThreeBackendComparison
+    % Simulate a 1D hydrogen-storage cycle with multirate microbial reactions
+    %
+    % SYNOPSIS:
+    %   summary = exampleSequentialBiochemistryPhreeqc1D();
+    %   summary = exampleSequentialBiochemistryPhreeqc1D( ...
+    %       'phreeqcDatabaseFile', db, 'reactionSubstepMaxDt', 0.4*day);
+    %
+    % DESCRIPTION:
+    %   Use one compositional flow-and-transport solve per coarse timestep,
+    %   followed by local microbial-reaction substeps and PHREEQC equilibrium.
+    %   MRST owns the microbial kinetics and biomass; PHREEQC supplies aqueous
+    %   speciation and mineral feedback. There is no outer Picard iteration
+    %   between the flow and reaction stages.
+    %
+    %   The high-rate storage benchmark uses initial N/N0 = 1, pH 6.24, and
+    %   HCO3- = 1.370e-3 mol/kgw on a 50-cell, 50 m grid. Biomass uses
+    %   N/N0 with N0 = 1e9 cells/kgw, first-order decay and Nmax/N0 = 1e4.
+    %   Diffusion, dispersion, chemotaxis and clogging are disabled.
+    %   The default 250-day injection/storage/production cycle
+    %   uses two-day flow steps and reaction substeps of at most 0.4 day.
+    %   Time options are in seconds; MRST's day converts days to seconds.
+    %
+    %   Packed output is reused when the complete serialized setup matches.
+    %   maximumFlowSteps truncates the schedule before packing: changing this
+    %   limit changes the cache identity, rather than extending a previous run.
+    %   elapsedSeconds measures packing, simulation/cache access and output
+    %   loading; it excludes setup, consumption metrics and plotting.
+    %   A short run checks execution, not full-cycle numerical convergence.
+    %
+    % OPTIONAL PARAMETERS:
+    %   phreeqcDatabaseFile  - Absolute path to h2_biogeochemistry.dat. Falls
+    %                          back to the PHREEQC_DATABASE_FILE environment
+    %                          variable, then to `which('h2_biogeochemistry.dat')`.
+    %   reactionSubstepMaxDt - Maximum duration of one local reaction/PHREEQC
+    %                          substep (default 0.4 day).
+    %   flowTimestepMaxDt     - Maximum coarse compositional-flow timestep
+    %                          (default 2 days, giving 125 flow steps over the
+    %                          complete 250-day benchmark).
+    %   maximumFlowSteps      - Optional positive integer limit for short
+    %                          validation runs (default Inf: complete schedule).
+    %   phreeqcReflashLocalBracket - Use a local pressure bracket with fzero
+    %                          fallback (default true).
+    %   phreeqcReflashParallel - Run the per-cell constant-volume flash with
+    %                          parfor instead of a serial loop (default false;
+    %                          requires Parallel Computing Toolbox).
+    %   plotResults          - Create publication figures (default false).
+    %   outputDirectory      - PDF/PNG output folder (build/phreeqc-figures).
+    %                          Pass '' to display without export.
+    %   simulationDirectory  - Packed simulation output directory. An empty
+    %                          value uses the standard H2sim output directory.
+    %   reactionSolverVerbose - Print local reaction Newton residuals
+    %                          (default false).
+    %
+    % RETURNS:
+    %   summary - Struct with the model, schedule, states, well solutions,
+    %             report, packedProblem and metrics. injectedH2Moles is total
+    %             prescribed H2 injection over the selected schedule;
+    %             consumedH2Moles is cumulative biological H2 consumption (mol).
+    %             h2LossPercent is 100*consumed/injected. elapsedSeconds is in s.
+    %             Short-run summaries retain the truncated schedule and report.
+    %
+    % SEE ALSO:
+    %   SequentialBiochemistryPhreeqcModel,
+    %   convertToSequentialBiochemistryPhreeqcModel,
+    %   setupH2StorageExampleWithSRB_benchmark, runThreeBackendComparison
 
-    mrstModule add ad-core ad-props compositional deckformat
+    mrstModule add ad-core ad-props compositional deckformat;
 
     %% Set simulation options
     opt = struct( ...
         'phreeqcDatabaseFile', '', ...
-        'flowTimestepMaxDt', 2*day, ...
-        'reactionSubstepMaxDt', 0.4*day, ...
+        'flowTimestepMaxDt', 2 * day, ...
+        'reactionSubstepMaxDt', 0.4 * day, ...
         'maximumFlowSteps', inf, ...
         'phreeqcReflashLocalBracket', true, ...
         'phreeqcReflashParallel', false, ...
@@ -155,7 +155,7 @@ function [model, solver] = configureModel(baseModel, opt)
 end
 
 function [problem, ws, states, report, elapsedSeconds] = ...
-        runPackedCase(state0, model, schedule, solver, opt)
+    runPackedCase(state0, model, schedule, solver, opt)
     timer = tic();
     problem = packH2simSimulationProblem(state0, model, schedule, ...
         'H2_MULTIRATE_1D_EXAMPLE', 'NonLinearSolver', solver, ...
@@ -172,7 +172,7 @@ function [problem, ws, states, report, elapsedSeconds] = ...
 end
 
 function summary = buildSummary(model, schedule, state0, states, ws, ...
-        report, problem, elapsedSeconds)
+    report, problem, elapsedSeconds)
     nReactions = model.biochemFluid.nbioreact;
     cumulative = zeros(numel(states), nReactions);
     for reaction = 1:nReactions
@@ -193,7 +193,7 @@ function summary = buildSummary(model, schedule, state0, states, ws, ...
         'packedProblem', problem, ...
         'injectedH2Moles', injectedH2Moles, ...
         'consumedH2Moles', consumedH2Moles, ...
-        'h2LossPercent', 100*consumedH2Moles/injectedH2Moles, ...
+        'h2LossPercent', 100 * consumedH2Moles / injectedH2Moles, ...
         'elapsedSeconds', elapsedSeconds);
 end
 
@@ -201,11 +201,11 @@ function printSummary(summary, opt)
     fprintf('\nSequentialBiochemistryPhreeqcModel, 1D benchmark:\n');
     fprintf('  Control steps            : %d\n', numel(summary.schedule.step.val));
     fprintf('  Reaction substep max dt  : %.3g day\n', ...
-        opt.reactionSubstepMaxDt/day);
+        opt.reactionSubstepMaxDt / day);
     fprintf('  Injected H2              : %.6g mol\n', summary.injectedH2Moles);
     fprintf('  Consumed H2              : %.6g mol (%.3g %%)\n', ...
         summary.consumedH2Moles, ...
-        100*summary.consumedH2Moles/summary.injectedH2Moles);
+        100 * summary.consumedH2Moles / summary.injectedH2Moles);
     fprintf('  Runtime                  : %.3g s\n', summary.elapsedSeconds);
 end
 
@@ -218,20 +218,20 @@ function injected = prescribedInjectedH2(schedule, model)
         wells = schedule.control(schedule.step.control(step)).W;
         for w = 1:numel(wells)
             if wells(w).sign <= 0 || ...
-                    (isfield(wells, 'status') && ~wells(w).status)
-                continue;
+                (isfield(wells, 'status') && ~wells(w).status)
+                continue
             end
 
             if strcmpi(wells(w).type, 'grat')
                 gasRate = wells(w).val;
             elseif strcmpi(wells(w).type, 'rate')
-                gasRate = wells(w).val*wells(w).compi(gasIndex);
+                gasRate = wells(w).val * wells(w).compi(gasIndex);
             else
-                continue;
+                continue
             end
-            molarRate = gasRate*model.FacilityModel.pressure/ ...
-                (8.314462618*model.FacilityModel.T);
-            injected = injected + molarRate*wells(w).components(idxH2)* ...
+            molarRate = gasRate * model.FacilityModel.pressure / ...
+                (8.314462618 * model.FacilityModel.T);
+            injected = injected + molarRate * wells(w).components(idxH2) * ...
                 schedule.step.val(step);
         end
     end
@@ -243,7 +243,7 @@ function index = findComponentIndex(names, aliases)
         candidate = find(strcmpi(names, aliases{i}), 1);
         if ~isempty(candidate)
             index = candidate;
-            return;
+            return
         end
     end
     error('Component "%s" was not found.', strjoin(aliases, '" or "'));
@@ -280,8 +280,8 @@ function validateOptions(opt)
     assert(isnumeric(opt.maximumFlowSteps) && isscalar(opt.maximumFlowSteps) && ...
         isreal(opt.maximumFlowSteps) && opt.maximumFlowSteps > 0 && ...
         (isinf(opt.maximumFlowSteps) || ...
-         (isfinite(opt.maximumFlowSteps) && ...
-          opt.maximumFlowSteps == floor(opt.maximumFlowSteps))), ...
+        (isfinite(opt.maximumFlowSteps) && ...
+        opt.maximumFlowSteps == floor(opt.maximumFlowSteps))), ...
         'maximumFlowSteps must be a positive integer or Inf.');
     validateattributes(opt.reactionSolverVerbose, {'logical', 'numeric'}, ...
         {'scalar', 'real', 'finite'}, ...

@@ -8,8 +8,8 @@
 % The script shows the effect on biomass distribution and porosity.
 % ===========================================================================
 
-mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10
-mrstModule add compositional  
+mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10;
+mrstModule add compositional;
 
 %% 1. Load and setup the base model (common to both scenarios)
 baseName = 'H2_STORAGE_DOME_TRAP';
@@ -47,7 +47,7 @@ cp = 1.0;                   % clogging coefficient
 
 %% 3. Update schedule controls for compositional injection
 schedule = scheduleBo;
-bc  = addBC([], schedule.control(1).bc.face, 'flux', 0, 'sat',[0.1514 0.8486] );    % no-flow for the flow eqs
+bc  = addBC([], schedule.control(1).bc.face, 'flux', 0, 'sat', [0.1514 0.8486]);    % no-flow for the flow eqs
 nc = 4; % number of components
 nf = numel(bc.face); % number of boundary faces
 bc.components = repmat([0.0; 0.95; 0.05; 0.0], 1, nf)';
@@ -78,8 +78,8 @@ state0 = initCompositionalStateBacteria(model_noBactDiff, state0.pressure, T0, .
 nls = NonLinearSolver();
 nls.LinearSolver = selectLinearSolverAD(model_noBactDiff);
 linsolve = nls.LinearSolver;
-disp(linsolve)
-nls = NonLinearSolver('LinearSolver',linsolve);
+disp(linsolve);
+nls = NonLinearSolver('LinearSolver', linsolve);
 prob_noBactDiff = packSimulationProblem(state0, model_noBactDiff, schedule, ...
     [baseName '_bio_noDiff_noDisp'], 'NonLinearSolver', nls);
 [ws_noDiff, states_noDiff] = getPackedSimulatorOutput(prob_noBactDiff);
@@ -91,37 +91,46 @@ state0_with = initCompositionalStateBacteria(model_withBactDiff, state0.pressure
     state0.s, comp0, nbact0, EOS);
 nls.LinearSolver = selectLinearSolverAD(model_withBactDiff);
 linsolve = nls.LinearSolver;
-disp(linsolve)
-nls = NonLinearSolver('LinearSolver',linsolve);
+disp(linsolve);
+nls = NonLinearSolver('LinearSolver', linsolve);
 prob_withBactDiff = packSimulationProblem(state0_with, model_withBactDiff, schedule, ...
     [baseName '_withBactDiff'], 'NonLinearSolver', nls);
-simulatePackedProblem(prob_withBactDiff,'RestartStep',1);
+simulatePackedProblem(prob_withBactDiff, 'RestartStep', 1);
 [ws_withDiff, states_withDiff] = getPackedSimulatorOutput(prob_withBactDiff);
 fprintf('\n===== Case 2 Complete (With Bacterial Diffusion + AMGCL Tuning) =====\n\n');
 
 %% 7. Visualise biomass at final time
 figure;
-subplot(1,2,1);
-plotCellData(model0.G, states_noDiff{end}.nbact); title('No Bacterial Diffusion');
-colorbar; view(0,90);
-subplot(1,2,2);
-plotCellData(model0.G, states_withDiff{end}.nbact); title('With Bacterial Diffusion');
-colorbar; view(0,90);
+subplot(1, 2, 1);
+plotCellData(model0.G, states_noDiff{end}.nbact);
+title('No Bacterial Diffusion');
+colorbar;
+view(0, 90);
+subplot(1, 2, 2);
+plotCellData(model0.G, states_withDiff{end}.nbact);
+title('With Bacterial Diffusion');
+colorbar;
+view(0, 90);
 sgtitle('Biomass concentration (cells/m³)');
 
 %% 8. Porosity at final time
 figure;
-subplot(1,2,1);
-plotCellData(model0.G, states_noDiff{end}.rock.poro); title('No Bacterial Diffusion');
-colorbar; view(0,90);
-subplot(1,2,2);
-plotCellData(model0.G, states_withDiff{end}.rock.poro); title('With Bacterial Diffusion');
-colorbar; view(0,90);
+subplot(1, 2, 1);
+plotCellData(model0.G, states_noDiff{end}.rock.poro);
+title('No Bacterial Diffusion');
+colorbar;
+view(0, 90);
+subplot(1, 2, 2);
+plotCellData(model0.G, states_withDiff{end}.rock.poro);
+title('With Bacterial Diffusion');
+colorbar;
+view(0, 90);
 sgtitle('Final porosity');
 
 %% 9. Well outputs comparison
 ws_combined = {ws_noDiff, ws_withDiff};
-figure; plotWellSols(ws_combined, cumsum(schedule.step.val)/day, ...
+figure;
+plotWellSols(ws_combined, cumsum(schedule.step.val) / day, ...
     'datasetnames', {'No Bact Diffusion', 'With Bact Diffusion'});
 
 % ===========================================================================
@@ -129,19 +138,19 @@ figure; plotWellSols(ws_combined, cumsum(schedule.step.val)/day, ...
 % ===========================================================================
 function model = createBactDiffModel(model0, compFluid, biochemFluid, backend, bactDiffusion)
     % Create the base biochemistry model (without internal flags for diffusion)
-    model = BiochemistryModel(...
+    model = BiochemistryModel( ...
         model0.G, model0.rock, model0.fluid, compFluid, biochemFluid, ...
         false, backend, ...
         'oil', true, 'gas', true, ...
         'bacteriamodel', true, ...
         'molecularDiffusion', false, ...
-        'bactDiffusion', bactDiffusion,...
+        'bactDiffusion', bactDiffusion, ...
         'molecularDispersion', false, ...
         'liquidPhase', 'O', 'vaporPhase', 'G');
 
     % Ensure the bacteria mass balance equation exists (it should be in model.Equations)
     % Add bacterial diffusion flux and extra term to the equation if requested
-   
+
 end
 
 %{

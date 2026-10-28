@@ -1,45 +1,45 @@
 function figures = plotPhreeqcBackendComparison(scenarios, varargin)
-%Plot saved aqueous profiles and hydrogen consumption for chemistry backends
-%
-% SYNOPSIS:
-%   figures = plotPhreeqcBackendComparison(scenarios);
-%   figures = plotPhreeqcBackendComparison(scenarios, 'outputDirectory', '');
-%
-% PARAMETERS:
-%   scenarios - Nonempty struct array returned by runThreeBackendComparison.
-%               Each entry supplies name, snapshotIndices, snapshotLabels,
-%               timeDays, aqueousH2, aqueousDIC, lossPercent,
-%               xDimensionless and finalSpatialConsumptionMoles. Snapshot
-%               counts must agree, and corresponding times must match within
-%               1e-8 day. Models and state histories are not used for plotting.
-%
-% OPTIONAL PARAMETERS:
-%   outputDirectory - PDF/PNG export folder (default build/phreeqc-figures
-%                     under pwd). Pass an empty character vector, '', to
-%                     create figures without writing files.
-%
-% RETURNS:
-%   figures - Three figure handles, in this order:
-%               1. Aqueous H2 mole fraction and DIC (mol/kgw) profiles.
-%               2. Cumulative H2 consumption / total scheduled injection (%).
-%               3. Final cumulative H2 consumption per cell (mol/cell).
-%             Time is in days; distance is x/L. Values and normalization
-%             come from scenarios; plotting does not recompute consumption.
-%
-% DESCRIPTION:
-%   Redraw existing results without running simulations. Profiles and final
-%   spatial consumption are sorted by dimensionless cell position. Each row
-%   of profile axes shares y limits. Case labels and snapshot labels are
-%   taken from the input array.
-%
-%   Exports use vector PDF and 300-dpi PNG, with these base names:
-%     backends_aqueous_profiles
-%     backends_H2_consumption_time
-%     backends_H2_consumption_space
-%   Figures remain open; the caller owns the returned handles.
-%
-% SEE ALSO:
-%   runThreeBackendComparison, paperExport, paperFigure, paperColors
+    % Plot saved aqueous profiles and hydrogen consumption for chemistry backends
+    %
+    % SYNOPSIS:
+    %   figures = plotPhreeqcBackendComparison(scenarios);
+    %   figures = plotPhreeqcBackendComparison(scenarios, 'outputDirectory', '');
+    %
+    % PARAMETERS:
+    %   scenarios - Nonempty struct array returned by runThreeBackendComparison.
+    %               Each entry supplies name, snapshotIndices, snapshotLabels,
+    %               timeDays, aqueousH2, aqueousDIC, lossPercent,
+    %               xDimensionless and finalSpatialConsumptionMoles. Snapshot
+    %               counts must agree, and corresponding times must match within
+    %               1e-8 day. Models and state histories are not used for plotting.
+    %
+    % OPTIONAL PARAMETERS:
+    %   outputDirectory - PDF/PNG export folder (default build/phreeqc-figures
+    %                     under pwd). Pass an empty character vector, '', to
+    %                     create figures without writing files.
+    %
+    % RETURNS:
+    %   figures - Three figure handles, in this order:
+    %               1. Aqueous H2 mole fraction and DIC (mol/kgw) profiles.
+    %               2. Cumulative H2 consumption / total scheduled injection (%).
+    %               3. Final cumulative H2 consumption per cell (mol/cell).
+    %             Time is in days; distance is x/L. Values and normalization
+    %             come from scenarios; plotting does not recompute consumption.
+    %
+    % DESCRIPTION:
+    %   Redraw existing results without running simulations. Profiles and final
+    %   spatial consumption are sorted by dimensionless cell position. Each row
+    %   of profile axes shares y limits. Case labels and snapshot labels are
+    %   taken from the input array.
+    %
+    %   Exports use vector PDF and 300-dpi PNG, with these base names:
+    %     backends_aqueous_profiles
+    %     backends_H2_consumption_time
+    %     backends_H2_consumption_space
+    %   Figures remain open; the caller owns the returned handles.
+    %
+    % SEE ALSO:
+    %   runThreeBackendComparison, paperExport, paperFigure, paperColors
 
     opt = merge_options(struct('outputDirectory', ...
         fullfile(pwd, 'build', 'phreeqc-figures')), varargin{:});
@@ -89,7 +89,7 @@ function fig = plotProfiles(scenarios, colors, styles, labels, nSnapshots)
             assert(max(times) - min(times) < 1e-8, ...
                 'Profile snapshots must use matched times.');
             title(ax, sprintf('(%c) %s, t = %.4g d', ...
-                'a' + (row - 1)*nSnapshots + snapshot - 1, ...
+                'a' + (row - 1) * nSnapshots + snapshot - 1, ...
                 scenarios(1).snapshotLabels(snapshot), times(1)));
             if snapshot == 1
                 if row == 1

@@ -1,33 +1,33 @@
 function diagnostics = reportMultirateDiagnostics(summary, varargin)
-%Report consumption, biomass and reaction limiting from a saved multirate run
-%
-% SYNOPSIS:
-%   diagnostics = reportMultirateDiagnostics(summary);
-%   diagnostics = reportMultirateDiagnostics(summary, 'verbose', false);
-%
-% PARAMETERS:
-%   summary - Result from exampleSequentialBiochemistryPhreeqc1D, containing
-%             model, schedule and accepted states. Solver reports are optional.
-%
-% OPTIONAL PARAMETERS:
-%   verbose - Print the collected diagnostics (default true).
-%
-% RETURNS:
-%   diagnostics - Reaction names, final consumed H2 in mol, maximum final
-%                 population ratio N/N0, maximum bicarbonate concentration
-%                 in mol/m^3 liquid, and one limiter minimum per control step.
-%                 limiterStatus is available, partial or unavailable. Missing
-%                 limiter values are NaN, not evidence of unrestricted kinetics.
-%
-% DESCRIPTION:
-%   Both packed-example and simulateScheduleAD report layouts are accepted.
-%   Limiter minima cover recorded converged nonlinear reports in accepted
-%   ministeps. Rejected attempts are excluded. Partial coverage is marked
-%   explicitly; malformed report data raises an error. Consumption uses the
-%   existing computeH2Consumption accounting, without changing simulations.
-%
-% SEE ALSO:
-%   exampleSequentialBiochemistryPhreeqc1D, computeH2Consumption, printSeqDiag
+    % Report consumption, biomass and reaction limiting from a saved multirate run
+    %
+    % SYNOPSIS:
+    %   diagnostics = reportMultirateDiagnostics(summary);
+    %   diagnostics = reportMultirateDiagnostics(summary, 'verbose', false);
+    %
+    % PARAMETERS:
+    %   summary - Result from exampleSequentialBiochemistryPhreeqc1D, containing
+    %             model, schedule and accepted states. Solver reports are optional.
+    %
+    % OPTIONAL PARAMETERS:
+    %   verbose - Print the collected diagnostics (default true).
+    %
+    % RETURNS:
+    %   diagnostics - Reaction names, final consumed H2 in mol, maximum final
+    %                 population ratio N/N0, maximum bicarbonate concentration
+    %                 in mol/m^3 liquid, and one limiter minimum per control step.
+    %                 limiterStatus is available, partial or unavailable. Missing
+    %                 limiter values are NaN, not evidence of unrestricted kinetics.
+    %
+    % DESCRIPTION:
+    %   Both packed-example and simulateScheduleAD report layouts are accepted.
+    %   Limiter minima cover recorded converged nonlinear reports in accepted
+    %   ministeps. Rejected attempts are excluded. Partial coverage is marked
+    %   explicitly; malformed report data raises an error. Consumption uses the
+    %   existing computeH2Consumption accounting, without changing simulations.
+    %
+    % SEE ALSO:
+    %   exampleSequentialBiochemistryPhreeqc1D, computeH2Consumption, printSeqDiag
 
     opt = merge_options(struct('verbose', true), varargin{:});
     validateattributes(opt.verbose, {'logical'}, {'scalar'}, mfilename, 'verbose');

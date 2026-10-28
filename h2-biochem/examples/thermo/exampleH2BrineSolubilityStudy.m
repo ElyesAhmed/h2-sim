@@ -1,30 +1,30 @@
 function result = exampleH2BrineSolubilityStudy(varargin)
-%Compare hydrogen-brine phase partitioning and salting-out models
-%
-% SYNOPSIS:
-%   result = exampleH2BrineSolubilityStudy();
-%   result = exampleH2BrineSolubilityStudy('plotResults', false);
-%
-% DESCRIPTION:
-%   Compare RK brine correlations, Soreide-Whitson, Peng-Robinson and
-%   Henry-Setschenow with a bundled near-pure-water ePC-SAFT reference table.
-%   The table is reference data; a live PC-SAFT solver is not used. PHREEQC,
-%   NIST access and Parallel Computing Toolbox are not required.
-%   See Ahmed et al. (2024), Advances in Water Resources 191, 104772.
-%
-% OPTIONAL PARAMETERS:
-%   plotResults     - Plot computed comparisons (default true).
-%   outputDirectory - Table/result folder (default build/thermodynamics-study).
-%
-% RETURNS:
-%   result - Partitioning and salting-out tables, reference information and
-%            output directory. Pressure is in Pa, temperature in K and NaCl
-%            salinity in mol/kg water. Mole fractions are dimensionless.
-%
-% SEE ALSO:
-%   plotH2BrineSolubilityStudy, generateH2BrineSolubilityTable
+    % Compare hydrogen-brine phase partitioning and salting-out models
+    %
+    % SYNOPSIS:
+    %   result = exampleH2BrineSolubilityStudy();
+    %   result = exampleH2BrineSolubilityStudy('plotResults', false);
+    %
+    % DESCRIPTION:
+    %   Compare RK brine correlations, Soreide-Whitson, Peng-Robinson and
+    %   Henry-Setschenow with a bundled near-pure-water ePC-SAFT reference table.
+    %   The table is reference data; a live PC-SAFT solver is not used. PHREEQC,
+    %   NIST access and Parallel Computing Toolbox are not required.
+    %   See Ahmed et al. (2024), Advances in Water Resources 191, 104772.
+    %
+    % OPTIONAL PARAMETERS:
+    %   plotResults     - Plot computed comparisons (default true).
+    %   outputDirectory - Table/result folder (default build/thermodynamics-study).
+    %
+    % RETURNS:
+    %   result - Partitioning and salting-out tables, reference information and
+    %            output directory. Pressure is in Pa, temperature in K and NaCl
+    %            salinity in mol/kg water. Mole fractions are dimensionless.
+    %
+    % SEE ALSO:
+    %   plotH2BrineSolubilityStudy, generateH2BrineSolubilityTable
 
-    mrstModule add compositional ad-core ad-props
+    mrstModule add compositional ad-core ad-props;
 
     %% Load the reference coordinates
     opt = merge_options(struct('plotResults', true, ...
@@ -68,7 +68,7 @@ function result = exampleH2BrineSolubilityStudy(varargin)
         'xH2', [rk.x_H2(order), xsw(:, 2), xpr(:, 2), henry.x_H2, ref.X_L(:, 2)], ...
         'yWater', [rk.y_H2O(order), ysw(:, 1), ypr(:, 1), nan(size(P)), ref.X_V(:, 1)], ...
         'modelNames', {{'RK', 'Soreide–Whitson', 'Peng–Robinson', ...
-                       'Henry–Setschenow', 'ePC-SAFT table'}});
+        'Henry–Setschenow', 'ePC-SAFT table'}});
 
     %% Isolate salinity at 40 degrees C and 15 MPa
     salts = linspace(0, 5, 21).';
@@ -108,7 +108,7 @@ end
 function validateReference(ref)
     assert(max(abs(ref.components(:, 3:end)), [], 'all') < 1e-6, ...
         'Bundled reference is expected to be the near-pure-water case.');
-    assert(numel(unique(ref.T))*numel(unique(ref.pressure)) == numel(ref.pressure));
+    assert(numel(unique(ref.T)) * numel(unique(ref.pressure)) == numel(ref.pressure));
 end
 
 function validateResults(partition, salting)

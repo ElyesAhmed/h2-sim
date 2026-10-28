@@ -29,28 +29,29 @@ classdef TracerDiffusivity < StateFunction
     %   DispersiveDiffusivity, TracerTransmissibility, DiffusiveTracerFlux
 
     properties
-        minPorosity = 1e-12;
+        minPorosity = 1e-12
 
         % --- Mechanical dispersion (liquid phase only) ---
-        alphaL_water = 5.0e-2;   % [m]
-        alphaT_water = 5.0e-3;   % [m]
+        alphaL_water = 5.0e-2    % [m]
+        alphaT_water = 5.0e-3    % [m]
 
         % --- Molecular diffusion ---
-        tortuosityExponent = 7/3;   % Millington-Quirk exponent
-        minDiffusivity = 1e-15;    % reasonable floor for diffusivities
+        tortuosityExponent = 7 / 3    % Millington-Quirk exponent
+        minDiffusivity = 1e-15     % reasonable floor for diffusivities
 
         % Reference aqueous molecular diffusivities at infinite dilution
         % [m^2/s]. These are configurable approximate values; PHREEQC
         % supplies speciation but MRST transports the analytical totals.
-        D_SO4 = 1.07e-9;
-        D_HS  = 1.73e-9;
-        D_HCO3 = 1.18e-9;
-        D_CA = 0.79e-9;
-        D_MG = 0.71e-9;
+        D_SO4 = 1.07e-9
+        D_HS  = 1.73e-9
+        D_HCO3 = 1.18e-9
+        D_CA = 0.79e-9
+        D_MG = 0.71e-9
     end
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function d = TracerDiffusivity(model, varargin)
             d@StateFunction(model, varargin{:});
             d = merge_options(d, varargin{:});
@@ -68,7 +69,7 @@ classdef TracerDiffusivity < StateFunction
             d.label = 'D_{tracer}^{eff}';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function D_eff = evaluateOnDomain(d, model, state)
             G = model.G;
             L_ix = model.getLiquidIndex();
@@ -114,36 +115,37 @@ classdef TracerDiffusivity < StateFunction
                 end
             end
         end
+
     end
 end
 
 % ------------------------------------------------------------------------
 function D_disp = liquidMechanicalDispersion(d, model, state, G, L_ix)
-% Use the same isotropic Darcy-speed approximation as EOS dispersion.
-D_disp = zeros(G.cells.num, 1);
-if model.molecularDispersion
-    op = model.operators;
-    phase_flux = model.getProp(state, 'PhaseFlux');
-    u_face = ifcell(phase_flux, L_ix);
-    internalFaces = find(op.internalConn);
-    internalFaceMap = sparse(internalFaces, ...
-        1:numel(internalFaces), 1, G.faces.num, ...
-        numel(internalFaces));
-    u_face_all = internalFaceMap*u_face;
+    % Use the same isotropic Darcy-speed approximation as EOS dispersion.
+    D_disp = zeros(G.cells.num, 1);
+    if model.molecularDispersion
+        op = model.operators;
+        phase_flux = model.getProp(state, 'PhaseFlux');
+        u_face = ifcell(phase_flux, L_ix);
+        internalFaces = find(op.internalConn);
+        internalFaceMap = sparse(internalFaces, ...
+            1:numel(internalFaces), 1, G.faces.num, ...
+            numel(internalFaces));
+        u_face_all = internalFaceMap * u_face;
 
-    v_mag = faceFlux2cellSpeed(G, u_face_all);
+        v_mag = faceFlux2cellSpeed(G, u_face_all);
 
-    D_disp = ((d.alphaL_water + 2*d.alphaT_water)/3) .* v_mag;
-    D_disp = max(D_disp, 0);
-end
+        D_disp = ((d.alphaL_water + 2 * d.alphaT_water) / 3) .* v_mag;
+        D_disp = max(D_disp, 0);
+    end
 end
 
 function val = ifcell(field, ph)
-if iscell(field)
-    val = field{ph};
-else
-    val = field(:, ph);
-end
+    if iscell(field)
+        val = field{ph};
+    else
+        val = field(:, ph);
+    end
 end
 
 %{

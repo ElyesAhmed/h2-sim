@@ -1,13 +1,13 @@
 function results = runH2StoreTests(mrstRoot)
-%RUNH2STORETESTS Run local unit and small numerical regression tests.
-%
-% SYNOPSIS:
-%   results = runH2StoreTests()
-%   results = runH2StoreTests('/path/to/pinned/mrst')
-%
-% The default uses this repository's MRST submodule. No PHREEQC engine,
-% downloaded fluid data or full paper examples are needed. Every test must
-% pass; failed or incomplete tests cause this runner to raise an error.
+    % RUNH2STORETESTS Run local unit and small numerical regression tests.
+    %
+    % SYNOPSIS:
+    %   results = runH2StoreTests()
+    %   results = runH2StoreTests('/path/to/pinned/mrst')
+    %
+    % The default uses this repository's MRST submodule. No PHREEQC engine,
+    % downloaded fluid data or full paper examples are needed. Every test must
+    % pass; failed or incomplete tests cause this runner to raise an error.
     folder = fileparts(mfilename('fullpath'));
     root = fileparts(fileparts(folder));
     if nargin == 0

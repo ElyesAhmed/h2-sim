@@ -97,7 +97,8 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
     end
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function model = SequentialBiochemistryPhreeqcModel(G, rock, fluid, compFluid, biochemFluid, includeWater, backend, varargin)
             baseOptions = getSequentialBiochemistryModelOptions(varargin);
             model = model@BiochemistryPhreeqcModel(G, rock, fluid, compFluid, ...
@@ -114,9 +115,9 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
 
             assert(model.phreeqcTimestepCoupling && model.isSequentialH2BiochemPhreeqcBackend(), ...
                 ['SequentialBiochemistryPhreeqcModel requires phreeqcBackend=', ...
-                 '''sequential-h2biochem-phreeqc'' and phreeqcTimestepCoupling=true: ', ...
-                 'the coarse-flow/local-reaction split is only meaningful for the ', ...
-                 'MRST-Monod-kinetics + sequential-PHREEQC-equilibrium hybrid backend.']);
+                '''sequential-h2biochem-phreeqc'' and phreeqcTimestepCoupling=true: ', ...
+                'the coarse-flow/local-reaction split is only meaningful for the ', ...
+                'MRST-Monod-kinetics + sequential-PHREEQC-equilibrium hybrid backend.']);
 
             if isempty(model.flowNonLinearSolver)
                 model.flowNonLinearSolver = NonLinearSolver();
@@ -140,7 +141,7 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             model = model.buildStageModels();
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function model = validateModel(model, varargin)
             % Validate as a regular BiochemistryPhreeqcModel, then (re)build
             % the internal flow-stage/reaction-stage sub-models so they
@@ -150,7 +151,7 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             model = model.buildStageModels();
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function model = buildStageModels(model)
             % (Re)build the internal flow-stage and reaction-stage
             % sub-models from the meta-model's CURRENT configuration.
@@ -216,7 +217,7 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             model.reactionStageModel = reaction;
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [state, report] = updateAfterConvergence(model, state0, state, dt, drivingForces) %#ok<INUSD>
             % The flow-stage and reaction-stage sub-models each already
             % ran their own updateAfterConvergence exactly once per
@@ -240,7 +241,7 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             report = [];
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [state, report] = stepFunction(model, state, state0, dt, drivingForces, linsolve, nls, iteration, varargin) %#ok<INUSD>
             % Override of the standard Newton stepFunction, implementing
             % the coarse-flow/local-reaction operator split in two stages
@@ -264,8 +265,8 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             assert(~isempty(flowModel) && ~isempty(reactionModel), ...
                 'SequentialBiochemistryPhreeqcModel:StageModelsNotBuilt', ...
                 ['Flow-stage/reaction-stage sub-models have not been built. ', ...
-                 'Call model.validateModel() before solving a timestep ', ...
-                 '(simulateScheduleAD does this automatically).']);
+                'Call model.validateModel() before solving a timestep ', ...
+                '(simulateScheduleAD does this automatically).']);
 
             %% Stage 1: single global flow + compositional transport solve
             forceArg = flowModel.getDrivingForces(drivingForces);
@@ -292,8 +293,8 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
 
             %% Stage 2: local biochemical substeps + one PHREEQC update
             % nSub equal substeps summing exactly to dt.
-            nSub  = max(1, ceil(dt/model.reactionSubstepMaxDt));
-            subDt = dt/nSub;
+            nSub  = max(1, ceil(dt / model.reactionSubstepMaxDt));
+            subDt = dt / nSub;
 
             [reactionModel, reactionState0] = ...
                 prepareLocalReactionStage(reactionModel, flowState);
@@ -326,6 +327,7 @@ classdef SequentialBiochemistryPhreeqcModel < BiochemistryPhreeqcModel
             report = model.makeStepReport('Converged', true, 'Failure', false);
             report.SequentialBiochemistryPhreeqcStages = stageReport;
         end
+
     end
 end
 
@@ -347,7 +349,7 @@ function [reactionModel, reactionState0] = prepareLocalReactionStage(reactionMod
 end
 
 function [reactionState, substepReports, reactionOk, phreeqcCalls, substepNo] = ...
-        advanceReactionSubsteps(reactionModel, reactionState0, nSub, subDt)
+    advanceReactionSubsteps(reactionModel, reactionState0, nSub, subDt)
     % Advance equal substeps in seconds. Each successful bounded reaction
     % update is followed by equilibrium and feedback for the next substep.
     reactionState  = reactionState0;
@@ -393,17 +395,17 @@ function reactionModel = refreshChemistryFeedback(reactionModel, state)
 end
 
 function baseOptions = getSequentialBiochemistryModelOptions(options)
-% Keep this class's own options away from the BiochemistryPhreeqcModel
-% constructor.
-ownOptions = {'reactionSubstepMaxDt', 'flowNonLinearSolver', 'reactionNonLinearSolver'};
-assert(mod(numel(options), 2) == 0, ...
-    'SequentialBiochemistryPhreeqcModel options must be property/value pairs.');
-baseOptions = {};
-for i = 1:2:numel(options)
-    if ~any(strcmpi(options{i}, ownOptions))
-        baseOptions(end + 1:end + 2) = options(i:i + 1); %#ok<AGROW>
+    % Keep this class's own options away from the BiochemistryPhreeqcModel
+    % constructor.
+    ownOptions = {'reactionSubstepMaxDt', 'flowNonLinearSolver', 'reactionNonLinearSolver'};
+    assert(mod(numel(options), 2) == 0, ...
+        'SequentialBiochemistryPhreeqcModel options must be property/value pairs.');
+    baseOptions = {};
+    for i = 1:2:numel(options)
+        if ~any(strcmpi(options{i}, ownOptions))
+            baseOptions(end + 1:end + 2) = options(i:i + 1);
+        end
     end
-end
 end
 
 %{

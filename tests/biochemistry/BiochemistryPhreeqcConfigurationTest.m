@@ -5,13 +5,16 @@ classdef BiochemistryPhreeqcConfigurationTest < matlab.unittest.TestCase
     end
 
     methods (TestClassSetup)
+
         function setupModel(test)
             [~, test.baseModel, ~, test.initialState] = ...
                 setupH2StorageExampleWithSRB_benchmark('gridCells', 3);
         end
+
     end
 
     methods (Test)
+
         function validationPreservesExistingChemistryHistory(test)
             model = construct(test.baseModel);
             % No wells are used in these state-validation checks.
@@ -25,10 +28,10 @@ classdef BiochemistryPhreeqcConfigurationTest < matlab.unittest.TestCase
                 'h2sDissolvedLag', 'phreeqcPH', 'phreeqcCarbonatePka1', ...
                 'tracerCa', 'tracerMg'};
             for k = 1:numel(fields)
-                state.(fields{k}) = (1:model.G.cells.num)'*k;
+                state.(fields{k}) = (1:model.G.cells.num)' * k;
             end
             state.sequentialCompositionalPhreeqcFirstStepBiomassConventionApplied = true;
-            state.sequentialCompositionalPhreeqcBiomassMET = [1; 2; 3]*1e-12;
+            state.sequentialCompositionalPhreeqcBiomassMET = [1; 2; 3] * 1e-12;
             state.phreeqcMineralCalcite = [0; 1; 2];
             actual = model.validateState(state);
             fields = [fields, {'sequentialCompositionalPhreeqcFirstStepBiomassConventionApplied', ...
@@ -113,6 +116,7 @@ classdef BiochemistryPhreeqcConfigurationTest < matlab.unittest.TestCase
                 'phreeqcTimestepCoupling', true, 'phreeqcDatabaseFile', file, ...
                 'carbonateBuffer', false), ?MException);
         end
+
     end
 end
 

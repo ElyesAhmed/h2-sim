@@ -20,8 +20,8 @@
 % ---------------------------------------------------------------------------
 
 clearvars;
-mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10
-mrstModule add compositional  
+mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui upr test-suite spe10;
+mrstModule add compositional;
 %% Define case identifiers and Eclipse deck
 baseName = 'H2_STORAGE_DOME_TRAP';
 dataPath = getDatasetPath('h2storage');
@@ -30,10 +30,10 @@ deck = readEclipseDeck(dataFile);
 
 %% Warn about computational cost
 warning('ComputationalCost:High', ...
-    ['This is a 5-cycle injection example; consider reducing cycles for faster runs.']);
+    'This example runs the configured storage schedule; setup and simulation may take time.');
 
 %% Set up black-oil model and schedule
-[~, ~, state0Bo, modelBo, scheduleBo, ~] = modelForSimple2DAquifer(deck,'numcycles',1);
+[~, ~, state0Bo, modelBo, scheduleBo, ~] = modelForSimple2DAquifer(deck, 'numcycles', 1);
 
 %% Convert black-oil to compositional model
 model = convertBlackOilModelToCompositionalModel(modelBo);
@@ -61,7 +61,7 @@ cp = 1.0;   % Clogging coefficient
 caseNameWithClogging = [baseName '_WITH_CLOGGING'];
 %% Setup model
 diagonal_backend = DiagonalAutoDiffBackend('modifyOperators', true);
-arg = {model.G, model.rock, model.fluid, compFluid, biochemFluid,...
+arg = {model.G, model.rock, model.fluid, compFluid, biochemFluid, ...
     false, diagonal_backend, 'oil', true, 'gas', true, ... % Define phases for water-oil system
     'bacteriamodel', bacteriamodel, 'liquidPhase', 'O', ...
     'vaporPhase', 'G'}; % Set phases and EOS model
@@ -79,7 +79,7 @@ end
 schedule = scheduleBo;
 for i = 1:numel(schedule.control)
     schedule.control(i).W.compi = [0, 1]; % Well components
-    if strcmp(schedule.control(i).W.name, 'cushion') && i<11
+    if strcmp(schedule.control(i).W.name, 'cushion') && i < 11
         schedule.control(i).W.components = [0.0, 0.1, 0.9, 0.0];
     else
         schedule.control(i).W.components = [0.0, 0.95, 0.05, 0.0];
@@ -91,15 +91,19 @@ model.outputFluxes = false;
 
 %% Plot initial grid, porosity, and permeability
 figure;
-subplot(1,2,1);
-plotCellData(model.G, poro0); hold on;
-plotGrid(model.G, schedule.control(1).W.cells, 'FaceColor','red','LineStyle','none');
-title('Porosity'); axis off tight;
+subplot(1, 2, 1);
+plotCellData(model.G, poro0);
+hold on;
+plotGrid(model.G, schedule.control(1).W.cells, 'FaceColor', 'red', 'LineStyle', 'none');
+title('Porosity');
+axis off tight;
 
-subplot(1,2,2);
-plotCellData(model.G, log10(perm0(:,1))); hold on;
-plotGrid(model.G, schedule.control(1).W.cells, 'FaceColor','red','LineStyle','none');
-title('Permeability (log10)'); axis off tight;
+subplot(1, 2, 2);
+plotCellData(model.G, log10(perm0(:, 1)));
+hold on;
+plotGrid(model.G, schedule.control(1).W.cells, 'FaceColor', 'red', 'LineStyle', 'none');
+title('Permeability (log10)');
+axis off tight;
 sgtitle('2D Dome-Shaped Aquifer');
 
 %% Initialize solvers
@@ -145,12 +149,19 @@ simulatePackedProblem(problemNoBact);
 [wsNoBact, statesNoBact] = getPackedSimulatorOutput(problemNoBact);
 
 % Plot states
-figure; plotToolbar(model.G, statesWithClog); title('With Clogging Effects');
-figure; plotToolbar(model.G, statesNoClog); title('Without Clogging Effects');
-figure; plotToolbar(model.G, statesNoBact); title('Without Bacterial Effects');
+figure;
+plotToolbar(model.G, statesWithClog);
+title('With Clogging Effects');
+figure;
+plotToolbar(model.G, statesNoClog);
+title('Without Clogging Effects');
+figure;
+plotToolbar(model.G, statesNoBact);
+title('Without Bacterial Effects');
 
 % Plot well outputs
-figure; plotWellSols({wsWithClog, wsNoClog, wsNoBact});
+figure;
+plotWellSols({wsWithClog, wsNoClog, wsNoBact});
 
 %% Copyright notice
 

@@ -1,44 +1,48 @@
 classdef H2StoreBenchmarkMappingTest < matlab.unittest.TestCase
-    %H2STOREBENCHMARKMAPPINGTEST Active-cell properties and completion identity.
+    % H2STOREBENCHMARKMAPPINGTEST Active-cell properties and completion identity.
     properties (TestParameter)
         inactive = {1, [1, 2, 6]}
     end
     methods (TestMethodSetup)
+
         function saveGravity(test)
             saved = gravity;
             test.addTeardown(@() gravity(saved));
         end
+
     end
     methods (Test)
+
         function rockMapping(test, inactive)
             deck.GRID = cartesianGrdecl(0:4, 0:2, 0:2);
             ids = (1:prod(deck.GRID.cartDims))';
             deck.GRID.ACTNUM = ones(size(ids));
             deck.GRID.ACTNUM(inactive) = 0;
-            deck.GRID.PERMX = ids*milli*darcy;
-            deck.GRID.PERMY = 2*ids*milli*darcy;
-            deck.GRID.PERMZ = 3*ids*milli*darcy;
-            deck.GRID.PORO = 0.1+ids/100;
-            deck.REGIONS.SATNUM = mod(ids-1, 3)+1;
+            deck.GRID.PERMX = ids * milli * darcy;
+            deck.GRID.PERMY = 2 * ids * milli * darcy;
+            deck.GRID.PERMZ = 3 * ids * milli * darcy;
+            deck.GRID.PORO = 0.1 + ids / 100;
+            deck.REGIONS.SATNUM = mod(ids - 1, 3) + 1;
             G = processGRDECL(deck.GRID);
             rock = makeBenchmarkRock(G, deck);
             expected = setdiff(ids, inactive(:));
             test.verifyEqual(G.cells.indexMap, expected);
-            test.verifyEqual(rock.perm, [expected, 2*expected, 3*expected]*milli*darcy);
-            test.verifyEqual(rock.poro, 0.1+expected/100);
-            test.verifyEqual(rock.regions.saturation, mod(expected-1, 3)+1);
+            test.verifyEqual(rock.perm, [expected, 2 * expected, 3 * expected] * milli * darcy);
+            test.verifyEqual(rock.poro, 0.1 + expected / 100);
+            test.verifyEqual(rock.regions.saturation, mod(expected - 1, 3) + 1);
         end
+
         function fullSetup(test)
             mrstModule add test-suite;
             deck = makeBenchmarkTestDeck();
             ids = (1:prod(deck.GRID.cartDims))';
             deck.GRID.ACTNUM = ones(size(ids));
             deck.GRID.ACTNUM(1) = 0;
-            deck.GRID.PERMX = 100+ids/numel(ids);
-            deck.GRID.PERMY = 200+ids/numel(ids);
-            deck.GRID.PERMZ = 50+ids/numel(ids);
-            deck.GRID.PORO = 0.2+0.1*ids/numel(ids);
-            deck.REGIONS.SATNUM = mod(ids-1, 3)+1;
+            deck.GRID.PERMX = 100 + ids / numel(ids);
+            deck.GRID.PERMY = 200 + ids / numel(ids);
+            deck.GRID.PERMZ = 50 + ids / numel(ids);
+            deck.GRID.PORO = 0.2 + 0.1 * ids / numel(ids);
+            deck.REGIONS.SATNUM = mod(ids - 1, 3) + 1;
             [~, ~, state, model, schedule] = ...
                 modelForUHSModifiedBenchmark(deck, 'chargeOnly', 1);
             converted = convertDeckUnits(deck);
@@ -58,6 +62,7 @@ classdef H2StoreBenchmarkMappingTest < matlab.unittest.TestCase
             end
             test.verifyNumElements(state.pressure, numel(cells));
         end
+
         function rejectInactiveCompletion(test)
             mrstModule add test-suite;
             deck = makeBenchmarkTestDeck();
@@ -66,6 +71,7 @@ classdef H2StoreBenchmarkMappingTest < matlab.unittest.TestCase
             test.verifyError(@() buildBenchmarkModel(deck), ...
                 'h2sim:h2store:InactiveBenchmarkCompletion');
         end
+
     end
 end
 

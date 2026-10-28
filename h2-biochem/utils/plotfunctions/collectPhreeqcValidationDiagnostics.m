@@ -1,44 +1,44 @@
 function diagnostics = collectPhreeqcValidationDiagnostics(result)
-%Collect hydrogen consumption and aqueous chemistry for a storage comparison
-%
-% SYNOPSIS:
-%   diagnostics = collectPhreeqcValidationDiagnostics(result)
-%
-% PARAMETERS:
-%   result - Structure with an h2sim run and, optionally, a reference run.
-%            Each run contains model, schedule and a nonempty cell array of
-%            accepted states, one per schedule step (excluding state0).
-%            The model supplies cell geometry and facility pressure (Pa)
-%            and temperature (K). State x(:, 2) is aqueous H2 mole fraction.
-%            H2sim states supply phreeqcPH and phreeqcTotalCarbon (mol/kg
-%            water); H2 consumption is obtained with computeH2Consumption.
-%            Reference states supply Solution.pH, TotalDIC (mol/kg water),
-%            Water (g), and MET_Rate, ACE_Rate, SRB_Rate (mol/kg water/day).
-%            Legacy result.ugfact is read only when reference is absent.
-%
-% RETURNS:
-%   diagnostics - Structure with h2sim and, when supplied, reference fields.
-%                 Each entry contains:
-%     timeDays      - nSteps-by-1 cumulative accepted times in days.
-%     coordinates   - nCells-by-nDimensions cell centroids in metres.
-%     h2, pH, dic   - nCells-by-nSteps aqueous H2 mole fraction, pH and
-%                     total DIC molality (mol/kg water), respectively.
-%     consumption   - nCells-by-nSteps-by-3 cumulative H2 consumption in mol,
-%                     ordered MET, ACE, SRB.
-%     injectedMoles - Positive total prescribed H2 injection in mol.
-%     lossPercent   - nSteps-by-1 total cumulative reaction consumption as
-%                     a percentage of injectedMoles.
-%
-% NOTES:
-%   Injection uses active injectors with rate or grat controls, H2 component
-%   index 2, and the facility ideal-gas conversion. Other control types are
-%   skipped. This is prescribed injection, not measured well-solution flux.
-%   Each run uses its own fixed denominator over the whole selected schedule,
-%   including during injection. No interpolation or reference alignment is
-%   performed here; the plotting function checks comparison coordinates.
-%
-% SEE ALSO:
-%   exampleCompositionalPhreeqcValidation, plotCompositionalPhreeqcValidation
+    % Collect hydrogen consumption and aqueous chemistry for a storage comparison
+    %
+    % SYNOPSIS:
+    %   diagnostics = collectPhreeqcValidationDiagnostics(result)
+    %
+    % PARAMETERS:
+    %   result - Structure with an h2sim run and, optionally, a reference run.
+    %            Each run contains model, schedule and a nonempty cell array of
+    %            accepted states, one per schedule step (excluding state0).
+    %            The model supplies cell geometry and facility pressure (Pa)
+    %            and temperature (K). State x(:, 2) is aqueous H2 mole fraction.
+    %            H2sim states supply phreeqcPH and phreeqcTotalCarbon (mol/kg
+    %            water); H2 consumption is obtained with computeH2Consumption.
+    %            Reference states supply Solution.pH, TotalDIC (mol/kg water),
+    %            Water (g), and MET_Rate, ACE_Rate, SRB_Rate (mol/kg water/day).
+    %            Legacy result.ugfact is read only when reference is absent.
+    %
+    % RETURNS:
+    %   diagnostics - Structure with h2sim and, when supplied, reference fields.
+    %                 Each entry contains:
+    %     timeDays      - nSteps-by-1 cumulative accepted times in days.
+    %     coordinates   - nCells-by-nDimensions cell centroids in metres.
+    %     h2, pH, dic   - nCells-by-nSteps aqueous H2 mole fraction, pH and
+    %                     total DIC molality (mol/kg water), respectively.
+    %     consumption   - nCells-by-nSteps-by-3 cumulative H2 consumption in mol,
+    %                     ordered MET, ACE, SRB.
+    %     injectedMoles - Positive total prescribed H2 injection in mol.
+    %     lossPercent   - nSteps-by-1 total cumulative reaction consumption as
+    %                     a percentage of injectedMoles.
+    %
+    % NOTES:
+    %   Injection uses active injectors with rate or grat controls, H2 component
+    %   index 2, and the facility ideal-gas conversion. Other control types are
+    %   skipped. This is prescribed injection, not measured well-solution flux.
+    %   Each run uses its own fixed denominator over the whole selected schedule,
+    %   including during injection. No interpolation or reference alignment is
+    %   performed here; the plotting function checks comparison coordinates.
+    %
+    % SEE ALSO:
+    %   exampleCompositionalPhreeqcValidation, plotCompositionalPhreeqcValidation
 
     % Compatibility with previously saved reference datasets.
     if ~isfield(result, 'reference') && isfield(result, 'ugfact')
@@ -46,7 +46,7 @@ function diagnostics = collectPhreeqcValidationDiagnostics(result)
     end
     names = {'h2sim'};
     if isfield(result, 'reference') && ~isempty(result.reference)
-        names{end+1} = 'reference';
+        names{end + 1} = 'reference';
     end
     diagnostics = struct();
     for j = 1:numel(names)
@@ -55,15 +55,15 @@ function diagnostics = collectPhreeqcValidationDiagnostics(result)
 end
 
 function current = collectRun(run, isH2sim)
-    timeDays = double(cumsum(run.schedule.step.val(:)))/day;
+    timeDays = double(cumsum(run.schedule.step.val(:))) / day;
     nSteps = numel(run.states);
     validateStateCount(nSteps, timeDays);
     current = struct('timeDays',    timeDays, ...
-                     'coordinates', run.model.G.cells.centroids, ...
-                     'h2',          [], ...
-                     'pH',          [], ...
-                     'dic',         [], ...
-                     'consumption', zeros(run.model.G.cells.num, nSteps, 3));
+        'coordinates', run.model.G.cells.centroids, ...
+        'h2',          [], ...
+        'pH',          [], ...
+        'dic',         [], ...
+        'consumption', zeros(run.model.G.cells.num, nSteps, 3));
 
     for k = 1:nSteps
         state = run.states{k};
@@ -89,8 +89,8 @@ function current = collectRun(run, isH2sim)
     end
     injected = prescribedInjectedH2(run);
     current.injectedMoles = injected;
-    current.lossPercent = 100*reshape( ...
-        sum(sum(current.consumption, 1), 3), nSteps, 1)/injected;
+    current.lossPercent = 100 * reshape( ...
+        sum(sum(current.consumption, 1), 3), nSteps, 1) / injected;
 end
 
 function validateStateCount(nSteps, timeDays)
@@ -111,12 +111,12 @@ function consumption = referenceConsumption(run, reaction)
     consumption = zeros(run.model.G.cells.num, nSteps);
     for k = 1:nSteps
         solution = run.states{k}.Solution;
-        increment = solution.(reactionNames{reaction}).*solution.Water/1000* ...
-            run.schedule.step.val(k)/day;
+        increment = solution.(reactionNames{reaction}) .* solution.Water / 1000 * ...
+            run.schedule.step.val(k) / day;
         if k == 1
             consumption(:, k) = increment;
         else
-            consumption(:, k) = consumption(:, k-1) + increment;
+            consumption(:, k) = consumption(:, k - 1) + increment;
         end
     end
 end
@@ -131,14 +131,14 @@ function injected = prescribedInjectedH2(run)
                 continue
             end
             if strcmp(well.type, 'rate')
-                rate = well.val*well.compi(run.model.getVaporIndex());
+                rate = well.val * well.compi(run.model.getVaporIndex());
             elseif strcmp(well.type, 'grat')
                 rate = well.val;
             else
                 continue
             end
-            injected = injected + rate*well.components(2)*run.schedule.step.val(k)* ...
-                run.model.FacilityModel.pressure/(8.314462618*run.model.FacilityModel.T);
+            injected = injected + rate * well.components(2) * run.schedule.step.val(k) * ...
+                run.model.FacilityModel.pressure / (8.314462618 * run.model.FacilityModel.T);
         end
     end
     assert(isfinite(injected) && injected > 0, 'H2sim:ValidationInjection', ...
