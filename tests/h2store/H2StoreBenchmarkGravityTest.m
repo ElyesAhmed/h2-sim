@@ -9,21 +9,7 @@ classdef H2StoreBenchmarkGravityTest < matlab.unittest.TestCase
     methods (TestClassSetup)
         function prepareDeck(test)
             mrstModule add test-suite;
-            root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
-            file = fullfile(root, 'h2-store', 'examples', 'data', ...
-                'Aquifer2D', 'H2STORAGE_RS.DATA');
-            test.deck = readEclipseDeck(file);
-            % Fixed benchmark completions require at least 43,101 cells.
-            grid = cartesianGrdecl(0:100:6100, 0:100:6100, 1100:10:1220);
-            count = prod(grid.cartDims);
-            grid.PERMX = repmat(100, count, 1);
-            grid.PERMY = grid.PERMX;
-            grid.PERMZ = grid.PERMX;
-            grid.PORO = repmat(0.25, count, 1);
-            test.deck.GRID = grid;
-            test.deck.RUNSPEC.DIMENS = grid.cartDims;
-            test.deck.REGIONS = struct('SATNUM', ones(count, 1));
-            test.deck.EDIT = struct();
+            test.deck = makeBenchmarkTestDeck();
         end
     end
     methods (TestMethodSetup)

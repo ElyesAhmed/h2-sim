@@ -100,3 +100,12 @@ The default full schedule retains six buildup pairs and its 1200-day duration.
 Default cushion-only runs now contain six pairs (900 days), instead of the
 previous four pairs (600 days). Set `numCyclesCushions = 4` to retain that earlier
 cushion-only schedule. Rerun results affected by a different buildup count.
+
+## Modified benchmark active cells
+
+Benchmark permeability, porosity and saturation regions follow
+`G.cells.indexMap`, so inactive logical deck cells are excluded consistently.
+Fluid initialization uses the same processed grid. The fixed benchmark well
+completions are logical deck-cell IDs and are mapped to active-cell indices;
+setup raises a descriptive error if a required completion is inactive or absent.
+All-active decks retain their property values and completion locations.
