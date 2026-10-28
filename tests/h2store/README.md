@@ -164,3 +164,8 @@ retains its per-Rs block structure and vectorized undersaturated-pressure
 calculation. The table generator's help lists actual required columns,
 conditional solubility fields, temperature selection, filenames and the
 absence of dry-gas output when rv is false. Mixture formulas are unchanged.
+
+NIST component-table tests use synthetic tab-separated responses through the
+`webReader` option. They check text and byte response handling, phase-boundary
+filtering, units, temperature ordering and cached-file reuse for both generators.
+They do not query NIST or validate its property correlations.
