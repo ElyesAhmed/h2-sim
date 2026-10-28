@@ -1,12 +1,12 @@
 function state = checkPhreeqcElementBalance(state, inputInventory, outputInventory, ...
     elements, options, backend)
-%Validate and store per-cell PHREEQC elemental conservation diagnostics
-%
-% The existing absolute/relative thresholds determine pass/fail on every call.
-% phreeqcElementBalanceWarningMode controls printing only: 'once' (default)
-% reports newly failing elements and tenfold worsening of residual/limit;
-% 'always' retains one warning per failing call. Warning history/counters are
-% state-local, survive saved-state restarts and never hide audit arrays.
+    % Validate and store per-cell PHREEQC elemental conservation diagnostics
+    %
+    % The existing absolute/relative thresholds determine pass/fail on every call.
+    % phreeqcElementBalanceWarningMode controls printing only: 'once' (default)
+    % reports newly failing elements and tenfold worsening of residual/limit;
+    % 'always' retains one warning per failing call. Warning history/counters are
+    % state-local, survive saved-state restarts and never hide audit arrays.
 
     assert(isequal(size(inputInventory), size(outputInventory)) && ...
         size(inputInventory, 2) == numel(elements), ...
@@ -21,7 +21,7 @@ function state = checkPhreeqcElementBalance(state, inputInventory, outputInvento
     scale = max(abs(inputInventory), abs(outputInventory));
     normalizedResidual = zeros(size(scale));
     nonzero = scale > 0;
-    normalizedResidual(nonzero) = absoluteResidual(nonzero)./scale(nonzero);
+    normalizedResidual(nonzero) = absoluteResidual(nonzero) ./ scale(nonzero);
     normalizedResidual(~nonzero & absoluteResidual > 0) = inf;
     limit = bsxfun(@plus, absTol, bsxfun(@times, scale, relTol));
     pass = absoluteResidual <= limit;
@@ -47,8 +47,8 @@ function state = checkPhreeqcElementBalance(state, inputInventory, outputInvento
         state, absoluteResidual, limit, pass, elements, backend, mode);
     if emit
         message = sprintf(['PHREEQC elemental conservation failed for backend "%s", cell %d, ', ...
-             'element %s: input=%.16g mol, output=%.16g mol, absolute ', ...
-             'residual=%.16g mol, normalized residual=%.16g (limit %.16g mol).'], ...
+            'element %s: input=%.16g mol, output=%.16g mol, absolute ', ...
+            'residual=%.16g mol, normalized residual=%.16g (limit %.16g mol).'], ...
             backend, cellNo, elements{elementNo}, inputInventory(cellNo, elementNo), ...
             outputInventory(cellNo, elementNo), absoluteResidual(cellNo, elementNo), ...
             normalizedResidual(cellNo, elementNo), limit(cellNo, elementNo));
@@ -62,13 +62,13 @@ function state = checkPhreeqcElementBalance(state, inputInventory, outputInvento
 end
 
 function [state, emit, cellNo, elementNo, reportedElements] = selectWarning( ...
-        state, residual, limit, pass, elements, backend, mode)
+    state, residual, limit, pass, elements, backend, mode)
     % Keep reporting history in the state, not in a process-global warning cache.
     history = struct('backend', {}, 'elements', {}, 'reportedRatio', {}, ...
         'failedCalls', {}, 'reportedCalls', {}, 'suppressedCalls', {});
     field = 'phreeqcElementBalanceWarningHistory';
     if isfield(state, field) && isstruct(state.(field)) && ...
-            all(isfield(state.(field), fieldnames(history)))
+        all(isfield(state.(field), fieldnames(history)))
         history = state.(field);
     end
     index = find(strcmp({history.backend}, backend), 1);
@@ -85,13 +85,13 @@ function [state, emit, cellNo, elementNo, reportedElements] = selectWarning( ...
     entry.failedCalls = entry.failedCalls + 1;
     ratio = zeros(size(residual));
     positiveLimit = limit > 0;
-    ratio(positiveLimit) = residual(positiveLimit)./limit(positiveLimit);
+    ratio(positiveLimit) = residual(positiveLimit) ./ limit(positiveLimit);
     ratio(~positiveLimit & ~pass) = inf;
     worstRatio = max(ratio, [], 1);
     failedElements = any(~pass, 1);
     newElement = failedElements & entry.reportedRatio == 0;
     worsened = failedElements & isfinite(entry.reportedRatio) & ...
-        worstRatio >= 10*entry.reportedRatio;
+        worstRatio >= 10 * entry.reportedRatio;
     trigger = newElement | worsened;
     setting = warning('query', 'H2Biochem:PhreeqcElementBalance');
     forceError = strcmp(setting.state, 'error');
@@ -132,7 +132,6 @@ function values = tolerance(options, field, default, ne)
             '%s must be scalar or contain one value per audited element.', field);
     end
 end
-
 
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.

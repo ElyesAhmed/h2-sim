@@ -1,10 +1,10 @@
 function cells = findDomeAquiferWellCells(G)
-%FINDDOMEAQUIFERWELLCELLS Select the first two dome storage completions.
-%   cells = findDomeAquiferWellCells(G) returns the first two cells in grid
-%   order with abs(x - 2500) < 0.45 m, abs(y - 2500) < 0.2 m and z > -600 m.
-%   At least two matches are required; cells are not reordered by depth.
+    % FINDDOMEAQUIFERWELLCELLS Select the first two dome storage completions.
+    %   cells = findDomeAquiferWellCells(G) returns the first two cells in grid
+    %   order with abs(x - 2500) < 0.45 m, abs(y - 2500) < 0.2 m and z > -600 m.
+    %   At least two matches are required; cells are not reordered by depth.
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).

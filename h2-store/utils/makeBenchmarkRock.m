@@ -1,18 +1,18 @@
 function rock = makeBenchmarkRock(G, deck)
-%MAKEBENCHMARKROCK Map benchmark deck properties to active grid cells.
-%
-% SYNOPSIS:
-%   rock = makeBenchmarkRock(G, deck)
-%
-% deck must be converted to SI units. PERMX, PERMY, PERMZ, PORO and SATNUM
-% contain one value per logical deck cell. G.cells.indexMap selects the
-% corresponding values in active-cell order. Permeability is diagonal,
-% porosity is dimensionless and saturation-region IDs retain their deck values.
-%
-% SEE ALSO:
-%   modelForUHSModifiedBenchmark, makeRock, convertDeckUnits
+    % MAKEBENCHMARKROCK Map benchmark deck properties to active grid cells.
+    %
+    % SYNOPSIS:
+    %   rock = makeBenchmarkRock(G, deck)
+    %
+    % deck must be converted to SI units. PERMX, PERMY, PERMZ, PORO and SATNUM
+    % contain one value per logical deck cell. G.cells.indexMap selects the
+    % corresponding values in active-cell order. Permeability is diagonal,
+    % porosity is dimensionless and saturation-region IDs retain their deck values.
+    %
+    % SEE ALSO:
+    %   modelForUHSModifiedBenchmark, makeRock, convertDeckUnits
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).

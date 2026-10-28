@@ -1,6 +1,7 @@
 classdef MultirateDiagnosticsTest < matlab.unittest.TestCase
     % Saved-result diagnostics must preserve accounting and report coverage.
     methods (Test)
+
         function collectsPhysicalQuantitiesWithoutSolverReports(test)
             summary = fixture();
             original = summary;
@@ -28,7 +29,7 @@ classdef MultirateDiagnosticsTest < matlab.unittest.TestCase
         function supportsPackedExampleReportLayout(test)
             summary = fixture();
             reports = {struct('StepReports', {{stepReport(0.3)}}); ...
-                       struct('StepReports', {{stepReport(0.4)}})};
+                struct('StepReports', {{stepReport(0.4)}})};
             summary.report = struct('Failure', false, 'StepReports', {reports});
             diagnostics = reportMultirateDiagnostics(summary, 'verbose', false);
             test.verifyEqual(diagnostics.minimumExtentScale, [0.3; 0.4]);
@@ -92,6 +93,7 @@ classdef MultirateDiagnosticsTest < matlab.unittest.TestCase
             test.verifySubstring(text, '2 unavailable steps');
             test.verifySubstring(text, 'mol H2');
         end
+
     end
 end
 

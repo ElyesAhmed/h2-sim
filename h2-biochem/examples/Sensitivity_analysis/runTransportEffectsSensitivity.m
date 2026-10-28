@@ -1,36 +1,36 @@
 function results = runTransportEffectsSensitivity(varargin)
-% Run a transport and bio-clogging sensitivity study and display its plots.
-%
-% The study is repeated for one or both reaction backends:
-%   'original'  - MRST owns all reactions (BiochemistryModel), reduced
-%                 fixed-pH CO2/HCO3 buffer, no PHREEQC. This is the first
-%                 "Original h2-biochem" case from testAllDiffusionEffects.
-%   'multirate' - Coarse global flow step followed by local reaction
-%                 substeps, each closed by a PHREEQC equilibrium update
-%                 (SequentialBiochemistryPhreeqcModel, built with
-%                 convertToSequentialBiochemistryPhreeqcModel). MRST retains
-%                 the microbial kinetics/biomass; PHREEQC owns the aqueous
-%                 and mineral equilibrium. Requires h2_biogeochemistry.dat.
-%
-% Each backend's cases are compared against that backend's own baseline.
-% Cases that fail to converge are recorded and skipped rather than aborting
-% the study (the coarse-flow/local-reaction split has only been exercised
-% with the transport effects switched off, so some combinations may fail).
-% Results remain in memory and figures are left open; no files are written.
-%
-% EXAMPLE:
-%   % Original backend only (no PHREEQC needed):
-%   results = runTransportEffectsSensitivity('backends', {'original'});
-%
-%   % Both backends (h2_biogeochemistry.dat is bundled at h2-biochem/database/
-%   % and found automatically via which() once startupH2sim has run):
-%   results = runTransportEffectsSensitivity();
-%
-%   % To use a different database, pass its absolute path explicitly:
-%   db = '/absolute/path/to/h2_biogeochemistry.dat';
-%   results = runTransportEffectsSensitivity('phreeqcDatabaseFile', db);
+    % Run a transport and bio-clogging sensitivity study and display its plots.
+    %
+    % The study is repeated for one or both reaction backends:
+    %   'original'  - MRST owns all reactions (BiochemistryModel), reduced
+    %                 fixed-pH CO2/HCO3 buffer, no PHREEQC. This is the first
+    %                 "Original h2-biochem" case from testAllDiffusionEffects.
+    %   'multirate' - Coarse global flow step followed by local reaction
+    %                 substeps, each closed by a PHREEQC equilibrium update
+    %                 (SequentialBiochemistryPhreeqcModel, built with
+    %                 convertToSequentialBiochemistryPhreeqcModel). MRST retains
+    %                 the microbial kinetics/biomass; PHREEQC owns the aqueous
+    %                 and mineral equilibrium. Requires h2_biogeochemistry.dat.
+    %
+    % Each backend's cases are compared against that backend's own baseline.
+    % Cases that fail to converge are recorded and skipped rather than aborting
+    % the study (the coarse-flow/local-reaction split has only been exercised
+    % with the transport effects switched off, so some combinations may fail).
+    % Results remain in memory and figures are left open; no files are written.
+    %
+    % EXAMPLE:
+    %   % Original backend only (no PHREEQC needed):
+    %   results = runTransportEffectsSensitivity('backends', {'original'});
+    %
+    %   % Both backends (h2_biogeochemistry.dat is bundled at h2-biochem/database/
+    %   % and found automatically via which() once startupH2sim has run):
+    %   results = runTransportEffectsSensitivity();
+    %
+    %   % To use a different database, pass its absolute path explicitly:
+    %   db = '/absolute/path/to/h2_biogeochemistry.dat';
+    %   results = runTransportEffectsSensitivity('phreeqcDatabaseFile', db);
 
-    mrstModule add ad-props compositional deckformat 
+    mrstModule add ad-props compositional deckformat;
 
     opt = struct( ...
         'meaningfulLossThreshold', 0.1, ...
@@ -38,15 +38,15 @@ function results = runTransportEffectsSensitivity(varargin)
         'rate', 'highrate', ...
         'backends', {{'original', 'multirate'}}, ...
         'phreeqcDatabaseFile', '', ...
-        'flowTimestepMaxDt', 2*day, ...
-        'reactionSubstepMaxDt', 0.4*day);
+        'flowTimestepMaxDt', 2 * day, ...
+        'reactionSubstepMaxDt', 0.4 * day);
     opt = merge_options(opt, varargin{:});
     validateOptions(opt);
 
     backends = resolveBackends(opt);
     cases = transportCases();
     nCases = numel(cases);
-    results = initializeResults(numel(backends)*nCases);
+    results = initializeResults(numel(backends) * nCases);
 
     commonOptions = { ...
         'rate', opt.rate, ...
@@ -61,7 +61,7 @@ function results = runTransportEffectsSensitivity(varargin)
     for b = 1:numel(backends)
         backend = backends(b);
         for caseNo = 1:nCases
-            idx = (b - 1)*nCases + caseNo;
+            idx = (b - 1) * nCases + caseNo;
             fprintf('\n[%s] Case %d/%d: %s\n', backend.label, caseNo, ...
                 nCases, cases(caseNo).name);
             setupOptions = [commonOptions, backend.setupOptions, ...
@@ -69,33 +69,33 @@ function results = runTransportEffectsSensitivity(varargin)
             results(idx).backend = string(backend.label);
             results(idx).caseName = string(cases(caseNo).name);
             results(idx).isBaseline = (caseNo == 1);
-           % try
-                [~, model, schedule, state0] = ...
-                    setupH2StorageExampleWithSRB_benchmark(setupOptions{:});
-                [model, schedule] = applyBackend(backend, model, schedule, ...
-                    state0, opt);
-                solver = NonLinearSolver();
-                solver.maxTimestepCuts = 12;
-                timer = tic();
-                [~, states, report] = simulateScheduleAD( ...
-                    state0, model, schedule, 'nonlinearSolver', solver);
-                if isstruct(report) && isfield(report, 'Failure')
-                    assert(~report.Failure, ...
-                        'Simulation report indicates failure.');
-                end
-                metrics = computeMetrics(states, schedule, model);
-                results(idx).completed = true;
-                results(idx).runtimeSeconds = toc(timer);
-                results(idx).timeDays = metrics.timeDays;
-                results(idx).lossPercent = metrics.lossPercent;
-                results(idx).finalLossPercent = metrics.finalLossPercent;
-                results(idx).consumedH2Moles = metrics.consumedH2Moles;
-                results(idx).injectedH2Moles = metrics.injectedH2Moles;
-                results(idx).reactionTotalsMoles = metrics.reactionTotalsMoles;
-                results(idx).finalSpatialConsumptionMoles = ...
-                    metrics.finalSpatialConsumptionMoles;
-                results(idx).xDimensionless = metrics.xDimensionless;
-                results(idx).errorMessage = "";
+            % try
+            [~, model, schedule, state0] = ...
+                setupH2StorageExampleWithSRB_benchmark(setupOptions{:});
+            [model, schedule] = applyBackend(backend, model, schedule, ...
+                state0, opt);
+            solver = NonLinearSolver();
+            solver.maxTimestepCuts = 12;
+            timer = tic();
+            [~, states, report] = simulateScheduleAD( ...
+                state0, model, schedule, 'nonlinearSolver', solver);
+            if isstruct(report) && isfield(report, 'Failure')
+                assert(~report.Failure, ...
+                    'Simulation report indicates failure.');
+            end
+            metrics = computeMetrics(states, schedule, model);
+            results(idx).completed = true;
+            results(idx).runtimeSeconds = toc(timer);
+            results(idx).timeDays = metrics.timeDays;
+            results(idx).lossPercent = metrics.lossPercent;
+            results(idx).finalLossPercent = metrics.finalLossPercent;
+            results(idx).consumedH2Moles = metrics.consumedH2Moles;
+            results(idx).injectedH2Moles = metrics.injectedH2Moles;
+            results(idx).reactionTotalsMoles = metrics.reactionTotalsMoles;
+            results(idx).finalSpatialConsumptionMoles = ...
+                metrics.finalSpatialConsumptionMoles;
+            results(idx).xDimensionless = metrics.xDimensionless;
+            results(idx).errorMessage = "";
             % catch err
             %     warning('runTransportEffectsSensitivity:caseFailed', ...
             %         '[%s] "%s" failed: %s', backend.label, ...
@@ -170,7 +170,7 @@ function [model, schedule] = applyBackend(backend, model, schedule, state0, opt)
         assert(~model.isSequentialCompositionalPhreeqcBackend() && ...
             ~model.isSequentialH2BiochemPhreeqcBackend(), ...
             'The original backend must use MRST-owned reactions.');
-        return;
+        return
     end
     assert(model.bacterialDecayOrder == 1, ...
         'The multirate backend requires first-order biomass decay.');
@@ -207,7 +207,7 @@ function cases = transportCases()
 end
 
 function item = makeCase(name, bactDiffusion, chemotaxis, ...
-        molecularDiffusion, mechanicalDispersion, bioClogging)
+    molecularDiffusion, mechanicalDispersion, bioClogging)
     item = struct( ...
         'name', char(name), ...
         'options', {{ ...
@@ -250,11 +250,11 @@ function metrics = computeMetrics(states, schedule, model)
     total = sum(cumulative, 2);
     injected = prescribedInjectedH2(schedule, model);
     x = model.G.cells.centroids(:, 1);
-    x = (x - min(x))./max(max(x) - min(x), eps);
+    x = (x - min(x)) ./ max(max(x) - min(x), eps);
     metrics = struct( ...
-        'timeDays', cumsum(schedule.step.val(:))./day, ...
-        'lossPercent', 100.*total./injected, ...
-        'finalLossPercent', 100.*total(end)./injected, ...
+        'timeDays', cumsum(schedule.step.val(:)) ./ day, ...
+        'lossPercent', 100 .* total ./ injected, ...
+        'finalLossPercent', 100 .* total(end) ./ injected, ...
         'consumedH2Moles', total(end), ...
         'injectedH2Moles', injected, ...
         'reactionTotalsMoles', cumulative(end, :), ...
@@ -272,19 +272,19 @@ function injected = prescribedInjectedH2(schedule, model)
         wells = schedule.control(schedule.step.control(step)).W;
         for w = 1:numel(wells)
             if wells(w).sign <= 0 || ...
-                    (isfield(wells, 'status') && ~wells(w).status)
-                continue;
+                (isfield(wells, 'status') && ~wells(w).status)
+                continue
             end
             if strcmpi(wells(w).type, 'grat')
                 gasRate = wells(w).val;
             elseif strcmpi(wells(w).type, 'rate')
-                gasRate = wells(w).val*wells(w).compi(gasIndex);
+                gasRate = wells(w).val * wells(w).compi(gasIndex);
             else
-                continue;
+                continue
             end
-            molarRate = gasRate*model.FacilityModel.pressure/ ...
-                (8.314462618*model.FacilityModel.T);
-            injected = injected + molarRate*wells(w).components(idxH2)* ...
+            molarRate = gasRate * model.FacilityModel.pressure / ...
+                (8.314462618 * model.FacilityModel.T);
+            injected = injected + molarRate * wells(w).components(idxH2) * ...
                 schedule.step.val(step);
         end
     end
@@ -317,9 +317,9 @@ function base = findBaseline(results, backendName)
     base = NaN;
     for i = 1:numel(results)
         if results(i).completed && results(i).isBaseline && ...
-                results(i).backend == backendName
+            results(i).backend == backendName
             base = results(i).finalLossPercent;
-            return;
+            return
         end
     end
 end
@@ -344,7 +344,7 @@ function summary = buildSummary(results, opt)
             status(i) = "FAILED";
             direction(i) = "n/a";
             meaningful(i) = "n/a";
-            continue;
+            continue
         end
         status(i) = "ok";
         finalLoss(i) = results(i).finalLossPercent;
@@ -352,7 +352,7 @@ function summary = buildSummary(results, opt)
         base = findBaseline(results, results(i).backend);
         if ~isnan(base)
             delta(i) = finalLoss(i) - base;
-            relative(i) = 100.*delta(i)./max(abs(base), eps);
+            relative(i) = 100 .* delta(i) ./ max(abs(base), eps);
         end
         if isnan(delta(i))
             direction(i) = "n/a";
@@ -379,10 +379,10 @@ function createPaperFigures(results, backends, cases, opt)
     nCases = numel(cases);
     caseNames = string({cases.name});
     for b = 1:numel(backends)
-        sub = results((b - 1)*nCases + (1:nCases));
+        sub = results((b - 1) * nCases + (1:nCases));
         done = [sub.completed];
         if ~any(done)
-            continue;
+            continue
         end
         label = string(backends(b).label);
         slug = matlab.lang.makeValidName(lower(char(label)));
@@ -443,7 +443,6 @@ function createPaperFigures(results, backends, cases, opt)
         paperExport(fig, sprintf('sensitivity_%s_spatial_H2_consumption', slug));
     end
 end
-
 
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.

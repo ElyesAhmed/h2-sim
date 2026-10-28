@@ -20,7 +20,8 @@ classdef DiffusiveBactFlux < StateFunction
     %   StateFunction, MicrobialTransmissibility
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function df = DiffusiveBactFlux(model, varargin)
             df@StateFunction(model, varargin{:});
             df = merge_options(df, varargin{:});
@@ -33,7 +34,7 @@ classdef DiffusiveBactFlux < StateFunction
             df.label = 'J_{bact}^{diff}';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function DN = evaluateOnDomain(prop, model, state)
             op = model.operators;
             bcrm = model.biochemFluid;
@@ -66,9 +67,10 @@ classdef DiffusiveBactFlux < StateFunction
                 end
 
                 % Diffusive flux (all faces)
-                DN{i} = - rhoLf .* T{i} .* op.Grad(nbacti);
+                DN{i} = -rhoLf .* T{i} .* op.Grad(nbacti);
             end
         end
+
     end
 end
 

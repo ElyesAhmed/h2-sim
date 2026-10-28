@@ -1,9 +1,10 @@
 classdef H2StoreInitializationTest < matlab.unittest.TestCase
-    %H2STOREINITIALIZATIONTEST Layer properties and uniform aquifer state.
+    % H2STOREINITIALIZATIONTEST Layer properties and uniform aquifer state.
     properties (TestParameter)
         saturation = {[1, 0], [0.7, 0.3]}
     end
     methods (Test)
+
         function layerProperties(test)
             G.cells.centroids = [25, 20; 25, 35; 25, 2; 25, 5];
             G.cells.num = 4;
@@ -11,9 +12,10 @@ classdef H2StoreInitializationTest < matlab.unittest.TestCase
             rock = makeAquifer2DRock(G);
             test.verifyEqual(rock.regions.saturation, [1; 3; 2; 1]);
             test.verifyEqual(rock.poro, [0.25; 0.1; 0.1; 0.25]);
-            expected = [10; 1e-4; 1e-2; 10]*milli*darcy;
+            expected = [10; 1e-4; 1e-2; 10] * milli * darcy;
             test.verifyEqual(rock.perm, repmat(expected, 1, 2));
         end
+
         function cartesianLayers(test)
             G = computeGeometry(cartGrid([10, 10], [50, 50]));
             rock = makeAquifer2DRock(G);
@@ -21,13 +23,14 @@ classdef H2StoreInitializationTest < matlab.unittest.TestCase
             y = G.cells.centroids(:, 2);
             expected = ones(G.cells.num, 1);
             expected(y < 5) = 2;
-            expected(y > 25.1 + 5*sin(pi*x/50)) = 3;
+            expected(y > 25.1 + 5 * sin(pi * x / 50)) = 3;
             test.verifyEqual(rock.regions.saturation, expected);
             test.verifyEqual(unique(expected), [1; 2; 3]);
         end
+
         function uniformState(test, saturation)
             G = computeGeometry(cartGrid([2, 2], [50, 50]));
-            rock = makeRock(G, 10*milli*darcy, 0.25);
+            rock = makeRock(G, 10 * milli * darcy, 0.25);
             fluid = initSimpleADIFluid('phases', 'OG', 'mu', [1, 0.1], ...
                 'rho', [1000, 1], 'n', [2, 2]);
             model = GenericBlackOilModel(G, rock, fluid, ...
@@ -43,6 +46,7 @@ classdef H2StoreInitializationTest < matlab.unittest.TestCase
             test.verifyEqual(state.wellSol.name, 'Storage');
             test.verifyFalse(isfield(state, 'T'));
         end
+
     end
 end
 

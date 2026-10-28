@@ -1,50 +1,50 @@
 function figures = plotSequentialBiochemistryPhreeqc(summary, varargin)
-%Plot final flow/chemistry profiles and cumulative multirate H2 consumption
-%
-% SYNOPSIS:
-%   figures = plotSequentialBiochemistryPhreeqc(summary);
-%   figures = plotSequentialBiochemistryPhreeqc(summary, ...
-%       'outputDirectory', '');
-%
-% PARAMETERS:
-%   summary - Result from exampleSequentialBiochemistryPhreeqc1D. Required
-%             fields: model, states, schedule and injectedH2Moles. The final
-%             state supplies pressure (Pa), phase saturations, phreeqcPH
-%             and nbact (N/N0). The model supplies the grid, vapor-phase
-%             index and biochemical mixture; the state history and schedule
-%             are used by computeH2Consumption for reaction-wise totals.
-%
-% OPTIONAL PARAMETERS:
-%   outputDirectory - PDF/PNG folder (default build/phreeqc-figures under pwd).
-%                     Pass an empty character vector, '', to disable export.
-%
-% RETURNS:
-%   figures - Two open figure handles owned by the caller:
-%               1. Final pressure (MPa), gas saturation, pH and biomass.
-%               2. Cumulative H2 consumption by reaction (mol), and total
-%                  consumption / total scheduled H2 injection (%).
-%
-% DESCRIPTION:
-%   Redraw saved results without running a simulation. Final profiles are
-%   sorted by dimensionless cell distance x/L. Time is accumulated from
-%   schedule.step.val (seconds) and plotted in days. The total consumption
-%   denominator is summary.injectedH2Moles at every time, including during
-%   injection. Consumption is recomputed from saved states, not simulated.
-%   The MET/ACE/SRB labels follow the benchmark's reaction order.
-%
-%   Exports use vector PDF and 300-dpi PNG with base names
-%   multirate_final_profiles and multirate_H2_consumption. Figures remain
-%   open for inspection or further editing.
-%
-% SEE ALSO:
-%   exampleSequentialBiochemistryPhreeqc1D, computeH2Consumption, paperExport
+    % Plot final flow/chemistry profiles and cumulative multirate H2 consumption
+    %
+    % SYNOPSIS:
+    %   figures = plotSequentialBiochemistryPhreeqc(summary);
+    %   figures = plotSequentialBiochemistryPhreeqc(summary, ...
+    %       'outputDirectory', '');
+    %
+    % PARAMETERS:
+    %   summary - Result from exampleSequentialBiochemistryPhreeqc1D. Required
+    %             fields: model, states, schedule and injectedH2Moles. The final
+    %             state supplies pressure (Pa), phase saturations, phreeqcPH
+    %             and nbact (N/N0). The model supplies the grid, vapor-phase
+    %             index and biochemical mixture; the state history and schedule
+    %             are used by computeH2Consumption for reaction-wise totals.
+    %
+    % OPTIONAL PARAMETERS:
+    %   outputDirectory - PDF/PNG folder (default build/phreeqc-figures under pwd).
+    %                     Pass an empty character vector, '', to disable export.
+    %
+    % RETURNS:
+    %   figures - Two open figure handles owned by the caller:
+    %               1. Final pressure (MPa), gas saturation, pH and biomass.
+    %               2. Cumulative H2 consumption by reaction (mol), and total
+    %                  consumption / total scheduled H2 injection (%).
+    %
+    % DESCRIPTION:
+    %   Redraw saved results without running a simulation. Final profiles are
+    %   sorted by dimensionless cell distance x/L. Time is accumulated from
+    %   schedule.step.val (seconds) and plotted in days. The total consumption
+    %   denominator is summary.injectedH2Moles at every time, including during
+    %   injection. Consumption is recomputed from saved states, not simulated.
+    %   The MET/ACE/SRB labels follow the benchmark's reaction order.
+    %
+    %   Exports use vector PDF and 300-dpi PNG with base names
+    %   multirate_final_profiles and multirate_H2_consumption. Figures remain
+    %   open for inspection or further editing.
+    %
+    % SEE ALSO:
+    %   exampleSequentialBiochemistryPhreeqc1D, computeH2Consumption, paperExport
 
     opt = merge_options(struct('outputDirectory', ...
         fullfile(pwd, 'build', 'phreeqc-figures')), varargin{:});
     model = summary.model;
     states = summary.states;
     schedule = summary.schedule;
-    time = cumsum(schedule.step.val(:))/day;
+    time = cumsum(schedule.step.val(:)) / day;
     [x, order] = sort(dimensionlessCellDistance(model.G));
     final = states{end};
     colors = paperColors(4);
@@ -66,7 +66,7 @@ end
 function fig = plotFinalProfiles(model, final, x, order, colors, time)
     fig = paperFigure([25, 18], 'Multirate final flow and chemistry');
     layout = tiledlayout(fig, 2, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
-    fields = {value(final.pressure)/1e6, ...
+    fields = {value(final.pressure) / 1e6, ...
         value(final.s(:, model.getVaporIndex())), ...
         value(final.phreeqcPH), value(final.nbact)};
     units = {'Pressure (MPa)', 'Gas saturation (-)', 'pH (-)', 'Biomass, N/N_0 (-)'};
@@ -128,7 +128,7 @@ function fig = plotConsumption(time, cumulative, n, colors, summary)
     lg.Box = 'off';
 
     ax = nexttile(layout);
-    plot(ax, [0; time], [0; 100*sum(cumulative, 2)/summary.injectedH2Moles], ...
+    plot(ax, [0; time], [0; 100 * sum(cumulative, 2) / summary.injectedH2Moles], ...
         'Color', [0.15, 0.15, 0.15], 'LineWidth', 1.8);
     xlabel(ax, 'Time (d)');
     ylabel(ax, 'H_2 consumed / total scheduled H_2 injection (%)');

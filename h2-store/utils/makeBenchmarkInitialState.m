@@ -1,18 +1,18 @@
 function state = makeBenchmarkInitialState(model, W, options)
-%MAKEBENCHMARKINITIALSTATE Initialize benchmark reservoir and well solutions.
-%
-% SYNOPSIS:
-%   state = makeBenchmarkInitialState(model, W, options)
-%
-% Every cell starts at options.initPres [Pa] and options.initSat (oil/gas
-% order, with brine in the oil phase). Dissolved-gas ratio rs is zero.
-% Each well solution starts at initPres. No temperature field is assigned;
-% the isothermal setup does not apply options.initTemp.
-%
-% SEE ALSO:
-%   modelForUHSModifiedBenchmark, initResSol, initWellSolAD
+    % MAKEBENCHMARKINITIALSTATE Initialize benchmark reservoir and well solutions.
+    %
+    % SYNOPSIS:
+    %   state = makeBenchmarkInitialState(model, W, options)
+    %
+    % Every cell starts at options.initPres [Pa] and options.initSat (oil/gas
+    % order, with brine in the oil phase). Dissolved-gas ratio rs is zero.
+    % Each well solution starts at initPres. No temperature field is assigned;
+    % the isothermal setup does not apply options.initTemp.
+    %
+    % SEE ALSO:
+    %   modelForUHSModifiedBenchmark, initResSol, initWellSolAD
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).

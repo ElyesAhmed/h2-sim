@@ -1,14 +1,14 @@
 % MRST Example: Setting Up H₂-Brine Fluid Properties for Black-Oil Simulation
-% This MRST example demonstrates how to generate black-oil fluid property tables for a 
-% hydrogen-brine system under reservoir conditions. The workflow accounts for temperature- 
-% and pressure-dependent properties of H₂ and H₂O (optionally including salinity) to compute 
-% hydrogen solubility in brine and construct corresponding PVT tables. In addition, the example 
-% shows how to generate gas-water flow property (SGOF) tables for black-oil simulation, including 
-% gas relative permeability (krG), waqter relative permeability (krO), and capillary pressure at the 
+% This MRST example demonstrates how to generate black-oil fluid property tables for a
+% hydrogen-brine system under reservoir conditions. The workflow accounts for temperature-
+% and pressure-dependent properties of H₂ and H₂O (optionally including salinity) to compute
+% hydrogen solubility in brine and construct corresponding PVT tables. In addition, the example
+% shows how to generate gas-water flow property (SGOF) tables for black-oil simulation, including
+% gas relative permeability (krG), waqter relative permeability (krO), and capillary pressure at the
 % gas-water contact (pcOG), over a defined saturation range.
 %
 %{
-Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
 
@@ -38,8 +38,8 @@ recompute = true;             % recompuete PVT and SGOF tables
 
 %% Notice on Computational Cost
 warning('ComputationalCost:Medium', ...
-       ['Please be advised that for large nbp and nbt this example often takes a long time ', ...
-        'to run: this script will extract data from https://webbook.nist.gov']);
+    ['Please be advised that for large nbp and nbt this example often takes a long time ', ...
+    'to run: this script will extract data from https://webbook.nist.gov']);
 
 % Define the target output directory relative to the current directory
 outputPathSol = fullfile(mrstOutputDirectory(), 'UHS_PVT', 'H2SolubilityTable');
@@ -50,25 +50,25 @@ end
 % Generate H2O Component Table
 comp_name = 'H2O';
 disp(['Generating component table for: ', comp_name]);
-tab_H2O = generateComponentProperties('min_temp',min_temp, 'max_temp',max_temp, ...
-    'n_temp', nbt, 'min_press',min_pressure, 'max_press', max_pressure, ...
-    'n_press',nbp, 'comp_name', comp_name,'outputDisplay', outputDisplay,'outputPath',outputPathSol);
+tab_H2O = generateComponentProperties('min_temp', min_temp, 'max_temp', max_temp, ...
+    'n_temp', nbt, 'min_press', min_pressure, 'max_press', max_pressure, ...
+    'n_press', nbp, 'comp_name', comp_name, 'outputDisplay', outputDisplay, 'outputPath', outputPathSol);
 
 % Generate H2 Component Table
 pause(0.5);  % Ensure smooth execution between commands
 comp_name = 'H2';
 disp(['Generating component table for: ', comp_name]);
-tab_H2 = generateComponentProperties('min_temp',min_temp, 'max_temp',max_temp, ...
-    'n_temp', nbt, 'min_press',min_pressure, 'max_press', max_pressure, ...
-    'n_press',nbp, 'comp_name', comp_name,'outputDisplay', outputDisplay,'outputPath',outputPathSol);
+tab_H2 = generateComponentProperties('min_temp', min_temp, 'max_temp', max_temp, ...
+    'n_temp', nbt, 'min_press', min_pressure, 'max_press', max_pressure, ...
+    'n_press', nbp, 'comp_name', comp_name, 'outputDisplay', outputDisplay, 'outputPath', outputPathSol);
 
 % Generate Solubility Table
 disp('Generating solubility table...');
 % [tab_sol, status_sol, file_path_sol] = generateSolubilityTable(min_temp,
 % max_temp, min_pressure, max_pressure, nbp, nbt, ms, outputPath);
-tab_sol= generateH2WaterSolubilityTable('min_temp',min_temp, 'max_temp', ...
-    max_temp, 'n_temp', nbt,'min_press',min_pressure, 'max_press',max_pressure, ...
-    'n_press', nbp, 'ms', ms,'outputDisplay', outputDisplay,'outputPath',outputPathSol, ...
+tab_sol = generateH2WaterSolubilityTable('min_temp', min_temp, 'max_temp', ...
+    max_temp, 'n_temp', nbt, 'min_press', min_pressure, 'max_press', max_pressure, ...
+    'n_press', nbp, 'ms', ms, 'outputDisplay', outputDisplay, 'outputPath', outputPathSol, ...
     'reCompute', recompute);
 
 % Configure and Write Fluid Properties (PVT) Tables
@@ -81,23 +81,23 @@ if ~exist(outputPathPvt, 'dir')
 end
 
 if onlyRS
-    getFluidH2BrineProps(tab_H2O, tab_H2, tab_sol,'rs', true, 'rv', false, ...
+    getFluidH2BrineProps(tab_H2O, tab_H2, tab_sol, 'rs', true, 'rv', false, ...
         'PVTGFile', 'PVTGH2BRINE', 'PVTOFile', 'PVTOH2BRINE', 'PVTGFile', ...
-        'PVTGH2BRINE','outputPath', outputPathPvt, 'reCompute', recompute);
+        'PVTGH2BRINE', 'outputPath', outputPathPvt, 'reCompute', recompute);
     disp('Writing fluid properties for miscible case with digas and disabled evapoil...');
 else
     % generate RSRV
     getFluidH2BrineProps(tab_H2O, tab_H2, tab_sol, 'rs', true, 'rv', true, ...
-        'PVTGFile', 'PVTGH2BRINE', 'PVTOFile', 'PVTOH2BRINE','PVDOFile', ...
+        'PVTGFile', 'PVTGH2BRINE', 'PVTOFile', 'PVTOH2BRINE', 'PVDOFile', ...
         'PVDOH2BRINE', 'outputPath', outputPathPvt, 'reCompute', recompute);
     disp('Writing fluid properties for miscible case with digas and evapoil...');
 end
-% We generates gas-oil flow properties specific to a hydrogen-brine system, for 
-% three distinct regions. We exemplify the system with three rock types: 
+% We generates gas-oil flow properties specific to a hydrogen-brine system, for
+% three distinct regions. We exemplify the system with three rock types:
 % caprock, bedrock, and storage rock (aquifer).
 %
 % The output includes key properties: gas relative permeability (krG), oil
-% relative permeability (krO),and capillary pressure at the gas-oil contact 
+% relative permeability (krO),and capillary pressure at the gas-oil contact
 % (pcOG). UHS_BENCHMARK_RSRV
 %
 % Relative permeability is modeled quadratically to capture the flow dynamics
@@ -106,9 +106,9 @@ end
 %% Generate SGOF (Gas-Oil Flow) Properties Table
 disp('Generating gas-oil flow properties for hydrogen-brine system with three regions');
 getFluidH2BrineSGOF('n', 100, 'plot', true, 'outputPath', outputPathPvt, 'fileName', 'SGOF_UHS.txt', ...
-                      'units', 'metric', 'nreg', 3, 'sw_imm', [0.1, 0.1, 0.1], ...
-                      'sg_imm', [0.05, 0.1, 0.1], 'c_a1', 3.5, 'c_a2', 3.5, 'c_a3', 1.5, ...
-                      'Pe', [0.4, 5, 10], 'P_c_max', [9.5e4, 9.5e4, 9.5e4], 'reCompute', recompute);
+    'units', 'metric', 'nreg', 3, 'sw_imm', [0.1, 0.1, 0.1], ...
+    'sg_imm', [0.05, 0.1, 0.1], 'c_a1', 3.5, 'c_a2', 3.5, 'c_a3', 1.5, ...
+    'Pe', [0.4, 5, 10], 'P_c_max', [9.5e4, 9.5e4, 9.5e4], 'reCompute', recompute);
 
 % Display completion message
 disp('H₂-Brine fluid properties setup for black-oil simulation is complete.');

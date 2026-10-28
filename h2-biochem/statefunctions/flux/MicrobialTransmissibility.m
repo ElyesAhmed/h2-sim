@@ -29,6 +29,7 @@ classdef MicrobialTransmissibility < StateFunction
     end
 
     methods
+
         function tf = MicrobialTransmissibility(model, varargin)
             % Constructor.
             %
@@ -81,7 +82,7 @@ classdef MicrobialTransmissibility < StateFunction
                 % Skip if diffusivity is zero everywhere
                 if isnumeric(D) && all(D(:) == 0)
                     T_face{spec} = zeros(nInternal, 1);
-                    continue;
+                    continue
                 end
 
                 % Compute harmonic transmissibility on all faces
@@ -91,6 +92,7 @@ classdef MicrobialTransmissibility < StateFunction
                 T_face{spec} = T_all(op.internalConn);
             end
         end
+
     end
 end
 

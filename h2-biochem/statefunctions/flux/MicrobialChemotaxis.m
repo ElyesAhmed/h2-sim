@@ -21,7 +21,8 @@ classdef MicrobialChemotaxis < StateFunction
     %   ChemotaxisTransmissibility, ChemotaxisBactFlux, MicrobialDiffusivity
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function md = MicrobialChemotaxis(model, varargin)
             md@StateFunction(model, varargin{:});
             md = merge_options(md, varargin{:});
@@ -31,7 +32,7 @@ classdef MicrobialChemotaxis < StateFunction
             md.label = 'D_{chemot}^{eff}';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function dN = evaluateOnDomain(~, model, state)
             bcrm = model.biochemFluid;
             nbioreact = bcrm.nbioreact;
@@ -45,7 +46,6 @@ classdef MicrobialChemotaxis < StateFunction
             else
                 phi = model.rock.poro;
             end
-
 
             % Liquid saturation
             L_ix = model.getLiquidIndex();
@@ -72,8 +72,8 @@ classdef MicrobialChemotaxis < StateFunction
                 if model.chemotaxisEffect
                     if model.biochemFluid.xch_seuil(i) <= 0
                         warning(['MicrobialChemotaxis: chemotaxisEffect flag enabled but ' ...
-                                 'xch_seuil coefficient is zero or negative for species %d. ' ...
-                                 'Chemotaxis will be inactive.'], i);
+                            'xch_seuil coefficient is zero or negative for species %d. ' ...
+                            'Chemotaxis will be inactive.'], i);
                     end
                     populationFraction = max(0, min(nbacti ./ model.bact_maxProp, 1));
                     dN{i} = model.biochemFluid.xch_seuil(i) .* phi .* liquidSaturation .* ...
@@ -83,6 +83,7 @@ classdef MicrobialChemotaxis < StateFunction
                 end
             end
         end
+
     end
 end
 

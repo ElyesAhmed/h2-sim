@@ -28,6 +28,7 @@ classdef DispersiveTransmissibility < StateFunction
     end
 
     methods
+
         function tf = DispersiveTransmissibility(model, varargin)
             % Constructor.
             %
@@ -83,7 +84,7 @@ classdef DispersiveTransmissibility < StateFunction
                     % Handle zero/empty diffusivity
                     if isnumeric(D_c_ph) && all(D_c_ph(:) == 0)
                         T_face{c, ph} = zeros(nfac_internal, 1);
-                        continue;
+                        continue
                     end
 
                     % Use cached getTransmissibility which avoids recreating operators
@@ -94,6 +95,7 @@ classdef DispersiveTransmissibility < StateFunction
                 end
             end
         end
+
     end
 end
 

@@ -1,19 +1,19 @@
 function state = makeDomeAquiferInitialState(model, W, options)
-%MAKEDOMEAQUIFERINITIALSTATE Initialize uniform pressure and phase fractions.
-%
-% SYNOPSIS:
-%   state = makeDomeAquiferInitialState(model, W, options)
-%
-% model is the dome black-oil model and W contains its initial control wells.
-% options.initPres [Pa] and options.initSat (oil/gas order) initialize every
-% cell. Brine occupies the oil phase. Dissolved-gas ratio rs and vaporized-brine
-% ratio rv are zero. Every well solution starts at initPres. No temperature
-% field is assigned; the isothermal setup does not apply options.initTemp.
-%
-% SEE ALSO:
-%   modelForDome3DAquifer, initResSol, initWellSolAD
+    % MAKEDOMEAQUIFERINITIALSTATE Initialize uniform pressure and phase fractions.
+    %
+    % SYNOPSIS:
+    %   state = makeDomeAquiferInitialState(model, W, options)
+    %
+    % model is the dome black-oil model and W contains its initial control wells.
+    % options.initPres [Pa] and options.initSat (oil/gas order) initialize every
+    % cell. Brine occupies the oil phase. Dissolved-gas ratio rs and vaporized-brine
+    % ratio rv are zero. Every well solution starts at initPres. No temperature
+    % field is assigned; the isothermal setup does not apply options.initTemp.
+    %
+    % SEE ALSO:
+    %   modelForDome3DAquifer, initResSol, initWellSolAD
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).

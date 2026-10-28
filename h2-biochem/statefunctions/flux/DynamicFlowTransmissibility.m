@@ -29,6 +29,7 @@ classdef DynamicFlowTransmissibility < StateFunction
     end
 
     methods
+
         function dt = DynamicFlowTransmissibility(model, conductivity_name)
             % Constructor for dynamic transmissibility calculator
 
@@ -110,61 +111,62 @@ classdef DynamicFlowTransmissibility < StateFunction
 
             T = prop.harmonicAvgOperator(T);
 
-            zeroFace = full(prop.faceHalfFaceMap*double(zeroHalfFace)) > 0;
+            zeroFace = full(prop.faceHalfFaceMap * double(zeroHalfFace)) > 0;
             if any(zeroFace)
-                T = T.*(~zeroFace);
+                T = T .* (~zeroFace);
             end
 
             % Ensure positive transmissibility
             T = abs(T);
         end
+
     end
 end
 
 function tp = getTwoPointOperator(G)
-% Create two-point flux approximation operator
-%
-% PARAMETERS:
-%   G - Grid structure
-%
-% RETURNS:
-%   tp - Function handle for two-point approximation
+    % Create two-point flux approximation operator
+    %
+    % PARAMETERS:
+    %   G - Grid structure
+    %
+    % RETURNS:
+    %   tp - Function handle for two-point approximation
 
-% Mappings from cells to faces
-cells = rldecode(1:G.cells.num, diff(G.cells.facePos), 2)';
-faces = G.cells.faces(:,1);
+    % Mappings from cells to faces
+    cells = rldecode(1:G.cells.num, diff(G.cells.facePos), 2)';
+    faces = G.cells.faces(:, 1);
 
-% Vector from cell to face centroids
-C = G.faces.centroids(faces,:) - G.cells.centroids(cells,:);
+    % Vector from cell to face centroids
+    C = G.faces.centroids(faces, :) - G.cells.centroids(cells, :);
 
-% Oriented normals
-sgn = 2*(cells == G.faces.neighbors(faces, 1)) - 1;
-N   = bsxfun(@times, sgn, G.faces.normals(faces, :));
+    % Oriented normals
+    sgn = 2 * (cells == G.faces.neighbors(faces, 1)) - 1;
+    N   = bsxfun(@times, sgn, G.faces.normals(faces, :));
 
-% Compute two-point weights
-cn = sum(C.*N, 2)./sum(C.*C, 2);
+    % Compute two-point weights
+    cn = sum(C .* N, 2) ./ sum(C .* C, 2);
 
-% Return function handle
-tp = @(lambda) cn.*lambda(cells);
+    % Return function handle
+    tp = @(lambda) cn .* lambda(cells);
 end
 
 function ha = getHarmonicAvgOperator(G)
-% Create harmonic averaging operator
-%
-% PARAMETERS:
-%   G - Grid structure
-%
-% RETURNS:
-%   ha - Function handle for harmonic averaging
+    % Create harmonic averaging operator
+    %
+    % PARAMETERS:
+    %   G - Grid structure
+    %
+    % RETURNS:
+    %   ha - Function handle for harmonic averaging
 
-faces = G.cells.faces(:,1);
-M = sparse(faces, 1:numel(faces), 1, G.faces.num, numel(faces));
-ha = @(T) 1./(M*(1./T));
+    faces = G.cells.faces(:, 1);
+    M = sparse(faces, 1:numel(faces), 1, G.faces.num, numel(faces));
+    ha = @(T) 1 ./ (M * (1 ./ T));
 end
 
 function M = getFaceHalfFaceMap(G)
-faces = G.cells.faces(:,1);
-M = sparse(faces, 1:numel(faces), 1, G.faces.num, numel(faces));
+    faces = G.cells.faces(:, 1);
+    M = sparse(faces, 1:numel(faces), 1, G.faces.num, numel(faces));
 end
 
 %{

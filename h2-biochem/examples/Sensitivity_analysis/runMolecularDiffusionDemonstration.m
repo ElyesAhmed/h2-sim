@@ -1,10 +1,10 @@
 function results = runMolecularDiffusionDemonstration()
-% Compare H2 loss with and without molecular diffusion in a lab-scale column.
-%
-% The shorter column and long shut-in make molecular transport resolvable
-% without changing the physical diffusion coefficients. No files are written.
+    % Compare H2 loss with and without molecular diffusion in a lab-scale column.
+    %
+    % The shorter column and long shut-in make molecular transport resolvable
+    % without changing the physical diffusion coefficients. No files are written.
 
-    mrstModule add ad-props compositional deckformat 
+    mrstModule add ad-props compositional deckformat;
 
     caseNames = ["No molecular diffusion"; "Molecular diffusion"];
     diffusionEnabled = [false; true];
@@ -43,7 +43,7 @@ function results = runMolecularDiffusionDemonstration()
             'molecularDiffusion', diffusionEnabled(caseNo));
         assert(~model.phreeqcTimestepCoupling, ...
             'The molecular-diffusion demonstration must not call PHREEQC.');
-        schedule = extendStoragePeriod(schedule, 500*day, 5*day);
+        schedule = extendStoragePeriod(schedule, 500 * day, 5 * day);
 
         solver = NonLinearSolver();
         solver.maxTimestepCuts = 12;
@@ -64,7 +64,7 @@ function results = runMolecularDiffusionDemonstration()
         results(caseNo).finalSpatialConsumptionMoles = ...
             metrics.finalSpatialConsumptionMoles;
         x = model.G.cells.centroids(:, 1);
-        results(caseNo).xDimensionless = (x - min(x))./max(max(x) - min(x), eps);
+        results(caseNo).xDimensionless = (x - min(x)) ./ max(max(x) - min(x), eps);
     end
 
     finalLoss = arrayfun(@(r) r.lossPercent(end), results);
@@ -81,7 +81,7 @@ end
 function schedule = extendStoragePeriod(schedule, duration, maxStep)
     injection = schedule.step.control == 1;
     production = schedule.step.control == 3;
-    storageSteps = repmat(maxStep, floor(duration/maxStep), 1);
+    storageSteps = repmat(maxStep, floor(duration / maxStep), 1);
     remainder = duration - sum(storageSteps);
     if remainder > 0
         storageSteps(end + 1, 1) = remainder;
@@ -89,8 +89,8 @@ function schedule = extendStoragePeriod(schedule, duration, maxStep)
     schedule.step.val = [schedule.step.val(injection); ...
         storageSteps; schedule.step.val(production)];
     schedule.step.control = [ones(nnz(injection), 1); ...
-        2*ones(numel(storageSteps), 1); ...
-        3*ones(nnz(production), 1)];
+        2 * ones(numel(storageSteps), 1); ...
+        3 * ones(nnz(production), 1)];
 end
 
 function metrics = computeMetrics(states, schedule, model)
@@ -106,8 +106,8 @@ function metrics = computeMetrics(states, schedule, model)
     total = sum(cumulative, 2);
     injected = prescribedInjectedH2(schedule, model);
     metrics = struct( ...
-        'timeDays', cumsum(schedule.step.val(:))./day, ...
-        'lossPercent', 100.*total./injected, ...
+        'timeDays', cumsum(schedule.step.val(:)) ./ day, ...
+        'lossPercent', 100 .* total ./ injected, ...
         'consumedH2Moles', total(end), ...
         'injectedH2Moles', injected, ...
         'finalSpatialConsumptionMoles', sum(finalSpatial, 2));
@@ -122,19 +122,19 @@ function injected = prescribedInjectedH2(schedule, model)
         wells = schedule.control(schedule.step.control(step)).W;
         for w = 1:numel(wells)
             if wells(w).sign <= 0 || ...
-                    (isfield(wells, 'status') && ~wells(w).status)
-                continue;
+                (isfield(wells, 'status') && ~wells(w).status)
+                continue
             end
             if strcmpi(wells(w).type, 'grat')
                 gasRate = wells(w).val;
             elseif strcmpi(wells(w).type, 'rate')
-                gasRate = wells(w).val*wells(w).compi(gasIndex);
+                gasRate = wells(w).val * wells(w).compi(gasIndex);
             else
-                continue;
+                continue
             end
-            molarRate = gasRate*model.FacilityModel.pressure/ ...
-                (8.314462618*model.FacilityModel.T);
-            injected = injected + molarRate*wells(w).components(idxH2)* ...
+            molarRate = gasRate * model.FacilityModel.pressure / ...
+                (8.314462618 * model.FacilityModel.T);
+            injected = injected + molarRate * wells(w).components(idxH2) * ...
                 schedule.step.val(step);
         end
     end

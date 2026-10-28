@@ -1,50 +1,50 @@
 function [model, poro0, perm0] = setupBioCloggingModel2bacts(model, nbact0, nc, cp)
-% setupBioCloggingModel -- Add bio-clogging effects to a compositional model
-%
-% SYNOPSIS:
-%   [model, poro0, perm0] = setupBioCloggingModel(model, nbact0, nc, cp)
-%
-% DESCRIPTION:
-%   Modifies the input MRST compositional model by including porosity
-%   and permeability reduction due to bacterial growth (bio-clogging).
-%   The reduction is parameterized by a characteristic bacterial
-%   concentration and a clogging strength coefficient.
-%
-% PARAMETERS:
-%   model  - MRST compositional model struct with fields `rock` and `fluid`.
-%   nbact0 - Initial bacterial concentration (scalar, dimensionless/normalized).
-%   nc     - Characteristic bacterial concentration at which clogging
-%            effects become significant (scalar).
-%   cp     - Dimensionless clogging strength coefficient (scalar).
-%
+    % setupBioCloggingModel -- Add bio-clogging effects to a compositional model
+    %
+    % SYNOPSIS:
+    %   [model, poro0, perm0] = setupBioCloggingModel(model, nbact0, nc, cp)
+    %
+    % DESCRIPTION:
+    %   Modifies the input MRST compositional model by including porosity
+    %   and permeability reduction due to bacterial growth (bio-clogging).
+    %   The reduction is parameterized by a characteristic bacterial
+    %   concentration and a clogging strength coefficient.
+    %
+    % PARAMETERS:
+    %   model  - MRST compositional model struct with fields `rock` and `fluid`.
+    %   nbact0 - Initial bacterial concentration (scalar, dimensionless/normalized).
+    %   nc     - Characteristic bacterial concentration at which clogging
+    %            effects become significant (scalar).
+    %   cp     - Dimensionless clogging strength coefficient (scalar).
+    %
 
-% RETURNS:
-%   model  - Modified model with porosity and permeability given as
-%            function handles depending on bacterial concentration.
-%   poro0  - Original porosity vector (before clogging modification).
-%   perm0  - Original permeability vector (before clogging modification).
-%
-% SEE ALSO:
-%   initCompositionalStateBacteria, TableCompositionalMixture
+    % RETURNS:
+    %   model  - Modified model with porosity and permeability given as
+    %            function handles depending on bacterial concentration.
+    %   poro0  - Original porosity vector (before clogging modification).
+    %   perm0  - Original permeability vector (before clogging modification).
+    %
+    % SEE ALSO:
+    %   initCompositionalStateBacteria, TableCompositionalMixture
 
-% Store original rock properties
-poro0 = model.rock.poro;
-perm0 = model.rock.perm(:, 1);
+    % Store original rock properties
+    poro0 = model.rock.poro;
+    perm0 = model.rock.perm(:, 1);
 
-% Define porosity multiplier (function of bacterial concentration)
-scale = 1 + cp.*(nbact0./ nc).^2;
-pvMult_nbact = @(nbact1,nbact2) 1 ./ (1 + scale(1).*(nbact1./nc(1)).^2+ scale(2).*(nbact2./nc(2)).^2);
+    % Define porosity multiplier (function of bacterial concentration)
+    scale = 1 + cp .* (nbact0 ./ nc).^2;
+    pvMult_nbact = @(nbact1, nbact2) 1 ./ (1 + scale(1) .* (nbact1 ./ nc(1)).^2 + scale(2) .* (nbact2 ./ nc(2)).^2);
 
-% Assign porosity update function to fluid/rock
-model.fluid.pvMultR = @(p, nbact1,nbact2) pvMult_nbact(nbact1,nbact2);
-poroFun = @(p, nbact1,nbact2) poro0 .* pvMult_nbact(nbact1,nbact2);
-model.rock.poro = poroFun;
+    % Assign porosity update function to fluid/rock
+    model.fluid.pvMultR = @(p, nbact1, nbact2) pvMult_nbact(nbact1, nbact2);
+    poroFun = @(p, nbact1, nbact2) poro0 .* pvMult_nbact(nbact1, nbact2);
+    model.rock.poro = poroFun;
 
-% Define permeability update function via Kozeny–Carman-like relation
-tauFun = @(p, nbact1,nbact2) ((1 - poro0) ./ (1 - poroFun(p, nbact1,nbact2))).^2 .* ...
-    (poroFun(p, nbact1,nbact2) ./ poro0).^3;
-permFun = @(p, nbact1,nbact2) perm0 .* tauFun(p, nbact1,nbact2);
-model.rock.perm = permFun;
+    % Define permeability update function via Kozeny–Carman-like relation
+    tauFun = @(p, nbact1, nbact2) ((1 - poro0) ./ (1 - poroFun(p, nbact1, nbact2))).^2 .* ...
+        (poroFun(p, nbact1, nbact2) ./ poro0).^3;
+    permFun = @(p, nbact1, nbact2) perm0 .* tauFun(p, nbact1, nbact2);
+    model.rock.perm = permFun;
 end
 
 %{

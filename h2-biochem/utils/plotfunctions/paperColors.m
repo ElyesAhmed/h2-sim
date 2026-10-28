@@ -1,18 +1,18 @@
 function c = paperColors(n)
-% Return n RGB color rows for paper/presentation figures with multiple
-% series. The first 4 rows are the module's fixed palette (used by
-% runThreeBackendComparison.m's 3-4 backend comparisons); beyond that,
-% additional distinguishable colors are drawn from MATLAB's 'lines'
-% colormap (needed by runTransportEffectsSensitivity.m's 10-case sweep).
-% Shared so every 1D_validation/ and Sensitivity_analysis/ figure with
-% more than one series uses the same colors for the same number of series.
-%
-% SYNOPSIS:
-%   c = paperColors(4)
-%   c = paperColors(10)
-%
-% SEE ALSO:
-%   paperFigure, styleAxes
+    % Return n RGB color rows for paper/presentation figures with multiple
+    % series. The first 4 rows are the module's fixed palette (used by
+    % runThreeBackendComparison.m's 3-4 backend comparisons); beyond that,
+    % additional distinguishable colors are drawn from MATLAB's 'lines'
+    % colormap (needed by runTransportEffectsSensitivity.m's 10-case sweep).
+    % Shared so every 1D_validation/ and Sensitivity_analysis/ figure with
+    % more than one series uses the same colors for the same number of series.
+    %
+    % SYNOPSIS:
+    %   c = paperColors(4)
+    %   c = paperColors(10)
+    %
+    % SEE ALSO:
+    %   paperFigure, styleAxes
 
     fixed = [ ...
         0.15, 0.15, 0.15; ...

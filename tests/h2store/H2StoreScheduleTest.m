@@ -1,10 +1,11 @@
 classdef H2StoreScheduleTest < matlab.unittest.TestCase
-    %H2STORESCHEDULETEST Stage ordering, controls, rates and temperature.
+    % H2STORESCHEDULETEST Stage ordering, controls, rates and temperature.
     properties (TestParameter)
         stage = {'charge', 'discharge', 'cushion'}
         useCushion = {false, true}
     end
     methods (Test)
+
         function singleStage(test, stage)
             [W, options] = inputs();
             options.([stage, 'Only']) = true;
@@ -15,15 +16,16 @@ classdef H2StoreScheduleTest < matlab.unittest.TestCase
                 test.verifyEqual(schedule.control(k).W.name, stage);
             end
         end
+
         function cycleOrder(test, useCushion)
             [W, options] = inputs();
             options.use_cushion = useCushion;
             schedule = makeAquifer2DSchedule(W, options);
             names = arrayfun(@(k) schedule.control(k).W.name, ...
                 schedule.step.control(:), 'UniformOutput', false);
-            transitions = [true; ~strcmp(names(2:end), names(1:end-1))];
+            transitions = [true; ~strcmp(names(2:end), names(1:end - 1))];
             expected = {'charge'; 'shut'; 'discharge'; 'charge'; 'shut'; 'discharge'};
-            duration = 2*(100 + 30 + 80);
+            duration = 2 * (100 + 30 + 80);
             if useCushion
                 expected = [{'cushion'; 'shut'}; expected];
                 duration = duration + 120 + 40;
@@ -34,6 +36,7 @@ classdef H2StoreScheduleTest < matlab.unittest.TestCase
             test.verifyGreaterThanOrEqual(schedule.step.control, 1);
             test.verifyLessThanOrEqual(schedule.step.control, numel(schedule.control));
         end
+
         function injectionRates(test)
             [W, options] = inputs();
             options.chargeOnly = true;
@@ -42,9 +45,10 @@ classdef H2StoreScheduleTest < matlab.unittest.TestCase
             test.verifyNumElements(rates, 19);
             test.verifyEqual(rates(1:10), repmat(options.rateCharge, 10, 1));
             tail = [5, 2.5, 1.25, 0.625, 0.3125, 0.15625, ...
-                    0.078125, 0.0390625, 0.0390625];
-            test.verifyEqual(rates(11:19), options.rateCharge*tail(:)/10);
+                0.078125, 0.0390625, 0.0390625];
+            test.verifyEqual(rates(11:19), options.rateCharge * tail(:) / 10);
         end
+
         function idleAndDischargeControls(test)
             [W, options] = inputs();
             schedule = makeAquifer2DSchedule(W, options);
@@ -65,12 +69,14 @@ classdef H2StoreScheduleTest < matlab.unittest.TestCase
                 test.verifyEqual(well.compi, [0, 1]);
             end
         end
+
         function suppliedWellIsUnchanged(test)
             [W, options] = inputs();
             before = W;
             makeAquifer2DSchedule(W, options);
             test.verifyEqual(W, before);
         end
+
         function singleStagePriority(test)
             [W, options] = inputs();
             options.chargeOnly = true;
@@ -79,6 +85,7 @@ classdef H2StoreScheduleTest < matlab.unittest.TestCase
             schedule = makeAquifer2DSchedule(W, options);
             test.verifyEqual(schedule.control(1).W.name, 'charge');
         end
+
     end
 end
 

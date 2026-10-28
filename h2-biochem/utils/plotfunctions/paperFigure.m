@@ -1,18 +1,18 @@
 function fig = paperFigure(sizeCm, name)
-% Create a white, centimeter-sized figure window for paper/presentation
-% figures. Shared by every 1D_validation/ and Sensitivity_analysis/
-% script so all module figures share one physical sizing convention.
-%
-% SYNOPSIS:
-%   fig = paperFigure([18, 11])
-%   fig = paperFigure([24, 15], 'Aqueous H2 and CO2 profiles')
-%
-% PARAMETERS:
-%   sizeCm - [width, height] figure size in centimeters.
-%   name   - Optional figure name (default: '').
-%
-% SEE ALSO:
-%   styleAxes, paperColors
+    % Create a white, centimeter-sized figure window for paper/presentation
+    % figures. Shared by every 1D_validation/ and Sensitivity_analysis/
+    % script so all module figures share one physical sizing convention.
+    %
+    % SYNOPSIS:
+    %   fig = paperFigure([18, 11])
+    %   fig = paperFigure([24, 15], 'Aqueous H2 and CO2 profiles')
+    %
+    % PARAMETERS:
+    %   sizeCm - [width, height] figure size in centimeters.
+    %   name   - Optional figure name (default: '').
+    %
+    % SEE ALSO:
+    %   styleAxes, paperColors
 
     if nargin < 2
         name = '';

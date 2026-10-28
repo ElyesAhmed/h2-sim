@@ -1,50 +1,50 @@
 function results = exampleCompositionalBacterial2DThreeReactions(varargin)
-%Compare microbial and abiotic hydrogen storage in a 2D structural trap
-%
-% SYNOPSIS:
-%   results = exampleCompositionalBacterial2DThreeReactions();
-%   results = exampleCompositionalBacterial2DThreeReactions( ...
-%       'scenarios', {'bacterial', 'abiotic'}, ...
-%       'molecularDiffusion', false, 'molecularDispersion', false);
-%
-% DESCRIPTION:
-%   Simulate cyclic hydrogen storage with residual methane, methanogenesis,
-%   acetogenesis and sulfate reduction. SO4 and HS are aqueous tracers; H2S
-%   is an EOS component. Kinetics use the existing biochemical tables, with
-%   no PHREEQC coupling. Initial biomass is [15, 15, 15] in model units;
-%   temperature is 317.50 K, sulfate is 0.1 mol/kg water, and EOS pH is 7.2.
-%   The EOS salinity parameter is zero. Flow controls and layered geometry
-%   come from modelForSimple2DAquifer and the bundled illustrative deck.
-%
-% OPTIONAL PARAMETERS:
-%   numCycles           - Number of storage cycles (default 5).
-%   gridSpacing         - Two positive PEBI target spacings in m ([0.5, 0.5]).
-%   scenarios           - Cell array selecting clogging, bacterial, abiotic
-%                         (default all three, in that order).
-%   molecularDiffusion  - Include molecular diffusion (default true).
-%   molecularDispersion - Include mechanical dispersion (default true).
-%   maximumFlowSteps    - Positive integer prefix limit, or Inf (default Inf).
-%   plotResults         - Plot when all scenarios are complete (default true).
-%   deckFile            - Input deck (default bundled Aquifer2D deck).
-%   outputDirectory     - Compact results and figures (default
-%                         build/compositional-2d-three-reactions).
-%   simulationDirectory - Packed-output root (default empty: MRST default).
-%
-% RETURNS:
-%   results - One struct per selected scenario with the model, initial state,
-%             accepted states, well outputs, reports and packed setup. A
-%             limited run writes a prefix of the full packed case and sets
-%             complete=false, allowing a subsequent run to resume the setup.
-%
-% NOTE:
-%   The website selects bacterial/abiotic cases and disables molecular
-%   transport. A short prefix or coarser teaching grid does not reproduce
-%   its full five-cycle results. Reported consumption is not a conservation
-%   or convergence proof.
-%
-% SEE ALSO:
-%   modelForSimple2DAquifer, plotCompositionalBacterial2DThreeReactions,
-%   packH2simSimulationProblem
+    % Compare microbial and abiotic hydrogen storage in a 2D structural trap
+    %
+    % SYNOPSIS:
+    %   results = exampleCompositionalBacterial2DThreeReactions();
+    %   results = exampleCompositionalBacterial2DThreeReactions( ...
+    %       'scenarios', {'bacterial', 'abiotic'}, ...
+    %       'molecularDiffusion', false, 'molecularDispersion', false);
+    %
+    % DESCRIPTION:
+    %   Simulate cyclic hydrogen storage with residual methane, methanogenesis,
+    %   acetogenesis and sulfate reduction. SO4 and HS are aqueous tracers; H2S
+    %   is an EOS component. Kinetics use the existing biochemical tables, with
+    %   no PHREEQC coupling. Initial biomass is [15, 15, 15] in model units;
+    %   temperature is 317.50 K, sulfate is 0.1 mol/kg water, and EOS pH is 7.2.
+    %   The EOS salinity parameter is zero. Flow controls and layered geometry
+    %   come from modelForSimple2DAquifer and the bundled illustrative deck.
+    %
+    % OPTIONAL PARAMETERS:
+    %   numCycles           - Number of storage cycles (default 5).
+    %   gridSpacing         - Two positive PEBI target spacings in m ([0.5, 0.5]).
+    %   scenarios           - Cell array selecting clogging, bacterial, abiotic
+    %                         (default all three, in that order).
+    %   molecularDiffusion  - Include molecular diffusion (default true).
+    %   molecularDispersion - Include mechanical dispersion (default true).
+    %   maximumFlowSteps    - Positive integer prefix limit, or Inf (default Inf).
+    %   plotResults         - Plot when all scenarios are complete (default true).
+    %   deckFile            - Input deck (default bundled Aquifer2D deck).
+    %   outputDirectory     - Compact results and figures (default
+    %                         build/compositional-2d-three-reactions).
+    %   simulationDirectory - Packed-output root (default empty: MRST default).
+    %
+    % RETURNS:
+    %   results - One struct per selected scenario with the model, initial state,
+    %             accepted states, well outputs, reports and packed setup. A
+    %             limited run writes a prefix of the full packed case and sets
+    %             complete=false, allowing a subsequent run to resume the setup.
+    %
+    % NOTE:
+    %   The website selects bacterial/abiotic cases and disables molecular
+    %   transport. A short prefix or coarser teaching grid does not reproduce
+    %   its full five-cycle results. Reported consumption is not a conservation
+    %   or convergence proof.
+    %
+    % SEE ALSO:
+    %   modelForSimple2DAquifer, plotCompositionalBacterial2DThreeReactions,
+    %   packH2simSimulationProblem
 
     %% Select cases and load the layered aquifer
     opt = struct('numCycles', 5, 'gridSpacing', [0.5, 0.5], ...
@@ -55,7 +55,7 @@ function results = exampleCompositionalBacterial2DThreeReactions(varargin)
         'simulationDirectory', '');
     opt = merge_options(opt, varargin{:});
     opt = validateOptions(opt);
-    mrstModule add ad-core ad-blackoil ad-props deckformat upr test-suite spe10 compositional
+    mrstModule add ad-core ad-blackoil ad-props deckformat upr test-suite spe10 compositional;
     deck = readEclipseDeck(opt.deckFile);
     [description, setup, state0Bo, modelBo, schedule] = modelForSimple2DAquifer( ...
         deck, 'numCycles', opt.numCycles, 'gridSpacing', opt.gridSpacing);
@@ -69,7 +69,7 @@ function results = exampleCompositionalBacterial2DThreeReactions(varargin)
         {'bactM', 'bactA', 'bactS'});
     initial = struct('sulfateMolality', 0.1, 'temperature', 273.15 + 44.35, ...
         'biomass', [15, 15, 15], 'composition', [0.8480, 1e-5, 1e-5, 0.1530, 0, 0]);
-    initial.composition = initial.composition/sum(initial.composition);
+    initial.composition = initial.composition / sum(initial.composition);
     schedule = configureSchedule(schedule, initial.temperature);
 
     %% Run or resume each selected scenario
@@ -128,7 +128,7 @@ function schedule = configureSchedule(schedule, temperature)
         end
         W.T = temperature;
         if strcmp(W.stage, 'discharge')
-            W.lims.bhp = 35*barsa;
+            W.lims.bhp = 35 * barsa;
         end
         schedule.control(k).W = W;
         schedule.control(k).bc = [];
@@ -136,7 +136,7 @@ function schedule = configureSchedule(schedule, temperature)
 end
 
 function [model, state0] = setupScenario(modelBo, state0Bo, schedule, ...
-        compFluid, biochemFluid, initial, scenario, opt)
+    compFluid, biochemFluid, initial, scenario, opt)
     backend = DiagonalAutoDiffBackend('modifyOperators', true);
     model = BiochemistryModel(modelBo.G, modelBo.rock, modelBo.fluid, compFluid, ...
         biochemFluid, false, backend, 'oil', true, 'gas', true, ...
@@ -159,11 +159,11 @@ function [model, state0] = setupScenario(modelBo, state0Bo, schedule, ...
         state0 = initCompositionalState(model, state0Bo.pressure, ...
             initial.temperature, state0Bo.s, initial.composition, model.EOSModel);
     end
-    state0.tracerSO4 = repmat(initial.sulfateMolality*1000, model.G.cells.num, 1);
+    state0.tracerSO4 = repmat(initial.sulfateMolality * 1000, model.G.cells.num, 1);
     state0.tracerHS = zeros(model.G.cells.num, 1);
     state0.h2sDissolvedLag = zeros(model.G.cells.num, 1);
     state0.wellSol = initWellSolAD(schedule.control(1).W, model, state0);
-    state0.wellSol.bhp = max(state0.pressure(schedule.control(1).W.cells)) + 5*barsa;
+    state0.wellSol.bhp = max(state0.pressure(schedule.control(1).W.cells)) + 5 * barsa;
 end
 
 function result = runScenario(model, state0, schedule, scenario, description, setup, opt)
@@ -180,14 +180,14 @@ function result = runScenario(model, state0, schedule, scenario, description, se
     if isfile(resultFile) && isinf(opt.maximumFlowSteps)
         saved = loadH2simResults(resultFile, 'result');
         if saved.result.complete && strcmp(saved.result.packedProblem.Name, problem.Name) && ...
-                problem.OutputHandlers.reports.numelData() == numel(schedule.step.val)
+            problem.OutputHandlers.reports.numelData() == numel(schedule.step.val)
             result = saved.result;
             validateResult(result, numel(schedule.step.val));
             fprintf('REUSED %s: %d saved physical states.\n', scenario, numel(result.states));
             return
         end
         % Release a mismatched saved history before allocating new states.
-        clear saved
+        clear saved;
     end
 
     % A limited run writes a prefix while retaining the full setup/cache identity.

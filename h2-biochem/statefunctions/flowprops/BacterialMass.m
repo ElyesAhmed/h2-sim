@@ -24,10 +24,11 @@ classdef BacterialMass < StateFunction & ComponentProperty
     %   BiochemistryModel, AqueousTracerMass, BiochemicalFlowDiscretization
 
     properties (Access = protected)
-        minimumDerivatives = 1.0e-3; % Minimum derivative cutoff value
+        minimumDerivatives = 1.0e-3  % Minimum derivative cutoff value
     end
 
     methods
+
         function gp = BacterialMass(model, varargin)
             % Constructor for bacterial mass calculator
 
@@ -110,7 +111,7 @@ classdef BacterialMass < StateFunction & ComponentProperty
         function mass = ensureMinimumDerivatives(prop, model, mass)
             der = prop.minimumDerivatives;
             if isempty(der)
-                return;
+                return
             end
             nc = numel(mass);
             if numel(der) == 1
@@ -139,29 +140,29 @@ classdef BacterialMass < StateFunction & ComponentProperty
                     m = mass;
                     d = der(c);
                     if isnumeric(m)
-                        continue;
+                        continue
                     end
                     if numel(m.jac) < c
                         % Not matching number of derivatives - stop early
-                        break;
+                        break
                     end
                     J = m.jac{c};
                     [n, l] = size(J);
                     if n ~= l
-                        continue;
+                        continue
                     end
                     diagonal = diag(J);
                     bad = abs(diagonal) < d;
                     if any(bad)
-                        m.jac{c} = m.jac{c} + sparse(1:n, 1:n, bad.*d, n, n);
+                        m.jac{c} = m.jac{c} + sparse(1:n, 1:n, bad .* d, n, n);
                     end
                     mass = m;
                 end
             end
         end
+
     end
 end
-
 
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.

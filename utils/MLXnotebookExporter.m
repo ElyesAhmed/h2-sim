@@ -1,16 +1,15 @@
 classdef MLXnotebookExporter
     methods
 
-
-        function setupMfromMlx(mne, filename, varargin)
-        % Setup M file from mlx
+        function setupMfromMlx(~, filename, varargin)
+            % Setup M file from mlx
 
             opt = struct('outputDirectory', []);
             opt = merge_options(opt, varargin{:});
 
-            assert(exist(filename, 'file') == 2, 'File %s not found.', filename); 
+            assert(exist(filename, 'file') == 2, 'File %s not found.', filename);
             inputfilename = which(filename);
-            
+
             if isempty(opt.outputDirectory)
                 % if the file is in a directory denoted notebooks, we move the output in the directory above
                 [dirpath, filename, ext] = fileparts(inputfilename);
@@ -30,22 +29,21 @@ classdef MLXnotebookExporter
 
             outputfilename = fullfile(outputDirectory, [filename, '.m']);
 
-            export(inputfilename, outputfilename, 'format', 'm');            
-            
+            export(inputfilename, outputfilename, 'format', 'm');
+
         end
-        
-        
+
         function setupIpynbFromMlx(mne, filename, varargin)
 
             opt = struct('outputDirectory', [], ...
-                         'removeSolverOutput', true);
+                'removeSolverOutput', true);
             opt = merge_options(opt, varargin{:});
-            
+
             assert(exist(filename, 'file') == 2, 'File %s not found.', filename);
-            
+
             fullfilename = which(filename);
             [dirpath, filename, ext] = fileparts(fullfilename);
-                                   
+
             if strcmp(ext, '.mlx')
                 % same directory
                 inputfilename   = fullfilename;
@@ -53,14 +51,14 @@ classdef MLXnotebookExporter
             else
                 outputDirectory = fullfile(dirpath, 'notebooks');
                 inputfilename = fullfile(outputDirectory, [filename, '.mlx']);
-            end            
+            end
 
             if ~isempty(opt.outputDirectory)
                 outputDirectory = opt.outputDirectory;
             end
 
             outputfilename = fullfile(outputDirectory, [filename, '.ipynb']);
-            
+
             export(inputfilename, outputfilename, 'format', 'ipynb');
 
             if opt.removeSolverOutput
@@ -79,87 +77,86 @@ classdef MLXnotebookExporter
             pyfilename = fullfile(h2simDir(), 'utils', 'setupIpynbForH2sim.py');
 
             pyrunfile([pyfilename ' ' outputfilename]);
-            
+
         end
 
-        
         function setupMlxFromM(mne, filename, varargin)
 
-            opt = struct('run'            , false, ...
-                         'outputDirectory', []);
+            opt = struct('run', false, ...
+                'outputDirectory', []);
             opt = merge_options(opt, varargin{:});
 
             [inputfile, outputfile] = getIOfiles(mne, filename, ...
-                                                 'outputDirectory', opt.outputDirectory, ...
-                                                 'outputFormat', 'mlx');
-            
+                'outputDirectory', opt.outputDirectory, ...
+                'outputFormat', 'mlx');
+
             matlab.internal.liveeditor.openAndSave(inputfile, outputfile);
 
             if opt.run
                 matlab.internal.liveeditor.executeAndSave(outputfile);
             end
-            
+
         end
-        
+
         function setupIpynbFromM(mne, filename, varargin)
 
-        % From a M-file, generate the notebooks (mlx and ipynb)
-        % The default directory for the generated notebooks is a sub-directory where the M-file is located called 'notebooks'
+            % From a M-file, generate the notebooks (mlx and ipynb)
+            % The default directory for the generated notebooks is a sub-directory where the M-file is located called 'notebooks'
 
-            opt = struct('run'            , false, ...
-                         'outputDirectory', []   , ...
-                         'generateIpynb'  , true);
+            opt = struct('run', false, ...
+                'outputDirectory', [], ...
+                'generateIpynb', true);
             opt = merge_options(opt, varargin{:});
 
             mne.setupMlxFromM(filename, ...
-                              'run'            , opt.run, ...
-                              'outputDirectory', opt.outputDirectory);
+                'run', opt.run, ...
+                'outputDirectory', opt.outputDirectory);
 
             if opt.generateIpynb
                 mne.setupIpynbFromMlx(filename, 'outputDirectory', opt.outputDirectory);
             end
-            
+
         end
 
-        function [inputfile, outputfile] = getIOfiles(mne, filename, varargin)
-            
+        function [inputfile, outputfile] = getIOfiles(~, filename, varargin)
+
             opt = struct('outputDirectory', [], ...
-                         'outputFormat', 'mlx');
-            
+                'outputFormat', 'mlx');
+
             opt = merge_options(opt, varargin{:});
 
-            assert(exist(filename, 'file') == 2, 'File %s not found.', filename); 
+            assert(exist(filename, 'file') == 2, 'File %s not found.', filename);
             fullfilename = which(filename);
-            [dirpath, filename, ext] = fileparts(fullfilename);
+            [dirpath, filename, ~] = fileparts(fullfilename);
 
             if isempty(opt.outputDirectory)
                 outputDirectory = fullfile(dirpath, 'notebooks');
-                if ~exist(outputDirectory)
+                if ~exist(outputDirectory, 'dir')
                     % Create the directory if it does not exist
                     mkdir(outputDirectory);
                 end
             else
-                outputDirectory = opt.outputDirectory
+                outputDirectory = opt.outputDirectory;
             end
 
             switch opt.outputFormat
-              case 'mlx'
-                inputfile  = fullfile(dirpath, [filename, '.m']);
-                outputfile = fullfile(outputDirectory, [filename, '.mlx']);
-              case 'ipynb'
-                inputfile  = fullfile(outputDirectory, [filename, '.mlx']);
-                outputfile = fullfile(outputDirectory, [filename, '.ipynb']);
-              otherwise
-                error('outputFormat not recognized');
+                case 'mlx'
+                    inputfile  = fullfile(dirpath, [filename, '.m']);
+                    outputfile = fullfile(outputDirectory, [filename, '.mlx']);
+                case 'ipynb'
+                    inputfile  = fullfile(outputDirectory, [filename, '.mlx']);
+                    outputfile = fullfile(outputDirectory, [filename, '.ipynb']);
+                otherwise
+                    error('outputFormat not recognized');
             end
-            
+
         end
 
-        function runMlxAndSave(mne, filename)
+        function runMlxAndSave(~, filename)
 
-        % To run and update the mlx notebook programmatically, it is possible to use:
-        % matlab.internal.liveeditor.executeAndSave('fullpathnameto.mlx')
-            
+            % To run and update the mlx notebook programmatically, it is possible to use:
+            % matlab.internal.liveeditor.executeAndSave('fullpathnameto.mlx')
+
             matlab.internal.liveeditor.executeAndSave(filename);
 
         end
@@ -177,9 +174,8 @@ classdef MLXnotebookExporter
             end
 
         end
-        
+
         function [txt, found_one] = cleanup_one(txt)
-            
 
             pos = strfind(txt, "Solving timestep");
 
@@ -189,7 +185,7 @@ classdef MLXnotebookExporter
             else
                 found_one = true;
             end
-            
+
             pos = pos(1);
 
             %  find the first occurence of 'output' before 'Solving timestep'
@@ -198,7 +194,7 @@ classdef MLXnotebookExporter
             outputpos = outputpos(end);
 
             %% We now find the position of the matching square brackets after the occurence of 'output'
-            
+
             bleft  = strfind(txt, '[');
             bright = strfind(txt, ']');
 
@@ -215,8 +211,8 @@ classdef MLXnotebookExporter
 
             ind = find(bracket(:, 1) > outputpos, 1);
 
-            bracket = bracket(ind : end, :);
-            
+            bracket = bracket(ind:end, :);
+
             % Position after the opening square bracket
             startpos = bracket(1, 1) + 1;
 
@@ -226,12 +222,11 @@ classdef MLXnotebookExporter
             endpos = bracket(ind, 1) - 1;
 
             %% We remove the captured text
-            txt = [txt(1 : startpos), ...
-                   txt(endpos + 1: end)];
+            txt = [txt(1:startpos), ...
+                txt(endpos + 1:end)];
 
         end
 
     end
 
 end
-

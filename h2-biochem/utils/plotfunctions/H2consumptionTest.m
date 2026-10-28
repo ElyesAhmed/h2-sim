@@ -33,9 +33,9 @@ for aa = 1:1
 
         for w = 1:numel(wells)
             if wells(w).sign <= 0 || ...
-                    (~strcmpi(wells(w).type, 'bhp') && wells(w).val == 0) || ...
-                    (isfield(wells, 'status') && ~wells(w).status)
-                continue;
+                (~strcmpi(wells(w).type, 'bhp') && wells(w).val == 0) || ...
+                (isfield(wells, 'status') && ~wells(w).status)
+                continue
             end
 
             if ~isfield(wells, 'components') || numel(wells(w).components) < idxH2
@@ -44,15 +44,15 @@ for aa = 1:1
             if strcmpi(wells(w).type, 'grat')
                 gasRate = wells(w).val;
             elseif strcmpi(wells(w).type, 'rate')
-                gasRate = wells(w).val*wells(w).compi(gasIndex);
+                gasRate = wells(w).val * wells(w).compi(gasIndex);
             else
                 error(['Cannot compute prescribed H2 input for injection control type "%s" ' ...
                     'at timestep %d.'], wells(w).type, t);
             end
 
-            h2MolarRate = gasRate*surfacePressure/(gasConstant*surfaceTemperature) * ...
+            h2MolarRate = gasRate * surfacePressure / (gasConstant * surfaceTemperature) * ...
                 wells(w).components(idxH2);
-            totalInjectedH2 = totalInjectedH2 + h2MolarRate*schedule.step.val(t);
+            totalInjectedH2 = totalInjectedH2 + h2MolarRate * schedule.step.val(t);
         end
     end
     fprintf('Total injected H2: %.2f mol\n', totalInjectedH2);
@@ -76,7 +76,7 @@ for aa = 1:1
         reactionTotals = sum(finalCum, 1);
         totalConsumedH2 = sum(reactionTotals);
 
-        timeDays = cumsum(schedule.step.val)./day;
+        timeDays = cumsum(schedule.step.val) ./ day;
         reactionNames = cellstr(model.biochemFluid.metabolicReaction);
         reactionNames = reactionNames(:);
 
@@ -91,7 +91,7 @@ for aa = 1:1
         grid on;
 
         xCoords = model.G.cells.centroids(:, 1);
-        xNorm = (xCoords - min(xCoords))./(max(xCoords) - min(xCoords));
+        xNorm = (xCoords - min(xCoords)) ./ (max(xCoords) - min(xCoords));
 
         figure;
         plot(xNorm, finalCum, 'LineWidth', 2);
@@ -109,10 +109,10 @@ for aa = 1:1
         end
         fprintf('Total consumed H2: %.6f mol\n', totalConsumedH2);
         fprintf('Consumed injected H2: %.3f %%\n', ...
-            100*totalConsumedH2./totalInjectedH2);
+            100 * totalConsumedH2 ./ totalInjectedH2);
         % ---- Spatial distribution as stacked bar chart ----
         xCoords = model.G.cells.centroids(:, 1);
-        xNorm = (xCoords - min(xCoords))./(max(xCoords) - min(xCoords));
+        xNorm = (xCoords - min(xCoords)) ./ (max(xCoords) - min(xCoords));
 
         figure;
         % Stacked bars: each cell's total height = sum of all reactions

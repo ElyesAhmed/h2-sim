@@ -109,13 +109,24 @@ The plotting functions above accept completed result structures, so you can redr
 
 ## Tests and support
 
-Run the MATLAB regression suite from the repository root after startup:
+After `startupH2sim`, run the biochemistry tests explicitly from their test folder:
 
 ```matlab
-checks = runtests(fullfile(pwd, 'h2-biochem', 'tests'));
+mrstModule add test-suite
+checks = runtests(fullfile(pwd, 'tests', 'biochemistry'));
 assertSuccess(checks);
 ```
 
-Tests requiring IPhreeqcCOM are skipped when that interface is unavailable.
+Optional backend or parallel tests can be skipped when their dependencies are
+unavailable; inspect incomplete results separately. Run H2-store unit and small
+numerical regression tests with:
+
+```matlab
+addpath(fullfile(pwd, 'tests', 'h2store'));
+results = runH2StoreTests();
+```
+
+These local checks do not run the full paper simulations. See
+[contributing guidance](CONTRIBUTING.md) for formatting and reference policies.
 
 Report bugs or request features through [GitHub Issues](https://github.com/sintefmath/h2-sim/issues). Include your MATLAB version, operating system, example command, and error message so the issue can be reproduced.

@@ -1,19 +1,19 @@
 function schedule = makeBenchmarkStorageSchedule(initialW, options)
-%MAKEBENCHMARKSTORAGESCHEDULE Assemble modified benchmark storage controls.
-%   schedule = makeBenchmarkStorageSchedule(W, options) returns a schedule
-%   without boundary conditions. Injection stages cover each timestep once,
-%   using two opening controls, one middle control and two closing controls.
-%   Charge rates are constant; cushion rate controls scale the final ramp.
-%
-% numCyclesCushions is a positive integer giving the number of cushion/shut-in
-% pairs in both full and cushion-only runs (default six). BHP buildup starts
-% at options.bhp, then uses 94 and 98 bar, and holds at 102 bar from pair four.
-% Rate-controlled buildup repeats options.rateCushion with its closing ramp
-% in every pair. Disable buildup with use_cushion = false.
-% Idle has sign +1; discharge has sign -1, a 20 bar BHP limit and only its
-% first completion open.
+    % MAKEBENCHMARKSTORAGESCHEDULE Assemble modified benchmark storage controls.
+    %   schedule = makeBenchmarkStorageSchedule(W, options) returns a schedule
+    %   without boundary conditions. Injection stages cover each timestep once,
+    %   using two opening controls, one middle control and two closing controls.
+    %   Charge rates are constant; cushion rate controls scale the final ramp.
+    %
+    % numCyclesCushions is a positive integer giving the number of cushion/shut-in
+    % pairs in both full and cushion-only runs (default six). BHP buildup starts
+    % at options.bhp, then uses 94 and 98 bar, and holds at 102 bar from pair four.
+    % Rate-controlled buildup repeats options.rateCushion with its closing ramp
+    % in every pair. Disable buildup with use_cushion = false.
+    % Idle has sign +1; discharge has sign -1, a 20 bar BHP limit and only its
+    % first completion open.
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -65,7 +65,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
     W(1).name = 'discharge';
     W(1).val = -options.rateDischarge;
     W(1).sign = -1;
-    W(1).lims.bhp = 20*barsa;
+    W(1).lims.bhp = 20 * barsa;
     W(1).cstatus(2:end) = 0;
     discharge = simpleSchedule( ...
         benchmarkStorageTimesteps(options.timeDischarge, options.dtDischarge), 'W', W);
@@ -83,7 +83,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
                 'h2sim:h2store:InvalidCushionCount', ...
                 'numCyclesCushions must be a finite positive integer scalar.');
             buildup = cell(1, count);
-            levels = [options.bhp, 94*barsa, 98*barsa, 102*barsa];
+            levels = [options.bhp, 94 * barsa, 98 * barsa, 102 * barsa];
             for k = 1:count
                 if k > 1 && options.use_bhp
                     for j = 1:numel(cushion)
@@ -106,13 +106,13 @@ end
 function stages = injectionStages(W, duration, targetStep, scaleClosingRate)
     validateattributes(duration, {'numeric'}, {'positive'});
     steps = benchmarkStorageTimesteps(duration, targetStep);
-    groups = {1, 2, 3:numel(steps)-2, numel(steps)-1, numel(steps)};
+    groups = {1, 2, 3:numel(steps) - 2, numel(steps) - 1, numel(steps)};
     stages = cell(1, 5);
     rate = W(1).val;
     for k = 1:5
         indices = groups{k};
         if scaleClosingRate && k > 3
-            W(1).val = rate.*steps(indices)./max(steps);
+            W(1).val = rate .* steps(indices) ./ max(steps);
         end
         stages{k} = simpleSchedule(steps(indices), 'W', W);
     end

@@ -19,7 +19,7 @@
 % SEE ALSO:
 %   modelForDome3DAquifer, summarizeH2StorageStates
 
-mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui vemmech test-suite 
+mrstModule add ad-core ad-blackoil ad-props deckformat mrst-gui vemmech test-suite;
 %% Notice on Computational Cost
 warning('ComputationalCost:High', ...
     'This example runs a full storage schedule and may take substantial time.');
@@ -36,7 +36,7 @@ deck = readEclipseDeck(dataFile);
 figure;
 % porosity
 subplot(1, 2, 1);
-plotCellData(model.G, model.rock.poro, model.G.cells.centroids(:,2) > 2500, 'LineStyle', 'none');
+plotCellData(model.G, model.rock.poro, model.G.cells.centroids(:, 2) > 2500, 'LineStyle', 'none');
 colorbar;
 title('Porosity Distribution');
 xlabel('X [m]');
@@ -44,7 +44,7 @@ ylabel('Y [m]');
 view(3);
 % permeability
 subplot(1, 2, 2);
-plotCellData(model.G, log10(model.rock.perm(:,1)), model.G.cells.centroids(:,2) > 2500, 'LineStyle', 'none');
+plotCellData(model.G, log10(model.rock.perm(:, 1)), model.G.cells.centroids(:, 2) > 2500, 'LineStyle', 'none');
 colorbar;
 title('log10(k_x / m^2)');
 xlabel('X [m]');
@@ -81,7 +81,7 @@ title(name);
 diagnostics = summarizeH2StorageStates(model, states, ws);
 
 %% Plotting results over time (in months)
-timeMonths = convertTo(cumsum(schedule.step.val), 30*day);
+timeMonths = convertTo(cumsum(schedule.step.val), 30 * day);
 
 figure;
 subplot(4, 1, 1);

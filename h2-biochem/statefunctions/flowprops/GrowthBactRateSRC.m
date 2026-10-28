@@ -22,6 +22,7 @@ classdef GrowthBactRateSRC < StateFunction
     %   CarbonLimitedGrowthRate, DecayBactRateSRC, BacterialMass
 
     methods
+
         function gp = GrowthBactRateSRC(model, varargin)
             % Constructor
             gp@StateFunction(model, varargin{:});
@@ -74,7 +75,7 @@ classdef GrowthBactRateSRC < StateFunction
             x = rm.getProp(state, 'x');
             h2Active = [];
             if isa(rm, 'BiochemistryPhreeqcModel') && ...
-                    rm.isSequentialH2BiochemPhreeqcBackend()
+                rm.isSequentialH2BiochemPhreeqcBackend()
                 threshold = getH2ActivationThreshold(rm);
                 idxH2Overall = find(strcmpi(namecp, 'H2') | ...
                     strcmpi(namecp, 'Hydrogen'), 1);
@@ -89,7 +90,7 @@ classdef GrowthBactRateSRC < StateFunction
                 % Find H2 index (required for all reactions)
                 idx_H2 = find(strcmpi(namecp, bcrm.rH2(i)), 1);
                 if isempty(idx_H2)
-                    continue;   % H2 not found – skip this reaction
+                    continue    % H2 not found – skip this reaction
                 end
                 % H2 mole fraction
                 if iscell(x)
@@ -107,7 +108,7 @@ classdef GrowthBactRateSRC < StateFunction
                     % Methanogens and acetogens: substrate is an EOS component
                     idx_sub = find(strcmpi(namecp, bcrm.rsub(i)), 1);
                     if isempty(idx_sub)
-                        continue;
+                        continue
                     end
                     if iscell(x)
                         xsub = x{idx_sub};
@@ -117,8 +118,8 @@ classdef GrowthBactRateSRC < StateFunction
                     alphasub = bcrm.alphasub(i);
 
                     if isprop(rm, 'carbonateBuffer') && rm.carbonateBuffer && ...
-                            strcmpi(bcrm.rsub(i), 'CO2') && ...
-                            (~isempty(feedback) || isfield(state, 'tracerHCO3'))
+                        strcmpi(bcrm.rsub(i), 'CO2') && ...
+                        (~isempty(feedback) || isfield(state, 'tracerHCO3'))
                         xsub = carbonateSubstrateFraction( ...
                             rm, state, feedback, xsub);
                     end
@@ -144,137 +145,138 @@ classdef GrowthBactRateSRC < StateFunction
                 end
             end
         end
+
     end
 end
 
 function xsub = sulfateSubstrateFraction(rm, state, feedback, template)
-% Convert sulfate [mol/m^3 liquid] to the legacy molar-fraction proxy.
-% SRB: substrate is sulfate tracer (not in EOS)
-if ~isempty(feedback)
-    so4_conc = feedback.sulfateMolality .* rm.EOSModel.rho_water;
-elseif isfield(state, 'tracerSO4')
-    so4_conc = state.tracerSO4;   % mol/m3 liquid
-else
-    so4_conc = zeros(size(template));
-end
-% Compute liquid molar density from Z_L
-if isfield(state, 'Z_L')
-    Z_L = state.Z_L;
-else
-    Z_L = ones(size(template));
-end
-R = 8.314;   % Pa·m3/(mol·K)
-% Retain pressure and temperature dependence for AD evaluations.
-P = state.pressure;
-T = state.T;
-rho_molar = P ./ (Z_L .* R .* T);   % mol/m3
-% Convert tracer to mole fraction
-xsub = so4_conc ./ rho_molar;
+    % Convert sulfate [mol/m^3 liquid] to the legacy molar-fraction proxy.
+    % SRB: substrate is sulfate tracer (not in EOS)
+    if ~isempty(feedback)
+        so4_conc = feedback.sulfateMolality .* rm.EOSModel.rho_water;
+    elseif isfield(state, 'tracerSO4')
+        so4_conc = state.tracerSO4;   % mol/m3 liquid
+    else
+        so4_conc = zeros(size(template));
+    end
+    % Compute liquid molar density from Z_L
+    if isfield(state, 'Z_L')
+        Z_L = state.Z_L;
+    else
+        Z_L = ones(size(template));
+    end
+    R = 8.314;   % Pa·m3/(mol·K)
+    % Retain pressure and temperature dependence for AD evaluations.
+    P = state.pressure;
+    T = state.T;
+    rho_molar = P ./ (Z_L .* R .* T);   % mol/m3
+    % Convert tracer to mole fraction
+    xsub = so4_conc ./ rho_molar;
 end
 
 function xsub = carbonateSubstrateFraction(rm, state, feedback, xsub)
-% Retain the existing feedback-DIC or pH-dependent bicarbonate CO2 proxy.
-if isfield(state, 'Z_L')
-    Z_L = state.Z_L;
-else
-    Z_L = ones(size(xsub));
-end
-R = 8.314;
-rho_molar = state.pressure ./ (Z_L .* R .* state.T);
-if ~isempty(feedback)
-    if isfield(feedback, 'totalCarbonMolality')
-        totalCarbon = feedback.totalCarbonMolality;
+    % Retain the existing feedback-DIC or pH-dependent bicarbonate CO2 proxy.
+    if isfield(state, 'Z_L')
+        Z_L = state.Z_L;
     else
-        totalCarbon = feedback.co2Molality + ...
-            feedback.hco3Molality;
+        Z_L = ones(size(xsub));
     end
-    % PHREEQC MET and ACE kinetics use
-    % tot("Carbonate(4)"), not free aqueous CO2.
-    xsub = totalCarbon .* ...
-        rm.EOSModel.rho_water ./ rho_molar;
-else
-    hco3 = state.tracerHCO3;
-    % tracerHCO3 transports non-CO2 DIC so that
-    % carbonate species omitted from the EOS are not
-    % discarded. For pH-dependent kinetics use the
-    % actual bicarbonate species returned by PHREEQC.
-    if isfield(state, 'phreeqcHCO3Molality')
-        hco3 = state.phreeqcHCO3Molality .* rm.EOSModel.rho_water;
-    end
-    if isfield(state, 'phreeqcPH')
-        pH = state.phreeqcPH;
+    R = 8.314;
+    rho_molar = state.pressure ./ (Z_L .* R .* state.T);
+    if ~isempty(feedback)
+        if isfield(feedback, 'totalCarbonMolality')
+            totalCarbon = feedback.totalCarbonMolality;
+        else
+            totalCarbon = feedback.co2Molality + ...
+                feedback.hco3Molality;
+        end
+        % PHREEQC MET and ACE kinetics use
+        % tot("Carbonate(4)"), not free aqueous CO2.
+        xsub = totalCarbon .* ...
+            rm.EOSModel.rho_water ./ rho_molar;
     else
-        pH = rm.carbonateBufferPH;
+        hco3 = state.tracerHCO3;
+        % tracerHCO3 transports non-CO2 DIC so that
+        % carbonate species omitted from the EOS are not
+        % discarded. For pH-dependent kinetics use the
+        % actual bicarbonate species returned by PHREEQC.
+        if isfield(state, 'phreeqcHCO3Molality')
+            hco3 = state.phreeqcHCO3Molality .* rm.EOSModel.rho_water;
+        end
+        if isfield(state, 'phreeqcPH')
+            pH = state.phreeqcPH;
+        else
+            pH = rm.carbonateBufferPH;
+        end
+        if isfield(state, 'phreeqcCarbonatePka1')
+            pKa1 = state.phreeqcCarbonatePka1;
+        else
+            pKa1 = rm.carbonateBufferPka1;
+        end
     end
-    if isfield(state, 'phreeqcCarbonatePka1')
-        pKa1 = state.phreeqcCarbonatePka1;
-    else
-        pKa1 = rm.carbonateBufferPka1;
+    if isempty(feedback)
+        hydrogenIon = 10.^(-pH);
+        Ka1 = 10.^(-pKa1);
+        co2FromBuffer = hco3 ./ rho_molar .* ...
+            hydrogenIon ./ Ka1;
+        xsub = max(xsub, co2FromBuffer);
     end
-end
-if isempty(feedback)
-    hydrogenIon = 10.^(-pH);
-    Ka1 = 10.^(-pKa1);
-    co2FromBuffer = hco3 ./ rho_molar .* ...
-        hydrogenIon ./ Ka1;
-    xsub = max(xsub, co2FromBuffer);
-end
 end
 
 function threshold = getH2ActivationThreshold(model)
-threshold = 1e-3;
-options = model.phreeqcCouplingOptions;
-name = 'sequentialH2BiochemPhreeqcH2ActivationThreshold';
-if isfield(options, name)
-    threshold = options.(name);
-end
-validateattributes(threshold, {'numeric'}, ...
-    {'scalar', 'real', 'finite', 'nonnegative', '<=', 1}, ...
-    mfilename, name);
+    threshold = 1e-3;
+    options = model.phreeqcCouplingOptions;
+    name = 'sequentialH2BiochemPhreeqcH2ActivationThreshold';
+    if isfield(options, name)
+        threshold = options.(name);
+    end
+    validateattributes(threshold, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'nonnegative', '<=', 1}, ...
+        mfilename, name);
 end
 
 function response = microbialEnvironmentalResponse(reaction, temperatureC, pH, tds)
-switch reaction
-    case 'MethanogenicArchae'
-        temperatureLimits = [10, 45, 122];
-        pHLimits = [4.1, 7.7, 10.2];
-    case 'SulfateReducingBacteria'
-        temperatureLimits = [10, 48, 113];
-        pHLimits = [1, 7.01, 11.5];
-    case 'AcetogenicBacteria'
-        temperatureLimits = [25, 38, 72];
-        pHLimits = [3.6, 7.04, 9.5];
-    otherwise
-        error('GrowthBactRateSRC:UnsupportedEnvironmentalResponse', ...
-            'No PHREEQC environmental response is defined for reaction "%s".', reaction);
-end
+    switch reaction
+        case 'MethanogenicArchae'
+            temperatureLimits = [10, 45, 122];
+            pHLimits = [4.1, 7.7, 10.2];
+        case 'SulfateReducingBacteria'
+            temperatureLimits = [10, 48, 113];
+            pHLimits = [1, 7.01, 11.5];
+        case 'AcetogenicBacteria'
+            temperatureLimits = [25, 38, 72];
+            pHLimits = [3.6, 7.04, 9.5];
+        otherwise
+            error('GrowthBactRateSRC:UnsupportedEnvironmentalResponse', ...
+                'No PHREEQC environmental response is defined for reaction "%s".', reaction);
+    end
 
-temperatureResponse = asymmetricParabolicResponse( ...
-    temperatureC, temperatureLimits);
-pHResponse = asymmetricParabolicResponse(pH, pHLimits);
+    temperatureResponse = asymmetricParabolicResponse( ...
+        temperatureC, temperatureLimits);
+    pHResponse = asymmetricParabolicResponse(pH, pHLimits);
 
-tdsResponse = ones(size(tds));
-salinityLimited = tds >= 50 & tds <= 300;
-tdsResponse(salinityLimited) = ...
-    (tds(salinityLimited) - 2*50 + 300).* ...
-    (300 - tds(salinityLimited))./(300 - 50)^2;
-tdsResponse(tds > 300) = 0;
+    tdsResponse = ones(size(tds));
+    salinityLimited = tds >= 50 & tds <= 300;
+    tdsResponse(salinityLimited) = ...
+        (tds(salinityLimited) - 2 * 50 + 300) .* ...
+        (300 - tds(salinityLimited)) ./ (300 - 50)^2;
+    tdsResponse(tds > 300) = 0;
 
-response = max(temperatureResponse, 0).*max(pHResponse, 0).* ...
-    max(tdsResponse, 0);
+    response = max(temperatureResponse, 0) .* max(pHResponse, 0) .* ...
+        max(tdsResponse, 0);
 end
 
 function response = asymmetricParabolicResponse(input, limits)
-lower = limits(1);
-optimum = limits(2);
-upper = limits(3);
-response = zeros(size(input));
-belowOptimum = input > lower & input < optimum;
-response(belowOptimum) = -(input(belowOptimum) - lower).* ...
-    (input(belowOptimum) + lower - 2*optimum)./(optimum - lower)^2;
-aboveOptimum = input >= optimum & input < upper;
-response(aboveOptimum) = -(input(aboveOptimum) - upper).* ...
-    (input(aboveOptimum) + upper - 2*optimum)./(optimum - upper)^2;
+    lower = limits(1);
+    optimum = limits(2);
+    upper = limits(3);
+    response = zeros(size(input));
+    belowOptimum = input > lower & input < optimum;
+    response(belowOptimum) = -(input(belowOptimum) - lower) .* ...
+        (input(belowOptimum) + lower - 2 * optimum) ./ (optimum - lower)^2;
+    aboveOptimum = input >= optimum & input < upper;
+    response(aboveOptimum) = -(input(aboveOptimum) - upper) .* ...
+        (input(aboveOptimum) + upper - 2 * optimum) ./ (optimum - upper)^2;
 end
 
 %{

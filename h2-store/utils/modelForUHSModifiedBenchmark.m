@@ -1,56 +1,56 @@
 function [description, options, state0, model, schedule, plotOptions] = ...
     modelForUHSModifiedBenchmark(deck, varargin)
-%MODELFORUHSMODIFIEDBENCHMARK Set up cyclic hydrogen storage in a saline aquifer.
-%
-% SYNOPSIS:
-%   [description, options] = modelForUHSModifiedBenchmark([], false)
-%   [description, options, state0, model, schedule, plotOptions] = ...
-%       modelForUHSModifiedBenchmark(deck, 'name', value, ...)
-%
-% PARAMETERS:
-%   deck - Metric ECLIPSE deck providing geometry, rock and fluid tables.
-%          Fixed logical well-cell IDs must be present and active.
-%   Optional name/value pairs override the default scenario options. Rates
-%   (rateCharge, rateCushion, rateDischarge and rateIdle) are surface volumes
-%   in m^3/s. Pressures bhp and initPres are in Pa; durations time* and target
-%   timesteps dt* are in seconds. Temperatures temp* and initTemp are in K.
-%   initSat gives oil/gas saturations, with brine occupying the oil phase.
-%
-%   numCycles sets the storage-cycle count. numCyclesCushions sets the positive
-%   integer number of cushion/shut-in pairs. use_cushion includes buildup;
-%   use_bhp selects BHP-controlled buildup; use_bc adds prescribed boundary
-%   pressures. Numeric 0/1 selectors chargeOnly, dischargeOnly and cushionOnly
-%   select schedule stages.
-%   Charge-only and discharge-only cannot both be enabled. useGroupCtrl assigns
-%   injection/production well groups.
-%
-% RETURNS:
-%   description - Case description used by the MRST test-suite interface.
-%   options     - Resolved setup options, in SI units.
-%   state0      - Uniform reservoir pressure/saturation, zero dissolved gas
-%                 and initialized well solutions.
-%   model       - Isothermal black-oil model with dissolved hydrogen in brine.
-%   schedule    - Well controls, timesteps and optional boundary conditions.
-%   plotOptions - View settings for MRST visualization.
-%
-% Full setup resets gravity to standard downward acceleration before building
-% boundary pressures and the model. Metadata-only calls leave gravity unchanged.
-% The isothermal state does not apply initTemp. Discharge well controls inherit
-% tempCushion; tempDischarge is retained as an option without being applied.
-%
-% REFERENCES:
-%   Hogeweg, S., Strobel, G. and Hagemann, B. (2022). Benchmark study for the
-%   simulation of underground hydrogen storage operations. Computational
-%   Geosciences, 26, 1367-1378. doi:10.1007/s10596-022-10163-5.
-%   Ahmed, E., et al. (2024). Phase behavior and black-oil simulations of
-%   hydrogen storage in saline aquifers. Advances in Water Resources, 191,
-%   104772.
-%
-% SEE ALSO:
-%   processTestCaseInput, makeBenchmarkRock, makeBenchmarkStorageSchedule,
-%   makeBenchmarkBoundaryConditions, makeBenchmarkInitialState
+    % MODELFORUHSMODIFIEDBENCHMARK Set up cyclic hydrogen storage in a saline aquifer.
+    %
+    % SYNOPSIS:
+    %   [description, options] = modelForUHSModifiedBenchmark([], false)
+    %   [description, options, state0, model, schedule, plotOptions] = ...
+    %       modelForUHSModifiedBenchmark(deck, 'name', value, ...)
+    %
+    % PARAMETERS:
+    %   deck - Metric ECLIPSE deck providing geometry, rock and fluid tables.
+    %          Fixed logical well-cell IDs must be present and active.
+    %   Optional name/value pairs override the default scenario options. Rates
+    %   (rateCharge, rateCushion, rateDischarge and rateIdle) are surface volumes
+    %   in m^3/s. Pressures bhp and initPres are in Pa; durations time* and target
+    %   timesteps dt* are in seconds. Temperatures temp* and initTemp are in K.
+    %   initSat gives oil/gas saturations, with brine occupying the oil phase.
+    %
+    %   numCycles sets the storage-cycle count. numCyclesCushions sets the positive
+    %   integer number of cushion/shut-in pairs. use_cushion includes buildup;
+    %   use_bhp selects BHP-controlled buildup; use_bc adds prescribed boundary
+    %   pressures. Numeric 0/1 selectors chargeOnly, dischargeOnly and cushionOnly
+    %   select schedule stages.
+    %   Charge-only and discharge-only cannot both be enabled. useGroupCtrl assigns
+    %   injection/production well groups.
+    %
+    % RETURNS:
+    %   description - Case description used by the MRST test-suite interface.
+    %   options     - Resolved setup options, in SI units.
+    %   state0      - Uniform reservoir pressure/saturation, zero dissolved gas
+    %                 and initialized well solutions.
+    %   model       - Isothermal black-oil model with dissolved hydrogen in brine.
+    %   schedule    - Well controls, timesteps and optional boundary conditions.
+    %   plotOptions - View settings for MRST visualization.
+    %
+    % Full setup resets gravity to standard downward acceleration before building
+    % boundary pressures and the model. Metadata-only calls leave gravity unchanged.
+    % The isothermal state does not apply initTemp. Discharge well controls inherit
+    % tempCushion; tempDischarge is retained as an option without being applied.
+    %
+    % REFERENCES:
+    %   Hogeweg, S., Strobel, G. and Hagemann, B. (2022). Benchmark study for the
+    %   simulation of underground hydrogen storage operations. Computational
+    %   Geosciences, 26, 1367-1378. doi:10.1007/s10596-022-10163-5.
+    %   Ahmed, E., et al. (2024). Phase behavior and black-oil simulations of
+    %   hydrogen storage in saline aquifers. Advances in Water Resources, 191,
+    %   104772.
+    %
+    % SEE ALSO:
+    %   processTestCaseInput, makeBenchmarkRock, makeBenchmarkStorageSchedule,
+    %   makeBenchmarkBoundaryConditions, makeBenchmarkInitialState
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -70,15 +70,15 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
 %}
 
     description = ['Modified benchmark for hydrogen storage with ', ...
-                   'multiple injection/production cycles using the black-oil model'];
+        'multiple injection/production cycles using the black-oil model'];
 
     % Default storage-cycle options.
     K0 = 273.15 * Kelvin;
     options = struct( ...
-        'rateCharge',        6.14062 * 10^5 * meter^3/day/2, ...
-        'rateIdle',          0.0 * meter^3/day/2, ...
-        'rateCushion',       6.14062 * 10^5 * meter^3/day/2, ...
-        'rateDischarge',     6.14062 * 10^5 * meter^3/day/2, ...
+        'rateCharge',        6.14062 * 10^5 * meter^3 / day / 2, ...
+        'rateIdle',          0.0 * meter^3 / day / 2, ...
+        'rateCushion',       6.14062 * 10^5 * meter^3 / day / 2, ...
+        'rateDischarge',     6.14062 * 10^5 * meter^3 / day / 2, ...
         'bhp',               90.0 * barsa, ...
         'tempCharge',        K0 + 60 * Kelvin, ...
         'tempDischarge',     K0 + 60 * Kelvin, ...
@@ -110,11 +110,11 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
         options, description, varargin{:});
     checkOptions(options);
     if ~fullSetup
-        return;
+        return
     end
     options = merge_options(options, varargin{:});
     if nargout <= 2
-        return;
+        return
     end
     require ad-core ad-props ad-blackoil;
 
@@ -137,17 +137,17 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
         'water', false, 'disgas', true, 'inputdata', deck);
     state0 = makeBenchmarkInitialState(model, schedule.control(1).W, options);
     plotOptions = {'View',               [0, 0], ...
-                   'PlotBoxAspectRatio', [1, 1, 0.25], ...
-                   'Projection',         'orthographic', ...
-                   'Size',               [800, 300]};
+        'PlotBoxAspectRatio', [1, 1, 0.25], ...
+        'Projection',         'orthographic', ...
+        'Size',               [800, 300]};
 end
 
 function W = setUpWells(G, rock, options)
     % Fixed logical deck-cell completions and radii for the modified benchmark.
     logicalCells = [5891; 9612; 13333; 17054; 20775; 24496; ...
-                   28217; 31938; 35659; 39380; 43101];
+        28217; 31938; 35659; 39380; 43101];
     radii = [0.9479; 0.7354; 0.7338; 2.2337; 2.2337; 2.6778; ...
-             2.6722; 5.1490; 5.1491; 0.7834; 0.7834];
+        2.6722; 5.1490; 5.1491; 0.7834; 0.7834];
     [active, cells] = ismember(logicalCells, G.cells.indexMap);
     assert(all(active), 'h2sim:h2store:InactiveBenchmarkCompletion', ...
         'Benchmark completion cells must be active: missing logical cells %s.', ...

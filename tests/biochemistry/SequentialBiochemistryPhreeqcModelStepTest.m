@@ -1,20 +1,20 @@
 classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
-% Timestep partitioning/report and physical-state checks for one step of
-% SequentialBiochemistryPhreeqcModel.
-%
-% A single arbitrary (i.e. NOT a clean multiple of the maximum reaction
-% substep duration) control-step timestep is solved once in
-% TestClassSetup; every Test method below only inspects the resulting
-% report/state, so no test method contains control-flow logic of its own.
-%
-% This requires a working native IPhreeqc or IPhreeqcCOM interface and an on-disk
-% h2_biogeochemistry.dat (both are needed because every accepted
-% reaction substep runs one real PHREEQC equilibrium call); the whole class
-% is skipped cleanly via assumeTrue in TestClassSetup when either is
-% unavailable.
-%
-% SEE ALSO:
-%   SequentialBiochemistryPhreeqcModel, convertToSequentialBiochemistryPhreeqcModel
+    % Timestep partitioning/report and physical-state checks for one step of
+    % SequentialBiochemistryPhreeqcModel.
+    %
+    % A single arbitrary (i.e. NOT a clean multiple of the maximum reaction
+    % substep duration) control-step timestep is solved once in
+    % TestClassSetup; every Test method below only inspects the resulting
+    % report/state, so no test method contains control-flow logic of its own.
+    %
+    % This requires a working native IPhreeqc or IPhreeqcCOM interface and an on-disk
+    % h2_biogeochemistry.dat (both are needed because every accepted
+    % reaction substep runs one real PHREEQC equilibrium call); the whole class
+    % is skipped cleanly via assumeTrue in TestClassSetup when either is
+    % unavailable.
+    %
+    % SEE ALSO:
+    %   SequentialBiochemistryPhreeqcModel, convertToSequentialBiochemistryPhreeqcModel
 
     properties
         model
@@ -27,18 +27,19 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
     end
 
     methods (TestClassSetup)
+
         function setupModelAndRunOneStep(testCase)
-            mrstModule add ad-core ad-props compositional deckformat 
+            mrstModule add ad-core ad-props compositional deckformat;
             databaseFile = resolveStepTestDatabaseFile();
             testCase.assumeTrue(~isempty(databaseFile) && isIPhreeqcComAvailable(), ...
                 ['A working IPhreeqc interface and an on-disk ', ...
-                 'h2_biogeochemistry.dat are required for this test.']);
+                'h2_biogeochemistry.dat are required for this test.']);
 
             % Small grid and a short single control period keep this test
             % fast; options otherwise match the high-rate sequential
             % h2-biochem-PHREEQC benchmark setup (see
             % runThreeBackendComparison / exampleSequentialBiochemistryPhreeqc1D).
-            [~, baseModel, schedule, state0] = setupH2StorageExampleWithSRB_benchmark( ...
+            [~, baseModel, schedule, initialState] = setupH2StorageExampleWithSRB_benchmark( ...
                 'rate', 'highrate', ...
                 'scheduleMode', 'injection', ...
                 'gridCells', 4, ...
@@ -61,11 +62,11 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
                 'phreeqcBackend', 'sequential-h2biochem-phreeqc', ...
                 'phreeqcDatabaseFile', databaseFile);
 
-            testCase.maxDt = 0.4*day;
+            testCase.maxDt = 0.4 * day;
             % Deliberately NOT a clean multiple of maxDt, to prove the
             % substep partitioning is general rather than hardcoded to
             % 2 day / 0.4 day steps.
-            testCase.dt = 0.65*day;
+            testCase.dt = 0.65 * day;
             testCase.model = convertToSequentialBiochemistryPhreeqcModel(baseModel, ...
                 'reactionSubstepMaxDt', testCase.maxDt);
             forces = schedule.control(1);
@@ -74,7 +75,7 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
             testCase.model = testCase.model.validateModel(forces);
             schedule = testCase.model.validateSchedule(schedule);
             forces = schedule.control(1);
-            testCase.state0 = testCase.model.validateState(state0);
+            testCase.state0 = testCase.model.validateState(initialState);
             [testCase.model, testCase.state0] = ...
                 testCase.model.updateForChangedControls(testCase.state0, forces);
             testCase.wellNames = {forces.W.name};
@@ -90,9 +91,11 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
             [testCase.resultState, testCase.report] = testCase.model.stepFunction( ...
                 guess, testCase.state0, testCase.dt, forces, [], [], 1);
         end
+
     end
 
     methods (Test)
+
         %% Report structure: one flow solve, expected reaction substeps.
         function testFlowWellOutputsAreRestored(testCase)
             wells = testCase.resultState.wellSol;
@@ -124,13 +127,13 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
         function testExpectedReactionSubstepCount(testCase)
             stages = testCase.report.SequentialBiochemistryPhreeqcStages;
             testCase.verifyEqual(stages.ReactionSubsteps, ...
-                ceil(testCase.dt/testCase.maxDt));
+                ceil(testCase.dt / testCase.maxDt));
         end
 
         function testReactionSubstepsAreEqualAndSumToDt(testCase)
             stages = testCase.report.SequentialBiochemistryPhreeqcStages;
-            total = stages.ReactionSubsteps*stages.ReactionSubstepSize;
-            testCase.verifyEqual(total, testCase.dt, 'AbsTol', 1e-9*testCase.dt);
+            total = stages.ReactionSubsteps * stages.ReactionSubstepSize;
+            testCase.verifyEqual(total, testCase.dt, 'AbsTol', 1e-9 * testCase.dt);
         end
 
         function testReactionSubstepReportCountMatchesSubstepCount(testCase)
@@ -204,13 +207,14 @@ classdef SequentialBiochemistryPhreeqcModelStepTest < matlab.unittest.TestCase
             testCase.verifyTrue(all(isfinite(cumulative(:))));
             testCase.verifyGreaterThanOrEqual(cumulative(:), 0);
         end
+
     end
 end
 
 function databaseFile = resolveStepTestDatabaseFile()
-% Best-effort h2_biogeochemistry.dat lookup. Returns '' (rather than
-% throwing) when the database cannot be located, so calling tests can
-% gate on it via assumeTrue and skip cleanly.
+    % Best-effort h2_biogeochemistry.dat lookup. Returns '' (rather than
+    % throwing) when the database cannot be located, so calling tests can
+    % gate on it via assumeTrue and skip cleanly.
     databaseFile = getenv('PHREEQC_DATABASE_FILE');
     if isempty(strtrim(databaseFile))
         databaseFile = which('h2_biogeochemistry.dat');
@@ -221,10 +225,9 @@ function databaseFile = resolveStepTestDatabaseFile()
 end
 
 function tf = isIPhreeqcComAvailable()
-% Best-effort probe for the platform IPhreeqc interface. Never throws:
-% returns false on any failure (missing native library or COM server) so
-% calling tests can gate on it via assumeTrue and skip cleanly.
-    tf = false;
+    % Best-effort probe for the platform IPhreeqc interface. Never throws:
+    % returns false on any failure (missing native library or COM server) so
+    % calling tests can gate on it via assumeTrue and skip cleanly.
     try
         server = createH2simIPhreeqc('IPhreeqcCOM.Object');
         delete(server);

@@ -49,29 +49,30 @@ classdef DispersiveDiffusivity < StateFunction
 
     properties
         % --- General ---
-        minPorosity = 1e-12;
+        minPorosity = 1e-12
 
         % --- Mechanical dispersion parameters ---
-        alphaL_water = 5.0e-2;   % [m]
-        alphaT_water = 5.0e-3;
-        alphaL_gas   = 1.5e-1;
-        alphaT_gas   = 1.5e-2;
+        alphaL_water = 5.0e-2    % [m]
+        alphaT_water = 5.0e-3
+        alphaL_gas   = 1.5e-1
+        alphaT_gas   = 1.5e-2
 
         % --- Molecular diffusion parameters ---
-        Tref = 273.15 + 40;               % [K]
-        pref = 101325;                     % [Pa] (1 atm)
-        tortuosityExponent = 7/3;          % Millington-Quirk exponent
-        gasDiffExponent = 1.5;            % Chapman-Enskog temperature exponent
-        defaultLiquidDiffusivity = 1e-9;   % [m^2/s]
-        minDiffusivity = 1e-15;            % reasonable floor for diffusivities
+        Tref = 273.15 + 40                % [K]
+        pref = 101325                      % [Pa] (1 atm)
+        tortuosityExponent = 7 / 3           % Millington-Quirk exponent
+        gasDiffExponent = 1.5             % Chapman-Enskog temperature exponent
+        defaultLiquidDiffusivity = 1e-9    % [m^2/s]
+        minDiffusivity = 1e-15             % reasonable floor for diffusivities
 
         % Lennard-Jones defaults for unknown components
-        defaultSigma   = 3.5;              % [Angstrom]
-        defaultEpsilon = 150.0;            % [K]
+        defaultSigma   = 3.5               % [Angstrom]
+        defaultEpsilon = 150.0             % [K]
     end
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function d = DispersiveDiffusivity(model, varargin)
             % Constructor.
             %
@@ -106,7 +107,7 @@ classdef DispersiveDiffusivity < StateFunction
             d.label = 'D_{eff}';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function D_eff = evaluateOnDomain(d, model, state)
             % Evaluate cell-based effective dispersive diffusivity.
             % Separates mechanical dispersion (phase-only) from diffusion (component+phase)
@@ -126,7 +127,7 @@ classdef DispersiveDiffusivity < StateFunction
                 nph = model.getNumberOfPhases();
                 D_eff = cell(ncomp, nph);
                 [D_eff{:}] = deal(0);
-                return;
+                return
             end
 
             ncomp = model.getNumberOfComponents();
@@ -151,8 +152,8 @@ classdef DispersiveDiffusivity < StateFunction
             % --- Pre-compute molecular diffusion parameters -------------------
             if model.molecularDiffusion
                 [p, T] = model.getProps(state, 'pressure', 'temperature');
-                p_safe = max(p, 1e-8*barsa);
-                gasScale = (T./d.Tref).^d.gasDiffExponent .* (d.pref./p_safe);
+                p_safe = max(p, 1e-8 * barsa);
+                gasScale = (T ./ d.Tref).^d.gasDiffExponent .* (d.pref ./ p_safe);
                 [Dliq_ref, paramLJ] = localLoadDiffusionDatabase(d, model);
                 Dij_ref = localBinaryDiffusionReference(d, model, paramLJ);
             end
@@ -202,6 +203,7 @@ classdef DispersiveDiffusivity < StateFunction
                 end
             end
         end
+
     end
 end
 
@@ -209,166 +211,168 @@ end
 % Helper functions
 % ------------------------------------------------------------------------
 function D_disp_ph = mechanicalDispersion(d, model, state, nph, L_ix, V_ix)
-% Isotropic Darcy-speed approximation, evaluated once per phase.
-G = model.G;
-op = model.operators;
-ncells = G.cells.num;
-D_disp_ph = cell(nph, 1);
-[D_disp_ph{:}] = deal(zeros(ncells, 1));
+    % Isotropic Darcy-speed approximation, evaluated once per phase.
+    G = model.G;
+    op = model.operators;
+    ncells = G.cells.num;
+    D_disp_ph = cell(nph, 1);
+    [D_disp_ph{:}] = deal(zeros(ncells, 1));
 
-if model.molecularDispersion
-    phase_flux = model.getProp(state, 'PhaseFlux');
+    if model.molecularDispersion
+        phase_flux = model.getProp(state, 'PhaseFlux');
 
-    % Dispersivity coefficients
-    aL = zeros(1, nph);
-    aT = zeros(1, nph);
-    aL(L_ix) = d.alphaL_water;
-    aT(L_ix) = d.alphaT_water;
-    if V_ix ~= L_ix
-        aL(V_ix) = d.alphaL_gas;
-        aT(V_ix) = d.alphaT_gas;
+        % Dispersivity coefficients
+        aL = zeros(1, nph);
+        aT = zeros(1, nph);
+        aL(L_ix) = d.alphaL_water;
+        aT(L_ix) = d.alphaT_water;
+        if V_ix ~= L_ix
+            aL(V_ix) = d.alphaL_gas;
+            aT(V_ix) = d.alphaT_gas;
+        end
+
+        % Compute dispersion for each phase (ONCE)
+        for ph = 1:nph
+            u_face = ifcell(phase_flux, ph);
+            internalFaces = find(op.internalConn);
+            internalFaceMap = sparse(internalFaces, ...
+                1:numel(internalFaces), 1, G.faces.num, ...
+                numel(internalFaces));
+            u_face_all = internalFaceMap * u_face;
+
+            v_mag = faceFlux2cellSpeed(G, u_face_all);
+
+            % Isotropic approximation: D = ((aL + 2*aT)/3)*DarcySpeed.
+            D_disp_ph{ph} = ((aL(ph) + 2 * aT(ph)) / 3) .* v_mag;
+            D_disp_ph{ph} = max(D_disp_ph{ph}, 0);
+        end
     end
-
-    % Compute dispersion for each phase (ONCE)
-    for ph = 1:nph
-        u_face = ifcell(phase_flux, ph);
-        internalFaces = find(op.internalConn);
-        internalFaceMap = sparse(internalFaces, ...
-            1:numel(internalFaces), 1, G.faces.num, ...
-            numel(internalFaces));
-        u_face_all = internalFaceMap*u_face;
-
-        v_mag = faceFlux2cellSpeed(G, u_face_all);
-
-        % Isotropic approximation: D = ((aL + 2*aT)/3)*DarcySpeed.
-        D_disp_ph{ph} = ((aL(ph) + 2*aT(ph))/3) .* v_mag;
-        D_disp_ph{ph} = max(D_disp_ph{ph}, 0);
-    end
-end
 end
 
 function D_i = gasMixtureDiffusivity(d, model, state, c, ncomp, Dij_ref, gasScale)
-% Wilke mixture coefficient from the unchanged binary-reference matrix.
-% Gas diffusion (Wilke multi-component)
-% D_i,mix = (1 - y_i) / sum(y_j/D_ij) for j!=i
-yAll = model.getProp(state, 'y');
-yc_curr = localGetComponentVector(yAll, c);
-numerator = max(1 - yc_curr, 1e-6);
+    % Wilke mixture coefficient from the unchanged binary-reference matrix.
+    % Gas diffusion (Wilke multi-component)
+    % D_i,mix = (1 - y_i) / sum(y_j/D_ij) for j!=i
+    yAll = model.getProp(state, 'y');
+    yc_curr = localGetComponentVector(yAll, c);
+    numerator = max(1 - yc_curr, 1e-6);
 
-invDi = 0;
-for j = 1:ncomp
-    if j == c, continue; end
-    yj = localGetComponentVector(yAll, j);
-    Dij = Dij_ref(c, j) .* gasScale;
-    Dij = max(Dij, d.minDiffusivity);
-    invDi = invDi + yj ./ Dij;
-end
-Di_mix = numerator ./ max(invDi, d.minDiffusivity);
-D_i = Di_mix;
+    invDi = 0;
+    for j = 1:ncomp
+        if j == c
+            continue
+        end
+        yj = localGetComponentVector(yAll, j);
+        Dij = Dij_ref(c, j) .* gasScale;
+        Dij = max(Dij, d.minDiffusivity);
+        invDi = invDi + yj ./ Dij;
+    end
+    Di_mix = numerator ./ max(invDi, d.minDiffusivity);
+    D_i = Di_mix;
 end
 
 function val = ifcell(field, ph)
-% Extract phase from cell array or matrix.
-if iscell(field)
-    val = field{ph};
-else
-    val = field(:, ph);
-end
+    % Extract phase from cell array or matrix.
+    if iscell(field)
+        val = field{ph};
+    else
+        val = field(:, ph);
+    end
 end
 
 function v = localGetComponentVector(z, j)
-% Extract component j from cell array or matrix.
-if iscell(z)
-    v = z{j};
-else
-    v = z(:, j);
-end
+    % Extract component j from cell array or matrix.
+    if iscell(z)
+        v = z{j};
+    else
+        v = z(:, j);
+    end
 end
 
 function [Dliq_ref, paramLJ] = localLoadDiffusionDatabase(d, model)
-% Load liquid diffusion coefficients and Lennard-Jones parameters.
-% Returns diffusivity in m^2/s and LJ parameters [sigma (Angstrom), epsilon (K)]
-namecp = model.compFluid.names();
-ncomp  = numel(namecp);
-Dliq_ref = d.defaultLiquidDiffusivity * ones(ncomp, 1);
-paramLJ  = repmat([d.defaultSigma, d.defaultEpsilon], ncomp, 1);
+    % Load liquid diffusion coefficients and Lennard-Jones parameters.
+    % Returns diffusivity in m^2/s and LJ parameters [sigma (Angstrom), epsilon (K)]
+    namecp = model.compFluid.names();
+    ncomp  = numel(namecp);
+    Dliq_ref = d.defaultLiquidDiffusivity * ones(ncomp, 1);
+    paramLJ  = repmat([d.defaultSigma, d.defaultEpsilon], ncomp, 1);
 
-db.Dliq = struct('h2',6.44e-9,'c1',2.15e-9,'methane',2.15e-9,'co2',2.72e-9, ...
-    'h2o',3.29e-9,'water',3.29e-9,'n2',2.86e-9,'c2',1.72e-9, ...
-    'ethane',1.72e-9,'c3',1.43e-9,'propane',1.43e-9,'h2s',2.15e-9, ...
-    'nc4',1.15e-9,'butane',1.15e-9);
-db.LJ = struct('h2',[2.92,59.7],'c1',[3.758,148.6],'methane',[3.758,148.6], ...
-    'co2',[3.996,195.2],'h2o',[2.641,809.1],'water',[2.641,809.1], ...
-    'n2',[3.798,71.4],'c2',[4.443,215.7],'ethane',[4.443,215.7], ...
-    'c3',[5.118,237.1],'propane',[5.118,237.1],'h2s',[3.60,301.0], ...
-    'nc4',[5.206,289.5],'butane',[5.206,289.5]);
+    db.Dliq = struct('h2', 6.44e-9, 'c1', 2.15e-9, 'methane', 2.15e-9, 'co2', 2.72e-9, ...
+        'h2o', 3.29e-9, 'water', 3.29e-9, 'n2', 2.86e-9, 'c2', 1.72e-9, ...
+        'ethane', 1.72e-9, 'c3', 1.43e-9, 'propane', 1.43e-9, 'h2s', 2.15e-9, ...
+        'nc4', 1.15e-9, 'butane', 1.15e-9);
+    db.LJ = struct('h2', [2.92, 59.7], 'c1', [3.758, 148.6], 'methane', [3.758, 148.6], ...
+        'co2', [3.996, 195.2], 'h2o', [2.641, 809.1], 'water', [2.641, 809.1], ...
+        'n2', [3.798, 71.4], 'c2', [4.443, 215.7], 'ethane', [4.443, 215.7], ...
+        'c3', [5.118, 237.1], 'propane', [5.118, 237.1], 'h2s', [3.60, 301.0], ...
+        'nc4', [5.206, 289.5], 'butane', [5.206, 289.5]);
 
-for i = 1:ncomp
-    key = lower(namecp{i});
-    if isfield(db.Dliq, key)
-        Dliq_ref(i) = db.Dliq.(key);
+    for i = 1:ncomp
+        key = lower(namecp{i});
+        if isfield(db.Dliq, key)
+            Dliq_ref(i) = db.Dliq.(key);
+        end
+        if isfield(db.LJ, key)
+            paramLJ(i, :) = db.LJ.(key);
+        end
     end
-    if isfield(db.LJ, key)
-        paramLJ(i,:) = db.LJ.(key);
-    end
-end
 end
 
 function Dij_ref = localBinaryDiffusionReference(d, model, paramLJ)
-% Computes binary gas diffusion coefficients using Chapman-Enskog theory
-% with Lennard-Jones collision integral (SI units, m^2/s at reference T/P).
-%
-% Formula: D_ij = (1.858e-7 * T^1.5) / (sigma_ij^2 * sqrt(Mij*) * Omega_D)
-% where Omega_D is the collision integral (Neufeld fit)
+    % Computes binary gas diffusion coefficients using Chapman-Enskog theory
+    % with Lennard-Jones collision integral (SI units, m^2/s at reference T/P).
+    %
+    % Formula: D_ij = (1.858e-7 * T^1.5) / (sigma_ij^2 * sqrt(Mij*) * Omega_D)
+    % where Omega_D is the collision integral (Neufeld fit)
 
-ncomp = size(paramLJ, 1);
-Molmass = 1e3 .* model.compFluid.molarMass;   % g/mol (converted from kg/mol)
-epsilon = paramLJ(:, 2);                       % Lennard-Jones energy [K]
-sigma = paramLJ(:, 1);                         % collision diameter [Angstrom]
+    ncomp = size(paramLJ, 1);
+    Molmass = 1e3 .* model.compFluid.molarMass;   % g/mol (converted from kg/mol)
+    epsilon = paramLJ(:, 2);                       % Lennard-Jones energy [K]
+    sigma = paramLJ(:, 1);                         % collision diameter [Angstrom]
 
-const = 1.858e-7;  % Chapman-Enskog constant (m^2/s)
-fTref = d.Tref^1.5;   % temperature factor at reference conditions
-Dij_ref = zeros(ncomp);
+    const = 1.858e-7;  % Chapman-Enskog constant (m^2/s)
+    fTref = d.Tref^1.5;   % temperature factor at reference conditions
+    Dij_ref = zeros(ncomp);
 
-for i = 1:ncomp
-    for j = 1:ncomp
-        if i == j
-            Dij_ref(i,j) = inf;
-            continue;
+    for i = 1:ncomp
+        for j = 1:ncomp
+            if i == j
+                Dij_ref(i, j) = inf;
+                continue
+            end
+
+            % Combining rules (Lorentz-Berthelot)
+            sigma_ij = 0.5 * (sigma(i) + sigma(j));
+            epsilon_ij = sqrt(epsilon(i) * epsilon(j));
+
+            % Reduced temperature for collision integral
+            T_star = d.Tref / epsilon_ij;
+
+            % Neufeld collision integral approximation
+            % Omega_D(T*) = A/(T*)^B + C/exp(D*T*) + E/exp(F*T*) + G/exp(H*T*)
+            A = 1.06036;
+            B = 0.15610;
+            C = 0.19300;
+            D = 0.47635;
+            E = 1.03587;
+            F = 1.52996;
+            G = 1.76474;
+            H = 3.89411;
+
+            Omega_D = A * (T_star^(-B)) + C * exp(-D * T_star) + ...
+                E * exp(-F * T_star) + G * exp(-H * T_star);
+
+            % Molecular mass term
+            sqrtMass = sqrt((1.0 / Molmass(i)) + (1.0 / Molmass(j)));
+            sigma_ij2 = sigma_ij^2;
+
+            % Chapman-Enskog formula with collision integral
+            Dij_ref(i, j) = (const * fTref * sqrtMass) / (sigma_ij2 * Omega_D);
         end
-
-        % Combining rules (Lorentz-Berthelot)
-        sigma_ij = 0.5 * (sigma(i) + sigma(j));
-        epsilon_ij = sqrt(epsilon(i) * epsilon(j));
-
-        % Reduced temperature for collision integral
-        T_star = d.Tref / epsilon_ij;
-
-        % Neufeld collision integral approximation
-        % Omega_D(T*) = A/(T*)^B + C/exp(D*T*) + E/exp(F*T*) + G/exp(H*T*)
-        A = 1.06036;
-        B = 0.15610;
-        C = 0.19300;
-        D = 0.47635;
-        E = 1.03587;
-        F = 1.52996;
-        G = 1.76474;
-        H = 3.89411;
-
-        Omega_D = A * (T_star^(-B)) + C * exp(-D*T_star) + ...
-            E * exp(-F*T_star) + G * exp(-H*T_star);
-
-        % Molecular mass term
-        sqrtMass = sqrt((1.0 / Molmass(i)) + (1.0 / Molmass(j)));
-        sigma_ij2 = sigma_ij^2;
-
-        % Chapman-Enskog formula with collision integral
-        Dij_ref(i,j) = (const * fTref * sqrtMass) / (sigma_ij2 * Omega_D);
     end
-end
 
-% Symmetrize matrix: D_ij = D_ji
-Dij_ref = 0.5 * (Dij_ref + Dij_ref.');
+    % Symmetrize matrix: D_ij = D_ji
+    Dij_ref = 0.5 * (Dij_ref + Dij_ref.');
 end
 
 %{

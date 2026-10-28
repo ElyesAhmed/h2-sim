@@ -1,23 +1,29 @@
 classdef H2StorePhaseTransferTest < matlab.unittest.TestCase
-    %H2STOREPHASETRANSFERTEST PVT round-trip and phase-transfer regressions.
+    % H2STOREPHASETRANSFERTEST PVT round-trip and phase-transfer regressions.
     properties
         Cases
     end
     methods (TestClassSetup)
+
         function simulate(test)
             test.Cases = runH2StorePhaseTransferCases();
         end
+
     end
     methods (Test)
+
         function dissolution(test)
             checkCase(test, 'dissolution', true, false);
         end
+
         function vaporization(test)
             checkCase(test, 'vaporization', false, true);
         end
+
         function combined(test)
             checkCase(test, 'combined', true, true);
         end
+
     end
 end
 
@@ -45,16 +51,16 @@ function checkCase(test, name, disgas, vapoil)
     end
     if disgas
         test.verifyGreaterThan(actual(end).rs, 0);
-        test.verifyGreaterThan(norm(actual(end).rs-actual(1).rs, inf), 1e-8);
-        test.verifyGreaterThan(norm(actual(end).dissolved-actual(1).dissolved, inf), 1e-8);
+        test.verifyGreaterThan(norm(actual(end).rs - actual(1).rs, inf), 1e-8);
+        test.verifyGreaterThan(norm(actual(end).dissolved - actual(1).dissolved, inf), 1e-8);
     else
         test.verifyEqual(actual(end).rs, zeros(4, 1));
         test.verifyEqual(actual(end).dissolved, zeros(4, 1));
     end
     if vapoil
         test.verifyGreaterThan(actual(end).rv, 0);
-        test.verifyGreaterThan(norm(actual(end).rv-actual(1).rv, inf), 1e-12);
-        test.verifyGreaterThan(norm(actual(end).vaporized-actual(1).vaporized, inf), 1e-10);
+        test.verifyGreaterThan(norm(actual(end).rv - actual(1).rv, inf), 1e-12);
+        test.verifyGreaterThan(norm(actual(end).vaporized - actual(1).vaporized, inf), 1e-10);
     else
         test.verifyEqual(actual(end).rv, zeros(4, 1));
         test.verifyEqual(actual(end).vaporized, zeros(4, 1));

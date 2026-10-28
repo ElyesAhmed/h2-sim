@@ -1,18 +1,18 @@
 function schedule = coarsenScheduleByControl(schedule, maxDt)
-% Partition every operating period (injection/storage/production, i.e.
-% every distinct schedule.control) into equal-size flow steps no larger
-% than maxDt, preserving each period's total duration exactly.
-%
-% Used to give the coarse-flow/local-reaction split
-% (SequentialBiochemistryPhreeqcModel) a coarse global flow-step
-% resolution while it independently subcycles local reactions at a finer
-% scale (see reactionSubstepMaxDt).
-%
-% SYNOPSIS:
-%   schedule = coarsenScheduleByControl(schedule, 2*day)
-%
-% SEE ALSO:
-%   SequentialBiochemistryPhreeqcModel, convertToSequentialBiochemistryPhreeqcModel
+    % Partition every operating period (injection/storage/production, i.e.
+    % every distinct schedule.control) into equal-size flow steps no larger
+    % than maxDt, preserving each period's total duration exactly.
+    %
+    % Used to give the coarse-flow/local-reaction split
+    % (SequentialBiochemistryPhreeqcModel) a coarse global flow-step
+    % resolution while it independently subcycles local reactions at a finer
+    % scale (see reactionSubstepMaxDt).
+    %
+    % SYNOPSIS:
+    %   schedule = coarsenScheduleByControl(schedule, 2*day)
+    %
+    % SEE ALSO:
+    %   SequentialBiochemistryPhreeqcModel, convertToSequentialBiochemistryPhreeqcModel
 
     control = schedule.step.control(:);
     val = schedule.step.val(:);
@@ -22,8 +22,8 @@ function schedule = coarsenScheduleByControl(schedule, maxDt)
     for i = 1:numel(controls)
         mask = control == controls(i);
         total = sum(val(mask));
-        nSteps = ceil(total/maxDt);
-        coarseVal = repmat(total/nSteps, nSteps, 1);
+        nSteps = ceil(total / maxDt);
+        coarseVal = repmat(total / nSteps, nSteps, 1);
         newVal = [newVal; coarseVal]; %#ok<AGROW>
         newControl = [newControl; repmat(controls(i), nSteps, 1)]; %#ok<AGROW>
     end

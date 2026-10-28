@@ -1,17 +1,20 @@
 classdef H2StoreDomeStateTest < matlab.unittest.TestCase
-    %H2STOREDOMESTATETEST Prescribed boundary pressure and initial solution ratios.
+    % H2STOREDOMESTATETEST Prescribed boundary pressure and initial solution ratios.
     properties (TestParameter)
         acceleration = {[0, 0, -9.81], [2, -1, 3], [0, 0, 0]}
         wellCount = {1, 2}
     end
     methods (TestMethodSetup)
+
         function saveGravity(test)
             saved = gravity;
             test.addTeardown(@() gravity(saved));
             gravity reset on;
         end
+
     end
     methods (Test)
+
         function prescribed3DPressure(test, acceleration)
             gravity(acceleration);
             G = computeGeometry(cartGrid([2, 3, 2], [50, 30, 20]));
@@ -21,15 +24,16 @@ classdef H2StoreDomeStateTest < matlab.unittest.TestCase
             bc = makeDomeAquiferBoundaryConditions(G, fluid, options);
             faces = find(G.faces.centroids(:, 1) == 0);
             xyz = G.faces.centroids(faces, :);
-            gradient = ((xyz(:,1)+100)*acceleration(1) + ...
-                (xyz(:,2)+100)*acceleration(2) + ...
-                (xyz(:,3)+100)*acceleration(3))/15;
-            expected = options.initPres + 5e4 - 998*gradient;
+            gradient = ((xyz(:, 1) + 100) * acceleration(1) + ...
+                (xyz(:, 2) + 100) * acceleration(2) + ...
+                (xyz(:, 3) + 100) * acceleration(3)) / 15;
+            expected = options.initPres + 5e4 - 998 * gradient;
             test.verifyEqual(bc.face, faces);
             test.verifyEqual(bc.value, expected, 'AbsTol', 1e-9);
             test.verifyEqual(bc.sat, repmat([0.8, 0.2], numel(faces), 1));
             test.verifyEqual(bc.type, repmat({'pressure'}, 1, numel(faces)));
         end
+
         function planarPressure(test)
             gravity([3, 4, 0]);
             G = computeGeometry(cartGrid([2, 3], [50, 30]));
@@ -37,32 +41,34 @@ classdef H2StoreDomeStateTest < matlab.unittest.TestCase
             options = struct('initPres', 37e5, 'initSat', [1, 0]);
             bc = makeDomeAquiferBoundaryConditions(G, fluid, options);
             y = G.faces.centroids(bc.face, 2);
-            expected = 37e5 + 5e4 + 1000*(y+100)*5/15;
+            expected = 37e5 + 5e4 + 1000 * (y + 100) * 5 / 15;
             test.verifyEqual(bc.value, expected, 'AbsTol', 1e-9);
             test.verifyEqual(gravity, [3, 4, 0]);
         end
+
         function initialSolution(test, wellCount)
             G = computeGeometry(cartGrid([2, 2, 2], [50, 50, 20]));
-            rock = makeRock(G, 10*milli*darcy, 0.25);
-            fluid = initSimpleADIFluid('phases','OG','mu',[1,0.1], ...
-                'rho',[1000,1],'n',[2,2]);
+            rock = makeRock(G, 10 * milli * darcy, 0.25);
+            fluid = initSimpleADIFluid('phases', 'OG', 'mu', [1, 0.1], ...
+                'rho', [1000, 1], 'n', [2, 2]);
             model = GenericBlackOilModel(G, rock, fluid, ...
-                'water',false,'disgas',true,'vapoil',true);
+                'water', false, 'disgas', true, 'vapoil', true);
             W = [];
             for k = 1:wellCount
-                W = addWell(W, G, rock, k, 'Name', sprintf('Storage%d',k), ...
-                    'Type','rate','Val',1,'Compi',[0,1]);
+                W = addWell(W, G, rock, k, 'Name', sprintf('Storage%d', k), ...
+                    'Type', 'rate', 'Val', 1, 'Compi', [0, 1]);
             end
-            options = struct('initPres',37e5,'initSat',[0.8,0.2],'initTemp',333);
+            options = struct('initPres', 37e5, 'initSat', [0.8, 0.2], 'initTemp', 333);
             state = makeDomeAquiferInitialState(model, W, options);
-            test.verifyEqual(state.pressure, repmat(37e5,G.cells.num,1));
-            test.verifyEqual(state.s, repmat([0.8,0.2],G.cells.num,1));
-            test.verifyEqual(state.rs, zeros(G.cells.num,1));
-            test.verifyEqual(state.rv, zeros(G.cells.num,1));
-            test.verifyEqual([state.wellSol.bhp], repmat(37e5,1,wellCount));
+            test.verifyEqual(state.pressure, repmat(37e5, G.cells.num, 1));
+            test.verifyEqual(state.s, repmat([0.8, 0.2], G.cells.num, 1));
+            test.verifyEqual(state.rs, zeros(G.cells.num, 1));
+            test.verifyEqual(state.rv, zeros(G.cells.num, 1));
+            test.verifyEqual([state.wellSol.bhp], repmat(37e5, 1, wellCount));
             test.verifyEqual({state.wellSol.name}, {W.name});
-            test.verifyFalse(isfield(state,'T'));
+            test.verifyFalse(isfield(state, 'T'));
         end
+
     end
 end
 

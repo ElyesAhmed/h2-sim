@@ -1,37 +1,37 @@
 function result = exampleBlackOilAquifer2D(varargin)
-%EXAMPLEBLACKOILAQUIFER2D Simulate structural trapping and cyclic hydrogen storage.
-%
-% SYNOPSIS:
-%   result = exampleBlackOilAquifer2D()
-%   result = exampleBlackOilAquifer2D('name', value, ...)
-%
-% OPTIONAL PARAMETERS:
-%   gridSpacing          - Target grid spacing [m], default [2, 2].
-%   numCycles            - Positive integer storage-cycle count, default 5.
-%   plotResults          - Plot simulation results and fluid tables, default true.
-%   minimumProductionBhp - Withdrawal pressure limit [Pa], default 35 bar.
-%   deckFile             - ECLIPSE deck path. Empty selects the bundled
-%                          Aquifer2D/H2STORAGE_RS.DATA deck.
-%   outputDirectory      - Folder for aquifer_results.mat and generated plots,
-%                          default build/aquifer-2d under the current folder.
-%
-% RETURNS:
-%   result - Structure containing the model, initial state, schedule, states,
-%            well solutions, reports, packed problem, resolved setup and paths.
-%            elapsedSeconds measures the packed simulation call.
-%
-% The case uses gravity, layered rock, capillarity and dissolved hydrogen.
-% Brine occupies the black-oil model's oil phase. A single well retains its
-% physical name through all controls; its stage field records each operation.
-% The initial well BHP is 5 bar above the maximum completion pressure.
-% Packed outputs persist through packH2simSimulationProblem, and the result
-% structure is also saved in outputDirectory. No PHREEQC engine is required.
-%
-% SEE ALSO:
-%   modelForSimple2DAquifer, packH2simSimulationProblem,
-%   plotBlackOilAquifer2D, plotAquiferFluidTables
+    % EXAMPLEBLACKOILAQUIFER2D Simulate structural trapping and cyclic hydrogen storage.
+    %
+    % SYNOPSIS:
+    %   result = exampleBlackOilAquifer2D()
+    %   result = exampleBlackOilAquifer2D('name', value, ...)
+    %
+    % OPTIONAL PARAMETERS:
+    %   gridSpacing          - Target grid spacing [m], default [2, 2].
+    %   numCycles            - Positive integer storage-cycle count, default 5.
+    %   plotResults          - Plot simulation results and fluid tables, default true.
+    %   minimumProductionBhp - Withdrawal pressure limit [Pa], default 35 bar.
+    %   deckFile             - ECLIPSE deck path. Empty selects the bundled
+    %                          Aquifer2D/H2STORAGE_RS.DATA deck.
+    %   outputDirectory      - Folder for aquifer_results.mat and generated plots,
+    %                          default build/aquifer-2d under the current folder.
+    %
+    % RETURNS:
+    %   result - Structure containing the model, initial state, schedule, states,
+    %            well solutions, reports, packed problem, resolved setup and paths.
+    %            elapsedSeconds measures the packed simulation call.
+    %
+    % The case uses gravity, layered rock, capillarity and dissolved hydrogen.
+    % Brine occupies the black-oil model's oil phase. A single well retains its
+    % physical name through all controls; its stage field records each operation.
+    % The initial well BHP is 5 bar above the maximum completion pressure.
+    % Packed outputs persist through packH2simSimulationProblem, and the result
+    % structure is also saved in outputDirectory. No PHREEQC engine is required.
+    %
+    % SEE ALSO:
+    %   modelForSimple2DAquifer, packH2simSimulationProblem,
+    %   plotBlackOilAquifer2D, plotAquiferFluidTables
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of h2sim.
@@ -50,12 +50,11 @@ You should have received a copy of the GNU General Public License
 along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
 %}
 
-
     options = struct( ...
         'gridSpacing',          [2, 2], ...
         'numCycles',            5, ...
         'plotResults',          true, ...
-        'minimumProductionBhp', 35*barsa, ...
+        'minimumProductionBhp', 35 * barsa, ...
         'deckFile',             '', ...
         'outputDirectory',      fullfile(pwd, 'build', 'aquifer-2d'));
     options = merge_options(options, varargin{:});
@@ -84,7 +83,7 @@ along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
     end
     state0.wellSol(1).name = 'Storage';
     state0.wellSol(1).bhp = ...
-        max(state0.pressure(schedule.control(1).W.cells))+5*barsa;
+        max(state0.pressure(schedule.control(1).W.cells)) + 5 * barsa;
 
     %% Configure the solvers and run the packed problem
     solver = NonLinearSolver();

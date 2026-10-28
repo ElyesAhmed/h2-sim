@@ -26,6 +26,7 @@ classdef BactPorosity < StateFunction
     end
 
     methods
+
         function poro = BactPorosity(model)
             % Constructor for bacteria-porosity relationship
             poro@StateFunction(model);
@@ -41,7 +42,7 @@ classdef BactPorosity < StateFunction
             poro.label = 'Phi';
         end
 
-        function poro = evaluateOnDomain(prop, model, state)
+        function poro = evaluateOnDomain(~, model, state)
             % Evaluate porosity modification
             %
             % PARAMETERS:
@@ -73,6 +74,7 @@ classdef BactPorosity < StateFunction
                 end
             end
         end
+
     end
 end
 

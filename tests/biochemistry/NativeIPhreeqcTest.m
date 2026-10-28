@@ -1,9 +1,10 @@
 classdef NativeIPhreeqcTest < matlab.unittest.TestCase
     % Exercise the Linux interface, also runnable with Windows native DLLs.
     methods (Test)
+
         function selectedOutputAndRepeatedRuns(test)
             iph = H2simNativeIPhreeqc();
-            cleanup = onCleanup(@() delete(iph)); %#ok<NASGU>
+            cleanup = onCleanup(@() delete(iph));
             test.assertEqual(iph.LoadDatabase(which('h2_biogeochemistry.dat')), 0);
             input = sprintf(['SOLUTION 1\npH 7\nNa 0.123456789\nCl 0.123456789\n' ...
                 'SELECTED_OUTPUT 1\n-reset false\n-pH true\n-totals Na Cl\nEND\n']);
@@ -17,6 +18,7 @@ classdef NativeIPhreeqcTest < matlab.unittest.TestCase
                     0.123456789e-3, 'AbsTol', 1e-12);
             end
         end
+
     end
 end
 

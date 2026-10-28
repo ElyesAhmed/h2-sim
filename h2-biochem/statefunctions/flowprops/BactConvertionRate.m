@@ -34,7 +34,8 @@ classdef BactConvertionRate < StateFunction
     %   CarbonLimitedGrowthRate, SRBTracerConvRate, BiochemistryModel
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function bcr = BactConvertionRate(model, varargin)
             % Constructor for bacterial conversion rate calculator.
             %
@@ -65,7 +66,7 @@ classdef BactConvertionRate < StateFunction
             bcr.label = 'Q_biot';
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function qbiot = evaluateOnDomain(~, model, state)
             % Compute bacterial conversion rate for each component.
             %
@@ -91,14 +92,14 @@ classdef BactConvertionRate < StateFunction
 
             % Early return if bacterial model is not active
             if ~(rm.bacteriamodel && rm.liquidPhase)
-                return;
+                return
             end
             if ismethod(rm, 'isSequentialCompositionalPhreeqcBackend') && ...
-                    rm.isSequentialCompositionalPhreeqcBackend()
+                rm.isSequentialCompositionalPhreeqcBackend()
                 % The compositional PHREEQC COM split owns MET/ACE/SRB chemistry after
                 % convergence. Keep the MRST transport equations, but do
                 % not apply their microbial component sources as well.
-                return;
+                return
             end
 
             % Get biochemical fluid properties
@@ -153,7 +154,7 @@ classdef BactConvertionRate < StateFunction
                 % Calculate base conversion rate
                 % The source is based on microbial mass and the
                 % reaction-specific yield scale.
-                qbase = psigrowth_i.*bmass_i./Y_H2(i);
+                qbase = psigrowth_i .* bmass_i ./ Y_H2(i);
 
                 % For SRB, only a pH/salinity-dependent fraction of the
                 % total sulfide produced is volatile H2S; the rest stays
@@ -182,35 +183,36 @@ classdef BactConvertionRate < StateFunction
                 end
             end
         end
+
     end
 end
 
 function validateMetabolicReactions(bcrm, nreact)
-% Validate reactor types
-for i = 1:nreact
-    rxn = bcrm.metabolicReaction{i};
-    if ~ismember(rxn, {'MethanogenicArchae', 'AcetogenicBacteria', 'SulfateReducingBacteria'})
-        error('BactConvertionRate:UnsupportedReaction', ...
-            'Unsupported metabolic reaction: %s', rxn);
+    % Validate reactor types
+    for i = 1:nreact
+        rxn = bcrm.metabolicReaction{i};
+        if ~ismember(rxn, {'MethanogenicArchae', 'AcetogenicBacteria', 'SulfateReducingBacteria'})
+            error('BactConvertionRate:UnsupportedReaction', ...
+                'Unsupported metabolic reaction: %s', rxn);
+        end
     end
-end
 end
 
 function [idxH2, idxprod] = reactionComponentIndices(compNames, bcrm, i, isSRB)
-idxH2   = find(strcmpi(compNames, bcrm.rH2{i}), 1);
-idxsub  = find(strcmpi(compNames, bcrm.rsub{i}), 1);
-idxprod = find(strcmpi(compNames, bcrm.p2{i}), 1);
+    idxH2   = find(strcmpi(compNames, bcrm.rH2{i}), 1);
+    idxsub  = find(strcmpi(compNames, bcrm.rsub{i}), 1);
+    idxprod = find(strcmpi(compNames, bcrm.p2{i}), 1);
 
-% Sulfate is a tracer; SRB requires only its H2 EOS component here.
-% Retain the optional product lookup used by the existing sulfide split.
-if isempty(idxH2)
-    error('BactConvertionRate:MissingH2', ...
-        'Required component H2 (%s) not found for reactor %d', bcrm.rH2{i}, i);
-end
-if isempty(idxsub) && ~isSRB
-    error('BactConvertionRate:MissingSubstrate', ...
-        'Required component substrate (%s) not found for reactor %d', bcrm.rsub{i}, i);
-end
+    % Sulfate is a tracer; SRB requires only its H2 EOS component here.
+    % Retain the optional product lookup used by the existing sulfide split.
+    if isempty(idxH2)
+        error('BactConvertionRate:MissingH2', ...
+            'Required component H2 (%s) not found for reactor %d', bcrm.rH2{i}, i);
+    end
+    if isempty(idxsub) && ~isSRB
+        error('BactConvertionRate:MissingSubstrate', ...
+            'Required component substrate (%s) not found for reactor %d', bcrm.rsub{i}, i);
+    end
 end
 
 %{

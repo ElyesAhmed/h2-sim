@@ -3,6 +3,7 @@ classdef ComponentTotalDispFlux < StateFunction
     % of components summed over all phases.
 
     methods
+
         function gp = ComponentTotalDispFlux(model, varargin)
             gp@StateFunction(model, varargin{:});
             gp = gp.dependsOn('ComponentPhaseDispFlux');
@@ -26,6 +27,7 @@ classdef ComponentTotalDispFlux < StateFunction
                 end
             end
         end
+
     end
 end
 

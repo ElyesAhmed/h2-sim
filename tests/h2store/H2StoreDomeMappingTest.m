@@ -1,9 +1,10 @@
 classdef H2StoreDomeMappingTest < matlab.unittest.TestCase
-    %H2STOREDOMEMAPPINGTEST Actual dome setup retains logical cell identity.
+    % H2STOREDOMEMAPPINGTEST Actual dome setup retains logical cell identity.
     properties
         model
     end
     methods (TestClassSetup)
+
         function buildDome(test)
             originalGravity = gravity;
             test.addTeardown(@() gravity(originalGravity));
@@ -14,19 +15,23 @@ classdef H2StoreDomeMappingTest < matlab.unittest.TestCase
             deck = readEclipseDeck(file);
             [~, ~, ~, test.model] = modelForDome3DAquifer(deck, 'numCycles', 1);
         end
+
     end
     methods (Test)
+
         function logicalCellIdentity(test)
             G = test.model.G;
             test.verifyEqual(G.cells.indexMap, (1:G.cells.num)');
             test.verifyEqual(numel(unique(G.cells.indexMap)), G.cells.num);
         end
+
         function regionLookup(test)
             model = test.model;
             regions = handleRegions(model.inputdata, model.G);
             test.verifyEqual(regions.SATNUM, model.rock.regions.saturation);
             test.verifyEqual(unique(regions.SATNUM), [1; 2; 3]);
         end
+
         function deckRockCorrespondence(test)
             model = test.model;
             rock = initEclipseRock(model.inputdata);
@@ -34,6 +39,7 @@ classdef H2StoreDomeMappingTest < matlab.unittest.TestCase
             test.verifyEqual(rock.poro, model.rock.poro);
             test.verifyEqual(rock.perm, model.rock.perm);
         end
+
     end
 end
 

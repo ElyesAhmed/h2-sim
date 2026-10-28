@@ -1,39 +1,47 @@
 classdef H2StoreWellPlacementTest < matlab.unittest.TestCase
-    %H2STOREWELLPLACEMENTTEST Aquifer completion window and coarse-grid fallback.
+    % H2STOREWELLPLACEMENTTEST Aquifer completion window and coarse-grid fallback.
     methods (Test)
+
         function geometricMatches(test)
             [G, rock] = makeInputs([25, 28; 25.05, 26; 24.5, 28.5; 25, 30]);
             test.verifyEqual(findAquifer2DWellCells(G, rock), [1; 2]);
         end
+
         function completionWindow(test)
             [G, rock] = makeInputs([25, 25; 25, 29.5; 25, -28; 25.2, 28]);
             test.verifyEqual(findAquifer2DWellCells(G, rock), 3);
         end
+
         function geometricMatchesTakePriority(test)
             [G, rock] = makeInputs([25, 28; 24.5, 28.5]);
             rock.poro(1) = 0.1;
             test.verifyEqual(findAquifer2DWellCells(G, rock), 1);
         end
+
         function nearestReservoirCell(test)
             [G, rock] = makeInputs([25.2, 28.5; 26, 28.5; 24, 27]);
             rock.poro = [0.1; 0.25; 0.25];
             test.verifyEqual(findAquifer2DWellCells(G, rock), 2);
         end
+
         function distanceTie(test)
             [G, rock] = makeInputs([24, 28.5; 26, 28.5]);
             test.verifyEqual(findAquifer2DWellCells(G, rock), 1);
         end
+
         function noEligibleReservoir(test)
             [G, rock] = makeInputs([24, 28; 26, 28]);
             rock.poro = [0.05; 0.1];
             test.verifyError(@() findAquifer2DWellCells(G, rock), ...
                 'h2sim:h2store:NoWellCells');
         end
+
         function emptyGrid(test)
             [G, rock] = makeInputs(zeros(0, 2));
             test.verifyError(@() findAquifer2DWellCells(G, rock), ...
                 'h2sim:h2store:NoWellCells');
         end
+
     end
 end
 

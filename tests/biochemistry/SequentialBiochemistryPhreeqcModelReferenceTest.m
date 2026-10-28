@@ -1,64 +1,64 @@
 classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestCase
-% Short PHREEQC integration comparison: SequentialBiochemistryPhreeqcModel
-% vs. the existing 0.4 day hybrid Picard reference
-% (simulateSequentialH2BiochemPhreeqc).
-%
-% Both drivers advance the SAME small 1D benchmark setup over the SAME
-% short 2 day (5 x 0.4 day) injection period. The split model's coarse
-% control steps are configured at the SAME 0.4 day cadence as the
-% reference (reactionSubstepMaxDt = 0.2 day, so each coarse step still
-% exercises 2 local reaction substeps and two PHREEQC updates) -- this isolates the
-% "no outer Picard iterations" splitting error from any additional error
-% due to a genuinely coarser flow step, and was confirmed empirically
-% (see below) to bring the two drivers into much closer qualitative
-% agreement than a single multi-day coarse step would.
-%
-% WHY EXACT QUANTITATIVE AGREEMENT IS NOT EXPECTED (and not asserted):
-% simulateSequentialH2BiochemPhreeqc re-solves flow AND re-equilibrates
-% PHREEQC chemistry together in up to 30 outer Picard iterations per
-% 0.4 day step, feeding the converged pH/DIC/sulfate chemistry back into
-% the MRST Monod kinetics within that same step. This model deliberately
-% has NO outer Picard loop (by design, see SequentialBiochemistryPhreeqcModel):
-% one flow solve, then local reaction substeps followed by one PHREEQC
-% call per coarse step, with no feedback of the PHREEQC result back into
-% a re-solved flow or repeated reaction pass within the step. Manual
-% instrumentation (per-substep H2 mole fraction / nbact / reported
-% consumption traces) confirmed two compounding, physically-legitimate
-% reasons the two drivers diverge quantitatively even at matched cadence:
-%   1. Bacterial "concentration" state nbact is defined per unit liquid
-%      volume; the reaction-disabled flow stage can and does change it
-%      (with reactionsEnabled=false, its own bacteria mass-conservation
-%      equation degenerates to "conserve pv*S_l*nbact", so nbact rises as
-%      injected gas locally reduces liquid saturation) -- expected
-%      physics, not a growth-source leak, but a further source of
-%      divergence from the reference's simultaneously-solved profile.
-%   2. Growth is gated off once the *converged end-of-step* overall H2
-%      mole fraction drops below an activation threshold
-%      (GrowthBactRateSRC/getH2ActivationThreshold); the reported
-%      "consumption rate" (computeConvergedH2ConsumptionRate, shared,
-%      pre-existing base-class code) is likewise evaluated at that same
-%      converged state, so it can under-report consumption that occurred
-%      earlier within an accepted step, once H2 has been driven below
-%      the threshold by the time of convergence. This can affect both
-%      drivers but is far more consequential for the split model, whose
-%      one-shot local reaction substeps most easily drive local H2 to
-%      near-depletion without the Picard reference's iterative
-%      chemistry/kinetics feedback moderating it.
-% Given this, the assertions below check ROBUST, physically meaningful
-% invariants (both non-negative/finite, consumption/growth localized near
-% the injector for both, and broad order-of-magnitude agreement) rather
-% than a tight relative-tolerance match, and the tolerances are
-% documented as reflecting an algorithmic (no-Picard vs. Picard)
-% difference, not a numerical-error budget.
-%
-% This requires a registered IPhreeqcCOM server and an on-disk
-% h2_biogeochemistry.dat (both drivers call PHREEQC); the whole class is
-% skipped cleanly via assumeTrue in TestClassSetup when either is
-% unavailable.
-%
-% SEE ALSO:
-%   SequentialBiochemistryPhreeqcModel, simulateSequentialH2BiochemPhreeqc,
-%   convertToSequentialBiochemistryPhreeqcModel
+    % Short PHREEQC integration comparison: SequentialBiochemistryPhreeqcModel
+    % vs. the existing 0.4 day hybrid Picard reference
+    % (simulateSequentialH2BiochemPhreeqc).
+    %
+    % Both drivers advance the SAME small 1D benchmark setup over the SAME
+    % short 2 day (5 x 0.4 day) injection period. The split model's coarse
+    % control steps are configured at the SAME 0.4 day cadence as the
+    % reference (reactionSubstepMaxDt = 0.2 day, so each coarse step still
+    % exercises 2 local reaction substeps and two PHREEQC updates) -- this isolates the
+    % "no outer Picard iterations" splitting error from any additional error
+    % due to a genuinely coarser flow step, and was confirmed empirically
+    % (see below) to bring the two drivers into much closer qualitative
+    % agreement than a single multi-day coarse step would.
+    %
+    % WHY EXACT QUANTITATIVE AGREEMENT IS NOT EXPECTED (and not asserted):
+    % simulateSequentialH2BiochemPhreeqc re-solves flow AND re-equilibrates
+    % PHREEQC chemistry together in up to 30 outer Picard iterations per
+    % 0.4 day step, feeding the converged pH/DIC/sulfate chemistry back into
+    % the MRST Monod kinetics within that same step. This model deliberately
+    % has NO outer Picard loop (by design, see SequentialBiochemistryPhreeqcModel):
+    % one flow solve, then local reaction substeps followed by one PHREEQC
+    % call per coarse step, with no feedback of the PHREEQC result back into
+    % a re-solved flow or repeated reaction pass within the step. Manual
+    % instrumentation (per-substep H2 mole fraction / nbact / reported
+    % consumption traces) confirmed two compounding, physically-legitimate
+    % reasons the two drivers diverge quantitatively even at matched cadence:
+    %   1. Bacterial "concentration" state nbact is defined per unit liquid
+    %      volume; the reaction-disabled flow stage can and does change it
+    %      (with reactionsEnabled=false, its own bacteria mass-conservation
+    %      equation degenerates to "conserve pv*S_l*nbact", so nbact rises as
+    %      injected gas locally reduces liquid saturation) -- expected
+    %      physics, not a growth-source leak, but a further source of
+    %      divergence from the reference's simultaneously-solved profile.
+    %   2. Growth is gated off once the *converged end-of-step* overall H2
+    %      mole fraction drops below an activation threshold
+    %      (GrowthBactRateSRC/getH2ActivationThreshold); the reported
+    %      "consumption rate" (computeConvergedH2ConsumptionRate, shared,
+    %      pre-existing base-class code) is likewise evaluated at that same
+    %      converged state, so it can under-report consumption that occurred
+    %      earlier within an accepted step, once H2 has been driven below
+    %      the threshold by the time of convergence. This can affect both
+    %      drivers but is far more consequential for the split model, whose
+    %      one-shot local reaction substeps most easily drive local H2 to
+    %      near-depletion without the Picard reference's iterative
+    %      chemistry/kinetics feedback moderating it.
+    % Given this, the assertions below check ROBUST, physically meaningful
+    % invariants (both non-negative/finite, consumption/growth localized near
+    % the injector for both, and broad order-of-magnitude agreement) rather
+    % than a tight relative-tolerance match, and the tolerances are
+    % documented as reflecting an algorithmic (no-Picard vs. Picard)
+    % difference, not a numerical-error budget.
+    %
+    % This requires a registered IPhreeqcCOM server and an on-disk
+    % h2_biogeochemistry.dat (both drivers call PHREEQC); the whole class is
+    % skipped cleanly via assumeTrue in TestClassSetup when either is
+    % unavailable.
+    %
+    % SEE ALSO:
+    %   SequentialBiochemistryPhreeqcModel, simulateSequentialH2BiochemPhreeqc,
+    %   convertToSequentialBiochemistryPhreeqcModel
 
     properties
         % Documented tolerances for the coarse-flow/local-reaction split
@@ -79,9 +79,9 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
         % reference re-equilibrates pH against the Picard-converged
         % reaction rates within the step; the split model equilibrates
         % once per one-shot local reaction substep).
-        h2ConsumptionLog10RatioTol = 3;
-        pHAbsTol = 0.1;
-        biomassLog10RatioTol = 3;
+        h2ConsumptionLog10RatioTol = 3
+        pHAbsTol = 0.1
+        biomassLog10RatioTol = 3
     end
 
     properties
@@ -98,12 +98,13 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
     end
 
     methods (TestClassSetup)
+
         function setupAndRunBothDrivers(testCase)
-            mrstModule add ad-core ad-props compositional deckformat 
+            mrstModule add ad-core ad-props compositional deckformat;
             databaseFile = resolveReferenceTestDatabaseFile();
             testCase.assumeTrue(~isempty(databaseFile) && isIPhreeqcComAvailableForReferenceTest(), ...
                 ['A registered IPhreeqcCOM server and an on-disk ', ...
-                 'h2_biogeochemistry.dat are required for this test.']);
+                'h2_biogeochemistry.dat are required for this test.']);
 
             [~, baseModel, schedule, state0] = setupH2StorageExampleWithSRB_benchmark( ...
                 'rate', 'highrate', ...
@@ -134,8 +135,8 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
             % comparison window.
             nShort = 5;
             shortSchedule = schedule;
-            shortSchedule.step.val     = repmat(0.4*day, nShort, 1);
-            assert(sum(shortSchedule.step.val)==2*day);
+            shortSchedule.step.val     = repmat(0.4 * day, nShort, 1);
+            assert(sum(shortSchedule.step.val) == 2 * day);
             shortSchedule.step.control = schedule.step.control(1:nShort);
 
             solver = NonLinearSolver();
@@ -155,7 +156,7 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
             % does not eliminate all divergence from the reference).
             coarseSchedule = shortSchedule;
             splitModel = convertToSequentialBiochemistryPhreeqcModel(baseModel, ...
-                'reactionSubstepMaxDt', 0.2*day);
+                'reactionSubstepMaxDt', 0.2 * day);
             splitSolver = NonLinearSolver();
             splitSolver.maxTimestepCuts = 12;
             [~, splitStates, splitReport] = simulateScheduleAD( ...
@@ -183,9 +184,11 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
             testCase.referenceMaxBiomass = max(value(referenceFinal.nbact), [], 'all');
             testCase.splitMaxBiomass     = max(value(splitFinal.nbact), [], 'all');
         end
+
     end
 
     methods (Test)
+
         function testReferenceDriverDidNotFail(testCase)
             testCase.verifyFalse(testCase.referenceReport.Failure);
         end
@@ -236,12 +239,13 @@ classdef SequentialBiochemistryPhreeqcModelReferenceTest < matlab.unittest.TestC
             testCase.verifyLessThanOrEqual(abs(log10Ratio), ...
                 testCase.biomassLog10RatioTol);
         end
+
     end
 end
 
 function total = totalH2Consumed(states, schedule, model, nReactions)
-% Sum computeH2Consumption's per-reaction cumulative H2 consumption
-% (mol/cell) across reactions and cells for the final saved state.
+    % Sum computeH2Consumption's per-reaction cumulative H2 consumption
+    % (mol/cell) across reactions and cells for the final saved state.
     cumulative = zeros(model.G.cells.num, nReactions);
     for reaction = 1:nReactions
         [~, reactionCumulative] = computeH2Consumption( ...
@@ -252,9 +256,9 @@ function total = totalH2Consumed(states, schedule, model, nReactions)
 end
 
 function databaseFile = resolveReferenceTestDatabaseFile()
-% Best-effort h2_biogeochemistry.dat lookup. Returns '' (rather than
-% throwing) when the database cannot be located, so calling tests can
-% gate on it via assumeTrue and skip cleanly.
+    % Best-effort h2_biogeochemistry.dat lookup. Returns '' (rather than
+    % throwing) when the database cannot be located, so calling tests can
+    % gate on it via assumeTrue and skip cleanly.
     databaseFile = getenv('PHREEQC_DATABASE_FILE');
     if isempty(strtrim(databaseFile))
         databaseFile = which('h2_biogeochemistry.dat');
@@ -265,10 +269,9 @@ function databaseFile = resolveReferenceTestDatabaseFile()
 end
 
 function tf = isIPhreeqcComAvailableForReferenceTest()
-% Best-effort probe for the platform IPhreeqc interface. Never throws:
-% returns false on any failure (missing native library or COM server) so
-% calling tests can gate on it via assumeTrue and skip cleanly.
-    tf = false;
+    % Best-effort probe for the platform IPhreeqc interface. Never throws:
+    % returns false on any failure (missing native library or COM server) so
+    % calling tests can gate on it via assumeTrue and skip cleanly.
     try
         server = createH2simIPhreeqc('IPhreeqcCOM.Object');
         delete(server);

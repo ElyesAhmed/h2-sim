@@ -18,6 +18,7 @@ classdef AqueousTracerMass < StateFunction
     %   BacterialMass, BiochemistryModel, SRBTracerConvRate
 
     methods
+
         function tm = AqueousTracerMass(model, varargin)
             tm@StateFunction(model, varargin{:});
             if ismethod(model, 'getAqueousTracerNames')
@@ -31,7 +32,7 @@ classdef AqueousTracerMass < StateFunction
             tm.label = 'M_{tracer}';
         end
 
-        function m = evaluateOnDomain(prop, model, state)
+        function m = evaluateOnDomain(~, model, state)
             s   = model.getProp(state, 's');
             pv  = model.PVTPropertyFunctions.get(model, state, 'PoreVolume');
             L_ix = model.getLiquidIndex();
@@ -52,6 +53,7 @@ classdef AqueousTracerMass < StateFunction
                 m{i} = pv .* sL .* concentration;
             end
         end
+
     end
 end
 

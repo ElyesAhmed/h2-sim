@@ -68,7 +68,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
         % Reserved for future support of alternative bio-chemical
         % formulations; only 'bacterialmodel' is currently implemented
         % (enforced in the constructor).
-        bacterialFormulation = 'bacterialmodel';
+        bacterialFormulation = 'bacterialmodel'
 
         % Compositional fluid mixture (EOS component list/names).
         compFluid
@@ -79,27 +79,28 @@ classdef BiochemistryModel < GenericOverallCompositionModel
         biochemFluid
 
         % Physical quantities and bounds
-        gammak   = [];                    % Stoichiometric coefficients, one row per reaction, one column per EOS component
-        bacteriamodel = true;             % Master switch for the microbial growth/decay sub-model
-        sulfateReduction = false;         % SO4/HS aqueous tracers active (set from biochemFluid)
-        enableSulfateSource = true;       % Optional anhydrite sulfate source for SRB tracers
-        bact_capProp = 3.0e0;             % Min nbact in the model
-        bact_maxProp = 120;               % Max nbact in the model
-        molecularDiffusion = false;       % Molecular diffusion of EOS components
-        molecularDispersion = false;      % Mechanical dispersion of EOS components
-        bactDiffusion = false;            % Microbial diffusion
-        chemotaxisEffect = false;         % chemotaxis
+        gammak   = []                     % Stoichiometric coefficients, one row per reaction, one column per EOS component
+        bacteriamodel = true              % Master switch for the microbial growth/decay sub-model
+        sulfateReduction = false          % SO4/HS aqueous tracers active (set from biochemFluid)
+        enableSulfateSource = true        % Optional anhydrite sulfate source for SRB tracers
+        bact_capProp = 3.0e0              % Min nbact in the model
+        bact_maxProp = 120                % Max nbact in the model
+        molecularDiffusion = false        % Molecular diffusion of EOS components
+        molecularDispersion = false       % Mechanical dispersion of EOS components
+        bactDiffusion = false             % Microbial diffusion
+        chemotaxisEffect = false          % chemotaxis
 
         % Coarse-flow/local-reaction sequential split support (see
         % SequentialBiochemistryPhreeqcModel). Both default to standard,
         % unsplit behaviour and are only toggled on internally built
         % single-purpose stage models.
-        reactionsEnabled = true;          % false: no biological source terms assembled (flow stage)
-        localReactionMode = false;        % true: no spatial flux/diffusion assembled (reaction stage)
+        reactionsEnabled = true           % false: no biological source terms assembled (flow stage)
+        localReactionMode = false         % true: no spatial flux/diffusion assembled (reaction stage)
     end
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function model = BiochemistryModel(G, rock, fluid, compFluid, biochemFluid, includeWater, backend, varargin)
             % Constructor
             model = model@GenericOverallCompositionModel(G, rock, fluid, compFluid, ...
@@ -127,11 +128,11 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 assert(model.oil, 'we need a liquid phase');
             end
 
-             %% Set metabolic reactions
+            %% Set metabolic reactions
             if isempty(biochemFluid)
-                biochemFluid=TableBioChemMixture({'MethanogenicArchae'},{'bactM'});
+                biochemFluid = TableBioChemMixture({'MethanogenicArchae'}, {'bactM'});
             end
-            model.biochemFluid=biochemFluid;
+            model.biochemFluid = biochemFluid;
             % SO4 and HS are non-volatile: when the SRB reaction is
             % present they are carried as aqueous tracers (advected with
             % the liquid phase, reacted via SRBTracerConvRate), never as
@@ -159,12 +160,11 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 indH2O  = find(strcmp(namecp, model.biochemFluid.pH2O(i)));
                 indsub  = find(strcmp(namecp, model.biochemFluid.rsub(i)));
                 indprod   = find(strcmp(namecp, model.biochemFluid.p2(i)));
-                model.gammak(i,indH2)  = model.biochemFluid.gamrH2(i);
-                model.gammak(i,indH2O) =  model.biochemFluid.gampH2O(i);
-                model.gammak(i,indsub) = model.biochemFluid.gamrsub(i);
-                model.gammak(i,indprod)  = model.biochemFluid.gamp2(i);
+                model.gammak(i, indH2)  = model.biochemFluid.gamrH2(i);
+                model.gammak(i, indH2O) =  model.biochemFluid.gampH2O(i);
+                model.gammak(i, indsub) = model.biochemFluid.gamrsub(i);
+                model.gammak(i, indprod)  = model.biochemFluid.gamp2(i);
             end
-
 
             % Validate bacterial formulation
             assert(any(strcmpi(model.bacterialFormulation, {'bacterialmodel'})), ...
@@ -182,8 +182,12 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             % transmissibilites
 
             % Set rock and grid from model if not provided
-            if nargin < 3, rock = model.rock; end
-            if nargin < 2, G = model.G;       end
+            if nargin < 3
+                rock = model.rock;
+            end
+            if nargin < 2
+                G = model.G;
+            end
 
             drock = rock;
             if model.dynamicFlowTrans()
@@ -191,7 +195,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 % model.setupOperators
                 drock = rock;
                 nbact0 = model.getDummyBacterialValues(drock.perm);
-                drock.perm = rock.perm(1*barsa(), nbact0{:});
+                drock.perm = rock.perm(1 * barsa(), nbact0{:});
             end
 
             if model.dynamicFlowPv()
@@ -201,7 +205,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                     drock = rock;
                 end
                 nbact0 = model.getDummyBacterialValues(drock.poro);
-                drock.poro = rock.poro(1*barsa(), nbact0{:});
+                drock.poro = rock.poro(1 * barsa(), nbact0{:});
             end
             % Let reservoir model set up operators
             model = setupOperators@ReservoirModel(model, G, drock, varargin{:});
@@ -215,7 +219,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             % parent compositional model for the remaining validation.
             if model.bacteriamodel
                 if isempty(model.FacilityModel) || ...
-                        ~isa(model.FacilityModel, 'BiochemistryGenericFacilityModel')
+                    ~isa(model.FacilityModel, 'BiochemistryGenericFacilityModel')
                     model.FacilityModel = BiochemistryGenericFacilityModel(model);
                 end
             else
@@ -338,6 +342,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 origin = [origin, o];
             end
         end
+
         function [eqs, names, types, state] = getModelEquations(model, state0, state, dt, drivingForces, varargin)
             % Assemble the full residual: EOS component conservation
             % (with well sources and, if reactionsEnabled, the microbial
@@ -357,7 +362,6 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             % Assemble equations and add in sources
             [pressures, sat, mob, rho, X] = model.getProps(state, 'PhasePressures', 's', 'Mobility', 'Density', 'ComponentPhaseMassFractions');
             comps = cellfun(@(x, y) {x, y}, X(:, model.getLiquidIndex), X(:, model.getVaporIndex), 'UniformOutput', false);
-
 
             eqs = model.addBoundaryConditionsAndSources(eqs, names, types, state, ...
                 pressures, sat, mob, rho, ...
@@ -382,7 +386,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
 
                 for i = 1:ncomp
                     if ~isempty(src_rate{i})
-                        eqs{i} = eqs{i} - src_rate{i}./rhoL;
+                        eqs{i} = eqs{i} - src_rate{i} ./ rhoL;
                     end
                 end
             end
@@ -415,10 +419,9 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             names = [names, bnames];
             types = [types, btypes];
 
-
             [weqs, wnames, wtypes, state] = model.FacilityModel.getModelEquations(state0, state, dt, drivingForces);
             % Concatenate
-            eqs   = [eqs  , weqs  ];
+            eqs   = [eqs, weqs];
             names = [names, wnames];
             types = [types, wtypes];
 
@@ -447,7 +450,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
 
             % Nothing to do without a Dirichlet bacterial specification
             if isempty(forces) || ~isfield(forces, 'bc') || isempty(forces.bc) ...
-                    || ~isfield(forces.bc, 'nbact') || isempty(forces.bc.nbact)
+                || ~isfield(forces.bc, 'nbact') || isempty(forces.bc.nbact)
                 return
             end
 
@@ -456,7 +459,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             if iscell(bc.nbact)
                 val = bc.nbact{species}(:);
             elseif ~isvector(bc.nbact) || ...
-                    (size(bc.nbact, 1) == 1 && size(bc.nbact, 2) == model.biochemFluid.nbioreact)
+                (size(bc.nbact, 1) == 1 && size(bc.nbact, 2) == model.biochemFluid.nbioreact)
                 assert(size(bc.nbact, 2) >= species, ...
                     'bc.nbact must have one column per bacterial species.');
                 val = bc.nbact(:, species);
@@ -486,7 +489,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             % driving direction is set explicitly by (nbact_c - nbact_bc).
             C  = G.faces.centroids(faces, :) - G.cells.centroids(cells, :);
             N  = G.faces.normals(faces, :);
-            cn = abs(sum(C.*N, 2))./sum(C.*C, 2);
+            cn = abs(sum(C .* N, 2)) ./ sum(C .* C, 2);
 
             % Cell-centred effective diffusivity D_b = bactdiff*phi*sL
             D = model.getProp(state, 'MicrobialDiffusivity');
@@ -523,7 +526,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             nc   = G.cells.num;
             nf   = numel(cells);
             Scat = sparse(cells, (1:nf)', 1, nc, nf);
-            beq = beq + Scat*Jout;
+            beq = beq + Scat * Jout;
         end
 
         function forces = validateDrivingForces(model, forces, varargin)
@@ -551,10 +554,10 @@ classdef BiochemistryModel < GenericOverallCompositionModel
 
                 removed = isP;
 
-                bactnames=model.biochemFluid.bactnames;
-                nbioreact=model.biochemFluid.nbioreact;
-                nbact=cell(1, nbioreact);
-                 for i = 1:nbioreact
+                bactnames = model.biochemFluid.bactnames;
+                nbioreact = model.biochemFluid.nbioreact;
+                nbact = cell(1, nbioreact);
+                for i = 1:nbioreact
                     name = bactnames{i};
                     sub = strcmp(names, name);
                     nbact{i} = vars{sub};
@@ -605,7 +608,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                         % updateAfterConvergence) to avoid a circular
                         % dependency between the flash and its own
                         % output.
-                        model.EOSModel = model.EOSModel.enablesrb_coupling(...
+                        model.EOSModel = model.EOSModel.enablesrb_coupling( ...
                             value(so4), value(hs), value(hs) + state.h2sDissolvedLag, state.T);
                     end
                     [state.x, state.y, state.L, state.FractionalDerivatives] = ...
@@ -655,35 +658,36 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 L = state.L;
                 propmodel = model.EOSModel.PropertyModel;
                 if isempty(propmodel.volumeShift)
-                    volL = L.*Z_L;
-                    volV = (1-L).*Z_V;
+                    volL = L .* Z_L;
+                    volV = (1 - L) .* Z_V;
                 else
-                    volL = L./propmodel.computeMolarDensity(model.EOSModel, state.pressure, state.x, Z_L, state.T, true);
-                    volV = (1-L)./propmodel.computeMolarDensity(model.EOSModel, state.pressure, state.y, Z_V, state.T, false);
+                    volL = L ./ propmodel.computeMolarDensity(model.EOSModel, state.pressure, state.x, Z_L, state.T, true);
+                    volV = (1 - L) ./ propmodel.computeMolarDensity(model.EOSModel, state.pressure, state.y, Z_V, state.T, false);
                 end
                 volT = volL + volV;
-                sL = volL./volT;
-                sV = volV./volT;
+                sL = volL ./ volT;
+                sV = volV ./ volT;
 
                 [pureLiquid, pureVapor, twoPhase] = model.getFlag(state);
-                sL = sL.*void;
-                sV = sV.*void;
+                sL = sL .* void;
+                sV = sV .* void;
                 [s{li}, s{vi}] = model.setMinimumTwoPhaseSaturations(state, 1 - void, sL, sV, pureLiquid, pureVapor, twoPhase);
                 state = model.setProp(state, 's', s);
             else
                 state = initStateAD@GenericOverallCompositionModel(model, state, vars, names, origin);
             end
         end
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function [v_eqs, tolerances, names] = getConvergenceValues(model, problem, varargin)
             % Get values for convergence check with CNV-style scaling
             [v_eqs, tolerances, names] = getConvergenceValues@ReservoirModel(model, problem, varargin{:});
 
             if model.bacteriamodel
-                nbioreact=model.biochemFluid.nbioreact;
-                bacteriaIndex=zeros(nbioreact,1);
-                for i=1:nbioreact
-                    bact=strcat(model.biochemFluid.bactnames{i},' (cell)');
+                nbioreact = model.biochemFluid.nbioreact;
+                bacteriaIndex = zeros(nbioreact, 1);
+                for i = 1:nbioreact
+                    bact = strcat(model.biochemFluid.bactnames{i}, ' (cell)');
                     bacteriaIndex(i) = find(strcmp(names, bact));
                     tolerances(bacteriaIndex(i)) = 1.0e-2;
                 end
@@ -692,12 +696,12 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 % dissimilar equation types and ensures convergence is fair.
                 scale = model.getEquationScaling(problem.equations, problem.equationNames, problem.state, problem.dt);
                 ix    = ~cellfun(@isempty, scale);
-                v_eqs(ix) = cellfun(@(scale, x) norm(scale.*value(x), inf), scale(ix), problem.equations(ix));
+                v_eqs(ix) = cellfun(@(scale, x) norm(scale .* value(x), inf), scale(ix), problem.equations(ix));
 
                 % Bacteria equation gets tighter tolerance due to stiff growth/decay
                 % with quadratic decay term. Loose tolerance allows unbounded Newton
                 % increments that cause Jacobian singularity.
-                for i=1:nbioreact
+                for i = 1:nbioreact
                     if ~isempty(bacteriaIndex(i))
                         % Use 10x tighter tolerance for bacteria (stiff equation)
                         tolerances(bacteriaIndex(i)) = 5.0e-2;
@@ -718,26 +722,30 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 cmass = value(cmass);
                 chemistry = value(chemistry);
             else
-                cmass= model.getProps(state0, 'ComponentTotalMass');
+                cmass = model.getProps(state0, 'ComponentTotalMass');
                 cmass = value(cmass);
             end
 
-            if ~iscell(cmass), cmass = {cmass}; end
+            if ~iscell(cmass)
+                cmass = {cmass};
+            end
             ncomp = model.getNumberOfComponents();
             mass = 0;
             for i = 1:ncomp
                 mass = mass + cmass{i};
             end
 
-            scaleMass = dt./mass;
+            scaleMass = dt ./ mass;
             for n = cnames
                 ix = strcmpi(n{1}, names);
-                if ~any(ix), continue; end
+                if ~any(ix)
+                    continue
+                end
                 scale{ix} = scaleMass;
             end
             if model.bacteriamodel
-               nbioreact=model.biochemFluid.nbioreact;
-                for i=1:nbioreact
+                nbioreact = model.biochemFluid.nbioreact;
+                for i = 1:nbioreact
                     ix = strcmpi(names, model.biochemFluid.bactnames{i});
                     if any(ix)
                         if iscell(chemistry)
@@ -745,14 +753,15 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                         else
                             chemistry_i = chemistry(:, i);
                         end
-                        scaleChemistry = dt./max(chemistry_i, 1e-12);
-                        scaleChemistry = filloutliers(scaleChemistry, "nearest","mean");
+                        scaleChemistry = dt ./ max(chemistry_i, 1e-12);
+                        scaleChemistry = filloutliers(scaleChemistry, "nearest", "mean");
                         scale{ix} = scaleChemistry;
                     end
                 end
             end
 
         end
+
         function scaling = getScalingFactorsCPR(model, problem, names, solver) %#ok
 
             scaling = model.getEquationScaling(problem.equations, problem.equationNames, problem.state, problem.dt);
@@ -764,8 +773,8 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             % nbact/SO4/HS and any per-reaction bacterial-population name
             % (bactnames) before falling back to the parent compositional
             % model's lookup for EOS component names.
-            switch(lower(name))
-                case {'nbact', 'bacteriamodel'} %Bacteria model
+            switch (lower(name))
+                case {'nbact', 'bacteriamodel'} % Bacteria model
                     index = ':';
                     fn = 'nbact';
                 case  {'so4', 'tracerSO4'} % SO4 aqueous tracer (non-volatile, outside the EOS)
@@ -792,7 +801,6 @@ classdef BiochemistryModel < GenericOverallCompositionModel
             names  = getComponentNames@GenericOverallCompositionModel(model);
         end
 
-
         function  [state, report] = updateAfterConvergence(model, state0, state, dt, drivingForces)
             % After the parent compositional model accepts the converged
             % step, accumulate this step's per-reaction H2 consumption
@@ -811,7 +819,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                     state.h2ConsumptionRate = ...
                         model.computeConvergedH2ConsumptionRate(state);
                     state.cumulativeH2ConsumptionMoles = cumulative + ...
-                        max(value(state.h2ConsumptionRate), 0).*dt;
+                        max(value(state.h2ConsumptionRate), 0) .* dt;
                 else
                     % Reactions are disabled for this stage (e.g. the flow
                     % stage of a coarse-flow/local-reaction split, see
@@ -881,8 +889,8 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 else
                     mass = bmass(:, i);
                 end
-                rate(:, i) = value(bcrm.nbactMax(i).*growth.*mass./ ...
-                    (bcrm.Y_H2(i).*rhoL));
+                rate(:, i) = value(bcrm.nbactMax(i) .* growth .* mass ./ ...
+                    (bcrm.Y_H2(i) .* rhoL));
             end
         end
 
@@ -905,7 +913,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 % Limit fractional change per iteration to stabilize stiff kinetics.
                 % Aggressive damping for highly stiff growth/decay kinetics (linear growth + nbact^2 decay).
                 % 5% change per iteration is conservative but necessary for quadratic decay singularities.
-                 nbioreact=model.biochemFluid.nbioreact;
+                nbioreact = model.biochemFluid.nbioreact;
                 max_frac_change = 0.05;
 
                 % Compute ONE relaxation factor per cell from the worst-case
@@ -922,11 +930,11 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 lambda = ones(ncells, 1);
                 for i = 1:nbioreact
                     if iscell(nbact_old)
-                        nbacti_old=nbact_old{i};
-                        nbacti_new=nbact_new{i};
+                        nbacti_old = nbact_old{i};
+                        nbacti_new = nbact_new{i};
                     else
-                        nbacti_old=nbact_old(:,i);
-                        nbacti_new=nbact_new(:,i);
+                        nbacti_old = nbact_old(:, i);
+                        nbacti_new = nbact_new(:, i);
                     end
                     frac_change = (nbacti_new - nbacti_old) ./ max(abs(nbacti_old), 1e-12);
                     lambda = min(lambda, max_frac_change ./ max(abs(frac_change), max_frac_change));
@@ -936,22 +944,21 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                     nbact_damped = nbact_new;
                     for i = 1:nbioreact
                         if iscell(nbact_old)
-                            nbacti_old=nbact_old{i};
-                            nbacti_new=nbact_new{i};
+                            nbacti_old = nbact_old{i};
+                            nbacti_new = nbact_new{i};
                         else
-                            nbacti_old=nbact_old(:,i);
-                            nbacti_new=nbact_new(:,i);
+                            nbacti_old = nbact_old(:, i);
+                            nbacti_new = nbact_new(:, i);
                         end
-                        nbacti_damped = nbacti_old + lambda.*(nbacti_new - nbacti_old);
+                        nbacti_damped = nbacti_old + lambda .* (nbacti_new - nbacti_old);
                         if iscell(nbact_damped)
                             nbact_damped{i} = nbacti_damped;
                         else
-                            nbact_damped(:,i) = nbacti_damped;
+                            nbact_damped(:, i) = nbacti_damped;
                         end
                     end
                     state = model.setProp(state, 'nbact', nbact_damped);
                 end
-
 
                 % Final capping to physical bounds
                 state = model.capProperty(state, 'nbact', model.bact_capProp, model.bact_maxProp);
@@ -966,7 +973,6 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 [state, report] = updateState@GenericOverallCompositionModel(model, state, problem, dz, drivingForces);
             end
         end
-
 
         function isDynamic = dynamicFlowTrans(model)
             % Get boolean indicating if the fluid flow transmissibility is
@@ -1026,8 +1032,9 @@ classdef BiochemistryModel < GenericOverallCompositionModel
     end
 
     methods (Access = private)
+
         function [eqs, names, types] = getBacterialBalanceEquations( ...
-                model, state0, state, dt, forces)
+            model, state0, state, dt, forces)
             % Accumulation [kg/s], transport, and reaction/well sources.
             % nbact is a liquid mass fraction: M = pv*sL*rhoL*nbact.
             fd = model.FlowDiscretization;
@@ -1040,8 +1047,8 @@ classdef BiochemistryModel < GenericOverallCompositionModel
 
             for i = 1:model.biochemFluid.nbioreact
                 if ~model.localReactionMode && ...
-                        (model.bactDiffusion || model.chemotaxisEffect) && ...
-                        ~isempty(flux{i})
+                    (model.bactDiffusion || model.chemotaxisEffect) && ...
+                    ~isempty(flux{i})
                     eqs{i} = model.operators.AccDiv(eqs{i}, flux{i});
                     if model.bactDiffusion
                         eqs{i} = model.addBacterialDiffusionBC( ...
@@ -1055,7 +1062,7 @@ classdef BiochemistryModel < GenericOverallCompositionModel
         end
 
         function [eqs, names, types] = getSRBTracerBalanceEquations( ...
-                model, state0, state, dt)
+            model, state0, state, dt)
             % SO4/HS balances [mol/s], with transport and reaction/well sources.
             % Tracers are non-volatile and do not enter the EOS flash.
             fd = model.FlowDiscretization;
@@ -1074,13 +1081,14 @@ classdef BiochemistryModel < GenericOverallCompositionModel
                 end
             end
         end
+
     end
 end
 
 function flag = normalizeTransportFlag(flag, name)
-validateattributes(flag, {'logical', 'numeric'}, {'scalar', 'real', 'finite'}, ...
-    mfilename, name);
-flag = logical(flag);
+    validateattributes(flag, {'logical', 'numeric'}, {'scalar', 'real', 'finite'}, ...
+        mfilename, name);
+    flag = logical(flag);
 end
 
 %{

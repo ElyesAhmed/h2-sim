@@ -1,5 +1,5 @@
 classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
-    %H2STOREBENCHMARKTIMINGTEST Benchmark stage coverage and BHP controls.
+    % H2STOREBENCHMARKTIMINGTEST Benchmark stage coverage and BHP controls.
     properties (TestParameter)
         duration = {0.1, 1, 2, 10.25}
         target = {1, 10}
@@ -11,70 +11,76 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
         invalidCount = {0, -1, 1.5, NaN, Inf, [], [1, 2]}
     end
     methods (Test)
+
         function exactInterval(test, duration, target)
             steps = benchmarkStorageTimesteps(duration, target);
             test.verifyEqual(sum(steps), duration, 'AbsTol', 1e-12);
             test.verifyGreaterThan(steps, 0);
             test.verifyLessThanOrEqual(steps, target);
         end
+
         function selectedStage(test, stage)
             [W, options] = inputs();
-            options.([stage,'Only']) = true;
+            options.([stage, 'Only']) = true;
             schedule = makeBenchmarkStorageSchedule(W, options);
-            if strcmp(stage,'cushion')
-                expected = options.numCyclesCushions*(options.timeCushion+options.timeShut);
+            if strcmp(stage, 'cushion')
+                expected = options.numCyclesCushions * (options.timeCushion + options.timeShut);
             else
-                field = ['time',upper(stage(1)),stage(2:end)];
+                field = ['time', upper(stage(1)), stage(2:end)];
                 expected = options.(field);
             end
             test.verifyEqual(sum(schedule.step.val), expected, 'AbsTol', 1e-7);
         end
+
         function defaultStageTotals(test)
             [W, options] = inputs();
             schedule = makeBenchmarkStorageSchedule(W, options);
             names = arrayfun(@(k) schedule.control(k).W.name, ...
-                schedule.step.control(:),'UniformOutput',false);
-            totals = [sum(schedule.step.val(strcmp(names,'cushion'))), ...
-                sum(schedule.step.val(strcmp(names,'charge'))), ...
-                sum(schedule.step.val(strcmp(names,'shut'))), ...
-                sum(schedule.step.val(strcmp(names,'discharge')))];
-            expected = [6*options.timeCushion, options.numCycles*options.timeCharge, ...
-                6*options.timeShut+options.numCycles*options.timeIdle, ...
-                options.numCycles*options.timeDischarge];
-            test.verifyEqual(totals, expected, 'AbsTol',1e-7);
-            test.verifyEqual(sum(schedule.step.val)/86400, 1200, 'AbsTol',1e-10);
+                schedule.step.control(:), 'UniformOutput', false);
+            totals = [sum(schedule.step.val(strcmp(names, 'cushion'))), ...
+                sum(schedule.step.val(strcmp(names, 'charge'))), ...
+                sum(schedule.step.val(strcmp(names, 'shut'))), ...
+                sum(schedule.step.val(strcmp(names, 'discharge')))];
+            expected = [6 * options.timeCushion, options.numCycles * options.timeCharge, ...
+                6 * options.timeShut + options.numCycles * options.timeIdle, ...
+                options.numCycles * options.timeDischarge];
+            test.verifyEqual(totals, expected, 'AbsTol', 1e-7);
+            test.verifyEqual(sum(schedule.step.val) / 86400, 1200, 'AbsTol', 1e-10);
         end
+
         function buildupPressures(test)
             [W, options] = inputs();
             schedule = makeBenchmarkStorageSchedule(W, options);
             names = arrayfun(@(k) schedule.control(k).W.name, ...
-                schedule.step.control(:),'UniformOutput',false);
-            cushion = strcmp(names,'cushion');
-            starts = find(cushion & [true; ~cushion(1:end-1)]);
-            levels = zeros(1,numel(starts));
+                schedule.step.control(:), 'UniformOutput', false);
+            cushion = strcmp(names, 'cushion');
+            starts = find(cushion & [true; ~cushion(1:end - 1)]);
+            levels = zeros(1, numel(starts));
             for k = 1:numel(starts)
                 well = schedule.control(schedule.step.control(starts(k))).W;
-                test.verifyEqual(well.type,'bhp');
-                levels(k) = well.val/barsa;
+                test.verifyEqual(well.type, 'bhp');
+                levels(k) = well.val / barsa;
             end
-            test.verifyEqual(levels,[90,94,98,102,102,102]);
+            test.verifyEqual(levels, [90, 94, 98, 102, 102, 102]);
         end
+
         function noCushionAndDischarge(test)
             [W, options] = inputs();
             options.use_cushion = false;
             schedule = makeBenchmarkStorageSchedule(W, options);
-            expected = options.numCycles*(options.timeCharge+options.timeIdle+options.timeDischarge);
-            test.verifyEqual(sum(schedule.step.val),expected,'AbsTol',1e-7);
+            expected = options.numCycles * (options.timeCharge + options.timeIdle + options.timeDischarge);
+            test.verifyEqual(sum(schedule.step.val), expected, 'AbsTol', 1e-7);
             for k = 1:numel(schedule.control)
                 well = schedule.control(k).W;
-                if strcmp(well.name,'discharge')
-                    test.verifyEqual(well.val,-options.rateDischarge);
-                    test.verifyEqual(well.sign,-1);
-                    test.verifyEqual(well.lims.bhp,20*barsa);
-                    test.verifyEqual(well.cstatus,[true;false]);
+                if strcmp(well.name, 'discharge')
+                    test.verifyEqual(well.val, -options.rateDischarge);
+                    test.verifyEqual(well.sign, -1);
+                    test.verifyEqual(well.lims.bhp, 20 * barsa);
+                    test.verifyEqual(well.cstatus, [true; false]);
                 end
             end
         end
+
         function rateCushionProfile(test, cushionRate, cushionOnly)
             [W, options] = inputs();
             options.use_bhp = false;
@@ -82,32 +88,34 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
             options.cushionOnly = cushionOnly;
             schedule = makeBenchmarkStorageSchedule(W, options);
             count = options.numCyclesCushions;
-            names = arrayfun(@(c) c.W.name, schedule.control, 'UniformOutput',false);
-            controls = schedule.control(strcmp(names,'cushion'));
+            names = arrayfun(@(c) c.W.name, schedule.control, 'UniformOutput', false);
+            controls = schedule.control(strcmp(names, 'cushion'));
             actual = arrayfun(@(c) c.W.val, controls);
-            expected = repmat(cushionRate*[1;1;1;0.5;0.5], count, 1);
-            test.verifyEqual(actual(:),expected,'AbsTol',1e-14);
+            expected = repmat(cushionRate * [1; 1; 1; 0.5; 0.5], count, 1);
+            test.verifyEqual(actual(:), expected, 'AbsTol', 1e-14);
             for k = 1:numel(controls)
-                test.verifyEqual(controls(k).W.type,'rate');
-                test.verifyEqual(controls(k).W.sign,1);
-                test.verifyEqual(controls(k).W.T,options.tempCushion);
-                test.verifyEqual(controls(k).W.compi,[0,1]);
+                test.verifyEqual(controls(k).W.type, 'rate');
+                test.verifyEqual(controls(k).W.sign, 1);
+                test.verifyEqual(controls(k).W.T, options.tempCushion);
+                test.verifyEqual(controls(k).W.compi, [0, 1]);
             end
             stepNames = names(schedule.step.control);
-            selected = strcmp(stepNames,'cushion');
+            selected = strcmp(stepNames, 'cushion');
             rates = arrayfun(@(k) schedule.control(k).W.val, schedule.step.control(selected));
-            volume = sum(schedule.step.val(selected).*rates(:));
-            expectedVolume = count*cushionRate*(options.timeCushion-options.dtCushion/2);
-            test.verifyEqual(volume,expectedVolume,'AbsTol',1e-7,'RelTol',1e-13);
+            volume = sum(schedule.step.val(selected) .* rates(:));
+            expectedVolume = count * cushionRate * (options.timeCushion - options.dtCushion / 2);
+            test.verifyEqual(volume, expectedVolume, 'AbsTol', 1e-7, 'RelTol', 1e-13);
         end
+
         function rateIgnoresBhpSetting(test)
             [W, options] = inputs();
             options.use_bhp = false;
-            before = makeBenchmarkStorageSchedule(W,options);
-            options.bhp = 110*barsa;
-            after = makeBenchmarkStorageSchedule(W,options);
-            test.verifyEqual(after,before);
+            before = makeBenchmarkStorageSchedule(W, options);
+            options.bhp = 110 * barsa;
+            after = makeBenchmarkStorageSchedule(W, options);
+            test.verifyEqual(after, before);
         end
+
         function configuredCount(test, cushionCount, cushionOnly, bhpControl)
             [W, options] = inputs();
             options.numCyclesCushions = cushionCount;
@@ -117,54 +125,57 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
             names = arrayfun(@(c) c.W.name, schedule.control, ...
                 'UniformOutput', false);
             controls = schedule.control(strcmp(names, 'cushion'));
-            test.verifyNumElements(controls, 5*cushionCount);
-            expectedTime = cushionCount*(options.timeCushion+options.timeShut);
+            test.verifyNumElements(controls, 5 * cushionCount);
+            expectedTime = cushionCount * (options.timeCushion + options.timeShut);
             if ~cushionOnly
-                expectedTime = expectedTime + options.numCycles* ...
-                    (options.timeCharge+options.timeIdle+options.timeDischarge);
+                expectedTime = expectedTime + options.numCycles * ...
+                    (options.timeCharge + options.timeIdle + options.timeDischarge);
             end
             test.verifyEqual(sum(schedule.step.val), expectedTime, 'AbsTol', 1e-7);
             values = reshape(arrayfun(@(c) c.W.val, controls), 5, []);
             if bhpControl
-                levels = [options.bhp, 94*barsa, 98*barsa, 102*barsa];
+                levels = [options.bhp, 94 * barsa, 98 * barsa, 102 * barsa];
                 expected = levels(min(1:cushionCount, numel(levels)));
                 test.verifyEqual(values, repmat(expected, 5, 1));
             else
-                expected = options.rateCushion*[1; 1; 1; 0.5; 0.5];
+                expected = options.rateCushion * [1; 1; 1; 0.5; 0.5];
                 test.verifyEqual(values, repmat(expected, 1, cushionCount));
                 stepNames = names(schedule.step.control);
                 selected = strcmp(stepNames, 'cushion');
                 rates = arrayfun(@(k) schedule.control(k).W.val, ...
                     schedule.step.control(selected));
-                volume = sum(schedule.step.val(selected).*rates(:));
-                expectedVolume = cushionCount*options.rateCushion* ...
-                    (options.timeCushion-options.dtCushion/2);
+                volume = sum(schedule.step.val(selected) .* rates(:));
+                expectedVolume = cushionCount * options.rateCushion * ...
+                    (options.timeCushion - options.dtCushion / 2);
                 test.verifyEqual(volume, expectedVolume, ...
                     'AbsTol', 1e-7, 'RelTol', 1e-13);
             end
         end
+
         function rejectInvalidCount(test, invalidCount)
             [W, options] = inputs();
             options.numCyclesCushions = invalidCount;
             test.verifyError(@() makeBenchmarkStorageSchedule(W, options), ...
                 'h2sim:h2store:InvalidCushionCount');
         end
+
         function shortCharge(test)
             [W, options] = inputs();
             options.chargeOnly = true;
             options.timeCharge = 0.5;
             options.dtCharge = 10;
             schedule = makeBenchmarkStorageSchedule(W, options);
-            test.verifyEqual(sum(schedule.step.val),0.5,'AbsTol',1e-14);
+            test.verifyEqual(sum(schedule.step.val), 0.5, 'AbsTol', 1e-14);
         end
+
     end
 end
 
 function [W, options] = inputs()
     mrstModule add test-suite;
-    [~,options] = modelForUHSModifiedBenchmark([],false);
-    W = struct('name','Prod','type','rate','val',options.rateCharge, ...
-        'sign',1,'status',true,'compi',[0,1],'cstatus',[true;true]);
+    [~, options] = modelForUHSModifiedBenchmark([], false);
+    W = struct('name', 'Prod', 'type', 'rate', 'val', options.rateCharge, ...
+        'sign', 1, 'status', true, 'compi', [0, 1], 'cstatus', [true; true]);
 end
 
 %{

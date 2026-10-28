@@ -26,6 +26,7 @@ classdef DynamicFlowPoreVolume < PoreVolume
     end
 
     methods
+
         function gp = DynamicFlowPoreVolume(model, varargin)
             % Constructor for dynamic pore volume calculator
 
@@ -74,6 +75,7 @@ classdef DynamicFlowPoreVolume < PoreVolume
             % Apply multiplier
             pv = pv .* pvMult;
         end
+
     end
 end
 

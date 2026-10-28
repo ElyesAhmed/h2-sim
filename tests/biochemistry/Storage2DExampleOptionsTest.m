@@ -1,6 +1,7 @@
 classdef Storage2DExampleOptionsTest < matlab.unittest.TestCase
     % Reject ambiguous step limits and bad cases before expensive grid setup.
     methods (Test)
+
         function rejectsFractionalStepLimits(test)
             test.verifyError(@() exampleCompositionalBacterial2DThreeReactions( ...
                 'maximumFlowSteps', 1.5, 'plotResults', false), ...
@@ -13,6 +14,7 @@ classdef Storage2DExampleOptionsTest < matlab.unittest.TestCase
                 'plotResults', false), ...
                 'MATLAB:exampleCompositionalBacterial2DThreeReactions:unrecognizedStringChoice');
         end
+
     end
 end
 

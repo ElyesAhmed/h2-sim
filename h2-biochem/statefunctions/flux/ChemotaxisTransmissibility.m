@@ -28,6 +28,7 @@ classdef ChemotaxisTransmissibility < StateFunction
     end
 
     methods
+
         function tf = ChemotaxisTransmissibility(model, varargin)
             % Constructor.
             %
@@ -80,7 +81,7 @@ classdef ChemotaxisTransmissibility < StateFunction
                 % Skip if diffusivity is zero everywhere
                 if isnumeric(D) && all(D(:) == 0)
                     T_face{spec} = zeros(nInternal, 1);
-                    continue;
+                    continue
                 end
 
                 % Compute harmonic transmissibility on all faces
@@ -90,6 +91,7 @@ classdef ChemotaxisTransmissibility < StateFunction
                 T_face{spec} = T_all(op.internalConn);
             end
         end
+
     end
 end
 

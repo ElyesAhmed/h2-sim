@@ -1,54 +1,54 @@
 function state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
-%Apply compositional PHREEQC chemistry after an accepted flow timestep
-%
-% SYNOPSIS:
-%   state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
-%
-% PARAMETERS:
-%   model - BiochemistryPhreeqcModel with timestep coupling enabled and
-%           phreeqcBackend = 'sequential-compositional-phreeqc'.
-%   state - Accepted reservoir state, including flashed liquid/gas data,
-%           aqueous tracers and any existing chemistry/biomass history.
-%   dt    - Positive, finite coupling duration in seconds.
-%
-% RETURNS:
-%   state - Updated aqueous/mineral chemistry, PHREEQC biomass, reaction
-%           consumption and element-audit diagnostics, followed by EOS
-%           reflash. H2sim retains flow and tracer transport; PHREEQC owns
-%           MET/ACE/SRB kinetics and separate biomass fields, not nbact.
-%
-% CONFIGURATION:
-%   Recognized fields of model.phreeqcCouplingOptions override the utility
-%   defaults, including databaseFile and comProgId seeded from model
-%   properties. Other fields are ignored here. The constructor's separate
-%   configuration validation still applies.
-%   databaseFile must be an existing absolute h2_biogeochemistry.dat path.
-%   Linux uses native IPhreeqc and Windows uses IPhreeqcCOM. comProgId is
-%   retained as compatibility metadata on Linux.
-%   sequentialCompositionalPhreeqcSteps (default 5) sets chemistry substeps;
-%   sequentialCompositionalPhreeqcBatchSize (default 50) sets independent
-%   cell blocks per engine call. A batch size of 1 processes cells singly.
-%   See getCouplingOptions below for kinetic, brine and audit defaults.
-%
-% NOTES:
-%   Water mass is in kg per cell; PHREEQC input concentrations use mol/kg
-%   water and gas volume uses litres/kg water. Initialization retains the
-%   historical first-step biomass normalization used by the reference case;
-%   its state flag prevents applying that convention again on later calls.
-%   The first coupling equilibrates every wet cell (liquid saturation at
-%   least 1e-3). Later calls can omit inactive cells when
-%   sequentialCompositionalPhreeqcSkipInactiveCells is enabled (default only for grids larger than 1000 cells). Inactive
-%   chemistry is restored; unavailable rate/TDS diagnostics remain explicit.
-%
-%   Each invocation opens one engine session, loads the database once and
-%   reuses that session across its batches. It is released on completion or
-%   error; sessions are not retained between timesteps. Unique local entity
-%   numbers isolate cell inputs. Selected-output row counts and kinetic-step
-%   sequences are checked before assigning rows in execution order.
-%
-% SEE ALSO:
-%   BiochemistryPhreeqcModel, createH2simIPhreeqc,
-%   runSequentialH2BiochemPhreeqcEquilibrium
+    % Apply compositional PHREEQC chemistry after an accepted flow timestep
+    %
+    % SYNOPSIS:
+    %   state = runSequentialCompositionalPhreeqcCoupling(model, state, dt)
+    %
+    % PARAMETERS:
+    %   model - BiochemistryPhreeqcModel with timestep coupling enabled and
+    %           phreeqcBackend = 'sequential-compositional-phreeqc'.
+    %   state - Accepted reservoir state, including flashed liquid/gas data,
+    %           aqueous tracers and any existing chemistry/biomass history.
+    %   dt    - Positive, finite coupling duration in seconds.
+    %
+    % RETURNS:
+    %   state - Updated aqueous/mineral chemistry, PHREEQC biomass, reaction
+    %           consumption and element-audit diagnostics, followed by EOS
+    %           reflash. H2sim retains flow and tracer transport; PHREEQC owns
+    %           MET/ACE/SRB kinetics and separate biomass fields, not nbact.
+    %
+    % CONFIGURATION:
+    %   Recognized fields of model.phreeqcCouplingOptions override the utility
+    %   defaults, including databaseFile and comProgId seeded from model
+    %   properties. Other fields are ignored here. The constructor's separate
+    %   configuration validation still applies.
+    %   databaseFile must be an existing absolute h2_biogeochemistry.dat path.
+    %   Linux uses native IPhreeqc and Windows uses IPhreeqcCOM. comProgId is
+    %   retained as compatibility metadata on Linux.
+    %   sequentialCompositionalPhreeqcSteps (default 5) sets chemistry substeps;
+    %   sequentialCompositionalPhreeqcBatchSize (default 50) sets independent
+    %   cell blocks per engine call. A batch size of 1 processes cells singly.
+    %   See getCouplingOptions below for kinetic, brine and audit defaults.
+    %
+    % NOTES:
+    %   Water mass is in kg per cell; PHREEQC input concentrations use mol/kg
+    %   water and gas volume uses litres/kg water. Initialization retains the
+    %   historical first-step biomass normalization used by the reference case;
+    %   its state flag prevents applying that convention again on later calls.
+    %   The first coupling equilibrates every wet cell (liquid saturation at
+    %   least 1e-3). Later calls can omit inactive cells when
+    %   sequentialCompositionalPhreeqcSkipInactiveCells is enabled (default only for grids larger than 1000 cells). Inactive
+    %   chemistry is restored; unavailable rate/TDS diagnostics remain explicit.
+    %
+    %   Each invocation opens one engine session, loads the database once and
+    %   reuses that session across its batches. It is released on completion or
+    %   error; sessions are not retained between timesteps. Unique local entity
+    %   numbers isolate cell inputs. Selected-output row counts and kinetic-step
+    %   sequences are checked before assigning rows in execution order.
+    %
+    % SEE ALSO:
+    %   BiochemistryPhreeqcModel, createH2simIPhreeqc,
+    %   runSequentialH2BiochemPhreeqcEquilibrium
 
     validateCouplingRequest(model, dt);
 
@@ -120,7 +120,7 @@ function validateCouplingRequest(model, dt)
 end
 
 function [state, phase, mineral, waterMass, firstCouplingStep] = ...
-        preparePhreeqcInput(model, state, opt, nc)
+    preparePhreeqcInput(model, state, opt, nc)
     % Establish the exact water basis and first-step convention before batching.
     rhoWater = opt.waterDensity;
     waterMass = getWaterMass(model, state, rhoWater);
@@ -176,9 +176,9 @@ function opt = getCouplingOptions(model)
         'sequentialCompositionalPhreeqcBMET', 0.01109, ...
         'sequentialCompositionalPhreeqcBACE', 0.00872, ...
         'sequentialCompositionalPhreeqcBSRB', 0.01048, ...
-        'sequentialCompositionalPhreeqcYMET', 0.03*4, ...
-        'sequentialCompositionalPhreeqcYACE', 0.07*4, ...
-        'sequentialCompositionalPhreeqcYSRB', 0.08*4, ...
+        'sequentialCompositionalPhreeqcYMET', 0.03 * 4, ...
+        'sequentialCompositionalPhreeqcYACE', 0.07 * 4, ...
+        'sequentialCompositionalPhreeqcYSRB', 0.08 * 4, ...
         'sequentialCompositionalPhreeqcKDMET', 10e-6, ...
         'sequentialCompositionalPhreeqcKDACE', 2.5e-6, ...
         'sequentialCompositionalPhreeqcKDSRB', 2.9e-6, ...
@@ -212,13 +212,13 @@ function validateCouplingOptions(opt, nc)
     databaseFile = char(opt.databaseFile);
     assert(~isempty(strtrim(databaseFile)) && isAbsolutePath(databaseFile), ...
         ['sequential-compositional-phreeqc requires an explicit absolute databaseFile path to ', ...
-         'h2_biogeochemistry.dat.']);
+        'h2_biogeochemistry.dat.']);
     assert(isfile(databaseFile), ...
         'compositional PHREEQC database not found: %s', databaseFile);
     [~, databaseName, extension] = fileparts(databaseFile);
     assert(strcmpi(extension, '.dat') && contains(lower(databaseName), 'h2_biogeochemistry'), ...
         ['sequential-compositional-phreeqc requires h2_biogeochemistry.dat, not a standard PHREEQC ', ...
-         'Pitzer database: %s'], databaseFile);
+        'Pitzer database: %s'], databaseFile);
     assert(ischar(opt.comProgId) || (isstring(opt.comProgId) && isscalar(opt.comProgId)), ...
         'sequential-compositional-phreeqc comProgId must identify a registered IPhreeqcCOM server.');
     assert(~isempty(strtrim(char(opt.comProgId))), ...
@@ -267,12 +267,12 @@ function validateCouplingOptions(opt, nc)
 end
 
 function [state, firstCouplingStep] = ...
-        initializeSequentialCompositionalPhreeqcState(state, opt, nc, waterMass)
+    initializeSequentialCompositionalPhreeqcState(state, opt, nc, waterMass)
     % Initialize missing inventories, then apply the historical normalization
     % only when the saved state does not mark it as already applied.
     % Stored biomass is mol/kg water and never aliases MRST's nbact field.
-    initialBiomass = opt.sequentialCompositionalPhreeqcN0* ...
-        opt.sequentialCompositionalPhreeqcCellMass/ ...
+    initialBiomass = opt.sequentialCompositionalPhreeqcN0 * ...
+        opt.sequentialCompositionalPhreeqcCellMass / ...
         opt.sequentialCompositionalPhreeqcBiomassMW;
     biomassFields = {'sequentialCompositionalPhreeqcBiomassMET', 'sequentialCompositionalPhreeqcBiomassACE', ...
         'sequentialCompositionalPhreeqcBiomassSRB'};
@@ -305,9 +305,8 @@ function [state, firstCouplingStep] = ...
         applyReferenceFirstStepBiomassConvention(state, waterMass);
 end
 
-
 function [state, firstCouplingStep] = ...
-        applyReferenceFirstStepBiomassConvention(state, waterMass)
+    applyReferenceFirstStepBiomassConvention(state, waterMass)
     % H2Storage1D initializes Solution.*_Biomass in mol/kgw, but its first
     % buildPhreeqcStrings call divides those values by cell water mass as if
     % they were mol/cell. Subsequent calls use PHREEQC output stored in
@@ -316,132 +315,132 @@ function [state, firstCouplingStep] = ...
     flag = 'sequentialCompositionalPhreeqcFirstStepBiomassConventionApplied';
     if isfield(state, flag) && state.(flag)
         firstCouplingStep = false;
-        return;
+        return
     end
     firstCouplingStep = true;
     fields = {'sequentialCompositionalPhreeqcBiomassMET', 'sequentialCompositionalPhreeqcBiomassACE', ...
         'sequentialCompositionalPhreeqcBiomassSRB'};
     for i = 1:numel(fields)
         field = fields{i};
-        state.(field) = state.(field)./waterMass;
+        state.(field) = state.(field) ./ waterMass;
     end
     state.(flag) = true;
 end
 
 function phase = getPhaseData(model, state, waterMass, rhoWater)
-nc = model.G.cells.num;
-phase = struct();
-phase.waterMass = waterMass;
-phase.temperature = asCellVector(value(state.T), nc, 'temperature');
-phase.pressureAtm = asCellVector(value(state.pressure)./101325, nc, 'pressure');
-phase.pH = getStateVector(state, 'phreeqcPH', nc, model.carbonateBufferPH);
-phase.Na = optionVector(model.phreeqcCouplingOptions, 'Na', 2.865, nc);
-phase.K = optionVector(model.phreeqcCouplingOptions, 'K', 0, nc);
-phase.Cl = optionVector(model.phreeqcCouplingOptions, 'Cl', 3.655, nc);
-phase.Si = optionVector(model.phreeqcCouplingOptions, 'Si', 9.723e-5, nc);
-initialFe3 = optionVector(model.phreeqcCouplingOptions, 'Fe3', 0, nc);
-initialFe2 = optionVector(model.phreeqcCouplingOptions, 'Fe2', 0, nc);
-phase.Fe3 = max(getStateVector(state, 'phreeqcFe3Molality', nc, initialFe3), 0);
-phase.Fe2 = max(getStateVector(state, 'phreeqcFe2Molality', nc, initialFe2), 0);
-phase.Ca = max(getStateVector(state, 'tracerCa', nc, 0)./rhoWater, 0);
-phase.Mg = max(getStateVector(state, 'tracerMg', nc, 0)./rhoWater, 0);
-phase.S6 = max(getStateVector(state, 'tracerSO4', nc, 0)./rhoWater, 0);
-phase.S2 = max(getStateVector(state, 'tracerHS', nc, 0)./rhoWater, 0);
+    nc = model.G.cells.num;
+    phase = struct();
+    phase.waterMass = waterMass;
+    phase.temperature = asCellVector(value(state.T), nc, 'temperature');
+    phase.pressureAtm = asCellVector(value(state.pressure) ./ 101325, nc, 'pressure');
+    phase.pH = getStateVector(state, 'phreeqcPH', nc, model.carbonateBufferPH);
+    phase.Na = optionVector(model.phreeqcCouplingOptions, 'Na', 2.865, nc);
+    phase.K = optionVector(model.phreeqcCouplingOptions, 'K', 0, nc);
+    phase.Cl = optionVector(model.phreeqcCouplingOptions, 'Cl', 3.655, nc);
+    phase.Si = optionVector(model.phreeqcCouplingOptions, 'Si', 9.723e-5, nc);
+    initialFe3 = optionVector(model.phreeqcCouplingOptions, 'Fe3', 0, nc);
+    initialFe2 = optionVector(model.phreeqcCouplingOptions, 'Fe2', 0, nc);
+    phase.Fe3 = max(getStateVector(state, 'phreeqcFe3Molality', nc, initialFe3), 0);
+    phase.Fe2 = max(getStateVector(state, 'phreeqcFe2Molality', nc, initialFe2), 0);
+    phase.Ca = max(getStateVector(state, 'tracerCa', nc, 0) ./ rhoWater, 0);
+    phase.Mg = max(getStateVector(state, 'tracerMg', nc, 0) ./ rhoWater, 0);
+    phase.S6 = max(getStateVector(state, 'tracerSO4', nc, 0) ./ rhoWater, 0);
+    phase.S2 = max(getStateVector(state, 'tracerHS', nc, 0) ./ rhoWater, 0);
 
-componentMoles = getEOSComponentMoles(model, state);
-phase.componentMoles = componentMoles;
-[phase.rhoL, phase.rhoV, phase.sL, phase.sV] = getPhaseProperties(model, state);
-poreVolume = asCellVector(value(model.PVTPropertyFunctions.get( ...
-    model, state, 'PoreVolume')), nc, 'pore volume');
-phase.gasVolumeLPerKg = max(poreVolume.*phase.sV.*1000./waterMass, 1e-12);
-phase.gasVolumeL = max(poreVolume.*phase.sV.*1000, 1e-6);
-phase.ZV = asCellVector(value(state.Z_V), nc, 'gas compressibility factor');
-phase.gasTemperature = phase.temperature;
+    componentMoles = getEOSComponentMoles(model, state);
+    phase.componentMoles = componentMoles;
+    [phase.rhoL, phase.rhoV, phase.sL, phase.sV] = getPhaseProperties(model, state);
+    poreVolume = asCellVector(value(model.PVTPropertyFunctions.get( ...
+        model, state, 'PoreVolume')), nc, 'pore volume');
+    phase.gasVolumeLPerKg = max(poreVolume .* phase.sV .* 1000 ./ waterMass, 1e-12);
+    phase.gasVolumeL = max(poreVolume .* phase.sV .* 1000, 1e-6);
+    phase.ZV = asCellVector(value(state.Z_V), nc, 'gas compressibility factor');
+    phase.gasTemperature = phase.temperature;
 
-names = model.EOSModel.CompositionalMixture.names;
-% compositional PHREEQC's GAS_PHASE inventory is its total component inventory per kg
-% water, rather than only the EOS vapor-phase portion. This gives PHREEQC
-% the complete volatile inventory to repartition; supplying only y*Sg
-% would silently discard pre-existing dissolved gas at every split.
-phase.gasH2 = getComponentMoles(componentMoles, names, {'H2', 'Hydrogen'});
-phase.gasCO2 = getComponentMoles(componentMoles, names, {'CO2', 'CarbonDioxide'});
-phase.gasCH4 = getComponentMoles(componentMoles, names, {'C1', 'CH4', 'Methane'});
-phase.gasH2S = getComponentMoles(componentMoles, names, {'H2S', 'HydrogenSulfide'});
-phase.gasN2 = getComponentMoles(componentMoles, names, {'N2', 'Nitrogen'}, false);
-components = value(state.components);
-% Match compositional PHREEQC's component cleanup before the PHREEQC gas inventory is
-% constructed.
-phase.gasH2 = zeroTraceComponent(phase.gasH2, components, names, {'H2', 'Hydrogen'});
-phase.gasCO2 = zeroTraceComponent(phase.gasCO2, components, names, {'CO2', 'CarbonDioxide'});
-phase.gasCH4 = zeroTraceComponent(phase.gasCH4, components, names, {'C1', 'CH4', 'Methane'});
-phase.gasH2S = zeroTraceComponent(phase.gasH2S, components, names, {'H2S', 'HydrogenSulfide'});
-phase.gasN2 = zeroTraceComponent(phase.gasN2, components, names, {'N2', 'Nitrogen'});
-phase.totalH2 = phase.gasH2;
-iH2 = findComponent(names, {'H2', 'Hydrogen'});
-phase.activeCells = components(:, iH2) > 1e-3 & phase.sL >= 1e-3;
-phase.partialH2 = gasPartialPressure(phase.gasH2, phase);
-phase.partialCO2 = gasPartialPressure(phase.gasCO2, phase);
-phase.partialCH4 = gasPartialPressure(phase.gasCH4, phase);
-phase.partialH2S = gasPartialPressure(phase.gasH2S, phase);
-phase.partialN2 = gasPartialPressure(phase.gasN2, phase);
+    names = model.EOSModel.CompositionalMixture.names;
+    % compositional PHREEQC's GAS_PHASE inventory is its total component inventory per kg
+    % water, rather than only the EOS vapor-phase portion. This gives PHREEQC
+    % the complete volatile inventory to repartition; supplying only y*Sg
+    % would silently discard pre-existing dissolved gas at every split.
+    phase.gasH2 = getComponentMoles(componentMoles, names, {'H2', 'Hydrogen'});
+    phase.gasCO2 = getComponentMoles(componentMoles, names, {'CO2', 'CarbonDioxide'});
+    phase.gasCH4 = getComponentMoles(componentMoles, names, {'C1', 'CH4', 'Methane'});
+    phase.gasH2S = getComponentMoles(componentMoles, names, {'H2S', 'HydrogenSulfide'});
+    phase.gasN2 = getComponentMoles(componentMoles, names, {'N2', 'Nitrogen'}, false);
+    components = value(state.components);
+    % Match compositional PHREEQC's component cleanup before the PHREEQC gas inventory is
+    % constructed.
+    phase.gasH2 = zeroTraceComponent(phase.gasH2, components, names, {'H2', 'Hydrogen'});
+    phase.gasCO2 = zeroTraceComponent(phase.gasCO2, components, names, {'CO2', 'CarbonDioxide'});
+    phase.gasCH4 = zeroTraceComponent(phase.gasCH4, components, names, {'C1', 'CH4', 'Methane'});
+    phase.gasH2S = zeroTraceComponent(phase.gasH2S, components, names, {'H2S', 'HydrogenSulfide'});
+    phase.gasN2 = zeroTraceComponent(phase.gasN2, components, names, {'N2', 'Nitrogen'});
+    phase.totalH2 = phase.gasH2;
+    iH2 = findComponent(names, {'H2', 'Hydrogen'});
+    phase.activeCells = components(:, iH2) > 1e-3 & phase.sL >= 1e-3;
+    phase.partialH2 = gasPartialPressure(phase.gasH2, phase);
+    phase.partialCO2 = gasPartialPressure(phase.gasCO2, phase);
+    phase.partialCH4 = gasPartialPressure(phase.gasCH4, phase);
+    phase.partialH2S = gasPartialPressure(phase.gasH2S, phase);
+    phase.partialN2 = gasPartialPressure(phase.gasN2, phase);
 
-% tracerHCO3 carries nonvolatile C(4). EOS CO2 is supplied separately in
-% GAS_PHASE_MODIFY, exactly as in compositional PHREEQC; adding dissolved EOS CO2 here
-% would count the same carbon inventory twice.
-phase.C4 = max(getStateVector(state, 'tracerHCO3', nc, 0)./rhoWater, 0);
-phase.Acetate = max(getStateVector(state, 'sequentialCompositionalPhreeqcAcetate', nc, 0), 0);
+    % tracerHCO3 carries nonvolatile C(4). EOS CO2 is supplied separately in
+    % GAS_PHASE_MODIFY, exactly as in compositional PHREEQC; adding dissolved EOS CO2 here
+    % would count the same carbon inventory twice.
+    phase.C4 = max(getStateVector(state, 'tracerHCO3', nc, 0) ./ rhoWater, 0);
+    phase.Acetate = max(getStateVector(state, 'sequentialCompositionalPhreeqcAcetate', nc, 0), 0);
 
-% Brine TDS (g/kgw, used as a g/L proxy) computed from the same
-% non-volatile ion inventory PHREEQC's SOLUTION block is given, before
-% GAS_PHASE injects the EOS's total (dissolved+vapor) component
-% inventory. Unlike PHREEQC's own RHO/SOLN_VOL-based TDS -- which is
-% evaluated after GAS_PHASE re-equilibration and so picks up that
-% injected gas mass -- this is independent of the gas split, matching
-% the "true brine" TDS the empirical rate-suppression curve was meant to
-% respond to. Only used when sequentialCompositionalPhreeqcPinTDS is set.
-ionMolarMassGPerMol = struct('Na', 22.99, 'K', 39.10, 'Ca', 40.08, ...
-    'Mg', 24.31, 'Cl', 35.45, 'Si', 28.09, 'S6', 96.06, 'S2', 33.07, ...
-    'Fe3', 55.85, 'Fe2', 55.85, 'Acetate', 59.05, 'C4', 61.02);
-phase.brineTDS = phase.Na.*ionMolarMassGPerMol.Na + phase.K.*ionMolarMassGPerMol.K + ...
-    phase.Ca.*ionMolarMassGPerMol.Ca + phase.Mg.*ionMolarMassGPerMol.Mg + ...
-    phase.Cl.*ionMolarMassGPerMol.Cl + phase.Si.*ionMolarMassGPerMol.Si + ...
-    phase.S6.*ionMolarMassGPerMol.S6 + phase.S2.*ionMolarMassGPerMol.S2 + ...
-    phase.Fe3.*ionMolarMassGPerMol.Fe3 + phase.Fe2.*ionMolarMassGPerMol.Fe2 + ...
-    phase.Acetate.*ionMolarMassGPerMol.Acetate + phase.C4.*ionMolarMassGPerMol.C4;
+    % Brine TDS (g/kgw, used as a g/L proxy) computed from the same
+    % non-volatile ion inventory PHREEQC's SOLUTION block is given, before
+    % GAS_PHASE injects the EOS's total (dissolved+vapor) component
+    % inventory. Unlike PHREEQC's own RHO/SOLN_VOL-based TDS -- which is
+    % evaluated after GAS_PHASE re-equilibration and so picks up that
+    % injected gas mass -- this is independent of the gas split, matching
+    % the "true brine" TDS the empirical rate-suppression curve was meant to
+    % respond to. Only used when sequentialCompositionalPhreeqcPinTDS is set.
+    ionMolarMassGPerMol = struct('Na', 22.99, 'K', 39.10, 'Ca', 40.08, ...
+        'Mg', 24.31, 'Cl', 35.45, 'Si', 28.09, 'S6', 96.06, 'S2', 33.07, ...
+        'Fe3', 55.85, 'Fe2', 55.85, 'Acetate', 59.05, 'C4', 61.02);
+    phase.brineTDS = phase.Na .* ionMolarMassGPerMol.Na + phase.K .* ionMolarMassGPerMol.K + ...
+        phase.Ca .* ionMolarMassGPerMol.Ca + phase.Mg .* ionMolarMassGPerMol.Mg + ...
+        phase.Cl .* ionMolarMassGPerMol.Cl + phase.Si .* ionMolarMassGPerMol.Si + ...
+        phase.S6 .* ionMolarMassGPerMol.S6 + phase.S2 .* ionMolarMassGPerMol.S2 + ...
+        phase.Fe3 .* ionMolarMassGPerMol.Fe3 + phase.Fe2 .* ionMolarMassGPerMol.Fe2 + ...
+        phase.Acetate .* ionMolarMassGPerMol.Acetate + phase.C4 .* ionMolarMassGPerMol.C4;
 end
 
 function mineral = getMineralData(state, waterMass, nc)
-mineral = struct();
-mineral.calcite = getStateVector(state, 'phreeqcMineralCalcite', nc, 0)./waterMass;
-mineral.dolomite = getStateVector(state, 'phreeqcMineralDolomite', nc, 0)./waterMass;
-mineral.anhydrite = getStateVector(state, 'phreeqcMineralAnhydrite', nc, 0)./waterMass;
-mineral.quartz = getStateVector(state, 'phreeqcMineralQuartz', nc, 0)./waterMass;
-mineral.goethite = getStateVector(state, 'phreeqcMineralGoethite', nc, 0)./waterMass;
-mineral.brucite = getStateVector(state, 'phreeqcMineralBrucite', nc, 0)./waterMass;
-mineral.portlandite = getStateVector(state, 'phreeqcMineralPortlandite', nc, 0)./waterMass;
-mineral.pyrite = getStateVector(state, 'phreeqcMineralPyrite', nc, 0)./waterMass;
-mineral.gypsum = getStateVector(state, 'phreeqcMineralGypsum', nc, 0)./waterMass;
+    mineral = struct();
+    mineral.calcite = getStateVector(state, 'phreeqcMineralCalcite', nc, 0) ./ waterMass;
+    mineral.dolomite = getStateVector(state, 'phreeqcMineralDolomite', nc, 0) ./ waterMass;
+    mineral.anhydrite = getStateVector(state, 'phreeqcMineralAnhydrite', nc, 0) ./ waterMass;
+    mineral.quartz = getStateVector(state, 'phreeqcMineralQuartz', nc, 0) ./ waterMass;
+    mineral.goethite = getStateVector(state, 'phreeqcMineralGoethite', nc, 0) ./ waterMass;
+    mineral.brucite = getStateVector(state, 'phreeqcMineralBrucite', nc, 0) ./ waterMass;
+    mineral.portlandite = getStateVector(state, 'phreeqcMineralPortlandite', nc, 0) ./ waterMass;
+    mineral.pyrite = getStateVector(state, 'phreeqcMineralPyrite', nc, 0) ./ waterMass;
+    mineral.gypsum = getStateVector(state, 'phreeqcMineralGypsum', nc, 0) ./ waterMass;
 end
 
 function input = buildPhreeqcBatchInput(preamble, opt, phase, mineral, ...
-        state, cellIdx, dt)
-% Build one RunString payload for a batch of cells: the shared preamble
-% (SELECTED_OUTPUT/USER_PUNCH/KNOBS/RATES, cell-independent) followed by
-% one self-contained SOLUTION/GAS_PHASE/KINETICS/EQUILIBRIUM_PHASES/USE
-% block per cell. Each cell in the batch is assigned a unique local
-% PHREEQC entity number (1..numel(cellIdx)), matching the standard
-% IPhreeqcCOM convention for concatenating independent batch reactions
-% (as used by PhreeqcRM-style multi-cell couplings) so that PHREEQC does
-% not overwrite one cell's SOLUTION/KINETICS/EQUILIBRIUM_PHASES/GAS_PHASE
-% definitions with another's within the same RunString call. With the
-% batch size of 1 this uses entity number 1 and the single-cell input.
-% The explicit final END preserves the end-of-input reaction boundary.
-blocks = cell(1, numel(cellIdx));
-for i = 1:numel(cellIdx)
-    blocks{i} = buildPhreeqcCellBlock(opt, phase, mineral, state, ...
-        cellIdx(i), dt, i);
-end
-input = [preamble, blocks{:}];
+    state, cellIdx, dt)
+    % Build one RunString payload for a batch of cells: the shared preamble
+    % (SELECTED_OUTPUT/USER_PUNCH/KNOBS/RATES, cell-independent) followed by
+    % one self-contained SOLUTION/GAS_PHASE/KINETICS/EQUILIBRIUM_PHASES/USE
+    % block per cell. Each cell in the batch is assigned a unique local
+    % PHREEQC entity number (1..numel(cellIdx)), matching the standard
+    % IPhreeqcCOM convention for concatenating independent batch reactions
+    % (as used by PhreeqcRM-style multi-cell couplings) so that PHREEQC does
+    % not overwrite one cell's SOLUTION/KINETICS/EQUILIBRIUM_PHASES/GAS_PHASE
+    % definitions with another's within the same RunString call. With the
+    % batch size of 1 this uses entity number 1 and the single-cell input.
+    % The explicit final END preserves the end-of-input reaction boundary.
+    blocks = cell(1, numel(cellIdx));
+    for i = 1:numel(cellIdx)
+        blocks{i} = buildPhreeqcCellBlock(opt, phase, mineral, state, ...
+            cellIdx(i), dt, i);
+    end
+    input = [preamble, blocks{:}];
 end
 
 function preamble = buildPhreeqcPreamble(opt)
@@ -449,11 +448,11 @@ function preamble = buildPhreeqcPreamble(opt)
     % cell processed in this coupling invocation. This text depends only on
     % opt (not on cellNo/dt/state), so it is built once and prefixed to every
     % RunString batch instead of being repeated per cell.
-    maxBiomass = opt.sequentialCompositionalPhreeqcNmax* ...
-        opt.sequentialCompositionalPhreeqcCellMass/ ...
+    maxBiomass = opt.sequentialCompositionalPhreeqcNmax * ...
+        opt.sequentialCompositionalPhreeqcCellMass / ...
         opt.sequentialCompositionalPhreeqcBiomassMW;
-    minBiomass = opt.sequentialCompositionalPhreeqcN0* ...
-        opt.sequentialCompositionalPhreeqcCellMass/ ...
+    minBiomass = opt.sequentialCompositionalPhreeqcN0 * ...
+        opt.sequentialCompositionalPhreeqcCellMass / ...
         opt.sequentialCompositionalPhreeqcBiomassMW;
     preamble = sprintf([ ...
         '%s' ...
@@ -475,12 +474,12 @@ function block = buildPhreeqcCellBlock(opt, phase, mineral, state, cellNo, dt, l
         buildKineticsBlock(opt, phase, state, cellNo, dt, localId), ...
         buildEquilibriumPhasesBlock(mineral, cellNo, localId), ...
         sprintf([ ...
-            'USE solution %d\n' ...
-            'USE kinetics %d\n' ...
-            'USE equilibrium_phases %d\n' ...
-            'USE gas_phase %d\n' ...
-            'END\n' ...
-            ], localId, localId, localId, localId)];
+        'USE solution %d\n' ...
+        'USE kinetics %d\n' ...
+        'USE equilibrium_phases %d\n' ...
+        'USE gas_phase %d\n' ...
+        'END\n' ...
+        ], localId, localId, localId, localId)];
 end
 
 function block = buildSolutionBlock(phase, cellNo, localId)
@@ -552,11 +551,11 @@ function block = buildGasPhaseBlock(phase, cellNo, localId)
         phase.partialCH4(cellNo), phase.partialH2S(cellNo), phase.partialN2(cellNo), ...
         localId, ...
         phase.pressureAtm(cellNo), phase.gasVolumeLPerKg(cellNo), ...
-        phase.gasH2(cellNo)./phase.waterMass(cellNo), ...
-        phase.gasCH4(cellNo)./phase.waterMass(cellNo), ...
-        phase.gasCO2(cellNo)./phase.waterMass(cellNo), ...
-        phase.gasH2S(cellNo)./phase.waterMass(cellNo), ...
-        phase.gasN2(cellNo)./phase.waterMass(cellNo));
+        phase.gasH2(cellNo) ./ phase.waterMass(cellNo), ...
+        phase.gasCH4(cellNo) ./ phase.waterMass(cellNo), ...
+        phase.gasCO2(cellNo) ./ phase.waterMass(cellNo), ...
+        phase.gasH2S(cellNo) ./ phase.waterMass(cellNo), ...
+        phase.gasN2(cellNo) ./ phase.waterMass(cellNo));
 end
 
 function block = buildKineticsBlock(opt, phase, state, cellNo, dt, localId)
@@ -566,11 +565,11 @@ function block = buildKineticsBlock(opt, phase, state, cellNo, dt, localId)
     biomassMET = state.sequentialCompositionalPhreeqcBiomassMET(cellNo);
     biomassACE = state.sequentialCompositionalPhreeqcBiomassACE(cellNo);
     biomassSRB = state.sequentialCompositionalPhreeqcBiomassSRB(cellNo);
-    maxBiomass = opt.sequentialCompositionalPhreeqcNmax* ...
-        opt.sequentialCompositionalPhreeqcCellMass/ ...
+    maxBiomass = opt.sequentialCompositionalPhreeqcNmax * ...
+        opt.sequentialCompositionalPhreeqcCellMass / ...
         opt.sequentialCompositionalPhreeqcBiomassMW;
     if phase.activeCells(cellNo)
-        h2Available = max(phase.totalH2(cellNo)./phase.waterMass(cellNo), 0);
+        h2Available = max(phase.totalH2(cellNo) ./ phase.waterMass(cellNo), 0);
     else
         h2Available = 0;
     end
@@ -651,11 +650,11 @@ function rates = buildRates(opt, minBiomass, maxBiomass)
         buildSulfateReductionRate(opt, tdsLine), ...
         buildAcetogenesisRate(opt, tdsLine), ...
         buildBiomassRate('MET', 1, opt.sequentialCompositionalPhreeqcYMET, ...
-            opt.sequentialCompositionalPhreeqcBMET, opt, minBiomass, maxBiomass), ...
+        opt.sequentialCompositionalPhreeqcBMET, opt, minBiomass, maxBiomass), ...
         buildBiomassRate('SRB', 2, opt.sequentialCompositionalPhreeqcYSRB, ...
-            opt.sequentialCompositionalPhreeqcBSRB, opt, minBiomass, maxBiomass), ...
+        opt.sequentialCompositionalPhreeqcBSRB, opt, minBiomass, maxBiomass), ...
         buildBiomassRate('ACE', 3, opt.sequentialCompositionalPhreeqcYACE, ...
-            opt.sequentialCompositionalPhreeqcBACE, opt, minBiomass, maxBiomass)];
+        opt.sequentialCompositionalPhreeqcBACE, opt, minBiomass, maxBiomass)];
 end
 
 function block = buildMethanogenesisRate(opt, tdsLine)
@@ -764,7 +763,7 @@ function block = buildBiomassRate(name, slot, yield, decay, opt, minBiomass, max
         '-end\n' ...
         ], ...
         name, slot, yield, decay, ...
-        opt.sequentialCompositionalPhreeqcBiomassMW/opt.sequentialCompositionalPhreeqcCellMass, ...
+        opt.sequentialCompositionalPhreeqcBiomassMW / opt.sequentialCompositionalPhreeqcCellMass, ...
         minBiomass, minBiomass, opt.sequentialCompositionalPhreeqcNmax, maxBiomass);
 end
 
@@ -813,7 +812,7 @@ function block = buildUserPunchBlock()
         '155 reactiveh = reactiveh + 3*TOT("Acetate")*TOT("water")\n' ...
         '160 Punch reactiveh\n' ...
         '-end\n' ...
-    ]);
+        ]);
 end
 
 function block = buildSelectedOutputRequest()
@@ -839,47 +838,47 @@ function block = buildSelectedOutputRequest()
         '-total Carbonate(4) Sulfate(6) Ca Mg Fe_di Fe_tri K Na Cl Acetate Sulfide(-2) Si\n' ...
         '-saturation_indices redoxCalcite Brucite Portlandite redoxAnhydrite redoxDolomite Quartz redoxH2S(g)\n' ...
         'END\n' ...
-    ]);
+        ]);
 end
 
 function iph = openPhreeqcSession(opt)
-% Create one session per invocation and reuse its database across batches.
-% Engine activation and LoadDatabase happen once; RunString and selected
-% output retrieval are repeated on the same instance within this call.
-try
-    iph = createH2simIPhreeqc(opt.comProgId);
-catch ME
-    error('H2Biochem:SequentialCompositionalPhreeqcActivation', ...
-        'IPhreeqc activation failed for "%s":\n%s', ...
-        char(opt.comProgId), ME.message);
-end
-try
-    loadStatus = iph.LoadDatabase(char(opt.databaseFile));
-    if loadStatus ~= 0
+    % Create one session per invocation and reuse its database across batches.
+    % Engine activation and LoadDatabase happen once; RunString and selected
+    % output retrieval are repeated on the same instance within this call.
+    try
+        iph = createH2simIPhreeqc(opt.comProgId);
+    catch ME
+        error('H2Biochem:SequentialCompositionalPhreeqcActivation', ...
+            'IPhreeqc activation failed for "%s":\n%s', ...
+            char(opt.comProgId), ME.message);
+    end
+    try
+        loadStatus = iph.LoadDatabase(char(opt.databaseFile));
+        if loadStatus ~= 0
+            message = getPhreeqcError(iph);
+            releasePhreeqcSession(iph);
+            error('H2Biochem:SequentialCompositionalPhreeqcDatabase', ...
+                'PHREEQC database load failed:\n%s', message);
+        end
+    catch ME
+        if startsWith(ME.identifier, 'H2Biochem:SequentialCompositionalPhreeqc')
+            rethrow(ME);
+        end
         message = getPhreeqcError(iph);
         releasePhreeqcSession(iph);
         error('H2Biochem:SequentialCompositionalPhreeqcDatabase', ...
-            'PHREEQC database load failed:\n%s', message);
+            'PHREEQC database load failed:\n%s\nPHREEQC message:\n%s', ME.message, message);
     end
-catch ME
-    if startsWith(ME.identifier, 'H2Biochem:SequentialCompositionalPhreeqc')
-        rethrow(ME);
-    end
-    message = getPhreeqcError(iph);
-    releasePhreeqcSession(iph);
-    error('H2Biochem:SequentialCompositionalPhreeqcDatabase', ...
-        'PHREEQC database load failed:\n%s\nPHREEQC message:\n%s', ME.message, message);
-end
 end
 
 function releasePhreeqcSession(iph)
-% Release this invocation's IPhreeqc session. Called both on normal
-% completion (via onCleanup in runSequentialCompositionalPhreeqcCoupling)
-% and on early error paths in openPhreeqcSession.
-try
-    delete(iph);
-catch
-end
+    % Release this invocation's IPhreeqc session. Called both on normal
+    % completion (via onCleanup in runSequentialCompositionalPhreeqcCoupling)
+    % and on early error paths in openPhreeqcSession.
+    try
+        delete(iph);
+    catch
+    end
 end
 
 function output = runIPhreeqcCOMBatch(iph, input, cellIdx)
@@ -941,15 +940,15 @@ function cellRaw = splitBatchedSelectedOutput(raw, cellIdx, rowsPerCell)
     [initialRows, allKineticsRows, referenceSteps] = identifyBatchRowGroups( ...
         stepValues, nCells, kineticsRowsPerCell, cellRangeText);
     for i = 1:nCells
-        kineticsRows = allKineticsRows((i - 1)*kineticsRowsPerCell + ...
+        kineticsRows = allKineticsRows((i - 1) * kineticsRowsPerCell + ...
             (1:kineticsRowsPerCell));
         cellSteps = stepValues(kineticsRows);
         if ~isequal(cellSteps, referenceSteps)
             error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
                 ['PHREEQC batched selected output for cells %s misattributed rows: cell %d ', ...
-                 'does not repeat the expected selected-output step sequence. Observed steps: ', ...
-                 '%s; expected: %s. Set ', ...
-                 'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], ...
+                'does not repeat the expected selected-output step sequence. Observed steps: ', ...
+                '%s; expected: %s. Set ', ...
+                'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], ...
                 cellRangeText, cellIdx(i), mat2str(cellSteps(:).'), ...
                 mat2str(referenceSteps(:).'));
         end
@@ -962,45 +961,45 @@ function [dataRows, stepValues] = validateBatchSelectedOutput(raw, cellRangeText
     % Check the schema and row count before interpreting any row as a cell.
     assert(iscell(raw) && size(raw, 1) >= 2 && size(raw, 2) >= 1, ...
         ['PHREEQC batched selected output for cells %s does not follow the required ', ...
-         'compositional PHREEQC GetSelectedOutputArray schema.'], cellRangeText);
+        'compositional PHREEQC GetSelectedOutputArray schema.'], cellRangeText);
     headers = normalizeHeaders(raw(1, :));
-    expectedRows = nCells*rowsPerCell;
+    expectedRows = nCells * rowsPerCell;
     dataRows = raw(2:end, :);
     if size(dataRows, 1) ~= expectedRows
         error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
             ['PHREEQC batched selected output for cells %s returned %d rows, expected %d ', ...
-             '(%d cells x %d rows/cell). Set sequentialCompositionalPhreeqcBatchSize to 1 to ', ...
-             'disable multi-cell RunString batching.'], ...
+            '(%d cells x %d rows/cell). Set sequentialCompositionalPhreeqcBatchSize to 1 to ', ...
+            'disable multi-cell RunString batching.'], ...
             cellRangeText, size(dataRows, 1), expectedRows, nCells, rowsPerCell);
     end
     stepColumn = find(ismember(headers, {'step'}), 1);
     if isempty(stepColumn)
         error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
             ['PHREEQC batched selected output for cells %s is missing the "step" ', ...
-             'identifier columns required to split multi-cell RunString batches. Set ', ...
-             'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], cellRangeText);
+            'identifier columns required to split multi-cell RunString batches. Set ', ...
+            'sequentialCompositionalPhreeqcBatchSize to 1 to disable batching.'], cellRangeText);
     end
     stepValues = cellfun(@toNumericScalar, dataRows(:, stepColumn));
 end
 
 function [initialRows, allKineticsRows, referenceSteps] = ...
-        identifyBatchRowGroups(stepValues, nCells, kineticsRowsPerCell, cellRangeText)
+    identifyBatchRowGroups(stepValues, nCells, kineticsRowsPerCell, cellRangeText)
     % Initial and kinetics rows retain their own engine execution order.
     initialRows = find(stepValues < 0);
     allKineticsRows = find(stepValues >= 0);
     if numel(initialRows) ~= nCells || ...
-            numel(allKineticsRows) ~= nCells*kineticsRowsPerCell
+        numel(allKineticsRows) ~= nCells * kineticsRowsPerCell
         error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
             ['PHREEQC batched selected output for cells %s contains %d initial ', ...
-             'rows and %d kinetics rows; expected %d and %d. Observed steps: %s.'], ...
+            'rows and %d kinetics rows; expected %d and %d. Observed steps: %s.'], ...
             cellRangeText, numel(initialRows), numel(allKineticsRows), nCells, ...
-            nCells*kineticsRowsPerCell, summarizeNumericVector(stepValues));
+            nCells * kineticsRowsPerCell, summarizeNumericVector(stepValues));
     end
     referenceSteps = stepValues(allKineticsRows(1:kineticsRowsPerCell));
     if numel(unique(referenceSteps)) ~= kineticsRowsPerCell
         error('H2Biochem:SequentialCompositionalPhreeqcBatchOutputMismatch', ...
             ['PHREEQC batched selected output for cells %s has an invalid first ', ...
-             'kinetics-step sequence: %s.'], ...
+            'kinetics-step sequence: %s.'], ...
             cellRangeText, mat2str(referenceSteps(:).'));
     end
 end
@@ -1012,8 +1011,8 @@ function text = summarizeNumericVector(values)
         text = mat2str(values);
     else
         text = sprintf('%s ... %s (%d values)', ...
-            mat2str(values(1:maxShown/2)), ...
-            mat2str(values(end-maxShown/2+1:end)), numel(values));
+            mat2str(values(1:maxShown / 2)), ...
+            mat2str(values(end - maxShown / 2 + 1:end)), numel(values));
     end
 end
 
@@ -1036,11 +1035,10 @@ function message = getPhreeqcError(iph)
     end
 end
 
-
 function result = parseSelectedOutput(raw, cellNo)
     assert(iscell(raw) && size(raw, 1) >= 2 && size(raw, 2) >= 1, ...
         ['PHREEQC selected output in cell %d does not follow the required ', ...
-         'compositional PHREEQC GetSelectedOutputArray schema.'], cellNo);
+        'compositional PHREEQC GetSelectedOutputArray schema.'], cellNo);
     headers = normalizeHeaders(raw(1, :));
     values = selectedOutputValues(raw(2:end, :), cellNo);
     assert(all(isfinite(values(:))), ...
@@ -1050,7 +1048,7 @@ function result = parseSelectedOutput(raw, cellNo)
     hydrogen = selectedValue(values, headers, {'reactivesystemh'}, cellNo);
     assert(numel(hydrogen) >= 2, ...
         ['PHREEQC selected output in cell %d lacks distinct initial and final ', ...
-         'reactive-hydrogen inventories.'], cellNo);
+        'reactive-hydrogen inventories.'], cellNo);
     result.initialSystemHydrogen = hydrogen(1);
     result.systemHydrogen = hydrogen(end);
 
@@ -1136,7 +1134,6 @@ function result = addKineticSummaries(result, values, headers, cellNo)
     result.tds = timeAverage(time(kineticsRows), tds(kineticsRows));
 end
 
-
 function state = auditElementBalance(state, options, phase, mineral, result, waterMass)
     input = elementReservoirs(phase, mineral, waterMass);
     output = outputElementReservoirs(result, waterMass);
@@ -1170,9 +1167,9 @@ function state = auditElementBalance(state, options, phase, mineral, result, wat
     % The first row is the interpreted SOLUTION (selected output is installed
     % before SOLUTION); add the explicitly supplied gas/mineral hydrogen.
     inputInventory(:, 1) = inputInventory(:, 1) + ...
-        reshape([result.initialSystemHydrogen], [], 1).*waterMass;
+        reshape([result.initialSystemHydrogen], [], 1) .* waterMass;
     % SYS(H) includes raw mineral hydrogen; apply the same phase correction.
-    outputInventory(:, 1) = reshape([result.systemHydrogen], [], 1).*waterMass + ...
+    outputInventory(:, 1) = reshape([result.systemHydrogen], [], 1) .* waterMass + ...
         roundoffCorrection(:, 1);
     % Skipped cells undergo the identity chemistry map, not a PHREEQC audit.
     % Keep an explicit evaluation mask so these entries cannot be reported as
@@ -1184,10 +1181,11 @@ function state = auditElementBalance(state, options, phase, mineral, result, wat
         elements, options, 'sequential-compositional-phreeqc');
 end
 
-
 function saveInvalidInventoryDiagnostic(diagnostic)
     directory = fullfile(pwd, 'build', 'phreeqc-failures');
-    if ~isfolder(directory), mkdir(directory); end
+    if ~isfolder(directory)
+        mkdir(directory);
+    end
     [~, identifier] = fileparts(tempname);
     file = fullfile(directory, ['invalid_inventory_', identifier, '.mat']);
     localFile = [tempname, '.mat'];
@@ -1199,31 +1197,33 @@ function saveInvalidInventoryDiagnostic(diagnostic)
 end
 
 function removeTemporaryDiagnostic(file)
-    if isfile(file), delete(file); end
+    if isfile(file)
+        delete(file);
+    end
 end
 
 function r = elementReservoirs(phase, mineral, waterMass)
     r = struct('hydrogen', zeros(size(waterMass)), ...
-        'c4', phase.C4.*waterMass, 'acetate', phase.Acetate.*waterMass, ...
-        's6', phase.S6.*waterMass, 's2', phase.S2.*waterMass, ...
-        'ca', phase.Ca.*waterMass, 'mg', phase.Mg.*waterMass, ...
-        'fe2', phase.Fe2.*waterMass, 'fe3', phase.Fe3.*waterMass, ...
+        'c4', phase.C4 .* waterMass, 'acetate', phase.Acetate .* waterMass, ...
+        's6', phase.S6 .* waterMass, 's2', phase.S2 .* waterMass, ...
+        'ca', phase.Ca .* waterMass, 'mg', phase.Mg .* waterMass, ...
+        'fe2', phase.Fe2 .* waterMass, 'fe3', phase.Fe3 .* waterMass, ...
         'gasH2', phase.gasH2, 'gasCO2', phase.gasCO2, ...
         'gasCH4', phase.gasCH4, 'gasH2S', phase.gasH2S, ...
-        'calcite', mineral.calcite.*waterMass, ...
-        'dolomite', mineral.dolomite.*waterMass, ...
-        'anhydrite', mineral.anhydrite.*waterMass, ...
-        'gypsum', mineral.gypsum.*waterMass, ...
-        'goethite', mineral.goethite.*waterMass, ...
-        'pyrite', mineral.pyrite.*waterMass, ...
-        'brucite', mineral.brucite.*waterMass, ...
-        'portlandite', mineral.portlandite.*waterMass);
+        'calcite', mineral.calcite .* waterMass, ...
+        'dolomite', mineral.dolomite .* waterMass, ...
+        'anhydrite', mineral.anhydrite .* waterMass, ...
+        'gypsum', mineral.gypsum .* waterMass, ...
+        'goethite', mineral.goethite .* waterMass, ...
+        'pyrite', mineral.pyrite .* waterMass, ...
+        'brucite', mineral.brucite .* waterMass, ...
+        'portlandite', mineral.portlandite .* waterMass);
 end
 
 function r = outputElementReservoirs(result, waterMass)
-    column = @(field) reshape([result.(field)], [], 1).*waterMass;
-    aqueous = @(field) reshape([result.(field)], [], 1).* ...
-        reshape([result.water], [], 1).*waterMass;
+    column = @(field) reshape([result.(field)], [], 1) .* waterMass;
+    aqueous = @(field) reshape([result.(field)], [], 1) .* ...
+        reshape([result.water], [], 1) .* waterMass;
     r = struct('hydrogen', zeros(size(waterMass)), ...
         'c4', aqueous('totalCarbon'), 'acetate', aqueous('acetate'), ...
         's6', aqueous('sulfate'), 's2', aqueous('sulfide'), ...
@@ -1237,7 +1237,6 @@ function r = outputElementReservoirs(result, waterMass)
         'goethite', column('goethite'), 'pyrite', column('pyrite'), ...
         'brucite', column('brucite'), 'portlandite', column('portlandite'));
 end
-
 
 function headers = normalizeHeaders(headers)
     % Match existing aliases case-insensitively, ignoring punctuation.
@@ -1271,7 +1270,7 @@ function values = selectedValue(values, headers, aliases, cellNo)
     column = find(ismember(headers, aliases), 1);
     assert(~isempty(column), ...
         ['PHREEQC selected output in cell %d is missing required compositional PHREEQC ', ...
-         'column "%s". Available columns: %s'], ...
+        'column "%s". Available columns: %s'], ...
         cellNo, aliases{1}, strjoin(headers, ', '));
     values = values(:, column);
 end
@@ -1280,14 +1279,13 @@ function average = timeAverage(time, rate)
     % Use interval-ending values, with the existing last-value fallback.
     if isempty(time) || time(end) <= 0
         average = rate(end);
-        return;
+        return
     end
     % Match H2Storage1D's selected-output integration: each reported rate is
     % applied to the interval ending at that output time.
     interval = [time(1); diff(time)];
-    average = sum(rate.*interval)./time(end);
+    average = sum(rate .* interval) ./ time(end);
 end
-
 
 function state = updateStateFromResults(model, state, opt, phase, result, waterMass, dt)
     % Commit chemistry before rebuilding EOS composition and refreshing outputs.
@@ -1315,11 +1313,11 @@ function state = storeAqueousChemistry(model, state, result, rhoWater, phase)
     state.phreeqcHCO3Molality = max(reshape([result.hco3], [], 1), 0);
     state.phreeqcCO2Molality = max(reshape([result.aqCO2], [], 1), 0);
     state.phreeqcTotalCarbon = max(reshape([result.totalCarbon], [], 1), 0);
-    state.tracerHCO3 = max(state.phreeqcTotalCarbon - state.phreeqcCO2Molality, 0).*rhoWater;
-    state.tracerSO4 = max(reshape([result.sulfate], [], 1), 0).*rhoWater;
-    state.tracerHS = max(reshape([result.sulfide], [], 1), 0).*rhoWater;
-    state.tracerCa = max(reshape([result.ca], [], 1), 0).*rhoWater;
-    state.tracerMg = max(reshape([result.mg], [], 1), 0).*rhoWater;
+    state.tracerHCO3 = max(state.phreeqcTotalCarbon - state.phreeqcCO2Molality, 0) .* rhoWater;
+    state.tracerSO4 = max(reshape([result.sulfate], [], 1), 0) .* rhoWater;
+    state.tracerHS = max(reshape([result.sulfide], [], 1), 0) .* rhoWater;
+    state.tracerCa = max(reshape([result.ca], [], 1), 0) .* rhoWater;
+    state.tracerMg = max(reshape([result.mg], [], 1), 0) .* rhoWater;
     state.phreeqcFe2Molality = max(reshape([result.fe2], [], 1), 0);
     state.phreeqcFe3Molality = max(reshape([result.fe3], [], 1), 0);
     state.sequentialCompositionalPhreeqcAcetate = max(reshape([result.acetate], [], 1), 0);
@@ -1330,7 +1328,7 @@ function state = storeAqueousChemistry(model, state, result, rhoWater, phase)
     state.sequentialCompositionalPhreeqcTDS = reshape([result.tds], [], 1);
     state.sequentialCompositionalPhreeqcBrineTDS = phase.brineTDS;
 
-    pka = state.phreeqcPH - log10(state.phreeqcHCO3Molality./ ...
+    pka = state.phreeqcPH - log10(state.phreeqcHCO3Molality ./ ...
         max(state.phreeqcCO2Molality, 1e-30));
     previousPka = getStateVector(state, 'phreeqcCarbonatePka1', nc, ...
         model.carbonateBufferPka1);
@@ -1341,15 +1339,15 @@ end
 function state = storeMineralInventories(state, result, waterMass)
     % Selected-output mineral amounts use the unit-water input basis.
     % Store nonnegative inventories in mol/cell using cell water mass [kg].
-    state.phreeqcMineralCalcite = max(reshape([result.calcite], [], 1), 0).*waterMass;
-    state.phreeqcMineralDolomite = max(reshape([result.dolomite], [], 1), 0).*waterMass;
-    state.phreeqcMineralAnhydrite = max(reshape([result.anhydrite], [], 1), 0).*waterMass;
-    state.phreeqcMineralQuartz = max(reshape([result.quartz], [], 1), 0).*waterMass;
-    state.phreeqcMineralGoethite = max(reshape([result.goethite], [], 1), 0).*waterMass;
-    state.phreeqcMineralBrucite = max(reshape([result.brucite], [], 1), 0).*waterMass;
-    state.phreeqcMineralPortlandite = max(reshape([result.portlandite], [], 1), 0).*waterMass;
-    state.phreeqcMineralPyrite = max(reshape([result.pyrite], [], 1), 0).*waterMass;
-    state.phreeqcMineralGypsum = max(reshape([result.gypsum], [], 1), 0).*waterMass;
+    state.phreeqcMineralCalcite = max(reshape([result.calcite], [], 1), 0) .* waterMass;
+    state.phreeqcMineralDolomite = max(reshape([result.dolomite], [], 1), 0) .* waterMass;
+    state.phreeqcMineralAnhydrite = max(reshape([result.anhydrite], [], 1), 0) .* waterMass;
+    state.phreeqcMineralQuartz = max(reshape([result.quartz], [], 1), 0) .* waterMass;
+    state.phreeqcMineralGoethite = max(reshape([result.goethite], [], 1), 0) .* waterMass;
+    state.phreeqcMineralBrucite = max(reshape([result.brucite], [], 1), 0) .* waterMass;
+    state.phreeqcMineralPortlandite = max(reshape([result.portlandite], [], 1), 0) .* waterMass;
+    state.phreeqcMineralPyrite = max(reshape([result.pyrite], [], 1), 0) .* waterMass;
+    state.phreeqcMineralGypsum = max(reshape([result.gypsum], [], 1), 0) .* waterMass;
 end
 
 function state = storeReactionResults(state, result, waterMass, dt, activeCells)
@@ -1371,13 +1369,13 @@ function state = storeReactionResults(state, result, waterMass, dt, activeCells)
     reactionRates(inactive, :) = 0;
     state.sequentialCompositionalPhreeqcReactionRates = reactionRates;
     state.sequentialCompositionalPhreeqcActiveCells = activeCells;
-    state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate = reactionRates.*waterMass;
+    state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate = reactionRates .* waterMass;
     state.sequentialCompositionalPhreeqcH2ConsumptionByReactionMoles = ...
-        state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate.*dt;
-    state.sequentialCompositionalPhreeqcH2ConsumptionRate = sum(reactionRates, 2).*waterMass;
+        state.sequentialCompositionalPhreeqcH2ConsumptionByReactionRate .* dt;
+    state.sequentialCompositionalPhreeqcH2ConsumptionRate = sum(reactionRates, 2) .* waterMass;
     state.sequentialCompositionalPhreeqcH2ConsumptionMoles = ...
-        state.sequentialCompositionalPhreeqcH2ConsumptionRate.*dt;
-    state.h2ConsumptionRate = reactionRates.*waterMass;
+        state.sequentialCompositionalPhreeqcH2ConsumptionRate .* dt;
+    state.h2ConsumptionRate = reactionRates .* waterMass;
 end
 
 function state = reconstructEOSComposition(model, state, phase, result, waterMass, inactive)
@@ -1390,20 +1388,20 @@ function state = reconstructEOSComposition(model, state, phase, result, waterMas
     assert(~isempty(waterIndex), 'compositional PHREEQC requires the EOS H2O component.');
     waterMolarMass = model.EOSModel.CompositionalMixture.molarMass(waterIndex);
     componentMoles(:, waterIndex) = max(componentMoles(:, waterIndex) + ...
-        (reshape([result.water], [], 1) - 1).*waterMass./waterMolarMass, 0);
+        (reshape([result.water], [], 1) - 1) .* waterMass ./ waterMolarMass, 0);
     componentMoles = replaceComponentMoles(componentMoles, names, {'H2', 'Hydrogen'}, ...
-        (reshape([result.gasH2], [], 1) + reshape([result.aqH2], [], 1)).*waterMass, true);
+        (reshape([result.gasH2], [], 1) + reshape([result.aqH2], [], 1)) .* waterMass, true);
     componentMoles = replaceComponentMoles(componentMoles, names, {'CO2', 'CarbonDioxide'}, ...
-        (reshape([result.gasCO2], [], 1) + reshape([result.aqCO2], [], 1)).*waterMass, true);
+        (reshape([result.gasCO2], [], 1) + reshape([result.aqCO2], [], 1)) .* waterMass, true);
     componentMoles = replaceComponentMoles(componentMoles, names, {'C1', 'CH4', 'Methane'}, ...
-        (reshape([result.gasCH4], [], 1) + reshape([result.aqCH4], [], 1)).*waterMass, true);
+        (reshape([result.gasCH4], [], 1) + reshape([result.aqCH4], [], 1)) .* waterMass, true);
     componentMoles = replaceComponentMoles(componentMoles, names, {'H2S', 'HydrogenSulfide'}, ...
-        reshape([result.gasH2S], [], 1).*waterMass, true);
+        reshape([result.gasH2S], [], 1) .* waterMass, true);
     componentMoles = replaceComponentMoles(componentMoles, names, {'N2', 'Nitrogen'}, ...
-        (reshape([result.gasN2], [], 1) + reshape([result.aqN2], [], 1)).*waterMass, false);
+        (reshape([result.gasN2], [], 1) + reshape([result.aqN2], [], 1)) .* waterMass, false);
     componentMoles = replaceComponentMoles(componentMoles, names, ...
         {'CH3COOH', 'AceticAcid', 'Acetate'}, ...
-        max(reshape([result.acetate], [], 1), 0).*waterMass, false);
+        max(reshape([result.acetate], [], 1), 0) .* waterMass, false);
     componentMoles(inactive, :) = phase.componentMoles(inactive, :);
     assert(all(isfinite(componentMoles(:)) & componentMoles(:) >= 0), ...
         'compositional PHREEQC returned invalid EOS component inventories.');
@@ -1412,7 +1410,7 @@ function state = reconstructEOSComposition(model, state, phase, result, waterMas
     assert(all(isfinite(totalMoles) & totalMoles > 0), ...
         'compositional PHREEQC produced invalid total EOS inventory.');
     state.components = bsxfun(@rdivide, componentMoles, totalMoles);
-    assert(all(abs(sum(state.components, 2) - 1) < 100*eps), ...
+    assert(all(abs(sum(state.components, 2) - 1) < 100 * eps), ...
         'compositional PHREEQC produced EOS compositions that do not sum to one.');
 end
 
@@ -1438,185 +1436,185 @@ function componentMoles = replaceComponentMoles(componentMoles, names, aliases, 
     index = findComponent(names, aliases);
     if isempty(index)
         assert(~required, 'compositional PHREEQC requires EOS component %s.', aliases{1});
-        return;
+        return
     end
     componentMoles(:, index) = max(values, 0);
 end
 
 function [rhoL, rhoV, sL, sV] = getPhaseProperties(model, state)
-nc = model.G.cells.num;
-s = value(state.s);
-liquid = model.getLiquidIndex();
-vapor = model.getVaporIndex();
-if iscell(s)
-    sL = s{liquid};
-    sV = s{vapor};
-else
-    sL = s(:, liquid);
-    sV = s(:, vapor);
-end
-propmodel = model.EOSModel.PropertyModel;
-rhoL = propmodel.computeMolarDensity(model.EOSModel, value(state.pressure), ...
-    value(state.x), value(state.Z_L), value(state.T), true);
-rhoV = propmodel.computeMolarDensity(model.EOSModel, value(state.pressure), ...
-    value(state.y), value(state.Z_V), value(state.T), false);
-rhoL = asCellVector(value(rhoL), nc, 'liquid molar density');
-rhoV = asCellVector(value(rhoV), nc, 'gas molar density');
-sL = asCellVector(sL, nc, 'liquid saturation');
-sV = asCellVector(sV, nc, 'gas saturation');
+    nc = model.G.cells.num;
+    s = value(state.s);
+    liquid = model.getLiquidIndex();
+    vapor = model.getVaporIndex();
+    if iscell(s)
+        sL = s{liquid};
+        sV = s{vapor};
+    else
+        sL = s(:, liquid);
+        sV = s(:, vapor);
+    end
+    propmodel = model.EOSModel.PropertyModel;
+    rhoL = propmodel.computeMolarDensity(model.EOSModel, value(state.pressure), ...
+        value(state.x), value(state.Z_L), value(state.T), true);
+    rhoV = propmodel.computeMolarDensity(model.EOSModel, value(state.pressure), ...
+        value(state.y), value(state.Z_V), value(state.T), false);
+    rhoL = asCellVector(value(rhoL), nc, 'liquid molar density');
+    rhoV = asCellVector(value(rhoV), nc, 'gas molar density');
+    sL = asCellVector(sL, nc, 'liquid saturation');
+    sV = asCellVector(sV, nc, 'gas saturation');
 end
 
 function componentMoles = getEOSComponentMoles(model, state)
-nc = model.G.cells.num;
-poreVolume = asCellVector(value(model.PVTPropertyFunctions.get( ...
-    model, state, 'PoreVolume')), nc, 'pore volume');
-[rhoL, rhoV, sL, sV] = getPhaseProperties(model, state);
-totalMoles = poreVolume.*(sL.*rhoL + sV.*rhoV);
-assert(all(isfinite(totalMoles) & totalMoles > 0), ...
-    'compositional PHREEQC coupling requires positive EOS moles per cell.');
-components = value(state.components);
-assert(ismatrix(components) && size(components, 1) == nc && ...
-    size(components, 2) == model.EOSModel.getNumberOfComponents(), ...
-    'EOS components must be a cell-by-component matrix.');
-componentMoles = bsxfun(@times, totalMoles, components);
+    nc = model.G.cells.num;
+    poreVolume = asCellVector(value(model.PVTPropertyFunctions.get( ...
+        model, state, 'PoreVolume')), nc, 'pore volume');
+    [rhoL, rhoV, sL, sV] = getPhaseProperties(model, state);
+    totalMoles = poreVolume .* (sL .* rhoL + sV .* rhoV);
+    assert(all(isfinite(totalMoles) & totalMoles > 0), ...
+        'compositional PHREEQC coupling requires positive EOS moles per cell.');
+    components = value(state.components);
+    assert(ismatrix(components) && size(components, 1) == nc && ...
+        size(components, 2) == model.EOSModel.getNumberOfComponents(), ...
+        'EOS components must be a cell-by-component matrix.');
+    componentMoles = bsxfun(@times, totalMoles, components);
 end
 
 function [x, rhoMolarL] = getLiquidCompositionAndDensity(model, state)
-x = value(state.x);
-if iscell(x)
-    x = horzcat(x{:});
-end
-rhoMolarL = model.EOSModel.PropertyModel.computeMolarDensity(model.EOSModel, ...
-    value(state.pressure), value(state.x), value(state.Z_L), value(state.T), true);
-rhoMolarL = value(rhoMolarL);
+    x = value(state.x);
+    if iscell(x)
+        x = horzcat(x{:});
+    end
+    rhoMolarL = model.EOSModel.PropertyModel.computeMolarDensity(model.EOSModel, ...
+        value(state.pressure), value(state.x), value(state.Z_L), value(state.T), true);
+    rhoMolarL = value(rhoMolarL);
 end
 
 function moles = getComponentMoles(componentMoles, names, aliases, required)
-if nargin < 4
-    required = true;
-end
-index = findComponent(names, aliases);
-if isempty(index)
-    assert(~required, 'compositional PHREEQC requires EOS component %s.', aliases{1});
-    moles = zeros(size(componentMoles, 1), 1);
-    return;
-end
-moles = componentMoles(:, index);
+    if nargin < 4
+        required = true;
+    end
+    index = findComponent(names, aliases);
+    if isempty(index)
+        assert(~required, 'compositional PHREEQC requires EOS component %s.', aliases{1});
+        moles = zeros(size(componentMoles, 1), 1);
+        return
+    end
+    moles = componentMoles(:, index);
 end
 
 function moles = zeroTraceComponent(moles, components, names, aliases)
-index = findComponent(names, aliases);
-if ~isempty(index)
-    moles(components(:, index) <= 1e-8) = 0;
-end
+    index = findComponent(names, aliases);
+    if ~isempty(index)
+        moles(components(:, index) <= 1e-8) = 0;
+    end
 end
 
 function pressure = gasPartialPressure(moles, phase)
-% compositional PHREEQC supplies PHREEQC with p_i = Z_v*n_i*R*T/V_g (atm).
-pressure = phase.ZV.*moles.*0.082057366080960.*phase.gasTemperature./ ...
-    phase.gasVolumeL;
+    % compositional PHREEQC supplies PHREEQC with p_i = Z_v*n_i*R*T/V_g (atm).
+    pressure = phase.ZV .* moles .* 0.082057366080960 .* phase.gasTemperature ./ ...
+        phase.gasVolumeL;
 end
 
 function state = clearStateFunctionCaches(model, state)
-groups = model.getStateFunctionGroupings();
-for i = 1:numel(groups)
-    name = groups{i}.getStateFunctionContainerName();
-    if isfield(state, name)
-        state = rmfield(state, name);
+    groups = model.getStateFunctionGroupings();
+    for i = 1:numel(groups)
+        name = groups{i}.getStateFunctionContainerName();
+        if isfield(state, name)
+            state = rmfield(state, name);
+        end
     end
-end
 end
 
 function state = refreshOutputStateFunctions(model, state)
-outputs = unique(model.OutputStateFunctions, 'stable');
-for i = 1:numel(outputs)
-    [~, state] = model.getProp(state, outputs{i});
-end
+    outputs = unique(model.OutputStateFunctions, 'stable');
+    for i = 1:numel(outputs)
+        [~, state] = model.getProp(state, outputs{i});
+    end
 end
 
 function model = updateEOSSalinityForReflash(model, state)
-if model.sulfateReduction && isa(model.EOSModel, 'SoreideWhitsonEos')
-    assert(isfield(state, 'tracerHS') && isfield(state, 'h2sDissolvedLag'), ...
-        'compositional PHREEQC reflash requires HS and lagged dissolved-H2S state.');
-    model.EOSModel = model.EOSModel.enablesrb_coupling( ...
-        value(state.tracerSO4), value(state.tracerHS), ...
-        value(state.tracerHS) + value(state.h2sDissolvedLag), value(state.T));
-end
+    if model.sulfateReduction && isa(model.EOSModel, 'SoreideWhitsonEos')
+        assert(isfield(state, 'tracerHS') && isfield(state, 'h2sDissolvedLag'), ...
+            'compositional PHREEQC reflash requires HS and lagged dissolved-H2S state.');
+        model.EOSModel = model.EOSModel.enablesrb_coupling( ...
+            value(state.tracerSO4), value(state.tracerHS), ...
+            value(state.tracerHS) + value(state.h2sDissolvedLag), value(state.T));
+    end
 end
 
 function waterMass = getWaterMass(model, state, rhoWater) %#ok<INUSD>
-poreVolume = value(model.PVTPropertyFunctions.get(model, state, 'PoreVolume'));
-s = value(state.s);
-liquid = model.getLiquidIndex();
-if iscell(s)
-    sL = s{liquid};
-else
-    sL = s(:, liquid);
-end
-names = model.EOSModel.CompositionalMixture.names;
-waterIndex = findComponent(names, {'H2O', 'Water'});
-assert(~isempty(waterIndex), 'compositional PHREEQC requires an EOS H2O component.');
-[x, rhoMolarL] = getLiquidCompositionAndDensity(model, state);
-waterMass = poreVolume.*max(sL, 1e-12).*rhoMolarL.* ...
-    max(x(:, waterIndex), 0).*model.EOSModel.CompositionalMixture.molarMass(waterIndex);
-assert(all(isfinite(waterMass) & waterMass > 0), ...
-    'compositional PHREEQC coupling requires positive liquid water mass.');
+    poreVolume = value(model.PVTPropertyFunctions.get(model, state, 'PoreVolume'));
+    s = value(state.s);
+    liquid = model.getLiquidIndex();
+    if iscell(s)
+        sL = s{liquid};
+    else
+        sL = s(:, liquid);
+    end
+    names = model.EOSModel.CompositionalMixture.names;
+    waterIndex = findComponent(names, {'H2O', 'Water'});
+    assert(~isempty(waterIndex), 'compositional PHREEQC requires an EOS H2O component.');
+    [x, rhoMolarL] = getLiquidCompositionAndDensity(model, state);
+    waterMass = poreVolume .* max(sL, 1e-12) .* rhoMolarL .* ...
+        max(x(:, waterIndex), 0) .* model.EOSModel.CompositionalMixture.molarMass(waterIndex);
+    assert(all(isfinite(waterMass) & waterMass > 0), ...
+        'compositional PHREEQC coupling requires positive liquid water mass.');
 end
 
 function values = getStateVector(state, field, nc, default)
-if isfield(state, field)
-    values = value(state.(field));
-else
-    values = default;
-end
-values = asCellVector(values, nc, field);
+    if isfield(state, field)
+        values = value(state.(field));
+    else
+        values = default;
+    end
+    values = asCellVector(values, nc, field);
 end
 
 function values = optionVector(options, field, default, nc)
-if isfield(options, field)
-    values = options.(field);
-else
-    values = default;
-end
-values = asCellVector(values, nc, field);
+    if isfield(options, field)
+        values = options.(field);
+    else
+        values = default;
+    end
+    values = asCellVector(values, nc, field);
 end
 
 function values = asCellVector(values, nc, name)
-if isscalar(values)
-    values = repmat(values, nc, 1);
-else
-    values = values(:);
-    assert(numel(values) == nc, ...
-        'compositional PHREEQC expected %d %s values, got %d.', nc, name, numel(values));
-end
+    if isscalar(values)
+        values = repmat(values, nc, 1);
+    else
+        values = values(:);
+        assert(numel(values) == nc, ...
+            'compositional PHREEQC expected %d %s values, got %d.', nc, name, numel(values));
+    end
 end
 
 function index = findComponent(names, aliases)
-index = [];
-for i = 1:numel(aliases)
-    index = find(strcmpi(names, aliases{i}), 1);
-    if ~isempty(index)
-        return;
+    index = [];
+    for i = 1:numel(aliases)
+        index = find(strcmpi(names, aliases{i}), 1);
+        if ~isempty(index)
+            return
+        end
     end
-end
 end
 
 function result = emptyResult()
-result = struct( ...
-    'pH', 0, 'aqH2', 0, 'aqN2', 0, 'aqCO2', 0, 'aqCH4', 0, 'aqH2S', 0, ...
-    'water', 0, 'gasH2', 0, 'gasCO2', 0, 'gasCH4', 0, 'gasH2S', 0, ...
-    'gasN2', 0, 'calcite', 0, 'anhydrite', 0, 'gypsum', 0, 'dolomite', 0, ...
-    'goethite', 0, 'pyrite', 0, 'brucite', 0, 'portlandite', 0, 'quartz', 0, ...
-    'biomassSRB', 0, 'biomassMET', 0, 'biomassACE', 0, 'totalCarbon', 0, ...
-    'sulfate', 0, 'ca', 0, 'mg', 0, 'acetate', 0, 'sulfide', 0, 'hco3', 0, ...
-    'fe2', 0, 'fe3', 0, 'initialSystemHydrogen', 0, 'systemHydrogen', 0, ...
-    'rateMET', 0, 'rateACE', 0, 'rateSRB', 0, 'tds', 0);
+    result = struct( ...
+        'pH', 0, 'aqH2', 0, 'aqN2', 0, 'aqCO2', 0, 'aqCH4', 0, 'aqH2S', 0, ...
+        'water', 0, 'gasH2', 0, 'gasCO2', 0, 'gasCH4', 0, 'gasH2S', 0, ...
+        'gasN2', 0, 'calcite', 0, 'anhydrite', 0, 'gypsum', 0, 'dolomite', 0, ...
+        'goethite', 0, 'pyrite', 0, 'brucite', 0, 'portlandite', 0, 'quartz', 0, ...
+        'biomassSRB', 0, 'biomassMET', 0, 'biomassACE', 0, 'totalCarbon', 0, ...
+        'sulfate', 0, 'ca', 0, 'mg', 0, 'acetate', 0, 'sulfide', 0, 'hco3', 0, ...
+        'fe2', 0, 'fe3', 0, 'initialSystemHydrogen', 0, 'systemHydrogen', 0, ...
+        'rateMET', 0, 'rateACE', 0, 'rateSRB', 0, 'tds', 0);
 end
 
 function isAbsolute = isAbsolutePath(path)
-path = char(path);
-isAbsolute = ~isempty(regexp(path, '^[A-Za-z]:[\\/]|^\\\\', 'once')) || ...
-    startsWith(path, filesep);
+    path = char(path);
+    isAbsolute = ~isempty(regexp(path, '^[A-Za-z]:[\\/]|^\\\\', 'once')) || ...
+        startsWith(path, filesep);
 end
 
 %{

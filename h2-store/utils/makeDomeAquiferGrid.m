@@ -1,26 +1,26 @@
 function [G, layers] = makeDomeAquiferGrid(horizontalCells)
-%MAKEDOMEAQUIFERGRID Build the corner-point grid and geological layer masks.
-%
-% SYNOPSIS:
-%   [G, layers] = makeDomeAquiferGrid()
-%   [G, layers] = makeDomeAquiferGrid([nx, ny])
-%
-% The default horizontal resolution is [51, 51] over a 5000 m square. Two
-% initial vertical cells are padded by 100 m at each end, then subdivided
-% eightfold to produce 32 layers. A 100 m Gaussian dome of width 500 m is
-% centered at [2500, 2500]. Depth offsets are -300 m before padding and
-% -450 m after refinement. Coordinates and geometry use meters.
-%
-% layers contains logical column masks: underrock (layers 1:8), bedrock
-% (9:12), caprock (20:24), toprock (25:32), and the remaining aquifer cells.
-% Grid construction does not create figures.
-%
-% Requires the MRST deckformat and vemmech modules (padGrdecl).
-%
-% SEE ALSO:
-%   modelForDome3DAquifer, dome3DModel, makeDomeAquiferRock
+    % MAKEDOMEAQUIFERGRID Build the corner-point grid and geological layer masks.
+    %
+    % SYNOPSIS:
+    %   [G, layers] = makeDomeAquiferGrid()
+    %   [G, layers] = makeDomeAquiferGrid([nx, ny])
+    %
+    % The default horizontal resolution is [51, 51] over a 5000 m square. Two
+    % initial vertical cells are padded by 100 m at each end, then subdivided
+    % eightfold to produce 32 layers. A 100 m Gaussian dome of width 500 m is
+    % centered at [2500, 2500]. Depth offsets are -300 m before padding and
+    % -450 m after refinement. Coordinates and geometry use meters.
+    %
+    % layers contains logical column masks: underrock (layers 1:8), bedrock
+    % (9:12), caprock (20:24), toprock (25:32), and the remaining aquifer cells.
+    % Grid construction does not create figures.
+    %
+    % Requires the MRST deckformat and vemmech modules (padGrdecl).
+    %
+    % SEE ALSO:
+    %   modelForDome3DAquifer, dome3DModel, makeDomeAquiferRock
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -47,12 +47,12 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
     resolution = [reshape(horizontalCells, 1, []), 2];
     dimensions = [5000, 5000, 100];
     grdecl = simpleGrdecl(resolution, 0, 'undisturbed', true, 'flat', true);
-    grdecl.COORD(1:3:end) = grdecl.COORD(1:3:end)*dimensions(1);
-    grdecl.COORD(2:3:end) = grdecl.COORD(2:3:end)*dimensions(2);
-    grdecl.COORD(3:3:end) = grdecl.COORD(3:3:end)*dimensions(3);
-    grdecl.ZCORN = grdecl.ZCORN*dimensions(3)*2;
+    grdecl.COORD(1:3:end) = grdecl.COORD(1:3:end) * dimensions(1);
+    grdecl.COORD(2:3:end) = grdecl.COORD(2:3:end) * dimensions(2);
+    grdecl.COORD(3:3:end) = grdecl.COORD(3:3:end) * dimensions(3);
+    grdecl.ZCORN = grdecl.ZCORN * dimensions(3) * 2;
     [X, Y, Z] = buildCornerPtNodes(grdecl);
-    Z = Z + 100.*exp(-(X - 2500).^2/(2*500^2) - (Y - 2500).^2/(2*500^2));
+    Z = Z + 100 .* exp(-(X - 2500).^2 / (2 * 500^2) - (Y - 2500).^2 / (2 * 500^2));
     grdecl.ZCORN = reshape(Z - 300, 1, []);
     grdecl = padGrdecl(grdecl, [0, 0, 1], [0, 0; 0, 0; 100, 100]);
     grdecl = refineGrdecl(grdecl, [1, 1, 8]);

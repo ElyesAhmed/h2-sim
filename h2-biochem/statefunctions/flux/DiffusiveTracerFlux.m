@@ -25,6 +25,7 @@ classdef DiffusiveTracerFlux < StateFunction
     %   StateFunction, TracerTransmissibility, DiffusiveBactFlux
 
     methods
+
         function df = DiffusiveTracerFlux(model, varargin)
             df@StateFunction(model, varargin{:});
             df = merge_options(df, varargin{:});
@@ -52,9 +53,10 @@ classdef DiffusiveTracerFlux < StateFunction
             J = cell(1, numel(tracerNames));
             for i = 1:numel(tracerNames)
                 c = model.getProp(state, lower(tracerNames{i}));
-                J{i} = - T{i} .* op.Grad(c);
+                J{i} = -T{i} .* op.Grad(c);
             end
         end
+
     end
 end
 

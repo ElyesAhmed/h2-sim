@@ -41,7 +41,8 @@ classdef TableBioChemMixture
     end
 
     methods
-        function biochem = TableBioChemMixture(names,bactnames)
+
+        function biochem = TableBioChemMixture(names, bactnames)
             % Constructor for TableBioChemMixture.
             if nargin == 0
                 names = {};
@@ -117,15 +118,17 @@ classdef TableBioChemMixture
                 biochem.xch_seuil(i) = entry.xch_seuil;
                 biochem.bactdiff(i) = entry.bactdiff;
             end
-            biochem.bactnames=bactnames;
+            biochem.bactnames = bactnames;
         end
 
         function n = get.nbioreact(biochem)
             n = numel(biochem.metabolicReaction);
         end
+
     end
 
     methods (Static)
+
         function varargout = getFluidList()
             % Return list of available metabolic reaction names.
             allReactions = bioChemFluidsStructs();
@@ -137,6 +140,7 @@ classdef TableBioChemMixture
                 varargout{1} = names(:)';   % row cell array
             end
         end
+
     end
 end
 

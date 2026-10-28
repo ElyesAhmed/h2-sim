@@ -32,7 +32,7 @@ model.rock.poro([1, end]) = 0.90;   % First and last cell porosity
 model.fluid.rhoGS = 0.08988;   % Hydrogen-like gas density at STP [kg/m^3]
 model.fluid.rhoOS = 999.0140;    % Water-like liquid density at STP [kg/m^3]
 % Shorten schedule for faster simulation
-schedule.step.val     = schedule.step.val/3;
+schedule.step.val     = schedule.step.val / 3;
 schedule.step.val     = schedule.step.val(1:400);
 schedule.step.control = schedule.step.control(1:400);
 
@@ -53,7 +53,7 @@ model.fluid = modifyRelPermForResidualSaturations( ...
     model.fluid, swc, swmax, sgr, sor, sgmax);
 
 %% Initial conditions
-%--------------------------------------------------------------------------
+% --------------------------------------------------------------------------
 % Default initial overall composition [H2O, H2, C1, CO2]
 initComp  = [0.90, 0.045, 0.005, 0.05];
 
@@ -62,57 +62,59 @@ initComp  = [0.90, 0.045, 0.005, 0.05];
 
 % Thermodynamic conditions
 initTemp  = 273.15 + 40;   % Absolute temperature [K]
-initPress = 82*barsa;      % Pressure [Pa]
+initPress = 82 * barsa;      % Pressure [Pa]
 
 %% Bio-clogging model
 initBact  = 9;             % Normalized bacteria concentration
 nc = 180; % critical bacteria concentration
 cp = 0.0; % scaling cofficient
-[model, poro0, perm0] = setupBioCloggingModel(model, initBact,nc, cp);
+[model, poro0, perm0] = setupBioCloggingModel(model, initBact, nc, cp);
 
 %% Biochemistry model wrapper
 compFluid = TableCompositionalMixture( ...
-    {'Water','Hydrogen','Methane','CarbonDioxide'}, ...
-    {'H2O','H2','C1','CO2'});
+    {'Water', 'Hydrogen', 'Methane', 'CarbonDioxide'}, ...
+    {'H2O', 'H2', 'C1', 'CO2'});
 
 biochemFluid = TableBioChemMixture({'MethanogenicArchae'});
-
 
 backend = DiagonalAutoDiffBackend('modifyOperators', true);
 model   = BiochemistryModel(model.G, model.rock, model.fluid, compFluid, biochemFluid, ...
     true, backend, 'water', false, 'oil', true, 'gas', true, ...
-    'bacteriamodel', true, 'molecularDispersion', true, 'liquidPhase','O','vaporPhase','G');
+    'bacteriamodel', true, 'molecularDispersion', true, 'liquidPhase', 'O', 'vaporPhase', 'G');
 
 %% Shut Wells
 schedule.control.W(1).components = [0.001, 0.948, 0.001, 0.05];
 schedule.control.W(2).components = [0.001, 0.948, 0.001, 0.05];
-schedule.control.W(1).type = 'rate'; schedule.control.W(1).val = 0;
-schedule.control.W(2).type = 'rate'; schedule.control.W(2).val = 0;
+schedule.control.W(1).type = 'rate';
+schedule.control.W(1).val = 0;
+schedule.control.W(2).type = 'rate';
+schedule.control.W(2).val = 0;
 [schedule.control.W.status] = deal(false);
-assert(all(arrayfun(@(w) abs(sum(w.components)-1)<1e-12, schedule.control.W)));
+assert(all(arrayfun(@(w) abs(sum(w.components) - 1) < 1e-12, schedule.control.W)));
 
 %% Initialize state
-state0 = initCompositionalStateBacteria(model, initPress, initTemp, [0,1], ...
+state0 = initCompositionalStateBacteria(model, initPress, initTemp, [0, 1], ...
     initComp, initBact, model.EOSModel);
 
 %% Scenario 1: with bacterial clogging
 prob1 = packSimulationProblem(state0, model, schedule, 'bio_clogging');
 prob1.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
-simulatePackedProblem(prob1, 'RestartStep',1);
+simulatePackedProblem(prob1, 'RestartStep', 1);
 [ws1, st1] = getPackedSimulatorOutput(prob1);
 
 %% Scenario 2: bacteria but no clogging
 model2 = model;
 model2.rock.perm = perm0;
 model2.rock.poro = poro0;
-model2.fluid.pvMultR = @(p,nb) 1;
+model2.fluid.pvMultR = @(p, nb) 1;
 prob2 = packSimulationProblem(state0, model2, schedule, 'bio_no_clog');
 prob2.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
 simulatePackedProblem(prob2);
 [ws2, st2] = getPackedSimulatorOutput(prob2);
 
 %% Scenario 3: abiotic (no bacteria)
-model3 = model2; model3.bacteriamodel = false;
+model3 = model2;
+model3.bacteriamodel = false;
 state3 = state0; % same state without bacteria effects
 prob3 = packSimulationProblem(state3, model3, schedule, 'no_bacteria');
 prob3.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
@@ -121,17 +123,17 @@ simulatePackedProblem(prob3);
 
 %% Compare scenarios
 compNames = model.EOSModel.getComponentNames();
-idxH2  = find(strcmp(compNames,'H2'));
-idxCO2 = find(strcmp(compNames,'CO2'));
-idxCH4 = find(strcmp(compNames,'C1'));
+idxH2  = find(strcmp(compNames, 'H2'));
+idxCO2 = find(strcmp(compNames, 'CO2'));
+idxCH4 = find(strcmp(compNames, 'C1'));
 
-timeDays = cumsum(schedule.step.val)/day;
-timeYrs  = timeDays/365;
+timeDays = cumsum(schedule.step.val) / day;
+timeYrs  = timeDays / 365;
 
 scenarios = {
-    struct('name','Bio-Clog','model', model,'states',{st1},'color',[0 0.5 0],'line','-'), ...
-    struct('name','Bio-NoClog','model', model2, 'states',{st2},'color',[0 0.7 0.7],'line','--'), ...
-    struct('name','Abiotic','model', model3,'states',{st3},'color',[0.7 0 0],'line',':')};
+             struct('name', 'Bio-Clog', 'model', model, 'states', {st1}, 'color', [0 0.5 0], 'line', '-'), ...
+                 struct('name', 'Bio-NoClog', 'model', model2, 'states', {st2}, 'color', [0 0.7 0.7], 'line', '--'), ...
+                 struct('name', 'Abiotic', 'model', model3, 'states', {st3}, 'color', [0.7 0 0], 'line', ':')};
 
 %% Plot results
 plotComponentProfiles(scenarios, compNames, timeYrs);
@@ -139,7 +141,7 @@ plotBacterialEffects(scenarios, timeYrs, poro0, perm0);
 plotPressureAndSaturation(scenarios, timeYrs);
 plotComponentComparison(scenarios, timeYrs, idxH2, idxCO2, idxCH4);
 
-plotToolbar(model.G, st1, 'plot1d', true, 'field','pressure');
+plotToolbar(model.G, st1, 'plot1d', true, 'field', 'pressure');
 title('Bio-Clogging Scenario - Pressure');
 
 %% Copyright notice

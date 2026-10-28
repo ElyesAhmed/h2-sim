@@ -4,6 +4,7 @@ classdef H2simNativeIPhreeqc < handle
         native = []
     end
     methods
+
         function obj = H2simNativeIPhreeqc()
             obj.native = IPhreeqc();
             obj.native = obj.native.CreateIPhreeqc();
@@ -15,15 +16,19 @@ classdef H2simNativeIPhreeqc < handle
                 obj.native.(toggles{k})(false);
             end
         end
+
         function status = LoadDatabase(obj, file)
             status = obj.native.LoadDatabase(file);
         end
+
         function status = RunString(obj, input)
             status = obj.native.RunString(input);
         end
+
         function message = GetErrorString(obj)
             message = obj.native.GetErrorString();
         end
+
         function raw = GetSelectedOutputArray(obj)
             % Use the typed API: no text rounding or wrapper table indexing.
             nr = obj.native.GetSelectedOutputRowCount();
@@ -34,7 +39,7 @@ classdef H2simNativeIPhreeqc < handle
             for row = 1:nr
                 for col = 1:nc
                     [status, ~, number, text] = obj.native.GetSelectedOutputValue2( ...
-                        row-1, col-1, vtype, value, blanks(4096), 4096);
+                        row - 1, col - 1, vtype, value, blanks(4096), 4096);
                     ok = (isnumeric(status) && isscalar(status) && status == 0) || ...
                         strcmp(string(status), 'IPQ_OK');
                     assert(ok, ...
@@ -48,12 +53,14 @@ classdef H2simNativeIPhreeqc < handle
                 end
             end
         end
+
         function delete(obj)
             if ~isempty(obj.native) && ~isempty(obj.native.id) && obj.native.id >= 0
                 obj.native.DestroyIPhreeqc();
                 obj.native = [];
             end
         end
+
     end
 end
 

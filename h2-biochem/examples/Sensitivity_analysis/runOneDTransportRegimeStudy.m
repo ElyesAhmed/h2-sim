@@ -1,90 +1,90 @@
 function study = runOneDTransportRegimeStudy(varargin)
-% Regime analysis: when do transport and motility processes affect H2 loss?
-%
-% The 1D storage benchmark is advection-dominated and its reactive
-% front is H2-saturated, so molecular diffusion, mechanical dispersion,
-% microbial diffusion and chemotaxis have almost no effect on the
-% integrated biological H2 loss (see runTransportEffectsSensitivity). This
-% script rebuilds the 1D case in a regime where those processes *can*
-% matter -- a slower injection and a substrate-limited front -- and then
-% isolates their effect. The changes are physically motivated (lower
-% Peclet, higher Damkohler-to-Peclet ratio) rather than an arbitrary
-% inflation of the transport coefficients.
-%
-% Cases (all share the sensitive-regime base state):
-%   1. Baseline                          -- no transport/motility effects
-%   2. Chemotaxis + microbial diffusion  -- bactDiffusion + chemotaxisEffect
-%   3. Molecular diffusion + dispersion  -- molecularDiffusion + molecularDispersion
-%   4. Bio-clogging                      -- porosity/permeability feedback
-%   5. All effects                       -- 2 + 3 + 4 together
-%
-% All reactions are MRST-owned (BiochemistryModel, reduced fixed-pH
-% carbonate buffer, no PHREEQC), so every transport switch is available and
-% the run is fast.
-%
-% OUTPUTS:
-%   study - struct array, one entry per case, with the loss history,
-%           spatial profile and runtime. A results table, a dimensionless
-%           regime table, and four figures (exported to EPS + PNG in the
-%           'figures' sub-folder) are produced.
-%
-% OPTIONAL PARAMETERS (sensitive-regime knobs, all physically motivated):
-%   'rateScale'        - Multiplier on the injection/production rate.
-%                        Default 0.5 (halves the Peclet number).
-%   'h2HalfSatScale'   - Multiplier on the H2 Monod half-saturation
-%                        constant. Default 25 (moves the front from
-%                        H2-saturated to H2-limited).
-%   'growthScale'      - Multiplier on the maximum specific growth rate.
-%                        Default 0.7 (slows the near-well biomass bloom so
-%                        the front stays transport-limited).
-%   'microbeDiffScale' - Multiplier on the microbial diffusion coefficient.
-%                        Default 60.
-%   'chemotaxisScale'  - Multiplier on the chemotaxis coefficient.
-%                        Default 60.
-%   'dispersivityScale'- Multiplier on the mechanical-dispersion
-%                        dispersivities. Default 3.
-%   'cloggingStrengthScale' - Strength of the bio-clogging feedback,
-%                        relative to the module default. 0 removes it, 1 is
-%                        the default. Sweep it (0, 0.25, 0.5, 1, 2) to
-%                        verify the sign and magnitude of the bio-clogging
-%                        effect are smooth rather than a model artifact.
-%   'cloggingMode'     - Which part of the bio-clogging feedback to keep:
-%                        'full'        (default) pore-volume + permeability,
-%                        'porevolume'  only the pore-volume reduction
-%                                      (concentrates H2/biomass -> raises
-%                                      the rate in the substrate-limited
-%                                      regime),
-%                        'permeability' only the Kozeny-Carman permeability
-%                                      reduction (alters the flow field).
-%                        The 'full' effect is the sum of two opposing
-%                        mechanisms and can be non-monotone; run the two
-%                        parts separately to get a clean, reportable sign
-%                        for each.
-%   'meaningfulLossThreshold' - |delta| (percentage points) below which a
-%                        case is reported as "no material change".
-%                        Default 0.1.
-%   'cloggingReference' - 'initial' (default) normalises the clogging
-%                        feedback so the run starts from the same porosity
-%                        and permeability as the no-clogging baseline
-%                        (clogging then acts only on biomass grown past its
-%                        initial value) -- the correct choice for a
-%                        clogging-vs-baseline comparison. 'zero' is the
-%                        legacy module behaviour, where the rock is already
-%                        partly clogged at the initial biomass.
-%   'gridCells'        - Number of cells in the 1D column. Default 50.
-%                        Refine (100, 200) to check whether a non-monotone
-%                        bio-clogging response is numerical or physical.
-%   'cases'            - Which process cases to run, as a string array or
-%                        cell array of names, or 'all' (default). The
-%                        Baseline case is always included as the reference.
-%                        Use e.g. 'cases', "Bio-clogging" to sweep only
-%                        clogging without paying for the other cases.
-%
-% SEE ALSO:
-%   runTransportEffectsSensitivity, setupH2StorageExampleWithSRB_benchmark,
-%   paperFigure, paperExport
+    % Regime analysis: when do transport and motility processes affect H2 loss?
+    %
+    % The 1D storage benchmark is advection-dominated and its reactive
+    % front is H2-saturated, so molecular diffusion, mechanical dispersion,
+    % microbial diffusion and chemotaxis have almost no effect on the
+    % integrated biological H2 loss (see runTransportEffectsSensitivity). This
+    % script rebuilds the 1D case in a regime where those processes *can*
+    % matter -- a slower injection and a substrate-limited front -- and then
+    % isolates their effect. The changes are physically motivated (lower
+    % Peclet, higher Damkohler-to-Peclet ratio) rather than an arbitrary
+    % inflation of the transport coefficients.
+    %
+    % Cases (all share the sensitive-regime base state):
+    %   1. Baseline                          -- no transport/motility effects
+    %   2. Chemotaxis + microbial diffusion  -- bactDiffusion + chemotaxisEffect
+    %   3. Molecular diffusion + dispersion  -- molecularDiffusion + molecularDispersion
+    %   4. Bio-clogging                      -- porosity/permeability feedback
+    %   5. All effects                       -- 2 + 3 + 4 together
+    %
+    % All reactions are MRST-owned (BiochemistryModel, reduced fixed-pH
+    % carbonate buffer, no PHREEQC), so every transport switch is available and
+    % the run is fast.
+    %
+    % OUTPUTS:
+    %   study - struct array, one entry per case, with the loss history,
+    %           spatial profile and runtime. A results table, a dimensionless
+    %           regime table, and four figures (exported to EPS + PNG in the
+    %           'figures' sub-folder) are produced.
+    %
+    % OPTIONAL PARAMETERS (sensitive-regime knobs, all physically motivated):
+    %   'rateScale'        - Multiplier on the injection/production rate.
+    %                        Default 0.5 (halves the Peclet number).
+    %   'h2HalfSatScale'   - Multiplier on the H2 Monod half-saturation
+    %                        constant. Default 25 (moves the front from
+    %                        H2-saturated to H2-limited).
+    %   'growthScale'      - Multiplier on the maximum specific growth rate.
+    %                        Default 0.7 (slows the near-well biomass bloom so
+    %                        the front stays transport-limited).
+    %   'microbeDiffScale' - Multiplier on the microbial diffusion coefficient.
+    %                        Default 60.
+    %   'chemotaxisScale'  - Multiplier on the chemotaxis coefficient.
+    %                        Default 60.
+    %   'dispersivityScale'- Multiplier on the mechanical-dispersion
+    %                        dispersivities. Default 3.
+    %   'cloggingStrengthScale' - Strength of the bio-clogging feedback,
+    %                        relative to the module default. 0 removes it, 1 is
+    %                        the default. Sweep it (0, 0.25, 0.5, 1, 2) to
+    %                        verify the sign and magnitude of the bio-clogging
+    %                        effect are smooth rather than a model artifact.
+    %   'cloggingMode'     - Which part of the bio-clogging feedback to keep:
+    %                        'full'        (default) pore-volume + permeability,
+    %                        'porevolume'  only the pore-volume reduction
+    %                                      (concentrates H2/biomass -> raises
+    %                                      the rate in the substrate-limited
+    %                                      regime),
+    %                        'permeability' only the Kozeny-Carman permeability
+    %                                      reduction (alters the flow field).
+    %                        The 'full' effect is the sum of two opposing
+    %                        mechanisms and can be non-monotone; run the two
+    %                        parts separately to get a clean, reportable sign
+    %                        for each.
+    %   'meaningfulLossThreshold' - |delta| (percentage points) below which a
+    %                        case is reported as "no material change".
+    %                        Default 0.1.
+    %   'cloggingReference' - 'initial' (default) normalises the clogging
+    %                        feedback so the run starts from the same porosity
+    %                        and permeability as the no-clogging baseline
+    %                        (clogging then acts only on biomass grown past its
+    %                        initial value) -- the correct choice for a
+    %                        clogging-vs-baseline comparison. 'zero' is the
+    %                        legacy module behaviour, where the rock is already
+    %                        partly clogged at the initial biomass.
+    %   'gridCells'        - Number of cells in the 1D column. Default 50.
+    %                        Refine (100, 200) to check whether a non-monotone
+    %                        bio-clogging response is numerical or physical.
+    %   'cases'            - Which process cases to run, as a string array or
+    %                        cell array of names, or 'all' (default). The
+    %                        Baseline case is always included as the reference.
+    %                        Use e.g. 'cases', "Bio-clogging" to sweep only
+    %                        clogging without paying for the other cases.
+    %
+    % SEE ALSO:
+    %   runTransportEffectsSensitivity, setupH2StorageExampleWithSRB_benchmark,
+    %   paperFigure, paperExport
 
-    mrstModule add ad-props compositional deckformat 
+    mrstModule add ad-props compositional deckformat;
 
     % Pull 'cases' out of varargin before merge_options, which type-checks
     % against the default and would reject a string/cellstr value.
@@ -182,26 +182,26 @@ end
 function cases = transportCases()
     cases = [ ...
         makeCase("Baseline", ...
-            false, false, false, false, false), ...
+        false, false, false, false, false), ...
         makeCase("Chemotaxis + microbial diffusion", ...
-            true,  true,  false, false, false), ...
+        true,  true,  false, false, false), ...
         makeCase("Molecular diffusion + dispersion", ...
-            false, false, true,  true,  false), ...
+        false, false, true,  true,  false), ...
         makeCase("Bio-clogging", ...
-            false, false, false, false, true), ...
+        false, false, false, false, true), ...
         makeCase("All effects", ...
-            true,  true,  true,  true,  true)];
+        true,  true,  true,  true,  true)];
 end
 
 function [val, rest] = extractOption(args, name, default)
     val  = default;
     rest = args;
-    for i = numel(args)-1:-1:1
+    for i = numel(args) - 1:-1:1
         if (ischar(args{i}) || (isstring(args{i}) && isscalar(args{i}))) ...
-                && strcmpi(char(args{i}), name)
-            val  = args{i+1};
-            rest = args([1:i-1, i+2:end]);
-            return;
+            && strcmpi(char(args{i}), name)
+            val  = args{i + 1};
+            rest = args([1:i - 1, i + 2:end]);
+            return
         end
     end
 end
@@ -209,8 +209,8 @@ end
 function cases = selectCases(cases, want)
     % Keep the Baseline (reference) plus any requested cases.
     if (ischar(want) || (isstring(want) && isscalar(want))) && ...
-            strcmpi(want, 'all')
-        return;
+        strcmpi(want, 'all')
+        return
     end
     want = string(want);
     names = string({cases.name});
@@ -234,7 +234,7 @@ end
 
 % ------------------------------------------------------------------------
 function [model, schedule, regime] = applySensitiveRegime( ...
-        model, schedule, state0, opt, wantClog)
+    model, schedule, state0, opt, wantClog)
     % 1. Slow the injection/production (lowers the Peclet number). Keep the
     %    injector rate-controlled even under heavy clogging by lifting its
     %    BHP limit, so the clogging effect on H2 loss is not confounded by
@@ -320,12 +320,12 @@ function d = cloggingDiagnostics(ws, states, model)
         bhpMax = nan;
         for i = 1:numel(ws)
             if isempty(ws{i})
-                continue;
+                continue
             end
             for w = 1:numel(ws{i})
                 isInj = (isfield(ws{i}(w), 'sign') && ws{i}(w).sign > 0) || ...
                     (isfield(ws{i}(w), 'name') && ...
-                     strcmpi(ws{i}(w).name, 'Injector'));
+                    strcmpi(ws{i}(w).name, 'Injector'));
                 if isInj && isfinite(ws{i}(w).bhp)
                     bhpMax = max([bhpMax, ws{i}(w).bhp]);
                 end
@@ -341,15 +341,15 @@ function model = scaleDispersivity(model, s)
     % DispersiveDiffusivity only exists when molecularDiffusion or
     % molecularDispersion is enabled; skip quietly otherwise.
     if s == 1
-        return;
+        return
     end
     fd = model.FlowDiscretization;
     if ~fd.hasStateFunction('DispersiveDiffusivity')
-        return;
+        return
     end
     sf = fd.getStateFunction('DispersiveDiffusivity');
     for f = {'alphaL_water', 'alphaT_water', 'alphaL_gas', ...
-             'alphaT_gas', 'defaultLiquidDiffusivity'}
+        'alphaT_gas', 'defaultLiquidDiffusivity'}
         sf.(f{1}) = sf.(f{1}) * s;
     end
     model.FlowDiscretization = ...
@@ -377,7 +377,7 @@ function regime = regimeNumbers(model, schedule, opt)
     end
     v = q / max(A * phi, eps);                        % pore velocity [m/s]
 
-    Dmol  = 4.5e-9 * phi^(4/3);                       % effective H2 diffusivity
+    Dmol  = 4.5e-9 * phi^(4 / 3);                       % effective H2 diffusivity
     alphaL = 5.0e-2 * opt.dispersivityScale;          % scaled longitudinal dispersivity [m]
     Ddisp = alphaL * v;
     Db    = max(model.biochemFluid.bactdiff);
@@ -442,14 +442,14 @@ function injected = prescribedInjectedH2(schedule, model)
         W = schedule.control(schedule.step.control(s)).W;
         for w = 1:numel(W)
             if W(w).sign <= 0 || (isfield(W, 'status') && ~W(w).status)
-                continue;
+                continue
             end
             if strcmpi(W(w).type, 'grat')
                 gasRate = W(w).val;
             elseif strcmpi(W(w).type, 'rate')
                 gasRate = W(w).val * W(w).compi(gasIdx);
             else
-                continue;
+                continue
             end
             molarRate = gasRate * model.FacilityModel.pressure / ...
                 (8.314462618 * model.FacilityModel.T);
@@ -491,7 +491,7 @@ function summary = buildSummary(study, opt)
         rt(i)   = study(i).runtimeSec;
         if ~study(i).completed
             verd(i) = "FAILED (no convergence)";
-            continue;
+            continue
         end
         final(i) = study(i).finalLoss;
         cons(i)  = study(i).consumedMol;
@@ -499,7 +499,7 @@ function summary = buildSummary(study, opt)
         bhp(i)   = study(i).maxInjBHP_bar;
         if isnan(base)
             verd(i) = "ok (no baseline)";
-            continue;
+            continue
         end
         delta(i) = study(i).finalLoss - base;
         rel(i)   = 100 * delta(i) / max(abs(base), eps);
@@ -540,7 +540,8 @@ function makeFigures(study, regimeTab, opt)
 
     % (1) H2 loss over time
     fig = paperFigure([20, 12], 'Regime study -- H2 loss over time');
-    ax = axes(fig); hold(ax, 'on');
+    ax = axes(fig);
+    hold(ax, 'on');
     for i = find(done)
         plot(ax, study(i).timeDays, study(i).lossPercent, ...
             'LineWidth', 1.8, 'Color', colors(i, :), 'DisplayName', names{i});
@@ -556,7 +557,8 @@ function makeFigures(study, regimeTab, opt)
 
     % (2) Final spatial consumption
     fig = paperFigure([20, 12], 'Regime study -- spatial H2 consumption');
-    ax = axes(fig); hold(ax, 'on');
+    ax = axes(fig);
+    hold(ax, 'on');
     for i = find(done)
         plot(ax, study(i).xDless, study(i).finalSpatialMol, ...
             'LineWidth', 1.8, 'Color', colors(i, :), 'DisplayName', names{i});
@@ -573,7 +575,8 @@ function makeFigures(study, regimeTab, opt)
         fig = paperFigure([20, 11], 'Regime study -- delta H2 loss');
         ax = axes(fig);
         base   = study(1).finalLoss;
-        idx    = find(done); idx = idx(idx ~= 1);
+        idx    = find(done);
+        idx = idx(idx ~= 1);
         dd     = arrayfun(@(k) study(k).finalLoss - base, idx(:));
         lbls   = names(idx);
         cats   = categorical(lbls, lbls);
@@ -596,8 +599,8 @@ function makeFigures(study, regimeTab, opt)
     fig = paperFigure([18, 11], 'Regime study -- dimensionless numbers');
     ax = axes(fig);
     pick = ["Peclet, molecular", "Peclet, dispersive", ...
-            "Peclet, chemotaxis", "Peclet, microbial diffusion", ...
-            "Damkohler (k L / v)"];
+        "Peclet, chemotaxis", "Peclet, microbial diffusion", ...
+        "Damkohler (k L / v)"];
     lbl  = ["Pe_{mol}", "Pe_{disp}", "Pe_{chemo}", "Pe_{micro}", "Da"];
     vals = zeros(numel(pick), 1);
     for i = 1:numel(pick)
@@ -615,10 +618,10 @@ end
 function c = distinctColors(n)
     base = [ ...
         0.15 0.15 0.15;   % baseline   - near-black
-        0.00 0.45 0.74;   % blue
-        0.85 0.33 0.10;   % orange-red
-        0.47 0.67 0.19;   % green
-        0.49 0.18 0.56];  % purple
+            0.00 0.45 0.74;   % blue
+            0.85 0.33 0.10;   % orange-red
+            0.47 0.67 0.19;   % green
+            0.49 0.18 0.56];  % purple
     if n <= size(base, 1)
         c = base(1:n, :);
     else

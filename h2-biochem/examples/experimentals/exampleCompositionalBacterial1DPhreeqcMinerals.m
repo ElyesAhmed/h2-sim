@@ -1,50 +1,50 @@
 function comparison = exampleCompositionalBacterial1DPhreeqcMinerals(varargin)
-%Compare microbial biochemistry and three PHREEQC mineral inventories in 1D
-%
-% SYNOPSIS:
-%   comparison = exampleCompositionalBacterial1DPhreeqcMinerals();
-%   comparison = exampleCompositionalBacterial1DPhreeqcMinerals( ...
-%       'gridCells', 4, 'maximumFlowSteps', 2, 'plotResults', false);
-%
-% DESCRIPTION:
-%   Compare the microbial biochemistry model with three compositional-PHREEQC
-%   mineral configurations during 50 days of hydrogen injection into a 50 m
-%   reservoir. All cases share the grid, flow controls, initial brine and
-%   microbial populations. Diffusion, dispersion, chemotaxis and clogging are
-%   disabled. The PHREEQC cases use Bentheimer, Berea and Grey Berea mineral
-%   inventories expressed as rock mass fractions.
-%
-%   This compares different reaction backends as well as mineral inventories;
-%   differences from the baseline cannot be attributed to minerals alone.
-%   PHREEQC and h2_biogeochemistry.dat are required. H2sim supports native
-%   IPhreeqc on Linux and COM on Windows through PhreeqcMatlab.
-%
-%   Use the four-cell, two-step synopsis as a setup check. The default run
-%   uses 50 cells and the complete injection schedule. Packed results may
-%   reuse matching cached simulations. Figures export as vector PDF and
-%   300-dpi PNG; outputDirectory is resolved relative to the current folder.
-%
-% OPTIONAL PARAMETERS:
-%   gridCells          - Number of longitudinal cells (default 50).
-%   maximumFlowSteps   - Positive step limit, or Inf for all steps (default Inf).
-%   batchSize          - Independent PHREEQC cells per call (default 50).
-%   phreeqcDatabaseFile - h2_biogeochemistry.dat path; environment/path fallback.
-%   plotResults        - Plot and export results (default true).
-%   outputDirectory    - Figure output folder (default build/phreeqc-figures).
-%
-% RETURNS:
-%   comparison - Four result structs, ordered baseline, Bentheimer, Berea,
-%                Grey Berea. Each includes model, state0, schedule, states,
-%                wellSols, reports and packedProblem. Hydrogen consumption
-%                is in mol; timeDays is in days. Spatial loss uses total
-%                prescribed injected H2 as its denominator. finalPH and
-%                finalReactiveMineralMoles are available only for PHREEQC;
-%                the baseline returns [] and NaN, respectively.
-%
-% SEE ALSO:
-%   runPhreeqcValidation, exampleSequentialBiochemistryPhreeqc1D
+    % Compare microbial biochemistry and three PHREEQC mineral inventories in 1D
+    %
+    % SYNOPSIS:
+    %   comparison = exampleCompositionalBacterial1DPhreeqcMinerals();
+    %   comparison = exampleCompositionalBacterial1DPhreeqcMinerals( ...
+    %       'gridCells', 4, 'maximumFlowSteps', 2, 'plotResults', false);
+    %
+    % DESCRIPTION:
+    %   Compare the microbial biochemistry model with three compositional-PHREEQC
+    %   mineral configurations during 50 days of hydrogen injection into a 50 m
+    %   reservoir. All cases share the grid, flow controls, initial brine and
+    %   microbial populations. Diffusion, dispersion, chemotaxis and clogging are
+    %   disabled. The PHREEQC cases use Bentheimer, Berea and Grey Berea mineral
+    %   inventories expressed as rock mass fractions.
+    %
+    %   This compares different reaction backends as well as mineral inventories;
+    %   differences from the baseline cannot be attributed to minerals alone.
+    %   PHREEQC and h2_biogeochemistry.dat are required. H2sim supports native
+    %   IPhreeqc on Linux and COM on Windows through PhreeqcMatlab.
+    %
+    %   Use the four-cell, two-step synopsis as a setup check. The default run
+    %   uses 50 cells and the complete injection schedule. Packed results may
+    %   reuse matching cached simulations. Figures export as vector PDF and
+    %   300-dpi PNG; outputDirectory is resolved relative to the current folder.
+    %
+    % OPTIONAL PARAMETERS:
+    %   gridCells          - Number of longitudinal cells (default 50).
+    %   maximumFlowSteps   - Positive step limit, or Inf for all steps (default Inf).
+    %   batchSize          - Independent PHREEQC cells per call (default 50).
+    %   phreeqcDatabaseFile - h2_biogeochemistry.dat path; environment/path fallback.
+    %   plotResults        - Plot and export results (default true).
+    %   outputDirectory    - Figure output folder (default build/phreeqc-figures).
+    %
+    % RETURNS:
+    %   comparison - Four result structs, ordered baseline, Bentheimer, Berea,
+    %                Grey Berea. Each includes model, state0, schedule, states,
+    %                wellSols, reports and packedProblem. Hydrogen consumption
+    %                is in mol; timeDays is in days. Spatial loss uses total
+    %                prescribed injected H2 as its denominator. finalPH and
+    %                finalReactiveMineralMoles are available only for PHREEQC;
+    %                the baseline returns [] and NaN, respectively.
+    %
+    % SEE ALSO:
+    %   runPhreeqcValidation, exampleSequentialBiochemistryPhreeqc1D
 
-    mrstModule add ad-core ad-props compositional deckformat
+    mrstModule add ad-core ad-props compositional deckformat;
 
     %% Select grid, chemistry and output options
     opt = struct( ...
@@ -63,9 +63,9 @@ function comparison = exampleCompositionalBacterial1DPhreeqcMinerals(varargin)
     mineralCases = table( ...
         ["A"; "B"; "C"], ...
         ["Bentheimer sandstone"; "Berea sandstone"; "Grey Berea sandstone"], ...
-        [0; 2; 2]./100, ...
-        [2; 1; 0]./100, ...
-        [98; 97; 98]./100, ...
+        [0; 2; 2] ./ 100, ...
+        [2; 1; 0] ./ 100, ...
+        [98; 97; 98] ./ 100, ...
         'VariableNames', {'Case', 'Rock', 'Calcite', 'Dolomite', 'Inert'});
 
     %% Share flow, transport and initial aqueous conditions
@@ -98,7 +98,7 @@ function comparison = exampleCompositionalBacterial1DPhreeqcMinerals(varargin)
         "Original", "Original h2-biochem, no clogging", ...
         model, schedule, state0, ...
         sprintf('H2_1D_ORIGINAL_INJECTION_FIGURES_V2_%dCELLS_%dSTEPS', ...
-            opt.gridCells, numel(schedule.step.val)));
+        opt.gridCells, numel(schedule.step.val)));
 
     %% Run the three compositional-PHREEQC mineral cases
     for caseNo = 1:height(mineralCases)
@@ -113,7 +113,7 @@ function comparison = exampleCompositionalBacterial1DPhreeqcMinerals(varargin)
             'phreeqcQuartzWtFraction', 0, ...
             'phreeqcInertWtFraction', mineralCases.Inert(caseNo), ...
             'sequentialCompositionalPhreeqcBatchSize', ...
-                min(opt.batchSize, opt.gridCells));
+            min(opt.batchSize, opt.gridCells));
         schedule = limitSchedule(schedule, opt.maximumFlowSteps);
         assertMatchedInitialState(comparison(1), model, state0);
         packedName = sprintf( ...
@@ -163,19 +163,19 @@ function assertMatchedInitialState(original, phreeqcModel, phreeqcState)
         field = sharedFields{fieldNo};
         assert(isfield(originalState, field) && isfield(phreeqcState, field) && ...
             max(abs(value(originalState.(field)) - value(phreeqcState.(field))), ...
-                [], 'all') < 1e-12, ...
+            [], 'all') < 1e-12, ...
             'Original and PHREEQC initial states differ in %s.', field);
     end
 
-    originalPopulation = value(originalState.nbact).* ...
+    originalPopulation = value(originalState.nbact) .* ...
         original.model.biochemFluid.nbactMax;
     opt = phreeqcModel.phreeqcCouplingOptions;
     phreeqcPopulation = [ ...
         phreeqcState.sequentialCompositionalPhreeqcBiomassMET, ...
         phreeqcState.sequentialCompositionalPhreeqcBiomassACE, ...
-        phreeqcState.sequentialCompositionalPhreeqcBiomassSRB].* ...
-        opt.sequentialCompositionalPhreeqcBiomassMW./ ...
-        opt.sequentialCompositionalPhreeqcCellMass.*opt.waterDensity;
+        phreeqcState.sequentialCompositionalPhreeqcBiomassSRB] .* ...
+        opt.sequentialCompositionalPhreeqcBiomassMW ./ ...
+        opt.sequentialCompositionalPhreeqcCellMass .* opt.waterDensity;
     assert(max(abs(originalPopulation - phreeqcPopulation), [], 'all') < 1, ...
         'Original and PHREEQC initial microbial populations are not matched.');
 end
@@ -208,9 +208,9 @@ function result = runPackedCase(name, rock, model, schedule, state0, packedName)
             sum(cumulative, 1).';
         finalSpatialConsumed = finalSpatialConsumed + cumulative(:, end);
     end
-    timeDays = cumsum(schedule.step.val(:))./day;
+    timeDays = cumsum(schedule.step.val(:)) ./ day;
     cumulativeInjected = prescribedInjectedH2(schedule, model);
-    h2LossPercent = 100*totalCumulativeConsumed./cumulativeInjected;
+    h2LossPercent = 100 * totalCumulativeConsumed ./ cumulativeInjected;
     xDimensionless = dimensionlessCellDistance(model.G);
 
     result = struct( ...
@@ -229,11 +229,11 @@ function result = runPackedCase(name, rock, model, schedule, state0, packedName)
         'h2LossPercent', h2LossPercent, ...
         'xDimensionless', xDimensionless, ...
         'spatialH2LossPercent', ...
-            100*finalSpatialConsumed./cumulativeInjected(end), ...
+        100 * finalSpatialConsumed ./ cumulativeInjected(end), ...
         'finalPH', [], ...
         'finalReactiveMineralMoles', nan(1, 2));
     if isa(model, 'BiochemistryPhreeqcModel') && ...
-            model.isSequentialCompositionalPhreeqcBackend()
+        model.isSequentialCompositionalPhreeqcBackend()
         finalState = states{end};
         result.finalPH = finalState.phreeqcPH;
         result.finalReactiveMineralMoles = [ ...
@@ -255,12 +255,12 @@ function summary = makeSummary(comparison, mineralCases)
         h2(:, 1), h2(:, 2), h2(:, 3), sum(h2, 2), ...
         finalH2LossPercent, ...
         meanPH, minerals(:, 1), minerals(:, 2), ...
-        [NaN; 100*mineralCases.Inert], ...
+        [NaN; 100 * mineralCases.Inert], ...
         [comparison.elapsedSeconds].', ...
         'VariableNames', { ...
-            'Case', 'Rock', 'H2_MET_mol', 'H2_ACE_mol', 'H2_SRB_mol', ...
-            'H2_Total_mol', 'FinalH2LossPercent', 'MeanFinalPH', 'FinalCalcite_mol', ...
-            'FinalDolomite_mol', 'InertRockWtPercent', 'ElapsedSeconds'});
+        'Case', 'Rock', 'H2_MET_mol', 'H2_ACE_mol', 'H2_SRB_mol', ...
+        'H2_Total_mol', 'FinalH2LossPercent', 'MeanFinalPH', 'FinalCalcite_mol', ...
+        'FinalDolomite_mol', 'InertRockWtPercent', 'ElapsedSeconds'});
 end
 
 function cumulativeInjected = prescribedInjectedH2(schedule, model)
@@ -273,19 +273,19 @@ function cumulativeInjected = prescribedInjectedH2(schedule, model)
         for wellNo = 1:numel(wells)
             well = wells(wellNo);
             if well.sign <= 0 || (isfield(well, 'status') && ~well.status)
-                continue;
+                continue
             end
             if strcmpi(well.type, 'grat')
                 gasRate = well.val;
             elseif strcmpi(well.type, 'rate')
-                gasRate = well.val*well.compi(gasIndex);
+                gasRate = well.val * well.compi(gasIndex);
             else
-                continue;
+                continue
             end
-            molarRate = gasRate*model.FacilityModel.pressure/ ...
-                (8.314462618*model.FacilityModel.T);
+            molarRate = gasRate * model.FacilityModel.pressure / ...
+                (8.314462618 * model.FacilityModel.T);
             increment(stepNo) = increment(stepNo) + ...
-                molarRate*well.components(h2Index)*schedule.step.val(stepNo);
+                molarRate * well.components(h2Index) * schedule.step.val(stepNo);
         end
     end
     cumulativeInjected = cumsum(increment);
@@ -297,7 +297,7 @@ function index = findComponentIndex(names, aliases)
     for aliasNo = 1:numel(aliases)
         index = find(strcmpi(names, aliases{aliasNo}), 1);
         if ~isempty(index)
-            return;
+            return
         end
     end
     error('Required EOS component was not found: %s.', aliases{1});
@@ -331,8 +331,8 @@ function databaseFile = resolvePhreeqcDatabaseFile(databaseFile)
     if isempty(strtrim(databaseFile)) || ~isfile(databaseFile)
         error('exampleCompositionalBacterial1DPhreeqcMinerals:MissingPhreeqcDatabase', ...
             ['h2_biogeochemistry.dat was not found. Pass its absolute path using ', ...
-             '''phreeqcDatabaseFile'', databaseFile, or set the ', ...
-             'PHREEQC_DATABASE_FILE environment variable.']);
+            '''phreeqcDatabaseFile'', databaseFile, or set the ', ...
+            'PHREEQC_DATABASE_FILE environment variable.']);
     end
     [~, name, extension] = fileparts(databaseFile);
     assert(strcmpi([name, extension], 'h2_biogeochemistry.dat'), ...

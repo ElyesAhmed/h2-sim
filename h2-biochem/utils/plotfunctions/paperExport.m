@@ -1,29 +1,29 @@
 function files = paperExport(fig, name, varargin)
-% Export a paper/presentation figure to EPS and PNG with one call.
-%
-% SYNOPSIS:
-%   paperExport(fig, 'h2_loss_over_time')
-%   files = paperExport(fig, 'h2_loss_over_time', 'dir', myDir)
-%
-% PARAMETERS:
-%   fig  - Figure handle (e.g. the return value of paperFigure).
-%   name - Base file name without extension. Non-alphanumeric characters are
-%          replaced by underscores.
-%
-% OPTIONAL PARAMETERS:
-%   'dir'        - Output directory. Default: a 'figures' sub-folder of the
-%                  calling script's directory, or of pwd if that cannot be
-%                  resolved. Created if missing.
-%   'formats'    - Cell array of extensions to write. Default {'eps','png'}.
-%   'resolution' - Raster resolution in DPI for PNG. Default 300.
-%   'style'      - If true, run styleAxes on every axes of the figure before
-%                  export. Default false.
-%
-% RETURNS:
-%   files - Cell array of the full paths written.
-%
-% SEE ALSO:
-%   paperFigure, styleAxes, paperColors
+    % Export a paper/presentation figure to EPS and PNG with one call.
+    %
+    % SYNOPSIS:
+    %   paperExport(fig, 'h2_loss_over_time')
+    %   files = paperExport(fig, 'h2_loss_over_time', 'dir', myDir)
+    %
+    % PARAMETERS:
+    %   fig  - Figure handle (e.g. the return value of paperFigure).
+    %   name - Base file name without extension. Non-alphanumeric characters are
+    %          replaced by underscores.
+    %
+    % OPTIONAL PARAMETERS:
+    %   'dir'        - Output directory. Default: a 'figures' sub-folder of the
+    %                  calling script's directory, or of pwd if that cannot be
+    %                  resolved. Created if missing.
+    %   'formats'    - Cell array of extensions to write. Default {'eps','png'}.
+    %   'resolution' - Raster resolution in DPI for PNG. Default 300.
+    %   'style'      - If true, run styleAxes on every axes of the figure before
+    %                  export. Default false.
+    %
+    % RETURNS:
+    %   files - Cell array of the full paths written.
+    %
+    % SEE ALSO:
+    %   paperFigure, styleAxes, paperColors
 
     opt = struct('dir', '', 'formats', {{'eps', 'png'}}, ...
         'resolution', 300, 'style', false);
@@ -95,12 +95,11 @@ end
 
 function outDir = defaultExportDir()
     stack = dbstack('-completenames');
-    outDir = '';
     for k = 1:numel(stack)
         [folder, fname] = fileparts(stack(k).file);
         if ~strcmp(fname, mfilename) && ~isempty(folder)
             outDir = fullfile(folder, 'figures');
-            return;
+            return
         end
     end
     outDir = fullfile(pwd, 'figures');

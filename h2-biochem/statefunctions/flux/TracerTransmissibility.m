@@ -26,6 +26,7 @@ classdef TracerTransmissibility < StateFunction
     end
 
     methods
+
         function tf = TracerTransmissibility(model, varargin)
             tf@StateFunction(model, varargin{:});
             tf = merge_options(tf, varargin{:});
@@ -52,12 +53,13 @@ classdef TracerTransmissibility < StateFunction
                 D = D_eff_cell{i};
                 if isnumeric(D) && all(D(:) == 0)
                     T_face{i} = zeros(nInternal, 1);
-                    continue;
+                    continue
                 end
                 T_all = tf.transmissibilityComputer.getTransmissibility(D);
                 T_face{i} = T_all(op.internalConn);
             end
         end
+
     end
 end
 

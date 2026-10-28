@@ -1,29 +1,29 @@
 function [totalGasVolume, H2InWater, vH2InGas] = computeGasVolumes(model, states, steps)
-%COMPUTEGASVOLUMES Hydrogen component inventories at surface conditions.
-%
-% SYNOPSIS:
-%   [total, dissolved, gas] = computeGasVolumes(model, states, steps)
-%
-% PARAMETERS:
-%   model  - MRST black-oil model with oil and gas phases. The oil
-%            phase represents brine and Rs represents dissolved hydrogen.
-%   states - Cell array of reservoir states.
-%   steps  - Indices to evaluate; order and repeated indices are preserved.
-%
-% RETURNS:
-%   total, dissolved, gas - Column cell arrays, one entry per requested step.
-%       Each entry contains one value per cell in surface-volume units [m^3].
-%       These are component volumes, not reservoir-phase volumes:
-%           dissolved = PV .* sO .* bO .* Rs
-%           gas       = PV .* sG .* bG
-%       bO and bG are reciprocal formation volume factors. PV is evaluated
-%       through the model, including its rock-compressibility multiplier.
-%       With disgas disabled the dissolved inventory is zero. Rv affects
-%       the gas PVT properties; vaporized brine is not hydrogen inventory.
-%
-% This corrects the former use of bulk volume and gas saturation in the
-% dissolved term. Postprocessed inventories and dissolution fractions from
-% older versions therefore need recomputation; simulation states are unchanged.
+    % COMPUTEGASVOLUMES Hydrogen component inventories at surface conditions.
+    %
+    % SYNOPSIS:
+    %   [total, dissolved, gas] = computeGasVolumes(model, states, steps)
+    %
+    % PARAMETERS:
+    %   model  - MRST black-oil model with oil and gas phases. The oil
+    %            phase represents brine and Rs represents dissolved hydrogen.
+    %   states - Cell array of reservoir states.
+    %   steps  - Indices to evaluate; order and repeated indices are preserved.
+    %
+    % RETURNS:
+    %   total, dissolved, gas - Column cell arrays, one entry per requested step.
+    %       Each entry contains one value per cell in surface-volume units [m^3].
+    %       These are component volumes, not reservoir-phase volumes:
+    %           dissolved = PV .* sO .* bO .* Rs
+    %           gas       = PV .* sG .* bG
+    %       bO and bG are reciprocal formation volume factors. PV is evaluated
+    %       through the model, including its rock-compressibility multiplier.
+    %       With disgas disabled the dissolved inventory is zero. Rv affects
+    %       the gas PVT properties; vaporized brine is not hydrogen inventory.
+    %
+    % This corrects the former use of bulk volume and gas saturation in the
+    % dissolved term. Postprocessed inventories and dissolution fractions from
+    % older versions therefore need recomputation; simulation states are unchanged.
     names = model.getPhaseNames();
     liquid = find(names == 'O', 1);
     gas = find(names == 'G', 1);

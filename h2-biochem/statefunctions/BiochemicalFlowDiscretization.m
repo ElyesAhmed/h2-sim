@@ -15,7 +15,8 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
     %   BiochemistryModel, BacterialMass, AqueousTracerMass
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function props = BiochemicalFlowDiscretization(model)
             % Constructor: inherit base FlowDiscretization properties
             props = props@FlowDiscretization(model);
@@ -24,7 +25,7 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
 
             % Add dispersion state functions
             if (isprop(model, 'molecularDispersion') && model.molecularDispersion) || ...
-                    (isprop(model, 'molecularDiffusion') && model.molecularDiffusion)
+                (isprop(model, 'molecularDiffusion') && model.molecularDiffusion)
                 props = props.setStateFunction('DispersiveDiffusivity', DispersiveDiffusivity(model));
                 props = props.setStateFunction('DispersiveTransmissibility', ...
                     DispersiveTransmissibility(model));
@@ -77,7 +78,7 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
                     end
 
                     if (isprop(model, 'molecularDispersion') && model.molecularDispersion) || ...
-                            (isprop(model, 'molecularDiffusion') && model.molecularDiffusion)
+                        (isprop(model, 'molecularDiffusion') && model.molecularDiffusion)
                         props = props.setStateFunction('TracerDiffusivity', TracerDiffusivity(model));
                         props = props.setStateFunction('TracerTransmissibility', ...
                             TracerTransmissibility(model));
@@ -87,13 +88,13 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
             end
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [acc, flux, names, types] = componentConservationEquations(fd, model, state, state0, dt)
             % Call parent method for standard component conservation
             [acc, flux, names, types] = componentConservationEquations@FlowDiscretization(fd, model, state, state0, dt);
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [acc, bflux, name, type] = bacteriaConservationEquation(fd, model, state, state0, dt)
             % Computes bacterial mass conservation equation
             bactmass  = model.getProp(state, 'BacterialMass');
@@ -132,8 +133,8 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
             [type{:}] = deal('cell');
         end
 
-        %-----------------------------------------------------------------%
-        function [acc, tflux, name, type] = tracerConservationEquation(fd, model, state, state0, dt)
+        % -----------------------------------------------------------------%
+        function [acc, tflux, name, type] = tracerConservationEquation(~, model, state, state0, dt)
             % Mass conservation for mobile non-EOS aqueous tracers.
             %
             % Unlike EOS components, these tracers never enter the flash:
@@ -185,7 +186,7 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
             type = repmat({'cell'}, 1, ntracer);
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function c = getPopulationMass(model, state, extra)
             % Compute microbial mass in each phase
             c = component.getPhaseComposition(model, state);
@@ -202,6 +203,7 @@ classdef BiochemicalFlowDiscretization < FlowDiscretization
                 end
             end
         end
+
     end
 end
 

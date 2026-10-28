@@ -1,27 +1,27 @@
 function SGOF = readSGOFTables(fid, kw, ntab, ncol)
-%READSGOFTABLES Read tables written by getFluidH2BrineSGOF.
-%
-% SYNOPSIS:
-%   tables = readSGOFTables(fid, 'SGOF', nreg, 4)
-%
-% PARAMETERS:
-%   fid  - Open file positioned at the column-header line. This function
-%          takes ownership of the handle and closes it, including on error.
-%   kw   - Relative permeability keyword following the header, usually SGOF.
-%   ntab - Number of region tables to read.
-%   ncol - Number of columns in each table, normally 4 for SGOF.
-%
-% RETURNS:
-%   SGOF - Column cell array of numeric region tables. Columns follow the
-%          input header: gas saturation, gas and brine relative permeability,
-%          and capillary pressure in the file's units. No unit conversion is
-%          performed. Requires MRST's deckformat module.
+    % READSGOFTABLES Read tables written by getFluidH2BrineSGOF.
+    %
+    % SYNOPSIS:
+    %   tables = readSGOFTables(fid, 'SGOF', nreg, 4)
+    %
+    % PARAMETERS:
+    %   fid  - Open file positioned at the column-header line. This function
+    %          takes ownership of the handle and closes it, including on error.
+    %   kw   - Relative permeability keyword following the header, usually SGOF.
+    %   ntab - Number of region tables to read.
+    %   ncol - Number of columns in each table, normally 4 for SGOF.
+    %
+    % RETURNS:
+    %   SGOF - Column cell array of numeric region tables. Columns follow the
+    %          input header: gas saturation, gas and brine relative permeability,
+    %          and capillary pressure in the file's units. No unit conversion is
+    %          performed. Requires MRST's deckformat module.
     fileCleanup = onCleanup(@() fclose(fid));
     headerLine = fgetl(fid);
     headers = strsplit(strtrim(strrep(headerLine, '--', '')));
     while ~feof(fid)
         if strcmpi(strtrim(fgetl(fid)), kw)
-            break;
+            break
         end
     end
     data = readRelPermTable(fid, kw, ntab, ncol);

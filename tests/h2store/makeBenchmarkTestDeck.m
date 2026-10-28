@@ -1,7 +1,7 @@
 function deck = makeBenchmarkTestDeck()
-%MAKEBENCHMARKTESTDECK Synthetic Cartesian benchmark grid with bundled fluid tables.
-%   The 61-by-61-by-12 grid accommodates the fixed benchmark completions and
-%   radii. Permeability is in mD for the metric deck; lengths are in meters.
+    % MAKEBENCHMARKTESTDECK Synthetic Cartesian benchmark grid with bundled fluid tables.
+    %   The 61-by-61-by-12 grid accommodates the fixed benchmark completions and
+    %   radii. Permeability is in mD for the metric deck; lengths are in meters.
     root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
     file = fullfile(root, 'h2-store', 'examples', 'data', ...
         'Aquifer2D', 'H2STORAGE_RS.DATA');

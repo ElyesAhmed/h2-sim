@@ -12,6 +12,7 @@ classdef CarbonLimitedGrowthRate < StateFunction
     % or a zero budget when the required inventory is unavailable.
 
     methods
+
         function clgr = CarbonLimitedGrowthRate(model, varargin)
             clgr@StateFunction(model, varargin{:});
             clgr = clgr.dependsOn('PsiGrowthRate', 'state');
@@ -29,7 +30,7 @@ classdef CarbonLimitedGrowthRate < StateFunction
             clgr.label = '\Psi_{growth,carbon-limited}';
         end
 
-        function psigrowth = evaluateOnDomain(prop, model, state)
+        function psigrowth = evaluateOnDomain(~, model, state)
             if isprop(model, 'ReservoirModel') && ~isempty(model.ReservoirModel)
                 rm = model.ReservoirModel;
             else
@@ -38,13 +39,13 @@ classdef CarbonLimitedGrowthRate < StateFunction
 
             psigrowth = model.getProps(state, 'PsiGrowthRate');
             if ~(isprop(rm, 'carbonateBuffer') && rm.carbonateBuffer)
-                return;
+                return
             end
 
             assert(isfield(state, 'carbonSubstrateDt') && isfield(state, 'carbonSubstrateMoles') && ...
                 isscalar(state.carbonSubstrateDt) && state.carbonSubstrateDt > 0, ...
                 ['CarbonLimitedGrowthRate requires the positive current timestep and ', ...
-                 'the start-of-step aqueous carbon inventory.']);
+                'the start-of-step aqueous carbon inventory.']);
 
             bcrm = rm.biochemFluid;
             cnames = rm.EOSModel.getComponentNames();
@@ -55,7 +56,7 @@ classdef CarbonLimitedGrowthRate < StateFunction
             L_ix = rm.getLiquidIndex();
             % [mol/s]: finite liquid CO2 plus HCO3- inventory at the
             % timestep start, divided by the current timestep duration.
-            carbonAvailable = state.carbonSubstrateMoles./state.carbonSubstrateDt;
+            carbonAvailable = state.carbonSubstrateMoles ./ state.carbonSubstrateDt;
 
             bmass = rm.PVTPropertyFunctions.get(rm, state, 'BacterialMass');
             rho = rm.PVTPropertyFunctions.get(rm, state, 'Density');
@@ -74,7 +75,7 @@ classdef CarbonLimitedGrowthRate < StateFunction
                 carbonReactions(i) = strcmpi(reaction, 'MethanogenicArchae') || ...
                     strcmpi(reaction, 'AcetogenicBacteria');
                 if ~carbonReactions(i)
-                    continue;
+                    continue
                 end
 
                 assert(strcmpi(bcrm.rsub(i), 'CO2'), ...
@@ -95,15 +96,15 @@ classdef CarbonLimitedGrowthRate < StateFunction
                     bmass_i = bmass(:, i);
                 end
 
-                qbase = psigrowth_i.*bmass_i./bcrm.Y_H2(i);
-                gammaCO2 = bcrm.nbactMax(i).*gamma(i, idxCO2).* ...
-                    molarMass(idxCO2)./abs(gamma(i, idxH2));
+                qbase = psigrowth_i .* bmass_i ./ bcrm.Y_H2(i);
+                gammaCO2 = bcrm.nbactMax(i) .* gamma(i, idxCO2) .* ...
+                    molarMass(idxCO2) ./ abs(gamma(i, idxH2));
 
                 % This is exactly the CO2 molar sink represented by
                 % BactConvertionRate after BiochemistryModel divides its
                 % mass source by rhoL.
                 co2Demand = co2Demand + max( ...
-                    -gammaCO2.*qbase./rhoL./molarMass(idxCO2), 0);
+                    -gammaCO2 .* qbase ./ rhoL ./ molarMass(idxCO2), 0);
             end
 
             % Smoothly approximate min(1, available/demand). A hard min
@@ -111,18 +112,19 @@ classdef CarbonLimitedGrowthRate < StateFunction
             % zero-carbon boundary and creates a nonsmooth Jacobian that
             % triggers severe timestep cutting. The p-norm form remains
             % conservative while retaining useful derivatives.
-            carbonRatio = carbonAvailable./max(co2Demand, 1e-30);
+            carbonRatio = carbonAvailable ./ max(co2Demand, 1e-30);
             smoothnessOrder = 8;
-            carbonScale = carbonRatio./ ...
-                (1 + carbonRatio.^smoothnessOrder).^(1/smoothnessOrder);
+            carbonScale = carbonRatio ./ ...
+                (1 + carbonRatio.^smoothnessOrder).^(1 / smoothnessOrder);
             for i = find(carbonReactions)
                 if iscell(psigrowth)
-                    psigrowth{i} = psigrowth{i}.*carbonScale;
+                    psigrowth{i} = psigrowth{i} .* carbonScale;
                 else
-                    psigrowth(:, i) = psigrowth(:, i).*carbonScale;
+                    psigrowth(:, i) = psigrowth(:, i) .* carbonScale;
                 end
             end
         end
+
     end
 end
 

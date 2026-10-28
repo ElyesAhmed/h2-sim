@@ -1,30 +1,30 @@
 function diagnostics = summarizeH2StorageStates(model, states, wellSols)
-%SUMMARIZEH2STORAGESTATES Summarize stored hydrogen and single-well histories.
-%
-% SYNOPSIS:
-%   diagnostics = summarizeH2StorageStates(model, states, wellSols)
-%
-% states and wellSols are equally sized cell arrays, with one well solution
-% per state. The oil phase represents brine. Inventory uses computeGasVolumes
-% and is reported in surface m^3. Mean pressure [Pa] and mean gas saturation
-% are arithmetic cell averages, without pore-volume weighting. bhp is in Pa;
-% gasRate and brineRate are signed surface rates [m^3/s] from qGs and qOs.
-%
-% RETURNS:
-%   diagnostics - Structure with row-vector fields in state order:
-%       totalHydrogenVolume, dissolvedHydrogenVolume, gasHydrogenVolume [m^3];
-%       meanPressure and bhp [Pa]; meanGasSaturation (dimensionless);
-%       dissolvedFractionPercent [%]; gasRate and brineRate [m^3/s].
-%
-% dissolvedFractionPercent is dissolved hydrogen divided by total hydrogen
-% currently stored, times 100;
-% it is zero for nonpositive total inventory. It is not a cumulative loss or
-% recovery efficiency. Empty histories return empty row vectors.
-%
-% SEE ALSO:
-%   computeGasVolumes, getPackedSimulatorOutput
+    % SUMMARIZEH2STORAGESTATES Summarize stored hydrogen and single-well histories.
+    %
+    % SYNOPSIS:
+    %   diagnostics = summarizeH2StorageStates(model, states, wellSols)
+    %
+    % states and wellSols are equally sized cell arrays, with one well solution
+    % per state. The oil phase represents brine. Inventory uses computeGasVolumes
+    % and is reported in surface m^3. Mean pressure [Pa] and mean gas saturation
+    % are arithmetic cell averages, without pore-volume weighting. bhp is in Pa;
+    % gasRate and brineRate are signed surface rates [m^3/s] from qGs and qOs.
+    %
+    % RETURNS:
+    %   diagnostics - Structure with row-vector fields in state order:
+    %       totalHydrogenVolume, dissolvedHydrogenVolume, gasHydrogenVolume [m^3];
+    %       meanPressure and bhp [Pa]; meanGasSaturation (dimensionless);
+    %       dissolvedFractionPercent [%]; gasRate and brineRate [m^3/s].
+    %
+    % dissolvedFractionPercent is dissolved hydrogen divided by total hydrogen
+    % currently stored, times 100;
+    % it is zero for nonpositive total inventory. It is not a cumulative loss or
+    % recovery efficiency. Empty histories return empty row vectors.
+    %
+    % SEE ALSO:
+    %   computeGasVolumes, getPackedSimulatorOutput
 
-%{
+    %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
@@ -65,8 +65,8 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
         diagnostics.meanGasSaturation(k) = mean(states{k}.s(:, gasPhase));
         if diagnostics.totalHydrogenVolume(k) > 0
             diagnostics.dissolvedFractionPercent(k) = ...
-                (diagnostics.dissolvedHydrogenVolume(k)/ ...
-                 diagnostics.totalHydrogenVolume(k))*100;
+                (diagnostics.dissolvedHydrogenVolume(k) / ...
+                diagnostics.totalHydrogenVolume(k)) * 100;
         end
         diagnostics.bhp(k) = well.bhp;
         diagnostics.gasRate(k) = well.qGs;

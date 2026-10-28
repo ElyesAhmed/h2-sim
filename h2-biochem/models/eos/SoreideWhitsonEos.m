@@ -22,30 +22,31 @@ classdef SoreideWhitsonEos < EquationOfStateModel
     %   EquationOfStateModel
 
     properties
-        msalt = 0.0; % Salt molality for Soreide-Whitson EoS
+        msalt = 0.0  % Salt molality for Soreide-Whitson EoS
 
         % --- Sulfate reduction coupling parameters ---
-        pH             = 7.2;    % pH of the system
-        initial_NaCl   = 2.0;    % Initial NaCl molality (mol/kg)
-        initial_SO4    = 0.5;    % Initial sulfate molality (mol/kg)
-        rho_water      = 1000;   % Water density (kg/m3)
-        pKa_H2S        = 6.98;   % pKa of H2S at 25°C
-        pKa_T_coef     = -0.013; % Temperature correction for pKa (1/K).
-                                 % pKa1 of H2S DECREASES with temperature
-                                 % (Millero et al. 1988; Barbero et al.
-                                 % 1982 report ~-0.011 to -0.015 per degC
-                                 % near 25C), so this must be negative.
-        pKa_sal_coef   = 0.1;    % Salinity correction for pKa (1/(mol/kg))
+        pH             = 7.2     % pH of the system
+        initial_NaCl   = 2.0     % Initial NaCl molality (mol/kg)
+        initial_SO4    = 0.5     % Initial sulfate molality (mol/kg)
+        rho_water      = 1000    % Water density (kg/m3)
+        pKa_H2S        = 6.98    % pKa of H2S at 25°C
+        pKa_T_coef     = -0.013  % Temperature correction for pKa (1/K).
+        % pKa1 of H2S DECREASES with temperature
+        % (Millero et al. 1988; Barbero et al.
+        % 1982 report ~-0.011 to -0.015 per degC
+        % near 25C), so this must be negative.
+        pKa_sal_coef   = 0.1     % Salinity correction for pKa (1/(mol/kg))
 
         % --- SRB coupling state (internal) ---
-        srb_enabled    = false;
-        srb_so4_conc   = [];
-        srb_hs_conc    = [];
-        srb_total_s    = [];
-        srb_t          = [];
+        srb_enabled    = false
+        srb_so4_conc   = []
+        srb_hs_conc    = []
+        srb_total_s    = []
+        srb_t          = []
     end
 
     methods
+
         function model = SoreideWhitsonEos(G, fluid, varargin)
             % Constructor: set up as Peng-Robinson, then adjust omegaB
             model = model@EquationOfStateModel(G, fluid, 'pr');
@@ -107,8 +108,8 @@ classdef SoreideWhitsonEos < EquationOfStateModel
 
             Vz = bsxfun(@times, Vc, z);
 
-            Tc_est = sum(bsxfun(@times, Vz, Tc), 2)./sum(Vz, 2);
-            Pc_est = sum(bsxfun(@times, Vz, Pc), 2)./sum(Vz, 2);
+            Tc_est = sum(bsxfun(@times, Vz, Tc), 2) ./ sum(Vz, 2);
+            Pc_est = sum(bsxfun(@times, Vz, Pc), 2) ./ sum(Vz, 2);
 
             Tr = T ./ Tc_est;
             Pr = p ./ Pc_est;
@@ -157,21 +158,21 @@ classdef SoreideWhitsonEos < EquationOfStateModel
                 for i = 1:ncomp
                     ai = acf(i);
                     if ai > 0.49
-                        oA{i} = model.omegaA.*(1 + (0.379642 + 1.48503.*ai - 0.164423.*ai.^2 + 0.016666.*ai.^3).*(1-Tr{i}.^(1/2))).^2;
+                        oA{i} = model.omegaA .* (1 + (0.379642 + 1.48503 .* ai - 0.164423 .* ai.^2 + 0.016666 .* ai.^3) .* (1 - Tr{i}.^(1 / 2))).^2;
                     else
-                        oA{i} = model.omegaA.*(1 + (0.37464 + 1.54226.*ai - 0.26992.*ai.^2).*(1-Tr{i}.^(1/2))).^2;
+                        oA{i} = model.omegaA .* (1 + (0.37464 + 1.54226 .* ai - 0.26992 .* ai.^2) .* (1 - Tr{i}.^(1 / 2))).^2;
                     end
                 end
                 % Override alpha for H2O component
                 TrH2O = Tr{indH2O};
-                oA{indH2O} = model.omegaA.*(1 + 0.4530.*(1-(1-0.0103*coef_msalt).*TrH2O)+0.0034.*(TrH2O.^(-3)-1)).^2;
+                oA{indH2O} = model.omegaA .* (1 + 0.4530 .* (1 - (1 - 0.0103 * coef_msalt) .* TrH2O) + 0.0034 .* (TrH2O.^(-3) - 1)).^2;
             else
-                tmp = bsxfun(@times, 0.37464 + 1.54226.*acf - 0.26992.*acf.^2, 1-Tr.^(1/2));
-                oA = model.omegaA.*(1 + tmp).^2;
+                tmp = bsxfun(@times, 0.37464 + 1.54226 .* acf - 0.26992 .* acf.^2, 1 - Tr.^(1 / 2));
+                oA = model.omegaA .* (1 + tmp).^2;
                 % Override alpha for H2O component
                 TrH2O = Tr(:, indH2O);
-                tmp1 = bsxfun(@power, 1 + 0.4530.*(1-(1-0.0103*coef_msalt).*TrH2O)+0.0034.*(TrH2O.^(-3)-1), 2);
-                oA(:, indH2O) = model.omegaA.*tmp1;
+                tmp1 = bsxfun(@power, 1 + 0.4530 .* (1 - (1 - 0.0103 * coef_msalt) .* TrH2O) + 0.0034 .* (TrH2O.^(-3) - 1), 2);
+                oA(:, indH2O) = model.omegaA .* tmp1;
             end
 
             % Use the current salinity stored in the model
@@ -179,27 +180,27 @@ classdef SoreideWhitsonEos < EquationOfStateModel
             if useCell
                 A_ij = cell(ncomp, ncomp);
                 for i = 1:ncomp
-                    sAi{i} = ((oA{i}.*Pr{i}).^(1/2))./Tr{i};
-                    Bi{i} = oB{i}.*Pr{i}./Tr{i};
+                    sAi{i} = ((oA{i} .* Pr{i}).^(1 / 2)) ./ Tr{i};
+                    Bi{i} = oB{i} .* Pr{i} ./ Tr{i};
                 end
                 if iscell(bic)
                     for i = 1:ncomp
                         for j = i:ncomp
-                            A_ij{i, j} = (sAi{i}.*sAi{j}).*(1 - bic{i, j});
+                            A_ij{i, j} = (sAi{i} .* sAi{j}) .* (1 - bic{i, j});
                             A_ij{j, i} = A_ij{i, j};
                         end
                     end
                 else
                     for i = 1:ncomp
                         for j = i:ncomp
-                            A_ij{i, j} = (sAi{i}.*sAi{j}).*(1 - bic(i, j));
+                            A_ij{i, j} = (sAi{i} .* sAi{j}) .* (1 - bic(i, j));
                             A_ij{j, i} = A_ij{i, j};
                         end
                     end
                 end
             else
-                Ai = oA.*Pr./Tr.^2;
-                Bi = oB.*Pr./Tr;
+                Ai = oA .* Pr ./ Tr.^2;
+                Bi = oB .* Pr ./ Tr;
                 A_ij = cell(ncomp, 1);
                 if iscell(bic)
                     for j = 1:ncomp
@@ -207,11 +208,11 @@ classdef SoreideWhitsonEos < EquationOfStateModel
                         for i = 1:ncomp
                             bicc(:, i) = bic{j, i};
                         end
-                        A_ij{j} = bsxfun(@times, bsxfun(@times, Ai, Ai(:, j)).^(1/2), 1 - bicc);
+                        A_ij{j} = bsxfun(@times, bsxfun(@times, Ai, Ai(:, j)).^(1 / 2), 1 - bicc);
                     end
                 else
                     for j = 1:ncomp
-                        A_ij{j} = bsxfun(@times, bsxfun(@times, Ai, Ai(:, j)).^(1/2), 1 - bic(j, :));
+                        A_ij{j} = bsxfun(@times, bsxfun(@times, Ai, Ai(:, j)).^(1 / 2), 1 - bic(j, :));
                     end
                 end
             end
@@ -238,7 +239,7 @@ classdef SoreideWhitsonEos < EquationOfStateModel
             nComponents = numel(namecp);
             bic = cell(nComponents);
 
-            coeffs = struct(...
+            coeffs = struct( ...
                 'H2',  [0.01993, 0.042834], ...
                 'C1', [0.494435, 0.0], ...
                 'H2S', [0.19031, -0.05965], ...
@@ -262,7 +263,7 @@ classdef SoreideWhitsonEos < EquationOfStateModel
             for i = 1:nComponents
                 Tr = T ./ fluid.Tcrit(i);
                 bic{i, i} = fluid.getBinaryInteraction();
-                bic{i, i} = bic{i, i}(i, i) + 0.*Tr;
+                bic{i, i} = bic{i, i}(i, i) + 0 .* Tr;
             end
             for i = 1:nComponents
                 for j = 1:nComponents
@@ -296,13 +297,13 @@ classdef SoreideWhitsonEos < EquationOfStateModel
             bic = cell(nComponents);
 
             coeffs = struct('H2', [-2.11917, 0.14888, -13.01835, -0.43946, -2.26322e-2, -4.4736e-3, 0, 0, 1], ...
-                'C1', [-1.625685, 1.114873, 0,0, 8.590105e-21, 1.812763e-3, -0.169968, -4.198569e-2,1], ...
-                'CO2', [-1.709096, 0.450487, 0, 0,  1.792130e-2,  0.066426, 0,0,1], ...
-                'H2S', [-4.2619e-1, 6.73586E-1, 0, 0,  -0.0575,  -0.078823343,-2.16250E-1,-0.160085087,1], ...
-                'N2',  [-1.702359096, 0.450487, 0, 0, 1.792130E-2,0.066426, 0,0,0.8], ...
-                'C2', [ 1.1120-1.7369.*0.0990.^(-0.1),  1.1001 + 0.8360.*0.0990,0,0,0.017407,0.033516,-0.15742-1.0988.*0.0990,0.011478,1], ...
-                'C3', [ 1.1120-1.7369.*0.1520.^(-0.1),  1.1001 + 0.8360.*0.1520,0,0,0.017407,0.033516,-0.15742-1.0988.*0.1520,0.011478,1], ...
-                'NC4', [ 1.1120-1.7369.*0.200810094644.^(-0.1),1.1001+0.8360.*0.200810094644,0,0,0.017407,0.033516,-0.15742-1.0988.*0.200810094644,0.011478,1]);
+                'C1', [-1.625685, 1.114873, 0, 0, 8.590105e-21, 1.812763e-3, -0.169968, -4.198569e-2, 1], ...
+                'CO2', [-1.709096, 0.450487, 0, 0,  1.792130e-2,  0.066426, 0, 0, 1], ...
+                'H2S', [-4.2619e-1, 6.73586E-1, 0, 0,  -0.0575,  -0.078823343, -2.16250E-1, -0.160085087, 1], ...
+                'N2',  [-1.702359096, 0.450487, 0, 0, 1.792130E-2, 0.066426, 0, 0, 0.8], ...
+                'C2', [1.1120 - 1.7369 .* 0.0990.^(-0.1),  1.1001 + 0.8360 .* 0.0990, 0, 0, 0.017407, 0.033516, -0.15742 - 1.0988 .* 0.0990, 0.011478, 1], ...
+                'C3', [1.1120 - 1.7369 .* 0.1520.^(-0.1),  1.1001 + 0.8360 .* 0.1520, 0, 0, 0.017407, 0.033516, -0.15742 - 1.0988 .* 0.1520, 0.011478, 1], ...
+                'NC4', [1.1120 - 1.7369 .* 0.200810094644.^(-0.1), 1.1001 + 0.8360 .* 0.200810094644, 0, 0, 0.017407, 0.033516, -0.15742 - 1.0988 .* 0.200810094644, 0.011478, 1]);
 
             fields = fieldnames(indices);
             for i = 1:numel(fields)
@@ -314,8 +315,8 @@ classdef SoreideWhitsonEos < EquationOfStateModel
                     csalt = coeffs.(comp)(9);
                     bic{indComp, indH2O} = coeffs.(comp)(1) .* (1 + coeffs.(comp)(5) .* msalt.^csalt) + ...
                         coeffs.(comp)(2) .* Tr .* (1 + coeffs.(comp)(6) .* msalt.^csalt) + ...
-                        coeffs.(comp)(3) .* exp(coeffs.(comp)(4) .* Tr)+...
-                        +coeffs.(comp)(7) .* Tr.^2.*(1+coeffs.(comp)(8) .* msalt.^csalt);
+                        coeffs.(comp)(3) .* exp(coeffs.(comp)(4) .* Tr) + ...
+                        +coeffs.(comp)(7) .* Tr.^2 .* (1 + coeffs.(comp)(8) .* msalt.^csalt);
                     bic{indH2O, indComp} = bic{indComp, indH2O};
                 end
             end
@@ -338,7 +339,7 @@ classdef SoreideWhitsonEos < EquationOfStateModel
             baseBic = fluid.getBinaryInteraction();
             for i = 1:nComponents
                 Tr = T ./ fluid.Tcrit(i);
-                bic{i, i} = baseBic(i, i) + 0.*Tr;
+                bic{i, i} = baseBic(i, i) + 0 .* Tr;
             end
             for i = 1:nComponents
                 for j = 1:nComponents
@@ -435,7 +436,7 @@ classdef SoreideWhitsonEos < EquationOfStateModel
                 model.pKa_sal_coef * model.msalt;
             Ka = 10.^(-pKa);
             H_conc = 10.^(-pH);
-            f_H2S = 1./(1 + Ka./H_conc);
+            f_H2S = 1 ./ (1 + Ka ./ H_conc);
         end
 
     end

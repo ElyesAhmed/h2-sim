@@ -9,8 +9,8 @@
 % component profiles.
 % ===========================================================================
 mrstVerbose true;
-mrstModule add ad-core ad-props deckformat mrst-gui
-mrstModule add compositional 
+mrstModule add ad-core ad-props deckformat mrst-gui;
+mrstModule add compositional;
 mrstVerbose off;
 
 %% 1. Setup base compositional model (common geometry, fluids, wells)
@@ -33,8 +33,11 @@ model0.EOSModel = SoreideWhitsonEos( ...
     model0.G, model0.EOSModel.CompositionalMixture, 'msalt', 5);
 
 % Residual saturations
-swc = 0.20; sor = 0.20; sgr = 0.10;
-swmax = 0.90; sgmax = 0.80;
+swc = 0.20;
+sor = 0.20;
+sgr = 0.10;
+swmax = 0.90;
+sgmax = 0.80;
 model0.fluid = modifyRelPermForResidualSaturations( ...
     model0.fluid, swc, swmax, sgr, sor, sgmax);
 
@@ -53,15 +56,17 @@ cp       = 0.0; % scaling coefficient
 % Shut wells – transport driven by initial gradients only
 schedule.control.W(1).components = [0.001, 0.948, 0.001, 0.05];
 schedule.control.W(2).components = [0.001, 0.948, 0.001, 0.05];
-schedule.control.W(1).type = 'rate'; schedule.control.W(1).val = 0;
-schedule.control.W(2).type = 'rate'; schedule.control.W(2).val = 0;
+schedule.control.W(1).type = 'rate';
+schedule.control.W(1).val = 0;
+schedule.control.W(2).type = 'rate';
+schedule.control.W(2).val = 0;
 [schedule.control.W.status] = deal(false);
-assert(all(arrayfun(@(w) abs(sum(w.components)-1)<1e-12, schedule.control.W)));
+assert(all(arrayfun(@(w) abs(sum(w.components) - 1) < 1e-12, schedule.control.W)));
 
 %% 3. Create models with/without bacterial diffusion
 compFluid = TableCompositionalMixture( ...
-    {'Water','Hydrogen','Methane','CarbonDioxide'}, ...
-    {'H2O','H2','C1','CO2'});
+    {'Water', 'Hydrogen', 'Methane', 'CarbonDioxide'}, ...
+    {'H2O', 'H2', 'C1', 'CO2'});
 biochemFluid = TableBioChemMixture({'MethanogenicArchae'});
 % Ensure diffusion coefficient is set (required by DiffusiveBactFlux)
 if ~isfield(biochemFluid, 'bactdiff') || isempty(biochemFluid.bactdiff)
@@ -77,7 +82,7 @@ model_noDiff = createModel(false);
 model_withDiff = createModel(true);
 
 %% 4. Initialise state (identical for both)
-state0 = initCompositionalStateBacteria(model_noDiff, initPress, initTemp, [0,1], ...
+state0 = initCompositionalStateBacteria(model_noDiff, initPress, initTemp, [0, 1], ...
     initComp, initBact, model_noDiff.EOSModel);
 
 %% 5. Solve
@@ -93,7 +98,7 @@ simulatePackedProblem(prob_noDiff);
 % With bacterial diffusion
 prob_withDiff = packSimulationProblem(state0, model_withDiff, schedule, 'bio_bactDiff_on',  'NonLinearSolver', nls);
 prob_withDiff.SimulatorSetup.model.OutputStateFunctions{end} = 'ComponentPhaseMass';
-simulatePackedProblem(prob_withDiff,'RestartStep',1);
+simulatePackedProblem(prob_withDiff, 'RestartStep', 1);
 [st_withDiff, ws_withDiff] = getPackedSimulatorOutput(prob_withDiff);
 
 %% 6. Compare results
@@ -103,58 +108,71 @@ idxH2    = find(strcmp(cnames, 'H2'));
 idxCO2   = find(strcmp(cnames, 'CO2'));
 idxCH4   = find(strcmp(cnames, 'C1'));
 G = model0.G;
-xc = G.cells.centroids(:,1);
+xc = G.cells.centroids(:, 1);
 
 % Final H2 profile
-figure('Name','Final H2 profile');
-plot(xc, ws_noDiff{end}.x(:, idxH2), 'b-', 'LineWidth', 1.5); hold on;
+figure('Name', 'Final H2 profile');
+plot(xc, ws_noDiff{end}.x(:, idxH2), 'b-', 'LineWidth', 1.5);
+hold on;
 plot(xc, ws_withDiff{end}.x(:, idxH2), 'r--', 'LineWidth', 1.5);
-hold off; legend('No bact diffusion','With bact diffusion','Location','best');
-xlabel('Distance [m]'); ylabel('H_2 mole fraction');
+hold off;
+legend('No bact diffusion', 'With bact diffusion', 'Location', 'best');
+xlabel('Distance [m]');
+ylabel('H_2 mole fraction');
 
 % Final CO2 profile
-figure('Name','Final CO2 profile');
-plot(xc, ws_noDiff{end}.x(:, idxCO2), 'b-', 'LineWidth', 1.5); hold on;
+figure('Name', 'Final CO2 profile');
+plot(xc, ws_noDiff{end}.x(:, idxCO2), 'b-', 'LineWidth', 1.5);
+hold on;
 plot(xc, ws_withDiff{end}.x(:, idxCO2), 'r--', 'LineWidth', 1.5);
-hold off; legend('No bact diffusion','With bact diffusion','Location','best');
-xlabel('Distance [m]'); ylabel('CO_2 mole fraction');
+hold off;
+legend('No bact diffusion', 'With bact diffusion', 'Location', 'best');
+xlabel('Distance [m]');
+ylabel('CO_2 mole fraction');
 
 % Biomass (nbact) profile
-figure('Name','Biomass (nbact)');
-plot(xc, ws_noDiff{end}.nbact, 'b-', 'LineWidth', 1.5); hold on;
+figure('Name', 'Biomass (nbact)');
+plot(xc, ws_noDiff{end}.nbact, 'b-', 'LineWidth', 1.5);
+hold on;
 plot(xc, ws_withDiff{end}.nbact, 'r--', 'LineWidth', 1.5);
-hold off; legend('No bact diffusion','With bact diffusion','Location','best');
-xlabel('Distance [m]'); ylabel('Normalized bacteria concentration');
+hold off;
+legend('No bact diffusion', 'With bact diffusion', 'Location', 'best');
+xlabel('Distance [m]');
+ylabel('Normalized bacteria concentration');
 
 % Porosity profile (computed from dynamic model)
 if clogModel
     phi_noDiff = model0.rock.poro(ws_noDiff{end}.pressure, ws_noDiff{end}.nbact);
     phi_withDiff = model0.rock.poro(ws_withDiff{end}.pressure, ws_withDiff{end}.nbact);
-    figure('Name','Porosity');
-    plot(xc, phi_noDiff, 'b-', 'LineWidth', 1.5); hold on;
+    figure('Name', 'Porosity');
+    plot(xc, phi_noDiff, 'b-', 'LineWidth', 1.5);
+    hold on;
     plot(xc, phi_withDiff, 'r--', 'LineWidth', 1.5);
-    hold off; legend('No bact diffusion','With bact diffusion','Location','best');
-    xlabel('Distance [m]'); ylabel('Porosity');
+    hold off;
+    legend('No bact diffusion', 'With bact diffusion', 'Location', 'best');
+    xlabel('Distance [m]');
+    ylabel('Porosity');
 end
+
 %% 7. Helper function: build model with optional bacterial diffusion
 % ===========================================================================
 % Helper function to add bacterial diffusion to a BiochemistryModel
 % ===========================================================================
 function model = createBactDiffModel(model0, compFluid, biochemFluid, backend, bactDiffusion)
     % Create the base biochemistry model (without internal flags for diffusion)
-    model = BiochemistryModel(...
+    model = BiochemistryModel( ...
         model0.G, model0.rock, model0.fluid, compFluid, biochemFluid, ...
         false, backend, ...
         'oil', true, 'gas', true, ...
         'bacteriamodel', true, ...
         'molecularDiffusion', false, ...
-        'bactDiffusion', bactDiffusion,...
+        'bactDiffusion', bactDiffusion, ...
         'molecularDispersion', false, ...
         'liquidPhase', 'O', 'vaporPhase', 'G');
 
     % Ensure the bacteria mass balance equation exists (it should be in model.Equations)
     % Add bacterial diffusion flux and extra term to the equation if requested
-   
+
 end
 
 %{

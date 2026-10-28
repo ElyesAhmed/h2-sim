@@ -1,52 +1,52 @@
 function figures = plotCompositionalPhreeqcValidation(result, varargin)
-%Plot storage-cycle chemistry with an optional external reference
-%
-% SYNOPSIS:
-%   figures = plotCompositionalPhreeqcValidation(result)
-%   figures = plotCompositionalPhreeqcValidation(result, 'outputDirectory', folder)
-%
-% PARAMETERS:
-%   result - Result returned by exampleCompositionalPhreeqcValidation, or a
-%            struct with cached diagnostics. diagnostics.h2sim is required;
-%            diagnostics.reference is optional. Each diagnostic entry has
-%            timeDays, coordinates (m), h2 (aqueous mole fraction), pH, dic
-%            (mol/kg water), consumption (cumulative mol H2, cells-by-times-
-%            reactions), injectedMoles and lossPercent. Reaction order is
-%            MET, ACE, SRB. Reference times and first coordinate columns
-%            must match H2sim exactly. Without cached diagnostics, the collector uses
-%            result.h2sim and any optional result.reference saved states.
-%
-% OPTIONAL PARAMETERS:
-%   outputDirectory - Export folder (default '', figures only). A nonempty
-%                     folder receives three 200-dpi PNGs, three vector PDFs
-%                     and phreeqc_loss_history.csv.
-%
-% RETURNS:
-%   figures - Row vector of three open figure handles, owned by the caller:
-%               1. Hydrogen loss and aqueous hydrogen maps.
-%               2. pH and DIC maps with shared per-quantity color limits.
-%               3. MET/ACE/SRB contributions to hydrogen loss.
-%
-% DESCRIPTION:
-%   Redraw stored results without running simulations or an external driver.
-%   Cached diagnostics are preferred; otherwise collect them from the saved
-%   model, schedule and accepted states. Legacy ugfact fields remain readable
-%   as optional reference data; stored provenance is not changed.
-%
-%   All loss percentages use total prescribed injection as their denominator
-%   at every time. Reaction contributions must sum to total loss within
-%   1e-8 percentage points. Time is in days; maps use the first cell coordinate
-%   as distance. Operating-period markers appear at days 50 and 200 when the
-%   final time exceeds them. Common color limits are padded for constant data.
-%
-%   Export base names are phreeqc_validation_full_cycle,
-%   phreeqc_geochemistry_full_cycle and phreeqc_reaction_loss_full_cycle.
-%   The CSV contains time, total loss and reaction percentages, adding reference
-%   columns only when reference diagnostics are present. Short datasets retain
-%   these historical filenames; filenames do not establish full-cycle coverage.
-%
-% SEE ALSO:
-%   exampleCompositionalPhreeqcValidation, collectPhreeqcValidationDiagnostics
+    % Plot storage-cycle chemistry with an optional external reference
+    %
+    % SYNOPSIS:
+    %   figures = plotCompositionalPhreeqcValidation(result)
+    %   figures = plotCompositionalPhreeqcValidation(result, 'outputDirectory', folder)
+    %
+    % PARAMETERS:
+    %   result - Result returned by exampleCompositionalPhreeqcValidation, or a
+    %            struct with cached diagnostics. diagnostics.h2sim is required;
+    %            diagnostics.reference is optional. Each diagnostic entry has
+    %            timeDays, coordinates (m), h2 (aqueous mole fraction), pH, dic
+    %            (mol/kg water), consumption (cumulative mol H2, cells-by-times-
+    %            reactions), injectedMoles and lossPercent. Reaction order is
+    %            MET, ACE, SRB. Reference times and first coordinate columns
+    %            must match H2sim exactly. Without cached diagnostics, the collector uses
+    %            result.h2sim and any optional result.reference saved states.
+    %
+    % OPTIONAL PARAMETERS:
+    %   outputDirectory - Export folder (default '', figures only). A nonempty
+    %                     folder receives three 200-dpi PNGs, three vector PDFs
+    %                     and phreeqc_loss_history.csv.
+    %
+    % RETURNS:
+    %   figures - Row vector of three open figure handles, owned by the caller:
+    %               1. Hydrogen loss and aqueous hydrogen maps.
+    %               2. pH and DIC maps with shared per-quantity color limits.
+    %               3. MET/ACE/SRB contributions to hydrogen loss.
+    %
+    % DESCRIPTION:
+    %   Redraw stored results without running simulations or an external driver.
+    %   Cached diagnostics are preferred; otherwise collect them from the saved
+    %   model, schedule and accepted states. Legacy ugfact fields remain readable
+    %   as optional reference data; stored provenance is not changed.
+    %
+    %   All loss percentages use total prescribed injection as their denominator
+    %   at every time. Reaction contributions must sum to total loss within
+    %   1e-8 percentage points. Time is in days; maps use the first cell coordinate
+    %   as distance. Operating-period markers appear at days 50 and 200 when the
+    %   final time exceeds them. Common color limits are padded for constant data.
+    %
+    %   Export base names are phreeqc_validation_full_cycle,
+    %   phreeqc_geochemistry_full_cycle and phreeqc_reaction_loss_full_cycle.
+    %   The CSV contains time, total loss and reaction percentages, adding reference
+    %   columns only when reference diagnostics are present. Short datasets retain
+    %   these historical filenames; filenames do not establish full-cycle coverage.
+    %
+    % SEE ALSO:
+    %   exampleCompositionalPhreeqcValidation, collectPhreeqcValidationDiagnostics
 
     opt = merge_options(struct('outputDirectory', ''), varargin{:});
     [data, labels, time, distance, nCases, styles] = prepareData(result);
@@ -78,8 +78,8 @@ function [data, labels, time, distance, nCases, styles] = prepareData(result)
     data = {diagnostics.h2sim};
     labels = {'Compositional PHREEQC'};
     if isfield(diagnostics, 'reference') && ~isempty(diagnostics.reference)
-        data{end+1} = diagnostics.reference;
-        labels{end+1} = 'Reference';
+        data{end + 1} = diagnostics.reference;
+        labels{end + 1} = 'Reference';
     end
     time = double(data{1}.timeDays(:));
     distance = data{1}.coordinates(:, 1);
@@ -134,15 +134,15 @@ function fig = plotGeochemistry(data, labels, time, distance, nCases)
 end
 
 function [fig, contributions] = plotReactionConsumption( ...
-        data, labels, time, nCases, styles)
+    data, labels, time, nCases, styles)
     fig = figure('Color', 'w', 'Units', 'centimeters', ...
         'Position', [2, 2, 29, 11]);
     tiledlayout(1, 3, 'TileSpacing', 'compact', 'Padding', 'compact');
     reactions = {'MET', 'ACE', 'SRB'};
     contributions = cell(1, nCases);
     for j = 1:nCases
-        contributions{j} = 100*reshape(sum(data{j}.consumption, 1), ...
-            numel(time), 3)/data{j}.injectedMoles;
+        contributions{j} = 100 * reshape(sum(data{j}.consumption, 1), ...
+            numel(time), 3) / data{j}.injectedMoles;
         assert(max(abs(sum(contributions{j}, 2) - data{j}.lossPercent(:))) < 1e-8, ...
             'Reaction contributions must sum to total hydrogen consumption.');
     end
@@ -224,7 +224,7 @@ function exportResults(figures, time, data, contributions, folder)
     names = {'Time_days', 'H2sim_total_percent'};
     if numel(data) == 2
         values = [values, data{2}.lossPercent(:)];
-        names{end+1} = 'Reference_total_percent';
+        names{end + 1} = 'Reference_total_percent';
     end
     values = [values, contributions{1}];
     names = [names, {'H2sim_MET_percent', 'H2sim_ACE_percent', 'H2sim_SRB_percent'}];

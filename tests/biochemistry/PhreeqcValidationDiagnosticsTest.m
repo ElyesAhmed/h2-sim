@@ -1,5 +1,6 @@
 classdef PhreeqcValidationDiagnosticsTest < matlab.unittest.TestCase
     methods (Test)
+
         function countsOnlyActivePrescribedInjection(test)
             result = fixture();
             diagnostics = collectPhreeqcValidationDiagnostics(result);
@@ -80,6 +81,7 @@ classdef PhreeqcValidationDiagnosticsTest < matlab.unittest.TestCase
             test.verifyEqual(numel(lines), 1);
             test.verifyEqual(lines.YData, [10.5, 21], 'AbsTol', 1e-12);
         end
+
     end
 end
 
@@ -91,23 +93,23 @@ function result = fixture()
         'biochemFluid', struct('nbioreact', 3), 'getVaporIndex', @() 2, ...
         'FacilityModel', struct('pressure', pressure, 'T', temperature));
     well = struct('sign', 1, 'status', true, 'type', 'rate', ...
-        'val', 8.314462618*temperature/pressure/day, ...
+        'val', 8.314462618 * temperature / pressure / day, ...
         'compi', [0, 1], 'components', [0, 1, 0]);
     closed = well;
     closed.status = false;
-    closed.val = 100*well.val;
+    closed.val = 100 * well.val;
     schedule = struct('control', struct('W', {well, closed}), ...
-        'step', struct('val', [2; 2]*day, 'control', [1; 2]));
-    increment = [1, 2, 3; 4, 5, 6]/100;
+        'step', struct('val', [2; 2] * day, 'control', [1; 2]));
+    increment = [1, 2, 3; 4, 5, 6] / 100;
     states = cell(2, 1);
     reference = states;
     for k = 1:2
         states{k} = struct('x', [0.9, 0.1; 0.8, 0.2], 'phreeqcPH', [6; 7], ...
             'phreeqcTotalCarbon', [0.001; 0.002], ...
-            'cumulativeH2ConsumptionMoles', k*increment);
+            'cumulativeH2ConsumptionMoles', k * increment);
         solution = struct('pH', [6; 7], 'TotalDIC', [0.001; 0.002], ...
-            'Water', [1000; 1000], 'MET_Rate', increment(:, 1)/2, ...
-            'ACE_Rate', increment(:, 2)/2, 'SRB_Rate', increment(:, 3)/2);
+            'Water', [1000; 1000], 'MET_Rate', increment(:, 1) / 2, ...
+            'ACE_Rate', increment(:, 2) / 2, 'SRB_Rate', increment(:, 3) / 2);
         reference{k} = struct('x', states{k}.x, 'Solution', solution);
     end
     result = struct('h2sim', struct('model', model, 'schedule', schedule, ...

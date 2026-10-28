@@ -14,11 +14,12 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
     %   BiochemistryModel, BiochemistryPhreeqcModel, CarbonLimitedGrowthRate
 
     properties
-        bacterialFormulation = 'bacterialmodel';  % Formulation for bacterial transport
+        bacterialFormulation = 'bacterialmodel'   % Formulation for bacterial transport
     end
 
     methods
-        %-----------------------------------------------------------------%
+
+        % -----------------------------------------------------------------%
         function model = setupStateFunctionGroupings(model, useDefaults)
             % Set up state function groupings using parent, and add
             % biochemistry-specific functions
@@ -47,44 +48,44 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             end
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function state = initStateAD(model, state, vars, names, origin)
             % Initialize AD state from double state
             state = initStateAD@GenericFacilityModel(model, state, vars, names, origin);
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function names = getBasicPrimaryVariableNames(model)
             % Get names of primary variables
             names = getBasicPrimaryVariableNames@GenericFacilityModel(model);
 
             % If bacterial variables are disabled, return immediately
             if strcmpi(model.bacterialFormulation, 'none') || ...
-                    strcmpi(model.primaryVariableSet, 'none')
+                strcmpi(model.primaryVariableSet, 'none')
                 return
             end
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [variables, names, map] = getBasicPrimaryVariables(model, wellSol)
             % Return facility primary variables
             [variables, names, map] = getBasicPrimaryVariables@GenericFacilityModel(model, wellSol);
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [fn, index] = getVariableField(model, name, varargin)
             % Get field name and index for a given variable
             [fn, index] = getVariableField@GenericFacilityModel(model, name, varargin{:});
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function src = getBacteriaSources(model, fd, state, state0, dt)
             % Net growth/decay plus liquid well advection [kg/s].
             rm = model.ReservoirModel;
             bcrm = rm.biochemFluid;
             if isempty(rm) || ~isprop(rm, 'bacteriamodel') || ~rm.bacteriamodel
                 src = 0;
-                return;
+                return
             end
 
             nbioreact = bcrm.nbioreact;
@@ -97,7 +98,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             end
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function src = getSRBTracerSources(model, fd, state, state0, dt)
             % Reaction + well-advection source for the SO4/HS aqueous
             % tracers. Mirrors getBacteriaSources, but for the two
@@ -105,7 +106,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             rm = model.ReservoirModel;
             if isempty(rm) || ~isprop(rm, 'sulfateReduction') || ~rm.sulfateReduction
                 src = {0, 0};
-                return;
+                return
             end
 
             flowState = fd.buildFlowState(model, state, state0, dt);
@@ -119,7 +120,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             end
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function src = getAqueousTracerSources(model, fd, state, state0, dt)
             % Reaction and well sources for all mobile aqueous tracers.
             % Ca/Mg are analytical totals updated by the post-step
@@ -127,7 +128,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             rm = model.ReservoirModel;
             if isempty(rm) || ~rm.hasMobileAqueousTracers()
                 src = {};
-                return;
+                return
             end
 
             tracerNames = rm.getAqueousTracerNames();
@@ -136,8 +137,8 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             [src_reaction{:}] = deal(0);
             % Disable biological sources independently of aqueous well fluxes.
             if rm.reactionsEnabled && rm.sulfateReduction && ...
-                    ~(ismethod(rm, 'isSequentialCompositionalPhreeqcBackend') && ...
-                    rm.isSequentialCompositionalPhreeqcBackend())
+                ~(ismethod(rm, 'isSequentialCompositionalPhreeqcBackend') && ...
+                rm.isSequentialCompositionalPhreeqcBackend())
                 flowState = fd.buildFlowState(model, state, state0, dt);
                 srbSource = model.getProps(flowState, 'SRBTracerConvRate');
                 src_reaction{strcmp(tracerNames, 'SO4')} = srbSource{1};
@@ -152,31 +153,33 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             end
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [eqs, names, types, state] = getModelEquations(model, state0, state, dt, drivingForces)
             % Return facility equations including parent contributions
             [eqs, names, types, state] = ...
                 getModelEquations@GenericFacilityModel(model, state0, state, dt, drivingForces);
         end
 
-        %-----------------------------------------------------------------%
+        % -----------------------------------------------------------------%
         function [values, tolerances, names, evaluated] = getFacilityConvergenceValues(model, problem, varargin)
             % Get convergence values for facility
             [values, tolerances, names, evaluated] = ...
                 getFacilityConvergenceValues@GenericFacilityModel(model, problem, varargin{:});
         end
+
     end
 
     methods (Access = private)
+
         function src_growthdecay = getBacterialReactionSources( ...
-                model, fd, state, state0, dt, nbioreact)
+            model, fd, state, state0, dt, nbioreact)
             % Specific rates [1/s] act on BacterialMass [kg]. Preserve the
             % regularization sink and active biomass-floor condition.
             rm = model.ReservoirModel;
             src_growthdecay = cell(1, nbioreact);
             [src_growthdecay{:}] = deal(0);
             if ~(ismethod(rm, 'isSequentialCompositionalPhreeqcBackend') && ...
-                    rm.isSequentialCompositionalPhreeqcBackend())
+                rm.isSequentialCompositionalPhreeqcBackend())
                 reg = 1.0e-10;
                 flowState = fd.buildFlowState(model, state, state0, dt);
                 psigrowth = model.getProps(flowState, 'CarbonLimitedGrowthRate');
@@ -184,7 +187,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
                 bmass     = rm.PVTPropertyFunctions.get(rm, state, 'BacterialMass');  % pv * S_l * rho_l * nbact [kg]
                 nbact     = rm.getProp(state, 'nbact');
                 for i = 1:nbioreact
-                    src_growthdecay{i} = (psigrowth{i} - psidecay{i}).* bmass{i} - reg .* bmass{i};
+                    src_growthdecay{i} = (psigrowth{i} - psidecay{i}) .* bmass{i} - reg .* bmass{i};
                     if iscell(nbact)
                         nbact_i = nbact{i};
                     else
@@ -196,7 +199,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
                     % every Newton iterate back to the floor, leaving an
                     % irreducible residual and forcing timestep cuts.
                     activeFloor = value(nbact_i) <= ...
-                        rm.bact_capProp.*(1 + sqrt(eps));
+                        rm.bact_capProp .* (1 + sqrt(eps));
                     negativeSource = value(src_growthdecay{i}) < 0;
                     src_growthdecay{i}(activeFloor & negativeSource) = 0;
                 end
@@ -210,7 +213,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             [src{:}] = deal(0);
             map = model.getProp(state, 'FacilityWellMapping');
             if isempty(map.cells)
-                return;
+                return
             end
 
             q_ph = model.getProp(state, 'PhaseFlux');
@@ -242,7 +245,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
             [src{:}] = deal(0);
             map = model.getProp(state, 'FacilityWellMapping');
             if isempty(map.cells)
-                return;
+                return
             end
 
             q_ph = model.getProp(state, 'PhaseFlux');
@@ -257,6 +260,7 @@ classdef BiochemistryGenericFacilityModel < GenericFacilityModel
                 src{i} = S * q_tracer;
             end
         end
+
     end
 end
 

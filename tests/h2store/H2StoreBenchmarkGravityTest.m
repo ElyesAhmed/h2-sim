@@ -1,5 +1,5 @@
 classdef H2StoreBenchmarkGravityTest < matlab.unittest.TestCase
-    %H2STOREBENCHMARKGRAVITYTEST Boundary and model accelerations agree at setup.
+    % H2STOREBENCHMARKGRAVITYTEST Boundary and model accelerations agree at setup.
     properties (TestParameter)
         incomingGravity = {[0, 0, 0], [2, -1, 3], [0, 0, 9.80665]}
     end
@@ -7,18 +7,23 @@ classdef H2StoreBenchmarkGravityTest < matlab.unittest.TestCase
         deck
     end
     methods (TestClassSetup)
+
         function prepareDeck(test)
             mrstModule add test-suite;
             test.deck = makeBenchmarkTestDeck();
         end
+
     end
     methods (TestMethodSetup)
+
         function saveGravity(test)
             saved = gravity;
             test.addTeardown(@() gravity(saved));
         end
+
     end
     methods (Test)
+
         function fullSetup(test, incomingGravity)
             gravity reset on;
             expectedGravity = gravity;
@@ -31,7 +36,7 @@ classdef H2StoreBenchmarkGravityTest < matlab.unittest.TestCase
             faces = boundaryFaces(G);
             faces = faces(~(G.faces.normals(faces, 3) > 2.48));
             expectedPressure = options.initPres + ...
-                998*(G.faces.centroids(faces, 3) - 1140)*expectedGravity(3);
+                998 * (G.faces.centroids(faces, 3) - 1140) * expectedGravity(3);
             for k = 1:numel(schedule.control)
                 bc = schedule.control(k).bc;
                 test.verifyEqual(bc.face, faces);
@@ -40,6 +45,7 @@ classdef H2StoreBenchmarkGravityTest < matlab.unittest.TestCase
             test.verifyEqual(state.pressure, ...
                 repmat(options.initPres, G.cells.num, 1));
         end
+
         function metadataPreservesGravity(test)
             incoming = [2, -1, 3];
             gravity(incoming);
@@ -47,6 +53,7 @@ classdef H2StoreBenchmarkGravityTest < matlab.unittest.TestCase
             test.verifyTrue(options.use_bc);
             test.verifyEqual(gravity, incoming);
         end
+
     end
 end
 

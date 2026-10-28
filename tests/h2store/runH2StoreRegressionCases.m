@@ -1,8 +1,8 @@
 function result = runH2StoreRegressionCases()
-%RUNH2STOREREGRESSIONCASES Small, deterministic oil-gas storage checks.
-% Brine occupies the oil phase. Generated local SGOF data and the hydrogen
-% Z correlation supply the fluid properties. These synthetic cases check
-% numerical stability across edits; they do not validate the correlations.
+    % RUNH2STOREREGRESSIONCASES Small, deterministic oil-gas storage checks.
+    % Brine occupies the oil phase. Generated local SGOF data and the hydrogen
+    % Z correlation supply the fluid properties. These synthetic cases check
+    % numerical stability across edits; they do not validate the correlations.
     folder = tempname;
     mkdir(folder);
     cleanup = onCleanup(@() rmdir(folder, 's'));
@@ -11,17 +11,17 @@ function result = runH2StoreRegressionCases()
     tables = readSGOFTables(fid, 'SGOF', 1, 4);
     sgof = tables{1};
     G = computeGeometry(cartGrid([4, 1, 1], [4, 1, 1]));
-    rock = makeRock(G, 100*milli*darcy, 0.2);
-    p0 = 40*barsa;
+    rock = makeRock(G, 100 * milli * darcy, 0.2);
+    p0 = 40 * barsa;
     Z = calculateBrillBreggsZfactorHydrogen(313.15, p0);
-    rhoGas = p0*0.002016/(8.314462618*313.15*Z);
+    rhoGas = p0 * 0.002016 / (8.314462618 * 313.15 * Z);
     result = struct();
     for k = 1:2
         fluid = initSimpleADIFluid('phases', 'OG', ...
             'mu', [1e-3, 9e-6], 'rho', [1000, rhoGas], ...
-            'c', [1e-9, 1/p0], 'pRef', p0, 'n', [2, 2]);
+            'c', [1e-9, 1 / p0], 'pRef', p0, 'n', [2, 2]);
         fluid.krG = @(s) interpTable(sgof(:, 1), sgof(:, 2), s);
-        fluid.krO = @(s) interpTable(1-flipud(sgof(:, 1)), ...
+        fluid.krO = @(s) interpTable(1 - flipud(sgof(:, 1)), ...
             flipud(sgof(:, 3)), s);
         model = GenericBlackOilModel(G, rock, fluid, 'water', false, ...
             'disgas', false, 'vapoil', false, 'gravity', [0, 0, 0]);
@@ -32,7 +32,7 @@ function result = runH2StoreRegressionCases()
             schedule = simpleSchedule([10; 10], 'bc', bc);
             name = 'injection';
         else
-            state0.pressure = p0 + [1; 0; 0; -1]*barsa;
+            state0.pressure = p0 + [1; 0; 0; -1] * barsa;
             schedule = simpleSchedule([10; 10]);
             name = 'closed';
         end

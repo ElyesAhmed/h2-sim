@@ -1,38 +1,38 @@
 function [biochemFluid, model, schedule, state0] = setupH2StorageExample(varargin)
-% Set up a 1D UHS case reproducing the simple storage cycle from
-% Shojae et al. (2025) – "New flow simulation framework ..."
-%
-% Grid: 50 x 1 x 1, 50 m length, 1 m width, 1 m height.
-% Initial: 150 bar, 60 °C, Sw=0.5508, gas: 90% H2, 10% CH4.
-% Schedule: inject H2 (0.565 kg/d) for 50 d, shut-in 150 d, produce (rate with BHP limit 150 bar) for 50 d.
-%
-% OPTIONAL PARAMETERS (property/value pairs):
-%   bacteriamodel       - Enable bacterial growth/decay (default: false)
-%   bactDiffusion       - Enable microbial diffusion (default: false)
-%   chemotaxisEffect    - Enable bacterial chemotaxis (default: false)
-%   molecularDiffusion  - Enable molecular diffusion (default: false)
-%   molecularDispersion - Enable mechanical dispersion (default: false)
-%   bioClogging         - Enable bio‑clogging (default: false)
-%   nbact0              - Initial bacterial concentration (default: 1e-6)
-%   ncycles             - Not used (only one cycle)
-%
-% RETURNS:
-%   biochemFluid - Biochemical reaction definition (with stoichiometry & kinetics)
-%   model        - BiochemistryModel
-%   schedule     - Cyclic schedule (injection, shut-in, production)
-%   state0       - Initial state
+    % Set up a 1D UHS case reproducing the simple storage cycle from
+    % Shojae et al. (2025) – "New flow simulation framework ..."
+    %
+    % Grid: 50 x 1 x 1, 50 m length, 1 m width, 1 m height.
+    % Initial: 150 bar, 60 °C, Sw=0.5508, gas: 90% H2, 10% CH4.
+    % Schedule: inject H2 (0.565 kg/d) for 50 d, shut-in 150 d, produce (rate with BHP limit 150 bar) for 50 d.
+    %
+    % OPTIONAL PARAMETERS (property/value pairs):
+    %   bacteriamodel       - Enable bacterial growth/decay (default: false)
+    %   bactDiffusion       - Enable microbial diffusion (default: false)
+    %   chemotaxisEffect    - Enable bacterial chemotaxis (default: false)
+    %   molecularDiffusion  - Enable molecular diffusion (default: false)
+    %   molecularDispersion - Enable mechanical dispersion (default: false)
+    %   bioClogging         - Enable bio‑clogging (default: false)
+    %   nbact0              - Initial bacterial concentration (default: 1e-6)
+    %   ncycles             - Not used (only one cycle)
+    %
+    % RETURNS:
+    %   biochemFluid - Biochemical reaction definition (with stoichiometry & kinetics)
+    %   model        - BiochemistryModel
+    %   schedule     - Cyclic schedule (injection, shut-in, production)
+    %   state0       - Initial state
 
-    require ad-props compositional deckformat
+    require ad-props compositional deckformat;
 
     % --- Parse optional parameters ---
     opt = struct('bacteriamodel', true, ...
-                 'bactDiffusion', false, ...
-                 'chemotaxisEffect', false, ...
-                 'molecularDiffusion', false, ...
-                 'molecularDispersion', false, ...
-                 'bioClogging', false, ...
-                 'nbact0', 10e0, ...
-                 'ncycles', 1);
+        'bactDiffusion', false, ...
+        'chemotaxisEffect', false, ...
+        'molecularDiffusion', false, ...
+        'molecularDispersion', false, ...
+        'bioClogging', false, ...
+        'nbact0', 10e0, ...
+        'ncycles', 1);
     opt = merge_options(opt, varargin{:});
 
     %% 1. Grid and rock – 1D horizontal, 50 cells
@@ -45,7 +45,7 @@ function [biochemFluid, model, schedule, state0] = setupH2StorageExample(varargi
         {'Water', 'Hydrogen', 'CarbonDioxide', 'Methane', 'AceticAcid'}, ...
         {'H2O', 'H2', 'CO2', 'C1', 'CH3COOH'});
     biochemFluid = TableBioChemMixture({'MethanogenicArchae', 'AcetogenicBacteria'}, ...
-                                       {'bactM', 'bactA'});
+        {'bactM', 'bactA'});
 
     % ----- OVERRIDE KINETIC PARAMETERS TO MATCH PAPER (MODERATE RATE) -----
     % Keep original database intact; override only the fields we need.
@@ -59,7 +59,7 @@ function [biochemFluid, model, schedule, state0] = setupH2StorageExample(varargi
         biochemFluid.alphasub(idxM)     = 230e-6 / 55.5;      % 4.14e-6 (mol/mol)
         biochemFluid.bbact(idxM)        = 0.01 * biochemFluid.Psigrowthmax(idxM); % 1.284e-7
         biochemFluid.Y_H2(idxM)         = 3.0e10;             % cells/mol H2 (scaled)
-        %biochemFluid.nbactMax(idxM)     = 1.06e8;             % cells/m^3
+        % biochemFluid.nbactMax(idxM)     = 1.06e8;             % cells/m^3
     end
 
     % 2. AcetogenicBacteria
@@ -70,27 +70,27 @@ function [biochemFluid, model, schedule, state0] = setupH2StorageExample(varargi
         biochemFluid.alphasub(idxA)     = 115e-6 / 55.5;      % 2.07e-6 (mol/mol)
         biochemFluid.bbact(idxA)        = 0.01 * biochemFluid.Psigrowthmax(idxA); % 1.009e-7
         biochemFluid.Y_H2(idxA)         = 7.0e10;             % cells/mol H2 (scaled)
-        %biochemFluid.nbactMax(idxA)     = 1.06e8;             % cells/m^3
+        % biochemFluid.nbactMax(idxA)     = 1.06e8;             % cells/m^3
     end
 
     % Optionally, override stoichiometry if you want to be explicit
     % (already correct in database, but we can set it anyway)
     biochemFluid.gamrH2  = [-4, -4];
     biochemFluid.gamrsub = [-1, -2];
-    biochemFluid.gampH2O = [ 2,  2];
-    biochemFluid.gamp2   = [ 1,  1];
+    biochemFluid.gampH2O = [2,  2];
+    biochemFluid.gamp2   = [1,  1];
     eos = SoreideWhitsonEos(G, compFluid, 'msalt', 0);  % fresh water
 
     % Simple fluid (used as a base for transport properties)
     fluid = initSimpleADIFluid('phases', 'OG', ...
-        'mu',  [1.3059*centi*poise, 0.01763*centi*poise], ...
-        'rho', [999.7, 1.2243] .* kilogram/meter^3, ...
-        'pRef', 100*barsa, ...
-        'c',   [5.0e-5/barsa, 1.0/barsa], ...
+        'mu',  [1.3059 * centi * poise, 0.01763 * centi * poise], ...
+        'rho', [999.7, 1.2243] .* kilogram / meter^3, ...
+        'pRef', 100 * barsa, ...
+        'c',   [5.0e-5 / barsa, 1.0 / barsa], ...
         'n',   [2, 2], ...
-        'smin',[0.2, 0.05]);
-    Pe = 0.1*barsa;
-    fluid.pcOG = @(sg) Pe * max((1 - sg - 0.2) ./ (1 - 0.2), 1e-5).^(-1/2);
+        'smin', [0.2, 0.05]);
+    Pe = 0.1 * barsa;
+    fluid.pcOG = @(sg) Pe * max((1 - sg - 0.2) ./ (1 - 0.2), 1e-5).^(-1 / 2);
 
     %% 3. Assemble model
     backend = DiagonalAutoDiffBackend('modifyOperators', true);
@@ -107,12 +107,12 @@ function [biochemFluid, model, schedule, state0] = setupH2StorageExample(varargi
 
     % Bio‑clogging (if requested)
     if opt.bioClogging && opt.bacteriamodel
-        nc = [180,180];               % critical bacteria concentration
+        nc = [180, 180];               % critical bacteria concentration
         cp = [0.5, 0.5];               % scaling coefficient
         nbact0 = opt.nbact0 * ones(1, biochemFluid.nbioreact);
         model = setupBioCloggingModel(model, nbact0, nc, cp, true);
     else
-        nc = [180,180];               % critical bacteria concentration
+        nc = [180, 180];               % critical bacteria concentration
         cp = [0.0, 0.0];               % scaling coefficient
         nbact0 = opt.nbact0 * ones(1, biochemFluid.nbioreact);
         model = setupBioCloggingModel(model, nbact0, nc, cp, false);
@@ -147,8 +147,8 @@ function [biochemFluid, model, schedule, state0] = setupH2StorageExample(varargi
 
     %% 5. Wells – injector at cell 1, producer at cell 50
     % Injection rate: 6.2811 sm3/day of H2 ≈ 0.565 kg/day (using rho_H2=0.0899 kg/m3)
-    q_inj = 0.565 * kilogram/day;   % mass rate of H2
-    q_prod = -0.565 * kilogram/day;
+    q_inj = 0.565 * kilogram / day;   % mass rate of H2
+    q_prod = -0.565 * kilogram / day;
 
     % Well components: injection of pure H2
     comp_inj = [0.0, 0.95, 0.05, 0.0, 0.0];   % H2 only

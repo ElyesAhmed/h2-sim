@@ -1,22 +1,22 @@
 function validateH2simSimulationInputs(state, model, schedule)
-%Check initial physical values, schedule controls, and well compositions
-%
-% SYNOPSIS:
-%   validateH2simSimulationInputs(state, model, schedule)
-%
-% DESCRIPTION:
-%   Reject non-finite or non-positive absolute pressures, temperatures, and
-%   timesteps; negative biomass; and invalid phase or component fractions.
-%   Fractions must sum to one within 1e-8 and are never clipped or normalized.
-%   Check closed wells as well, so reopening one retains a valid composition.
-%
-% PARAMETERS:
-%   state    - Initial reservoir state.
-%   model    - Model supplying phase and component counts.
-%   schedule - Simulation timesteps and well controls.
-%
-% SEE ALSO:
-%   packH2simSimulationProblem
+    % Check initial physical values, schedule controls, and well compositions
+    %
+    % SYNOPSIS:
+    %   validateH2simSimulationInputs(state, model, schedule)
+    %
+    % DESCRIPTION:
+    %   Reject non-finite or non-positive absolute pressures, temperatures, and
+    %   timesteps; negative biomass; and invalid phase or component fractions.
+    %   Fractions must sum to one within 1e-8 and are never clipped or normalized.
+    %   Check closed wells as well, so reopening one retains a valid composition.
+    %
+    % PARAMETERS:
+    %   state    - Initial reservoir state.
+    %   model    - Model supplying phase and component counts.
+    %   schedule - Simulation timesteps and well controls.
+    %
+    % SEE ALSO:
+    %   packH2simSimulationProblem
 
     ncomp = validateInitialState(state, model);
     validateSchedule(schedule);
@@ -60,7 +60,7 @@ function validateSchedule(schedule)
     controls = schedule.step.control(:);
     assert(numel(controls) == numel(schedule.step.val) && ...
         all(isfinite(controls) & controls == fix(controls) & ...
-            controls >= 1 & controls <= numel(schedule.control)), ...
+        controls >= 1 & controls <= numel(schedule.control)), ...
         'H2sim:InvalidSchedule', 'Each timestep must reference an existing control.');
 end
 
