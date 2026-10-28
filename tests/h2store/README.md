@@ -169,3 +169,8 @@ NIST component-table tests use synthetic tab-separated responses through the
 `webReader` option. They check text and byte response handling, phase-boundary
 filtering, units, temperature ordering and cached-file reuse for both generators.
 They do not query NIST or validate its property correlations.
+
+Timestep tests check the increasing/decreasing ramps, zero intervals, exact
+intervals and both final-remainder conventions used by the aquifer setups.
+The capped convention can shorten the requested interval; these tests preserve
+that behavior rather than changing the paper schedules.

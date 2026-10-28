@@ -17,7 +17,7 @@ function [description, options, state0, model, schedule, plotOptions] = modelFor
 %   `MRSTExample`, `example_template`, `exampleSuiteTutorial`.
 
 %{
-Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
 This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
 
@@ -309,7 +309,8 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
         W(1).sign = 1;
 
         % Ramp up cushion rates
-        dtCushions = rampupTimestepsEnds(options.timeCushion, options.dtCushion);
+        dtCushions = rampupStorageTimesteps(options.timeCushion, ...
+            options.dtCushion, 8, false);
         rateCushion = options.rateCushion .* dtCushions ./ max(dtCushions);
         
         % Create cushion schedules
@@ -340,7 +341,8 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
     W(1).sign = 1;
 
     % Ramp up charge rates
-    dtCharges = rampupTimestepsEnds(options.timeCharge, options.dtCharge);
+    dtCharges = rampupStorageTimesteps(options.timeCharge, ...
+        options.dtCharge, 8, false);
     rateCharge = options.rateCharge .* dtCharges ./ max(dtCharges);
     
     % Create charge schedules
@@ -369,11 +371,13 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
     W(1).sign = 0;
     W(1).status = false;
 
-    dtIdle = rampupTimestepsEnds(options.timeIdle, options.dtIdle);
+    dtIdle = rampupStorageTimesteps(options.timeIdle, ...
+        options.dtIdle, 8, false);
     scheduleIdle = simpleSchedule(dtIdle, 'W', W);
 
     % Set up shut schedule
-    dtShut = rampupTimestepsEnds(options.timeShut, options.dtShut);
+    dtShut = rampupStorageTimesteps(options.timeShut, ...
+        options.dtShut, 8, false);
     scheduleShut = simpleSchedule(dtShut, 'W', W);
 
     % Define discharge schedule
@@ -383,7 +387,8 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
     W(1).sign = -1;
     W(1).status = true;
 
-    dtDischarge = rampupTimestepsEnds(options.timeDischarge, options.dtDischarge);
+    dtDischarge = rampupStorageTimesteps(options.timeDischarge, ...
+        options.dtDischarge, 8, false);
     scheduleDischarge = simpleSchedule(dtDischarge, 'W', W);
 
     % Combine schedules based on options
@@ -452,80 +457,4 @@ function options = checkOptions(options)
     assert(~(options.chargeOnly && options.dischargeOnly), ...
         'Cannot simulate only charge and only discharge at the same time');
     
-end
-
-function dT = rampupTimestepsEnds(time, dt, n)
-% Create timesteps that ramp up geometrically
-%
-% SYNOPSIS:
-%   dT = rampupTimesteps(1*year, 30*day)
-%   dT = rampupTimesteps(1*year, 30*day, 5)
-%
-% DESCRIPTION:
-%   This function generates a timestep sequence for a given total time
-%   interval that increases geometrically until it reaches some target
-%   timestep. The rest of the interval is then divided into a number of
-%   target timesteps.
-%
-% REQUIRED PARAMETERS:
-%   time   - The total simulation time so that sum(dt) = time
-%
-%   dt     - Target timestep after initial ramp-up
-%
-%   n      - (OPTIONAL) Number of rampup steps. Defaults to 8.
-%
-% RETURNS:
-%   dt     - Array of timesteps.
-%
-% NOTE:
-%   The final timestep may be shorter than dt in order to exactly reach T.
-%
-
-%{
-Copyright 2009-2023 SINTEF Digital, Mathematics & Cybernetics.
-
-This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
-
-MRST is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-MRST is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with MRST.  If not, see <http://www.gnu.org/licenses/>.
-%}
-
-    if nargin < 3
-        n = 8;
-    end
-    if time == 0
-        dT = [];
-        return
-    end
-    % Initial geometric series
-    dt_init = (dt./2.^[n n:-1:1])';
-    cs_time = cumsum(dt_init);
-    if any(cs_time > time)
-        dt_init = dt_init(cs_time < time);
-    end
-    
-    % Remaining time that must be discretized
-    dt_left = time - sum(2.*dt_init);
-    % Even steps
-    dt_rem = repmat(dt, floor(dt_left/dt), 1);
-    % Final ministep if present
-    dt_final = time - sum(2.*dt_init) - sum(dt_rem);
-    % Less than to account for rounding errors leading to a very small
-    % negative time-step.
-    if dt_final <= 0
-        dt_final = [];
-    end
-       
-    % Combined timesteps
-    dT = [dt_init; dt_rem;sort(dt_init,'descend'); dt_final];
 end
