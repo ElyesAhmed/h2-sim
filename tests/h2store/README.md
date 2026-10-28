@@ -178,3 +178,7 @@ that behavior rather than changing the paper schedules.
 Well-placement tests exercise the 2D aquifer completion window, ordering,
 geometric-match priority, coarse-grid nearest-cell fallback, ties and missing
 reservoir cells. They use synthetic centroids and do not run the full aquifer.
+
+Boundary-condition tests build small MRST Cartesian grids and check lateral
+face ordering, hydrostatic pressure, zero and rotated gravity, the 3D gravity
+branch, inflow composition and reference-pressure changes.

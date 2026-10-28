@@ -203,55 +203,6 @@ function W = setUpWells(G, rock, options)
     end
 end
 
-function bc = setUpBc(G, rock, fluid, options)
-    % setUpBc - Sets up boundary conditions for the simulation.
-    %
-    % Syntax: bc = setUpBc(G, rock, fluid, options)
-    %
-    % Inputs:
-    %   G      - Grid structure
-    %   rock   - Rock properties structure
-    %   fluid  - Fluid properties structure
-    %   options - Simulation options structure
-    %
-    % Outputs:
-    %   bc     - Boundary condition structure
-
-    % Initialize saturation and fluid density
-    sat = options.initSat;
-    omega = fluid.rhoOS;  % Water saturation density
-
-    % Determine gravity vector based on grid dimensions
-    if G.griddim < 3
-        grav_ = [0 -norm(gravity)];  % 2D case
-    else
-        grav_ = gravity;  % 3D case
-    end
-
-    % Identify boundary faces
-    f = boundaryFaces(G);
-    f1 = f(abs(G.faces.centroids(f, 1)) < eps);     % Left boundary
-    f2 = f(abs(G.faces.centroids(f, 1) - 50) < eps); % Right boundary
-
-    % Calculate pressure difference for left boundary
-    dx1 = bsxfun(@minus, G.faces.centroids(f1, :), 0);
-    dp1 = omega .* (dx1 * reshape(grav_, [], 1));  % Pressure change due to gravity
-    p0 = options.initPres;                           % Initial pressure
-    pcmax = p0 + 3 * barsa();                       % Maximum pressure condition
-    pressure1 = pcmax + dp1;                           % Total pressure for left boundary
-
-    % Add boundary condition for left boundary
-    bc = addBC([], f1, 'pressure', pressure1, 'sat', sat);
-
-    % Calculate pressure difference for right boundary
-    dx2 = bsxfun(@minus, G.faces.centroids(f2, :), 0);
-    dp2 = omega .* (dx2 * reshape(grav_, [], 1));  % Pressure change due to gravity
-    pressure2 = pcmax + dp2;                       % Total pressure for right boundary
-
-    % Add boundary condition for right boundary
-    bc = addBC(bc, f2, 'pressure', pressure2, 'sat', sat);
-end
-
 function schedule = setUpSchedule(G0, rock, fluid, options)
     % setUpSchedule - Sets up the well schedule for the reservoir simulation.
     %
@@ -381,7 +332,7 @@ function schedule = setUpSchedule(G0, rock, fluid, options)
 
     % Set up boundary conditions if specified
     if options.use_bc    
-        bc = setUpBc(G0, rock, fluid, options);        
+        bc = makeAquifer2DBoundaryConditions(G0, fluid, options);
         for i = 1:numel(schedule.control)        
             schedule.control(i).bc = bc;  % Assign boundary conditions to each control
         end
