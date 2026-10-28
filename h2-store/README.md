@@ -50,3 +50,12 @@ This corrects older postprocessing that used bulk cell volume and gas
 saturation in the dissolved term. Recompute inventory plots and dissolved
 fractions produced with older versions. The correction changes postprocessing;
 it does not change the reservoir simulation equations or stored states.
+
+## Dome schedule timing
+
+Dome stages retain their full remainder and every injection timestep. The
+default cushion timestep is one day. The default four-cycle schedule lasts
+547 days: 365 days of cushion injection, 90 days of shut-in and four cycles
+of 10-day charge, 3-day idle and 10-day discharge stages. This correction changes
+stage timing and injected volumes. Recompute stored dome results and plots when
+adopting it. The other models keep their existing timestep construction.
