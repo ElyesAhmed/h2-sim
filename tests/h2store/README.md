@@ -187,3 +187,7 @@ Schedule tests cover single-stage selection, cyclic ordering with and without
 cushion gas, stage durations, injection-rate controls, disabled idle wells,
 discharge signs/temperature and input-well preservation. The discharge control
 uses `tempCushion`; `tempDischarge` is not applied by this construction.
+
+Initialization tests check reservoir/bedrock/caprock properties and region
+numbers, uniform pressure and phase saturations, zero dissolved hydrogen and
+initial well pressure. The isothermal state does not apply `initTemp`.
