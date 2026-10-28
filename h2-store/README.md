@@ -66,3 +66,13 @@ The dome grid retains its logical cell indices in `G.cells.indexMap`. Saturation
 region IDs remain in `rock.regions.saturation` and `deck.REGIONS.SATNUM`. Keeping
 these arrays separate ensures that MRST deck-region and rock lookups select the
 corresponding cells rather than repeating the first few deck entries.
+
+## Modified benchmark schedule timing
+
+Benchmark injection stages now use the two-step opening and closing ramps
+without skipping or overlapping timesteps, and retain their final remainder.
+The default BHP-controlled schedule lasts 1200 days. The 90/94/98/102/102/102 bar
+buildup levels and six cushion/shut-in pairs are unchanged. Recompute stored
+benchmark results when adopting this timing correction. Later cushion controls
+in rate mode still receive pressure-valued assignments; that separate mode
+requires review before its results can be relied on.
