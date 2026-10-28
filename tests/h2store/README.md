@@ -10,7 +10,8 @@ results = runH2StoreTests();
 Initialize the pinned MRST submodule first, or pass that checkout to
 `runH2StoreTests('/path/to/mrst')`. These tests run locally, without PHREEQC,
 network access, plots or GitHub MATLAB CI. The test folder stays outside the
-module runtime path. The runner restores the MATLAB path and working folder.
+module runtime path. Dome grid tests load MRST `vemmech` for `padGrdecl`.
+The runner restores the MATLAB path and working folder.
 
 ## Coverage
 
@@ -191,3 +192,7 @@ uses `tempCushion`; `tempDischarge` is not applied by this construction.
 Initialization tests check reservoir/bedrock/caprock properties and region
 numbers, uniform pressure and phase saturations, zero dissolved hydrogen and
 initial well pressure. The isothermal state does not apply `initTemp`.
+
+Dome tests use a small 3-by-3-by-32 corner-point grid to verify geometry, layer
+partitioning, anisotropic reservoir properties and sealing-layer regions.
+Completion tests check ordering and descriptive errors for fewer than two matches.
