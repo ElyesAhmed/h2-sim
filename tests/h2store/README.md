@@ -223,4 +223,11 @@ Benchmark boundary/state tests cover the prescribed pressure formula with normal
 rotated and zero gravity, area-dependent face selection, downward-facing
 boundaries and one/two-well initial states. They use synthetic Cartesian grids
 and do not require the external benchmark deck. The boundary helper reads current
-gravity; the benchmark still resets gravity after constructing its schedule.
+gravity. The full benchmark setup initializes standard downward gravity before
+constructing its schedule and model.
+
+Benchmark gravity integration tests construct the actual setup on a synthetic
+44,652-cell Cartesian deck with bundled fluid tables and the fixed benchmark
+completions. They verify boundary pressures and model gravity with incoming
+gravity off, rotated or standard, and preserve gravity for metadata-only calls.
+These tests construct models without time integration or external data downloads.
