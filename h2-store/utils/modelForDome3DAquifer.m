@@ -86,7 +86,6 @@ rock = makeDomeAquiferRock(G, layers);
 deck = convertDeckUnits(deck);
 deck.GRID.ACTNUM = ones(G.cells.num, 1);
 deck.REGIONS.SATNUM = rock.regions.saturation;
-G.cells.indexMap = rock.regions.saturation;
 deck.GRID.PORO = rock.poro;
 deck.GRID.PERMX = rock.perm(:, 1);
 deck.GRID.PERMY = rock.perm(:, 2);
