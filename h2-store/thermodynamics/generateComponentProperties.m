@@ -1,44 +1,34 @@
 function tab_comp = generateComponentProperties(varargin)
-% MAKE_COMPONENT_TABLE_H2 Generate tables for H2O and H2 fluid properties
-% with dynamic input parameters.
+%GENERATECOMPONENTPROPERTIES Query NIST for H2 or H2O property tables.
 %
 % SYNOPSIS:
-%   tab_comp = MAKE_COMPONENT_TABLE_H2('min_temp', 0, 'max_temp', 100,
-%                                      'n_temp', 11, 'min_press', 1e5,
-%                                      'max_press', 1e7, 'n_press', 10,
-%                                      'comp_name', 'H2O',
-%                                      'outputDisplay', false,
-%                                      'outputPath', dir)
+%   data = generateComponentProperties('comp_name', 'H2', 'outputPath', folder)
 %
-% DESCRIPTION:
-%   This function generates a table for the fluid properties of a given
-%   component (e.g., H2 or H2O) across a specified temperature and pressure
-%   range, using dynamic input parameters for flexibility.
+% PARAMETERS:
+%   min_temp, max_temp - Temperature bounds [degrees Celsius], default 0, 100.
+%   n_temp             - Temperature count, default 11. Samples are
+%                        min_temp + (0:n_temp-1)*(max_temp-min_temp)/n_temp.
+%   min_press, max_press - Pressure bounds [Pa], default 1e5, 1e7.
+%   n_press            - Pressure count (at least two), default 10.
+%   comp_name          - 'H2' or 'H2O' (default). Other names select water.
+%   outputPath         - Default: UHS_PVT/H2SolubilityTable below the MRST
+%                        output directory.
+%   fileName           - Optional CSV name. The generated name uses pressure
+%                        values in Pa, although its suffix says bar.
+%   reCompute          - Regenerate an existing file, default true.
+%   outputDisplay      - Display the returned table, default false.
+%   webReader          - Request function, default @webread. It takes a URL
+%                        and returns a text or byte response.
 %
-% REQUIRED PARAMETERS:
-%   'min_temp'    - Minimum temperature in Celsius (default: 0°C)
-%   'max_temp'    - Maximum temperature in Celsius (default: 100°C)
-%   'n_temp'      - Number of temperature points (default: 11)
-%   'min_press'   - Minimum pressure in Pascals (default: 1e5 Pa)
-%   'max_press'   - Maximum pressure in Pascals (default: 1e7 Pa)
-%   'n_press'     - Number of pressure points (default: 10)
-%   'comp_name'   - Name of the component (default: 'H2O')
-%
-% OPTIONAL PARAMETERS:
-%   'outputDisplay'  - If true, displays the generated table. Default: false
-%   'outputPath'     - Directory where the output file is saved. Default: current directory.
-%   'fileName'       - File name for the generated table.
-%
-% EXAMPLE USAGE:
-%   tab_comp = MAKE_COMPONENT_TABLE_H2('min_temp', 0, 'max_temp', 100, ...
-%                                       'n_temp', 11, 'min_press', 1e5, ...
-%                                       'max_press', 1e7, 'n_press', 10, ...
-%                                       'comp_name', 'H2O', ...
-%                                       'outputPath', '/path/to/output', ...
-%                                       'fileName', 'water_properties.csv');
+% RETURNS:
+%   data - Table read from the CSV, with temperature [degrees Celsius],
+%          pressure [Pa], density [kg/m3], viscosity [Pa.s] and enthalpy [J/kg].
+%          Both rows adjacent to each phase transition are excluded. Failed
+%          temperature requests issue warnings; successful rows are retained.
+%          An unreadable final CSV returns an empty array.
 %
 % COPYRIGHT:
-%   Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+%   Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 %   This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
 %
 %   MRST is free software: you can redistribute it and/or modify
@@ -55,25 +45,15 @@ function tab_comp = generateComponentProperties(varargin)
 %   along with MRST. If not, see <http://www.gnu.org/licenses/>.
 
 % Input parameters
-opts = struct(...
-    'min_temp', 0, ...          % Default: 0°C
-    'max_temp', 100, ...        % Default: 100°C
-    'n_temp', 11, ...           % Default: 11 points
-    'min_press', 1e5, ...       % Default: 1 bar (1e5 Pa)
-    'max_press', 1e7, ...       % Default: 100 bar (1e7 Pa)
-    'n_press', 10, ...          % Default: 10 points
-    'comp_name', 'H2O', ...     % Default: 'H2O'
-    'outputDisplay', false, ... % Default: false (auto-generated)
-    'outputPath', '', ...       % Default: mrst output directory
-    'fileName', '', ...         % Default: see below
-    'reCompute', true ...       % Default: true
-    );
-
+opts = struct('min_temp', 0, 'max_temp', 100, 'n_temp', 11, ...
+              'min_press', 1e5, 'max_press', 1e7, 'n_press', 10, ...
+              'comp_name', 'H2O', 'outputDisplay', false, ...
+              'outputPath', '', 'fileName', '', 'webReader', @webread, ...
+              'reCompute', true);
 
 % Merge user inputs with the defaults
 opts = merge_options(opts, varargin{:});
 
-% Rest of the function remains the same...
 minTemp = opts.min_temp;
 maxTemp = opts.max_temp;
 nTemp = opts.n_temp;
@@ -112,7 +92,7 @@ filePath = fullfile(opts.outputPath, opts.fileName);
 if exist(filePath, 'file')&&~opts.reCompute
     fprintf('File %s already exists. Loading data...\n', opts.fileName);
     try
-        tab_comp = readtable(filePath, 'VariableNamingRule', 'preserve');
+        tab_comp = readComponentCSV(filePath);
         if opts.outputDisplay
             disp('Component Table read successfully:');
             display(tab_comp);
@@ -132,6 +112,7 @@ outFile = fopen(filePath, 'w');
 if outFile == -1
     error('Could not open the file: %s', filePath);
 end
+fileCleanup = onCleanup(@() fclose(outFile));
 
 fprintf(outFile, '# This autogenerated file contains thermodynamical properties of %s.\n', compName);
 fprintf(outFile, '# The data has been obtained by querying the NIST Chemistry WebBook https://doi.org/10.18434/T4D303.\n#\n');
@@ -168,66 +149,41 @@ for i = 1:nTemp
         query.ID = 'C1333740'; % H2
     end
 
-    queryStr = '';
     fields = fieldnames(query);
-    for k = 1:length(fields)
-        if k > 1
-            queryStr = [queryStr '&'];
-        end
-        queryStr = [queryStr fields{k} '=' query.(fields{k})];
+    parts = cell(size(fields));
+    for k = 1:numel(fields)
+        parts{k} = [fields{k}, '=', query.(fields{k})];
     end
+    queryStr = strjoin(parts, '&');
 
     try
-        response = webread(['https://webbook.nist.gov/cgi/fluid.cgi?' queryStr]);
-        responseStr = char(response)';  % Convert uint8 to character array
-        % Save the response as a temporary text file and read it
-        tempFile = 'temp_data.txt';
-        fid = fopen(tempFile, 'w');
-        fprintf(fid, '%s', responseStr);
-        fclose(fid);
-        % Read the table
-        data = readtable(tempFile, 'Delimiter', '\t', 'ReadVariableNames', true,'VariableNamingRule', 'preserve');
-        % Delete the temporary file
-        delete(tempFile);
-
-        % Retrive the necessary data
-        phase = data.Phase;
-        uniquePhases = unique(phase); % Get unique phase types
-
-        if numel(uniquePhases) > 1
-            % Detect phase transitions using string comparison
-            phaseTransitionForward = [false; ~strcmp(phase(1:end-1), phase(2:end))];
-            phaseTransitionBackward = [~strcmp(phase(1:end-1), phase(2:end)); false];
-            isNotPhaseTransition = ~(phaseTransitionForward | phaseTransitionBackward);
-        else
-            % If there's only one phase, no transitions exist
-            phaseTransitionForward = false(size(phase));
-            phaseTransitionBackward = false(size(phase));
-            isNotPhaseTransition = true(size(phase));
-        end
-
-
+        response = opts.webReader(['https://webbook.nist.gov/cgi/fluid.cgi?' queryStr]);
+        data = readNISTFluidResponse(response);
+        phase = string(data.Phase);
+        transition = phase(1:end-1) ~= phase(2:end);
+        isNotPhaseTransition = ~([false; transition] | [transition; false]);
 
         pressure = data.("Pressure (Pa)")(isNotPhaseTransition);
         density = data.("Density (kg/m3)")(isNotPhaseTransition);
         viscosity = data.("Viscosity (uPa*s)")(isNotPhaseTransition) * 1e-6; % Convert to Pa.s
         enthalpy = data.("Enthalpy (kJ/kg)")(isNotPhaseTransition) * 1000;   % Convert to J/kg
 
-        for j = 1:length(pressure)
-            fprintf(outFile, ' %.11e, %.11e, %.11e, %.11e, %.11e\n', ...
-                temperature, pressure(j), density(j), viscosity(j), enthalpy(j));
+        rows = [repmat(temperature, numel(pressure), 1), ...
+                pressure, density, viscosity, enthalpy];
+        if ~isempty(rows)
+            fprintf(outFile, ' %.11e, %.11e, %.11e, %.11e, %.11e\n', rows.');
         end
     catch ME
         warning('Failed to retrieve data for T=%.1f°C: %s', temperature, ME.message);
     end
 end
 
-fclose(outFile);
+clear fileCleanup;
 fprintf('A file %s has been generated in %s.\n', opts.fileName, opts.outputPath);
 % Read the CSV file into a table
 try
 
-    tab_comp = readtable(filePath,  'VariableNamingRule', 'preserve');
+    tab_comp = readComponentCSV(filePath);
     disp('Table read successfully:');
     if opts.outputDisplay
         display(tab_comp);
@@ -237,4 +193,10 @@ catch ME
     disp(ME.message);
     tab_comp = []; % Return empty if reading fails
 end
+end
+function data = readComponentCSV(file)
+    data = readtable(file, 'Delimiter', ',', 'CommentStyle', '#', ...
+        'ReadVariableNames', false);
+    data.Properties.VariableNames = {'# temperature [°C]', 'pressure [Pa]', ...
+        'density [kg/m3]', 'viscosity [Pa.s]', 'enthalpy [J/kg]'};
 end
