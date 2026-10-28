@@ -76,7 +76,12 @@ function compareRestart(complete, restarted, name)
     % PHREEQC engine history is not serialized. The documented PE diagnostic
     % can change on restart; retain it in golden outputs and report its drift.
     maximumPEDifference = 0;
+    maximumHSDifference = 0;
     for k = 1:numel(complete.states)
+        if isfield(complete.states{k}, 'tracerHS')
+            maximumHSDifference = max(maximumHSDifference, ...
+                max(abs(complete.states{k}.tracerHS - restarted.states{k}.tracerHS)));
+        end
         if isfield(complete.states{k}, 'phreeqcPE')
             a = complete.states{k}.phreeqcPE;
             b = restarted.states{k}.phreeqcPE;
@@ -86,8 +91,8 @@ function compareRestart(complete, restarted, name)
             restarted.states{k} = rmfield(restarted.states{k}, 'phreeqcPE');
         end
     end
-    fprintf('CYCLE_RESTART model=%s maximumPEDiagnosticDifference=%.17g\n', ...
-        name, maximumPEDifference);
+    fprintf('CYCLE_RESTART model=%s maximumPEDiagnosticDifference=%.17g maximumHSTracerDifference=%.17g\n', ...
+        name, maximumPEDifference, maximumHSDifference);
     compareStorageCycleValues(complete, restarted, [name, '.restart']);
 end
 

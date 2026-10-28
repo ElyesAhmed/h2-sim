@@ -100,6 +100,17 @@ classdef SoreideWhitsonEos < EquationOfStateModel
             end
         end
 
+        function [x, y, K, Z_L, Z_V, L, values] = substitutionCompositionUpdate(model, P, T, z, K, L)
+            % Keep compositions at the numerical floor on the same SSI branch
+            % after normalization or restart roundoff. The inherited update
+            % freezes trace-component K-values when z <= minimumComposition.
+            floor = model.minimumComposition;
+            atFloor = abs(z - floor) <= 4 * eps(floor);
+            z(atFloor) = floor;
+            [x, y, K, Z_L, Z_V, L, values] = ...
+                substitutionCompositionUpdate@EquationOfStateModel(model, P, T, z, K, L);
+        end
+
         function L = singlePhaseLabel(eos, p, T, z, Z_L, Z_V)
             % Fugacity-based phase labeling for Soreide-Whitson
             Vc = eos.CompositionalMixture.Vcrit;
