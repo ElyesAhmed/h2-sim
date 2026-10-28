@@ -6,6 +6,9 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
         stage = {'charge', 'discharge', 'cushion'}
         cushionRate = {0, 1.25, 3.5}
         cushionOnly = {false, true}
+        cushionCount = {1, 2, 4, 6, 8}
+        bhpControl = {false, true}
+        invalidCount = {0, -1, 1.5, NaN, Inf, [], [1, 2]}
     end
     methods (Test)
         function exactInterval(test, duration, target)
@@ -19,7 +22,7 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
             options.([stage,'Only']) = true;
             schedule = makeBenchmarkStorageSchedule(W, options);
             if strcmp(stage,'cushion')
-                expected = 4*(options.timeCushion+options.timeShut);
+                expected = options.numCyclesCushions*(options.timeCushion+options.timeShut);
             else
                 field = ['time',upper(stage(1)),stage(2:end)];
                 expected = options.(field);
@@ -78,10 +81,7 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
             options.rateCushion = cushionRate;
             options.cushionOnly = cushionOnly;
             schedule = makeBenchmarkStorageSchedule(W, options);
-            count = 6;
-            if cushionOnly
-                count = 4;
-            end
+            count = options.numCyclesCushions;
             names = arrayfun(@(c) c.W.name, schedule.control, 'UniformOutput',false);
             controls = schedule.control(strcmp(names,'cushion'));
             actual = arrayfun(@(c) c.W.val, controls);
@@ -107,6 +107,47 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
             options.bhp = 110*barsa;
             after = makeBenchmarkStorageSchedule(W,options);
             test.verifyEqual(after,before);
+        end
+        function configuredCount(test, cushionCount, cushionOnly, bhpControl)
+            [W, options] = inputs();
+            options.numCyclesCushions = cushionCount;
+            options.cushionOnly = cushionOnly;
+            options.use_bhp = bhpControl;
+            schedule = makeBenchmarkStorageSchedule(W, options);
+            names = arrayfun(@(c) c.W.name, schedule.control, ...
+                'UniformOutput', false);
+            controls = schedule.control(strcmp(names, 'cushion'));
+            test.verifyNumElements(controls, 5*cushionCount);
+            expectedTime = cushionCount*(options.timeCushion+options.timeShut);
+            if ~cushionOnly
+                expectedTime = expectedTime + options.numCycles* ...
+                    (options.timeCharge+options.timeIdle+options.timeDischarge);
+            end
+            test.verifyEqual(sum(schedule.step.val), expectedTime, 'AbsTol', 1e-7);
+            values = reshape(arrayfun(@(c) c.W.val, controls), 5, []);
+            if bhpControl
+                levels = [options.bhp, 94*barsa, 98*barsa, 102*barsa];
+                expected = levels(min(1:cushionCount, numel(levels)));
+                test.verifyEqual(values, repmat(expected, 5, 1));
+            else
+                expected = options.rateCushion*[1; 1; 1; 0.5; 0.5];
+                test.verifyEqual(values, repmat(expected, 1, cushionCount));
+                stepNames = names(schedule.step.control);
+                selected = strcmp(stepNames, 'cushion');
+                rates = arrayfun(@(k) schedule.control(k).W.val, ...
+                    schedule.step.control(selected));
+                volume = sum(schedule.step.val(selected).*rates(:));
+                expectedVolume = cushionCount*options.rateCushion* ...
+                    (options.timeCushion-options.dtCushion/2);
+                test.verifyEqual(volume, expectedVolume, ...
+                    'AbsTol', 1e-7, 'RelTol', 1e-13);
+            end
+        end
+        function rejectInvalidCount(test, invalidCount)
+            [W, options] = inputs();
+            options.numCyclesCushions = invalidCount;
+            test.verifyError(@() makeBenchmarkStorageSchedule(W, options), ...
+                'h2sim:h2store:InvalidCushionCount');
         end
         function shortCharge(test)
             [W, options] = inputs();

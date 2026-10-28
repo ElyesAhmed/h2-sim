@@ -59,7 +59,7 @@ options = struct( ...
     'dtShut',           3.0 * day,                        ... % Time step during shut phase (days)
     'dtDischarge',      3.0 * day,                        ... % Time step during discharging (days)
     'numCycles',        4,                               ... % Total number of cycles (charging and discharging)
-    'numCyclesCushions',6,                                ... % Number of cycles for cushion gas (H₂)
+    'numCyclesCushions',6,                                ... % Cushion/shut-in pair count (positive integer)
     'chargeOnly',       0,                                ... % Flag to simulate only the charging phase (0: No, 1: Yes)
     'cushionOnly',      0,                                ... % Flag to simulate only the cushioning phase (0: No, 1: Yes)
     'dischargeOnly',    0,                                ... % Flag to simulate only the discharging phase (0: No, 1: Yes)
