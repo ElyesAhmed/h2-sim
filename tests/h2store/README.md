@@ -215,7 +215,7 @@ one and two wells, uniform saturation/pressure, zero rs/rv and initial well bhp.
 Modified benchmark timing tests use its actual defaults and a supplied well
 structure, without the external benchmark grid. They check exact stage totals,
 short intervals, BHP buildup levels, no-cushion cycles and discharge controls.
-Rate-mode checks cover zero and positive rates, four/six buildup pairs, closing
+Rate-mode checks cover zero and positive rates, configured buildup counts, closing
 ramp values, scheduled injected volume and independence from the BHP setting.
 BHP buildup levels remain covered by their separate assertions.
 
@@ -231,3 +231,9 @@ Benchmark gravity integration tests construct the actual setup on a synthetic
 completions. They verify boundary pressures and model gravity with incoming
 gravity off, rotated or standard, and preserve gravity for metadata-only calls.
 These tests construct models without time integration or external data downloads.
+
+Benchmark cushion-count checks cover 1, 2, 4, 6 and 8 pairs in full and
+cushion-only schedules, using both BHP and rate controls. They verify pair counts,
+pressure levels, total duration, rate profiles and scheduled volume. Invalid
+counts are rejected. The default cushion-only count is now six; explicitly set
+`numCyclesCushions = 4` to retain its previous four-pair duration.

@@ -5,12 +5,13 @@ function schedule = makeBenchmarkStorageSchedule(initialW, options)
 %   using two opening controls, one middle control and two closing controls.
 %   Charge rates are constant; cushion rate controls scale the final ramp.
 %
-% Default BHP buildup consists of six cushion/shut-in pairs at options.bhp,
-% 94, 98, 102, 102 and 102 bar, followed by numCycles storage cycles. Cushion-only
-% selects the first four pairs. numCyclesCushions is not applied. Rate-controlled
-% buildup repeats options.rateCushion with its closing ramp in every pair;
-% pressure escalation applies only in BHP mode. Idle has sign +1;
-% discharge has sign -1, a 20 bar BHP limit and only its first completion open.
+% numCyclesCushions is a positive integer giving the number of cushion/shut-in
+% pairs in both full and cushion-only runs (default six). BHP buildup starts
+% at options.bhp, then uses 94 and 98 bar, and holds at 102 bar from pair four.
+% Rate-controlled buildup repeats options.rateCushion with its closing ramp
+% in every pair. Disable buildup with use_cushion = false.
+% Idle has sign +1; discharge has sign -1, a 20 bar BHP limit and only its
+% first completion open.
 
 %{
 Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
@@ -76,12 +77,17 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
         cycle = combineSchedules(charge{:}, idle, discharge, 'makeConsistent', false);
         cycles = repmat({cycle}, 1, options.numCycles);
         if options.use_cushion
-            buildup = cell(1, 4);
+            count = options.numCyclesCushions;
+            assert(isnumeric(count) && isreal(count) && isscalar(count) && ...
+                isfinite(count) && count >= 1 && count == fix(count), ...
+                'h2sim:h2store:InvalidCushionCount', ...
+                'numCyclesCushions must be a finite positive integer scalar.');
+            buildup = cell(1, count);
             levels = [options.bhp, 94*barsa, 98*barsa, 102*barsa];
-            for k = 1:4
+            for k = 1:count
                 if k > 1 && options.use_bhp
                     for j = 1:numel(cushion)
-                        cushion{j}.control.W.val = levels(k);
+                        cushion{j}.control.W.val = levels(min(k, numel(levels)));
                     end
                 end
                 buildup{k} = combineSchedules(cushion{:}, shut, 'makeConsistent', false);
@@ -89,8 +95,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
             if options.cushionOnly
                 schedule = combineSchedules(buildup{:}, 'makeConsistent', false);
             else
-                schedule = combineSchedules(buildup{:}, buildup{4}, buildup{4}, ...
-                    cycles{:}, 'makeConsistent', false);
+                schedule = combineSchedules(buildup{:}, cycles{:}, 'makeConsistent', false);
             end
         else
             schedule = combineSchedules(cycles{:}, 'makeConsistent', false);

@@ -87,3 +87,16 @@ incoming global gravity setting, while deck initialization reset model gravity.
 With boundary conditions enabled, results started with gravity off or rotated
 can therefore change; rerun affected cases. Setups already using standard gravity retain the same pressure formula,
 face selection and acceleration. Metadata-only calls leave gravity unchanged.
+
+## Modified benchmark cushion count
+
+`numCyclesCushions` now sets the number of cushion/shut-in pairs for both full
+and cushion-only schedules. It must be a finite positive integer; use
+`use_cushion = false` to disable buildup. BHP levels start at `bhp`, then use
+94 and 98 bar, and remain at 102 bar from pair four onward. Rate mode repeats
+the configured cushion-rate profile for each pair.
+
+The default full schedule retains six buildup pairs and its 1200-day duration.
+Default cushion-only runs now contain six pairs (900 days), instead of the
+previous four pairs (600 days). Set `numCyclesCushions = 4` to retain that earlier
+cushion-only schedule. Rerun results affected by a different buildup count.
