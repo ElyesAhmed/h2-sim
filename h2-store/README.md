@@ -73,6 +73,8 @@ Benchmark injection stages now use the two-step opening and closing ramps
 without skipping or overlapping timesteps, and retain their final remainder.
 The default BHP-controlled schedule lasts 1200 days. The 90/94/98/102/102/102 bar
 buildup levels and six cushion/shut-in pairs are unchanged. Recompute stored
-benchmark results when adopting this timing correction. Later cushion controls
-in rate mode still receive pressure-valued assignments; that separate mode
-requires review before its results can be relied on.
+benchmark results when adopting this timing correction. In rate-controlled mode,
+every cushion/shut-in pair repeats the configured `rateCushion` profile, including
+its closing ramp. The 94/98/102 bar escalation applies only in BHP mode. This
+corrects pressure values previously assigned to rate controls; recompute results
+from affected rate-controlled buildup cases.

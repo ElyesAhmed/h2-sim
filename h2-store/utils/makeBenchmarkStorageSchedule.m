@@ -7,9 +7,9 @@ function schedule = makeBenchmarkStorageSchedule(initialW, options)
 %
 % Default BHP buildup consists of six cushion/shut-in pairs at options.bhp,
 % 94, 98, 102, 102 and 102 bar, followed by numCycles storage cycles. Cushion-only
-% selects the first four pairs. numCyclesCushions is not applied. Later buildup
-% values are assigned even if use_bhp=false, which interprets them as rates.
-% BHP-controlled buildup is the tested benchmark mode. Idle has sign +1;
+% selects the first four pairs. numCyclesCushions is not applied. Rate-controlled
+% buildup repeats options.rateCushion with its closing ramp in every pair;
+% pressure escalation applies only in BHP mode. Idle has sign +1;
 % discharge has sign -1, a 20 bar BHP limit and only its first completion open.
 
 %{
@@ -79,7 +79,7 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
             buildup = cell(1, 4);
             levels = [options.bhp, 94*barsa, 98*barsa, 102*barsa];
             for k = 1:4
-                if k > 1
+                if k > 1 && options.use_bhp
                     for j = 1:numel(cushion)
                         cushion{j}.control.W.val = levels(k);
                     end

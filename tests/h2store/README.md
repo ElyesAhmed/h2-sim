@@ -215,5 +215,6 @@ one and two wells, uniform saturation/pressure, zero rs/rv and initial well bhp.
 Modified benchmark timing tests use its actual defaults and a supplied well
 structure, without the external benchmark grid. They check exact stage totals,
 short intervals, BHP buildup levels, no-cushion cycles and discharge controls.
-Only BHP-controlled buildup is covered; the later rate-mode cushion pressure
-assignments remain a separate issue.
+Rate-mode checks cover zero and positive rates, four/six buildup pairs, closing
+ramp values, scheduled injected volume and independence from the BHP setting.
+BHP buildup levels remain covered by their separate assertions.

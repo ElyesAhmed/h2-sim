@@ -4,6 +4,8 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
         duration = {0.1, 1, 2, 10.25}
         target = {1, 10}
         stage = {'charge', 'discharge', 'cushion'}
+        cushionRate = {0, 1.25, 3.5}
+        cushionOnly = {false, true}
     end
     methods (Test)
         function exactInterval(test, duration, target)
@@ -69,6 +71,42 @@ classdef H2StoreBenchmarkTimingTest < matlab.unittest.TestCase
                     test.verifyEqual(well.cstatus,[true;false]);
                 end
             end
+        end
+        function rateCushionProfile(test, cushionRate, cushionOnly)
+            [W, options] = inputs();
+            options.use_bhp = false;
+            options.rateCushion = cushionRate;
+            options.cushionOnly = cushionOnly;
+            schedule = makeBenchmarkStorageSchedule(W, options);
+            count = 6;
+            if cushionOnly
+                count = 4;
+            end
+            names = arrayfun(@(c) c.W.name, schedule.control, 'UniformOutput',false);
+            controls = schedule.control(strcmp(names,'cushion'));
+            actual = arrayfun(@(c) c.W.val, controls);
+            expected = repmat(cushionRate*[1;1;1;0.5;0.5], count, 1);
+            test.verifyEqual(actual(:),expected,'AbsTol',1e-14);
+            for k = 1:numel(controls)
+                test.verifyEqual(controls(k).W.type,'rate');
+                test.verifyEqual(controls(k).W.sign,1);
+                test.verifyEqual(controls(k).W.T,options.tempCushion);
+                test.verifyEqual(controls(k).W.compi,[0,1]);
+            end
+            stepNames = names(schedule.step.control);
+            selected = strcmp(stepNames,'cushion');
+            rates = arrayfun(@(k) schedule.control(k).W.val, schedule.step.control(selected));
+            volume = sum(schedule.step.val(selected).*rates(:));
+            expectedVolume = count*cushionRate*(options.timeCushion-options.dtCushion/2);
+            test.verifyEqual(volume,expectedVolume,'AbsTol',1e-7,'RelTol',1e-13);
+        end
+        function rateIgnoresBhpSetting(test)
+            [W, options] = inputs();
+            options.use_bhp = false;
+            before = makeBenchmarkStorageSchedule(W,options);
+            options.bhp = 110*barsa;
+            after = makeBenchmarkStorageSchedule(W,options);
+            test.verifyEqual(after,before);
         end
         function shortCharge(test)
             [W, options] = inputs();
