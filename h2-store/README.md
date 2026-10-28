@@ -78,3 +78,12 @@ every cushion/shut-in pair repeats the configured `rateCushion` profile, includi
 its closing ramp. The 94/98/102 bar escalation applies only in BHP mode. This
 corrects pressure values previously assigned to rate controls; recompute results
 from affected rate-controlled buildup cases.
+
+## Modified benchmark gravity
+
+Full benchmark setup initializes standard downward gravity before constructing
+boundary pressures and the flow model. Previously boundary pressures used the
+incoming global gravity setting, while deck initialization reset model gravity.
+With boundary conditions enabled, results started with gravity off or rotated
+can therefore change; rerun affected cases. Setups already using standard gravity retain the same pressure formula,
+face selection and acceleration. Metadata-only calls leave gravity unchanged.

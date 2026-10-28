@@ -8,10 +8,9 @@ function [description, options, state0, model, schedule, plotOptions] = modelFor
 % Ahmed, E., et al. (2024). Phase behavior and black-oil simulations of hydrogen storage in saline aquifers. 
 % Advances in Water Resources, 191, 104772.
 %
-% Boundary pressures use the current gravity setting. The model then resets
-% gravity to the standard downward acceleration during deck initialization.
-% Initialize gravity with "gravity reset on" before requesting a full setup
-% to use the same acceleration for boundary pressures and flow.
+% Full setup resets gravity to the standard downward acceleration before
+% constructing boundary pressures and the flow model. Metadata-only calls
+% leave the current gravity setting unchanged.
 %
 % SEE ALSO:
 %   `MRSTExample`, `example_template`, `exampleSuiteTutorial`
@@ -96,12 +95,12 @@ poro =  deck.GRID.PORO; clear p
 rock = makeRock(G, perm, poro);
 
 %% Set up schedule and initiate model from deck
+gravity reset on;
 schedule = setUpSchedule(G, rock, options);
 [~, model, ~] = initEclipseProblemAD(deck,'getSchedule',false,'getInitialState', false);
 fluid = model.fluid;
 deck = model.inputdata;
 rock.regions.saturation=deck.REGIONS.SATNUM;
-gravity reset on;
 %% We reset a blackoil model and "oil" is the water phase
 model = GenericBlackOilModel(G, rock, fluid, 'water', false, 'disgas', true, 'inputdata', deck);
 %% Set up initial state
