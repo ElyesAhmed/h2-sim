@@ -91,7 +91,7 @@ deck.GRID.PERMX = rock.perm(:, 1);
 deck.GRID.PERMY = rock.perm(:, 2);
 deck.GRID.PERMZ = rock.perm(:, 3);
 
-%% Deck conversion and initializationclose
+%% Initialize fluid tables from the deck
 [~, model, ~] = initEclipseProblemAD(deck,'G',G,'getSchedule',false,'getInitialState', false);
 fluid = model.fluid;
 deck = model.inputdata;
@@ -105,7 +105,7 @@ model = GenericBlackOilModel(G, rock, fluid, 'water', false, 'disgas', true, 'va
 schedule = setUpSchedule(G, rock, fluid, options);
 
 %% Setup initial state
-state0 = setUpInitialState(model, schedule.control(1).W, options);
+state0 = makeDomeAquiferInitialState(model, schedule.control(1).W, options);
 
 %% Plotting options
 plotOptions = {'View', [0, 0], ...
@@ -113,11 +113,7 @@ plotOptions = {'View', [0, 0], ...
                'Projection', 'orthographic', ...
                'Size', [800, 300]};
 
-% Uncomment the following line to set a title for the RUNSPEC in the deck
-% deck.RUNSPEC.TITLE = 'H2_illustration_storage';
 
-% Uncomment to convert the model back to a deck format
-% deck_new = model2Deck(model, schedule, 'deck', deck);
 end
 
 
@@ -131,85 +127,16 @@ function W = setUpWells(G, rock, options)
     end
 end
 
-function bc = setUpBc(G, rock, fluid, options)
-% setUpBc initializes boundary conditions for the reservoir model.
-%
-% This function sets the pressure boundary conditions and saturation 
-% for the specified grid and fluid properties.
-%
-% Inputs:
-%   G       - Grid structure containing cell and face information
-%   rock    - Rock properties structure (not used in this function)
-%   fluid   - Fluid properties structure
-%   options - Options structure containing simulation parameters
-%
-% Outputs:
-%   bc      - Boundary conditions structure containing pressure and saturation
-    rhoOS = fluid.rhoOS;
-
-    % Determine gravity vector
-    if G.griddim < 3   
-        grav_ = [0 -norm(gravity)]; % 2D gravity vector
-    else
-        grav_ = gravity; % 3D gravity vector
-    end
-
-    %% Identify boundary faces
-    f = boundaryFaces(G);
-    f1 = f(abs(G.faces.centroids(f, 1)) < eps);
-
-    %% Calculate pressure gradient based on gravity
-    ref_position = -100;
-    scaling = 15;
-    dx1 = bsxfun(@minus, G.faces.centroids(f1, :), ref_position) / scaling;
-    dp1 = rhoOS .* (dx1 * reshape(grav_, [], 1));
-
-    %% Set the hydrostatic pressure boundary condition
-    pcmax = options.initPres + 0.5*barsa();
-    pressure1 = pcmax - dp1;
-    bc = addBC([], f1, 'pressure', pressure1, 'sat', options.initSat);
-
-end
-
 function schedule = setUpSchedule(G, rock, fluid, options)
     W = setUpWells(G, rock, options);
     schedule = makeDomeAquiferSchedule(W, options);
     if options.use_bc
-        bc = setUpBc(G, rock, fluid, options);
+        bc = makeDomeAquiferBoundaryConditions(G, fluid, options);
         for i = 1:numel(schedule.control)
             schedule.control(i).bc = bc;
         end
     end
 end
-
-function state0 = setUpInitialState(model, W, options)
-    % setUpInitialState initializes the reservoir state for the simulation.
-    %
-    % Inputs:
-    %   model - The model object containing grid and rock properties.
-    %   W     - Well data structure containing well definitions.
-    %   options - A structure containing simulation options.
-    %
-    % Output:
-    %   state0 - Initial state structure with pressure, saturation, and well solutions.
-
-    %% Initialize reservoir solution state with specified initial pressure and saturation
-    state0 = initResSol(model.G, options.initPres, options.initSat);
-
-    %% Set residual saturations to zero (not applicable for initial state)
-    state0.rs = zeros(size(state0.pressure)); % Residual saturation for water
-    state0.rv = zeros(size(state0.pressure)); % Residual saturation for gas
-
-    %% Initialize well solutions based on well definitions
-    wellSol = initWellSolAD(W, model, state0);
-    
-    %% Set initial bottom-hole pressure for wells
-    [wellSol.bhp] = deal(options.initPres);
-    
-    %% Assign well solutions to the state structure
-    state0.wellSol = wellSol;
-end
-
 
 %-------------------------------------------------------------------------%
 function options = checkOptions(options)
