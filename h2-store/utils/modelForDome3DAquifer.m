@@ -57,7 +57,7 @@ options = struct( ...
     'timeShut',         90 * day,                  ... % Shut-in time
     'timeDischarge',    10 * day,                  ... % Discharging time
     'dtCharge',         1*day,                ... % Time step during charging
-    'dtCushion',        1*day * hour,                ... % Time step during cushioning
+    'dtCushion',        1 * day,                ... % Time step during cushioning
     'dtIdle',           8.4 * hour,                ... % Time step during idle
     'dtShut',           8.4 * hour,                ... % Time step during shut-in
     'dtDischarge',      1 * day,                ... % Time step during discharging
@@ -172,162 +172,17 @@ function bc = setUpBc(G, rock, fluid, options)
 
 end
 
-function schedule = setUpSchedule(G0, rock, fluid, options)
-% setUpSchedule configures the operational schedule for hydrogen storage 
-% in the specified reservoir model.
-%
-% This function sets up various operational phases including charging, 
-% cushioning, idling, and discharging, based on the provided options.
-%
-% Inputs:
-%   G0      - Grid structure representing the reservoir model
-%   rock    - Rock properties structure
-%   fluid   - Fluid properties structure
-%   options - Options structure containing simulation parameters
-%
-% Outputs:
-%   schedule - Schedule structure defining the operational phases
-
-    %% Initialize wells based on grid, rock, fluid, and options
-    W = setUpWells(G0, rock, options);
-    
-    %% Cushioning phase configuration
-    if options.use_cushion
-        W(1).type     = 'rate';
-        W(1).name     = 'cushion';
-        W(1).val      = options.rateCushion;
-        W(1).T        = options.tempCushion;
-        W(1).sign     = 1;
-
-        %% Generate timesteps for the cushioning phase
-        dtCushions = rampupStorageTimesteps(options.timeCushion, ...
-            options.dtCushion, 8, true);
-        rateCushion = options.rateCushion .* dtCushions ./ max(dtCushions);
-        
-        %% Create schedules for the initial cushioning phases
-        for i = 1:9    
-            dtCushion = dtCushions(i);
-            W(1).val  = rateCushion(10);
-            scheduleCushions{i} = simpleSchedule(dtCushion, 'W', W);
-        end
-
-        %% Handle remaining cushioning phases
-        dtCushion = dtCushions(10:end-10);
-        W(1).val  = rateCushion(10);
-        scheduleCushions{10} = simpleSchedule(dtCushion, 'W', W);
-        
-        %% Continue with final cushioning phases
-        for i = 1:9    
-            dtCushion = dtCushions(end-9+i);
-            W(1).val  = rateCushion(end-9+i);
-            scheduleCushions{i+10} = simpleSchedule(dtCushion, 'W', W);
-        end
-    end
-
-    %% Set up wells again for the charging phase
-    W = setUpWells(G0, rock, options);
-    W(1).type     = 'rate';
-    W(1).name     = 'charge';    
-    W(1).val      = options.rateCharge;
-    W(1).T        = options.tempCharge;
-    W(1).sign     = 1;
-    
-    %% Generate timesteps for the charging phase
-    dtCharges = rampupStorageTimesteps(options.timeCharge, ...
-        options.dtCharge, 8, true);
-    rateCharge = options.rateCharge .* dtCharges ./ max(dtCharges);
-    
-    %% Create schedules for the initial charging phases
-    for i = 1:9    
-        dtCharge = dtCharges(i);
-        W(1).val  = rateCharge(10);
-        scheduleCharges{i} = simpleSchedule(dtCharge, 'W', W);
-    end
-
-    %% Handle remaining charging phases
-    dtCharge = dtCharges(10:end-10);
-    W(1).val  = rateCharge(10);
-    scheduleCharges{10} = simpleSchedule(dtCharge, 'W', W);
-
-    %% Continue with final charging phases
-    for i = 1:9    
-        dtCharge = dtCharges(end-9+i);
-        W(1).val  = rateCharge(10);
-        scheduleCharges{i+10} = simpleSchedule(dtCharge, 'W', W);
-    end
-    
-    %% Group control setup
-    if options.useGroupCtrl
-        groups = [];
-        scheduleCharge.groups = groups;
-    end
-
-    %% Idle phase configuration
-    W(1).type     = 'rate';
-    W(1).val      = options.rateIdle;
-    W(1).name     = 'shut';        
-    W(1).T        = options.tempCushion;
-    W(1).sign     = -1;
-    
-    %% Generate schedule for the idle phase
-    dtIdle = rampupStorageTimesteps(options.timeIdle, ...
-        options.dtIdle, 8, true);
-    scheduleIdle = simpleSchedule(dtIdle, 'W', W);
-    if options.useGroupCtrl
-        groups = [];
-        scheduleIdle.groups = groups;
-    end
-
-    %% Shut-in phase configuration
-    dtShut = rampupStorageTimesteps(options.timeShut, ...
-        options.dtShut, 8, true);
-    scheduleShut = simpleSchedule(dtShut, 'W', W);
-
-    %% Discharge phase configuration
-    W(1).type     = 'rate';
-    W(1).name     = 'discharge';    
-    W(1).val      = -options.rateDischarge;
-    W(1).sign     = -1;
-    
-    %% Generate schedule for the discharge phase
-    dtDischarge = rampupStorageTimesteps(options.timeDischarge, ...
-        options.dtDischarge, 8, true);
-    scheduleDischarge = simpleSchedule(dtDischarge, 'W', W);
-    if options.useGroupCtrl
-        groups = [];
-        scheduleCharge.groups = groups;
-    end
-    
-    %% Combine schedules based on the specified options
-    if options.chargeOnly
-        schedule = combineSchedules(scheduleCharges{:}, 'makeConsistent', false);
-    elseif options.dischargeOnly
-        schedule = scheduleDischarge;
-    elseif options.cushionOnly
-        schedule = combineSchedules(scheduleCushions{:}, 'makeConsistent', false);
-    else 
-        %% Combine all schedules for normal operation
-        if options.use_cushion
-            schedule = combineSchedules(scheduleCharges{:}, scheduleIdle, scheduleDischarge, 'makeConsistent', false);
-            schedule = repmat({schedule}, 1, options.numCycles);
-            schedule = combineSchedules(scheduleCushions{:}, scheduleShut, schedule{:}, 'makeConsistent', false);
-        else
-            schedule = combineSchedules(scheduleCharges{:}, scheduleIdle, scheduleDischarge, 'makeConsistent', false);
-            schedule = repmat({schedule}, 1, options.numCycles);
-            schedule = combineSchedules(schedule{:}, 'makeConsistent', false);  
-        end
-    end
-
-    %% Setup boundary conditions if specified
-    if options.use_bc    
-        bc = setUpBc(G0, rock, fluid, options);        
-        for i = 1:numel(schedule.control)        
+function schedule = setUpSchedule(G, rock, fluid, options)
+    W = setUpWells(G, rock, options);
+    schedule = makeDomeAquiferSchedule(W, options);
+    if options.use_bc
+        bc = setUpBc(G, rock, fluid, options);
+        for i = 1:numel(schedule.control)
             schedule.control(i).bc = bc;
         end
     end
 end
 
-%-------------------------------------------------------------------------%
 function state0 = setUpInitialState(model, W, options)
     % setUpInitialState initializes the reservoir state for the simulation.
     %

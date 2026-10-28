@@ -196,3 +196,9 @@ initial well pressure. The isothermal state does not apply `initTemp`.
 Dome tests use a small 3-by-3-by-32 corner-point grid to verify geometry, layer
 partitioning, anisotropic reservoir properties and sealing-layer regions.
 Completion tests check ordering and descriptive errors for fewer than two matches.
+
+Dome timing checks use analytic stage totals, including short intervals and
+noninteger remainders. The dome schedule now uses a one-day default cushion
+timestep, retains remainders and includes every injection timestep. Its schedules
+and injected volumes therefore differ from earlier versions; rerun affected cases.
+The other models retain their existing timestep helper and reference solutions.
