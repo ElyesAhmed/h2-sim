@@ -207,3 +207,7 @@ Dome mapping integration tests construct the default 83,232-cell model once
 without advancing a timestep. They check logical cell identity, deck saturation
 region lookup and deck-to-rock correspondence. This setup is larger than the
 small time-integration fixtures; it requires no downloaded data or plots.
+
+Dome boundary/state tests verify the prescribed scaled pressure formula, lateral
+face selection, rotated/zero gravity and the 2D branch. Initial-state checks use
+one and two wells, uniform saturation/pressure, zero rs/rv and initial well bhp.
