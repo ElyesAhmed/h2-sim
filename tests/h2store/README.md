@@ -250,3 +250,8 @@ current dissolved fraction, signed single-well rates, zero inventory and empty
 histories. Mismatched histories and multiple-well entries raise descriptive errors.
 The benchmark and dome paper scripts share this helper; their dissolved-fraction
 plots describe stored inventory rather than cumulative operational losses.
+
+Cycle-endpoint plotting checks use distinct states at nonconsecutive schedule
+indices. They verify state/time pairing, dissolved-H2 mass fractions, well-stage
+metadata, zero dissolved inventory and empty schedules. The 2D paper script now
+plots actual stage endpoints; earlier frames used sequential state indices.

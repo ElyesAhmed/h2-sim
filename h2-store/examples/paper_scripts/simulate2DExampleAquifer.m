@@ -145,24 +145,20 @@ ylabel('Hydrogen Loss Percentage (%)');
 title('Hydrogen Loss Due to Dissolution');
 grid on;
 
-%% Plot xH2 Over Time
-rhoOS = model.fluid.rhoOS;  % Density of oil-saturated phase
-rhoGS = model.fluid.rhoGS;  % Density of gas-saturated phase
-StepsOfCycles = sort([LastSteps.cushion, LastSteps.charge, LastSteps.discharge, LastSteps.shut]); % Combine all steps
-for i = 1:length(StepsOfCycles) % Loop through each step of the cycles
-    % Calculate xH2 based on the current state's solution ratio (rs)
-    xH2 = rhoGS .* states{i}.rs ./ (rhoOS + rhoGS .* states{i}.rs); 
-    plotCellData(model.G, xH2, 'LineStyle', 'none'); 
-    time = sum(schedule.step.val(1:i)); 
-    title(sprintf('xH2 at Time = %.2f Days', convertTo(time, day)));
-    colorbar; 
+%% Plot dissolved-hydrogen mass fraction at storage-stage endpoints
+endpointData = getH2CycleEndpointData(model, states, schedule);
+for k = 1:numel(endpointData.steps)
+    plotCellData(model.G, endpointData.massFraction{k}, 'LineStyle', 'none');
+    title(sprintf('Dissolved H2 mass fraction at time = %.2f days', ...
+        convertTo(endpointData.time(k), day)));
+    colorbar;
     pause(0.01);
 end
 %% Copyright Notice
 %
 % <html>
 % <p><font size="-1">
-% Copyright 2009-2025 SINTEF Digital, Mathematics & Cybernetics.
+% Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 % </font></p>
 % <p><font size="-1">
 % This file is part of The MATLAB Reservoir Simulation Toolbox (MRST).
