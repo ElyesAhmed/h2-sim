@@ -174,3 +174,7 @@ Timestep tests check the increasing/decreasing ramps, zero intervals, exact
 intervals and both final-remainder conventions used by the aquifer setups.
 The capped convention can shorten the requested interval; these tests preserve
 that behavior rather than changing the paper schedules.
+
+Well-placement tests exercise the 2D aquifer completion window, ordering,
+geometric-match priority, coarse-grid nearest-cell fallback, ties and missing
+reservoir cells. They use synthetic centroids and do not run the full aquifer.
