@@ -1,13 +1,7 @@
 # Local storage-cycle regressions
 
-**Known failing check:** fresh-engine PHREEQC restarts expose a `tracerHS`
-difference during production in both pre-cleanup `9794f27` and merged cleanup
-`72f9e4b`. In the final 2.4-day reactive cycle, the measured difference is
-`7.170710469e-8 mol/m^3` in one cell at the final step (about 0.025%). The strict
-runner below reports this failure; it has not been waived or accepted as a
-passing regression. Black-oil cycle/restart checks pass. The reactive case
-consumes hydrogen throughout the cycle, reaching approximately `0.0833 mol`.
-This test addition records an existing restart issue; it does not fix it.
+These checks cover black-oil and reactive PHREEQC cycles, including serialized
+restarts with freshly reconstructed models and PHREEQC engine sessions.
 
 Run from the repository root in MATLAB:
 
@@ -76,8 +70,9 @@ chemistry diagnostics on restart.
 
 `storage-cycle-reference.mat` contains numeric snapshots in a `cases` struct.
 Its provenance is recorded in `reference-provenance.json`. The initial reference
-was generated using pre-cleanup source `9794f27`, then checked against the merged
-cleanup source, independently of restart comparisons. It contains no model
+was generated using pre-cleanup source `9794f27` and checked against the merged
+cleanup source. It was then reviewed and updated for the EOS trace-floor fix
+`d3dbf3f`; see the numerical changes below and the provenance JSON. It contains no model
 objects or dependency code.
 
 The runner never writes or updates the reference. Any future reference change
@@ -90,18 +85,52 @@ all phase-appearance regimes, or replace full paper-cycle validation. Existing
 H2-store phase-transfer tests separately cover dissolution-only and
 vaporization-only configurations and closed-system component inventories.
 
+## Trace-component restart regression
+
+The original cycle reproduced a final-step HS tracer difference of
+`7.170710469e-8 mol/m^3`. Its first material difference entered PHREEQC in the
+input sulfur total. In the EOS successive-substitution flash, a trace composition
+of exactly `minimumComposition` froze its K-value, while the adjacent
+floating-point value above that floor updated it. Restart roundoff could select
+different branches, changing the dissolved H2S share handed to PHREEQC.
+
+`SoreideWhitsonEos` now maps feeds within four floating-point increments of the
+composition floor to that floor before calling the inherited SSI update. The
+floor, equilibrium tolerances, database and kinetic parameters are unchanged.
+The focused `SoreideWhitsonTraceFloorTest` checks both identical phase updates
+for neighboring floor values and normal K-value updates above that tiny band.
+
+The corrected branch classification changes the uninterrupted reference as well
+as stabilizing restarts. Reviewed maximum changes in this four-cell case are:
+
+| Quantity | Maximum absolute change |
+| --- | ---: |
+| Pressure | 3.5041 Pa |
+| Saturation | 8.1845e-8 |
+| Overall component fraction | 2.1348e-8 |
+| pH | 7.0651e-5 |
+| HS tracer | 4.1646e-4 mol/m^3 |
+| HCO3 tracer | 1.6414e-4 mol/m^3 |
+
+Total final H2 consumption changed from `0.083275857282247928` to
+`0.083275622213297762 mol`, about 2.8 parts per million. The black-oil reference
+is unchanged. PE diagnostic values may change substantially, as discussed above.
+The fixed fresh-engine restart has a maximum HS tracer difference of
+`1.394717675e-14 mol/m^3`, compared with `7.170710469e-8 mol/m^3` before the
+fix. Comparison bounds were not widened. These values describe this fixture, not a
+bound on changes in every possible simulation.
+
 ## Inspecting a failing restart
 
-After initialization by the runner, the lower-level routine can return both
-completed-cycle outputs and explicit restart statuses without raising at the
-first comparison failure:
+After initialization by the runner, request both outputs from the lower-level
+routine to inspect completed cycles and explicit statuses without raising at
+the first comparison failure:
 
 ```matlab
 [cases, restartChecks] = runStorageCycleCases();
 disp(restartChecks);
 ```
 
-Requesting only `cases` still raises when a restart fails. The standard
+Requesting only `cases` still raises when a check fails. The standard
 `runStorageCycleRegressions` command always requires every restart to pass,
-even if the saved uninterrupted-cycle reference matches. Do not interpret
-successful completion of the diagnostic routine as an all-tests-passed result.
+even if the saved uninterrupted-cycle reference matches.

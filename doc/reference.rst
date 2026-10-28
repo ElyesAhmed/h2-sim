@@ -390,6 +390,19 @@ the scientific interpretation. No such change or tolerance relaxation is
 applied here. Engine reload alone is not a complete restart-reproducibility
 fix when the generated input also differs by roundoff.
 
+A separate full-cycle HS tracer restart discrepancy was traced to the EOS
+successive-substitution flash, before the aqueous input entered PHREEQC.
+An overall trace composition exactly at ``minimumComposition`` skipped its
+K-value update, while the adjacent floating-point value above that floor
+updated it. The H2sim Soreide-Whitson subclass now maps values within four
+floating-point increments of the floor to that floor before the inherited
+SSI update. This stabilizes the trace-component branch without changing the
+composition floor, equilibrium tolerance, chemistry database or kinetics.
+Local cycle regressions exercise a saved-state restart with a fresh PHREEQC
+engine. PE remains a separately reported diagnostic, not a restart-equality
+requirement. See ``tests/cycles/README.md`` for reference-update provenance
+and the measured numerical changes in the test fixture.
+
 PHREEQC selected-output definitions
 -----------------------------------
 
