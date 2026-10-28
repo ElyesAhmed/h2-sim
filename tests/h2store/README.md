@@ -182,3 +182,8 @@ reservoir cells. They use synthetic centroids and do not run the full aquifer.
 Boundary-condition tests build small MRST Cartesian grids and check lateral
 face ordering, hydrostatic pressure, zero and rotated gravity, the 3D gravity
 branch, inflow composition and reference-pressure changes.
+
+Schedule tests cover single-stage selection, cyclic ordering with and without
+cushion gas, stage durations, injection-rate controls, disabled idle wells,
+discharge signs/temperature and input-well preservation. The discharge control
+uses `tempCushion`; `tempDischarge` is not applied by this construction.
