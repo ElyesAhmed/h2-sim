@@ -126,6 +126,17 @@ addpath(fullfile(pwd, 'tests', 'h2store'));
 results = runH2StoreTests();
 ```
 
+Run the small complete-cycle and serialized-restart regressions locally with
+MRST and a working PHREEQC engine:
+
+```matlab
+addpath(fullfile(pwd, 'tests', 'cycles'));
+cases = runStorageCycleRegressions();
+```
+
+See the [cycle regression guide](tests/cycles/README.md) for coverage, reference
+provenance and comparison bounds.
+
 These local checks do not run the full paper simulations. See
 [contributing guidance](CONTRIBUTING.md) for formatting and reference policies.
 
