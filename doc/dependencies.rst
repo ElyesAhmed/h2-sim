@@ -1,10 +1,11 @@
 Dependencies
 ============
 
-The standard workflows run serially. Startup currently checks native
-PhreeqcMatlab libraries even when the chosen simulation does not use PHREEQC;
-see :doc:`installation` for first-startup downloads and offline setup. Install optional components only when
-your selected model needs them.
+The standard workflows run serially. Plain ``startupH2sim`` initializes core
+modules and MRST without checking or fetching chemistry libraries. Request
+``startupH2sim('phreeqc', true)`` only for chemistry workflows, or initialize
+chemistry later with ``initializeH2simPhreeqc``. See :doc:`installation` for
+explicit setup, first-use downloads and offline chemistry requirements.
 
 .. list-table:: What you need
    :header-rows: 1
@@ -20,8 +21,8 @@ your selected model needs them.
      - All simulation workflows
      - Pinned Git submodule; initialized by ``startupH2sim``
    * - PhreeqcMatlab
-     - Startup library checks and optional chemistry integration tools
-     - Pinned Git submodule
+     - Optional chemistry integration tools
+     - Pinned submodule; initialized only by explicit chemistry setup
    * - IPhreeqc (Linux) / IPhreeqcCOM (Windows)
      - The two sequential PHREEQC backends
      - Native shared library through PhreeqcMatlab on Linux; registered COM server on Windows; see :ref:`optional-phreeqc-setup`

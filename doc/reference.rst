@@ -14,7 +14,7 @@ Entry points
    * - Function
      - Purpose
    * - ``startupH2sim``
-     - Initialize code and dependencies
+     - Initialize core code and MRST; optional chemistry setup
    * - ``exampleBlackOilAquifer2D``
      - 2D structural trapping and five storage cycles
    * - ``simple1DBacterialExampleMetacet``
@@ -160,6 +160,20 @@ mass flux; tracer fluxes use molar concentrations without a density factor.
 For direct state-function evaluations outside the solver, initialize AD
 variables through ``model.AutoDiffBackend.initVariablesAD`` so their type
 matches the model's discrete operators.
+
+Startup profiles
+----------------
+
+``startupH2sim`` selects the core modules and pinned MRST dependency only.
+``startupH2sim('phreeqc', true)`` also initializes the pinned PhreeqcMatlab
+paths and checks its native libraries. ``initializeH2simPhreeqc`` enables this
+chemistry setup later in an existing core session. Default startup does not
+remove previously initialized chemistry paths or unload libraries.
+
+The batch launcher accepts ``--phreeqc`` to apply native Linux runtime setup
+before MATLAB starts. Without that flag it does not require the chemistry
+checkout or preload script. A native interface requested before initialization
+raises ``H2sim:PhreeqcNotInitialized`` with setup instructions.
 
 Saved backend figures
 ---------------------

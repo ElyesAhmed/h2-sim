@@ -160,7 +160,8 @@ For detailed methodology and validation, see our publication:
 
 ### Prerequisites
 
-Use the pinned MRST and PhreeqcMatlab submodules and run `startupH2sim` from
+Use pinned MRST for core workflows and add pinned PhreeqcMatlab for chemistry.
+Run `startupH2sim` from
 the repository root. Startup selects H2sim's `h2sim-biochem` implementation and
 loads the needed MRST dependencies; do not manually load MRST's separate
 `h2-biochem` or `h2store` modules for these examples.
@@ -168,18 +169,20 @@ loads the needed MRST dependencies; do not manually load MRST's separate
 The stated core minimum is MATLAB R2021a. The latest recorded regression run
 used R2026a Update 5; see the [verification guide](https://sintefmath.github.io/h2-sim/verification.html).
 Follow the [installation guide](https://sintefmath.github.io/h2-sim/installation.html)
-for platform-specific chemistry setup. Startup currently checks/downloads
-PhreeqcMatlab libraries even when the selected simulation does not use chemistry.
+for platform-specific chemistry setup. Plain `startupH2sim` skips PhreeqcMatlab
+setup; use `startupH2sim('phreeqc', true)` or `initializeH2simPhreeqc` when
+chemistry is required. Explicit initialization may download missing libraries.
 
 ### Terminal profiling
 
 From the H2sim repository root under WSL, run:
 
 ```bash
-bash run_matlab_h2sim.sh "results = profilePhreeqcWorkflows;"
+bash run_matlab_h2sim.sh --phreeqc "results = profilePhreeqcWorkflows;"
 ```
 
-The launcher prefers Linux MATLAB on PATH and falls back to Windows MATLAB R2026a under WSL. It initializes this checkout from the
+The `--phreeqc` flag enables chemistry setup and the Linux runtime preloader.
+Without the flag, the launcher starts core H2sim only. The launcher prefers Linux MATLAB on PATH and falls back to Windows MATLAB R2026a under WSL. It initializes this checkout from the
 standard MATLAB path, and propagates MATLAB's batch exit status. Set
 `MATLAB_BIN` to the desired Linux executable or Windows executable's WSL path.
 MATLAB needs a valid license for the selected installation; this is separate

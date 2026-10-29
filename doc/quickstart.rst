@@ -40,10 +40,11 @@ Short PHREEQC mineral comparison
 --------------------------------
 
 After configuring native IPhreeqc on Linux or IPhreeqcCOM on Windows
-(see :ref:`optional-phreeqc-setup`):
+(see :ref:`optional-phreeqc-setup`), explicitly initialize chemistry:
 
 .. code-block:: matlab
 
+   startupH2sim('phreeqc', true)
    comparison = exampleCompositionalBacterial1DPhreeqcMinerals( ...
        'gridCells', 4, 'maximumFlowSteps', 2, 'plotResults', false);
    pH = comparison(2).states{end}.phreeqcPH;

@@ -17,7 +17,7 @@ H2sim provides MATLAB models and examples for hydrogen storage in saline aquifer
 
 ## Install
 
-Use **MATLAB R2021a or newer** and Git. See the [verification record](https://sintefmath.github.io/h2-sim/verification.html) for the MATLAB releases and platforms actually tested. Clone the repository with its pinned MRST and PhreeqcMatlab dependencies:
+Use **MATLAB R2021a or newer** and Git. See the [verification record](https://sintefmath.github.io/h2-sim/verification.html) for the MATLAB releases and platforms actually tested. For a complete checkout, clone the repository with its pinned MRST and optional PhreeqcMatlab source:
 
 ```sh
 git clone --recurse-submodules https://github.com/sintefmath/h2-sim.git
@@ -30,6 +30,8 @@ If you already cloned without the dependencies, run this from the repository dir
 git submodule update --init --recursive
 ```
 
+For a core-only checkout, omit `--recurse-submodules` when cloning and initialize only MRST with `git submodule update --init --recursive -- submodules/mrst`. Chemistry setup can initialize PhreeqcMatlab later.
+
 In MATLAB, set the current folder to the cloned `h2-sim` directory and initialize:
 
 ```matlab
@@ -38,7 +40,7 @@ startupH2sim
 
 Startup initializes MRST and adds the H2sim modules. Use this startup function rather than recursively adding the entire MRST tree with `genpath`.
 
-Startup currently also checks PhreeqcMatlab's native libraries, even for core-only simulations. The first startup may download them; offline installations must provide the pinned submodules and libraries beforehand. See the [installation guide](https://sintefmath.github.io/h2-sim/installation.html) for platform setup and troubleshooting.
+Core startup does not initialize, fetch or check PhreeqcMatlab. To initialize chemistry, run `startupH2sim('phreeqc', true)`, or call `initializeH2simPhreeqc` later in a core session. Explicit chemistry setup may fetch the pinned dependency and download missing native libraries; provide them beforehand for offline chemistry use.
 
 To update a clean checkout on the repository's `master` branch:
 
@@ -53,7 +55,7 @@ Restart MATLAB and run `startupH2sim` after updating. Preserve local work before
 
 ## Run your first simulation
 
-Start with a coarse-grid 2D saline aquifer and one storage cycle. The flow calculation uses the bundled fluid tables and needs neither a PHREEQC engine nor Parallel Computing Toolbox; the startup library check described above still applies:
+Start with a coarse-grid 2D saline aquifer and one storage cycle. The flow calculation uses the bundled fluid tables and needs neither a PHREEQC engine nor Parallel Computing Toolbox; core startup does not check chemistry libraries:
 
 ```matlab
 result = exampleBlackOilAquifer2D( ...
@@ -89,11 +91,12 @@ module for these examples. See the [upstream comparison and attribution audit](h
 
 ## Use PHREEQC chemistry
 
-H2sim supports sequential PHREEQC coupling on **Linux MATLAB** through PhreeqcMatlab's native IPhreeqc shared library, and on **Windows MATLAB** through IPhreeqcCOM. On Linux, launch with `bash run_matlab_h2sim.sh "MATLAB statements"`; set `MATLAB_BIN` if MATLAB is not on PATH. See the [PHREEQC installation instructions](https://sintefmath.github.io/h2-sim/installation.html#optional-phreeqc-setup).
+H2sim supports sequential PHREEQC coupling on **Linux MATLAB** through PhreeqcMatlab's native IPhreeqc shared library, and on **Windows MATLAB** through IPhreeqcCOM. On Linux, launch with `bash run_matlab_h2sim.sh --phreeqc "MATLAB statements"`; set `MATLAB_BIN` if MATLAB is not on PATH. See the [PHREEQC installation instructions](https://sintefmath.github.io/h2-sim/installation.html#optional-phreeqc-setup).
 
-After completing the platform setup and running `startupH2sim`, check the interface and bundled database:
+After completing the platform setup, explicitly enable chemistry and check the interface and bundled database. Existing chemistry scripts should use this startup form:
 
 ```matlab
+startupH2sim('phreeqc', true)
 db = which('h2_biogeochemistry.dat');
 assert(~isempty(db), 'Initialize H2sim first.');
 iph = createH2simIPhreeqc('IPhreeqcCOM.Object');
@@ -130,9 +133,10 @@ Use [CITATION.cff](CITATION.cff) or GitHub's **Cite this repository** metadata t
 
 ## Tests and support
 
-After `startupH2sim`, run the biochemistry tests explicitly from their test folder:
+For the complete biochemistry suite, initialize chemistry and run the tests explicitly from their folder:
 
 ```matlab
+startupH2sim('phreeqc', true)
 mrstModule add test-suite
 checks = runtests(fullfile(pwd, 'tests', 'biochemistry'));
 assertSuccess(checks);

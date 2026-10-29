@@ -26,7 +26,7 @@ For biochemistry tests, first follow :doc:`installation` and initialize H2sim:
 
 .. code-block:: matlab
 
-   startupH2sim
+   startupH2sim('phreeqc', true)
    mrstModule add test-suite
    checks = runtests(fullfile(pwd, 'tests', 'biochemistry'));
    assertSuccess(checks);
@@ -96,6 +96,43 @@ this environment with fresh output: 33 cells, 179 accepted control steps and
 one 220-day simulated build-up/storage cycle. Its explicit plotting call passed.
 This manual onboarding check is separate from the 338 MATLAB test results and
 uses a different grid and cycle count from the archived five-cycle figures.
+
+Optional-startup verification
+-----------------------------
+
+On 29 October 2026, startup change ``4b86044`` was checked in the same Windows
+MATLAB R2026a Update 5 environment, using archived pinned MRST and PhreeqcMatlab
+source files rather than locally edited dependency checkouts:
+
+* With no PhreeqcMatlab directory, default startup completed three black-oil
+  phase-transfer cases and a two-step compositional simulation. The chemistry
+  checkout remained absent. A requested native interface reported
+  ``H2sim:PhreeqcNotInitialized`` with explicit setup instructions.
+* Default and explicit-false startup passed repeated-call and changed-working-
+  directory checks without initializing chemistry.
+* Explicit chemistry startup initialized the real IPhreeqc engine; both complete-
+  cycle/reference/restart cases passed. Repeating core startup preserved the
+  already initialized chemistry paths.
+* All 126 biochemistry tests and 217 H2-store tests passed, with no failed or
+  incomplete biochemistry tests. The five additional biochemistry tests cover
+  startup options, explicit initialization and dependency errors.
+* All 13 Python tooling tests passed. The six launcher checks exercise core
+  startup without a chemistry checkout, opt-in Linux preloading, Windows routing,
+  path quoting, argument errors and MATLAB exit-status propagation using fake
+  executables. They do not execute native Linux MATLAB.
+
+The focused startup tests can also run without a chemistry checkout:
+
+.. code-block:: matlab
+
+   startupH2sim
+   checks = runtests(fullfile(pwd, 'tests', 'biochemistry', ...
+       'H2simPhreeqcStartupTest.m'));
+   assertSuccess(checks);
+
+No numerical references, chemistry parameters or solver acceptance bounds were
+changed for optional startup. The earlier dated record remains above for the
+EOS restart correction and reference provenance.
 
 Platform and scientific limits
 -------------------------------

@@ -113,7 +113,7 @@ Use the existing example
 
 .. code-block:: matlab
 
-   startupH2sim
+   startupH2sim('phreeqc', true)
    exampleCompositionalBacterial2DPhreeqcMinerals
 
 This is the public entry point for the layered mineral-coupling setup.

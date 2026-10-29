@@ -16,6 +16,11 @@ requirements, and a verification command.
 
    <a class="phreeqc-brand" href="https://www.usgs.gov/software/phreeqc-version-3" aria-label="PHREEQC — official USGS software page"><img src="_static/phreeqc-icon.png" alt="PHREEQC application icon" width="32" height="32"><span><strong>PHREEQC</strong><small>USGS geochemical software ↗</small></span></a>
 
+Initialize with ``startupH2sim('phreeqc', true)`` before running chemistry
+examples, or call ``initializeH2simPhreeqc`` after core startup. Linux batch
+runs should use ``bash run_matlab_h2sim.sh --phreeqc "MATLAB statements"``
+to configure the native-library runtime before MATLAB starts.
+
 Two supported chemistry workflows share MRST flow and EOS gas–liquid
 partitioning, but assign microbial kinetics differently.
 

@@ -32,11 +32,25 @@ The stated minimum for core examples is MATLAB R2021a. The latest recorded
 regression environment is R2026a Update 5; earlier releases were not retested
 in that record. See :doc:`verification` for tested environments and limits.
 
-Startup adds H2sim modules and initializes dependencies. It currently also
-checks PhreeqcMatlab native libraries for core-only workflows and may download
-them on first startup. Offline use requires those libraries and the pinned
-submodule contents to be present beforehand. Optional chemistry initialization
-is not yet implemented. Do not add the complete MRST tree with ``genpath``.
+Default startup initializes MRST and H2sim modules only. It does not fetch,
+initialize or check PhreeqcMatlab or its libraries. Core workflows can use a
+checkout with only the MRST submodule initialized:
+
+.. code-block:: shell
+
+   git submodule update --init --recursive -- submodules/mrst
+
+Chemistry initialization is explicit:
+
+.. code-block:: matlab
+
+   startupH2sim('phreeqc', true)
+
+Or enable it after a core startup with ``initializeH2simPhreeqc``. This explicit
+request may fetch the pinned PhreeqcMatlab submodule and download missing native
+libraries. Supply them beforehand for offline chemistry use. Repeating core
+startup does not unload an already initialized chemistry session. Do not add
+the complete MRST tree with ``genpath``.
 
 H2sim uses its own biochemistry implementation, registered as
 ``h2sim-biochem``. Initialize it with ``startupH2sim``; do not use
@@ -56,6 +70,27 @@ You can check which implementation is selected:
 
 Both paths should point into this H2sim checkout's ``h2-biochem`` folder.
 
+Terminal startup profiles
+-------------------------
+
+The launcher uses the same core-only default:
+
+.. code-block:: bash
+
+   bash run_matlab_h2sim.sh "disp('Core ready')"
+
+For chemistry, initialize the PhreeqcMatlab submodule and request runtime setup:
+
+.. code-block:: bash
+
+   git submodule update --init --recursive -- submodules/PhreeqcMatlab
+   bash run_matlab_h2sim.sh --phreeqc "disp('Chemistry ready')"
+
+The flag supplies the Linux library preloader and calls
+``startupH2sim('phreeqc', true)``. It is not needed for core batch workflows.
+On Windows/WSL it selects the same explicit MATLAB initialization without
+using the Linux preloader. ``MATLAB_BIN`` selects the executable in either mode.
+
 Runtime and development paths
 -----------------------------
 
@@ -72,6 +107,7 @@ Run tests by their explicit folder path from the repository root:
 
 .. code-block:: matlab
 
+   startupH2sim('phreeqc', true)
    checks = runtests('tests/biochemistry');
    assertSuccess(checks);
 
@@ -91,8 +127,8 @@ Run a first example
 
 This coarse, one-cycle saline-aquifer configuration uses the black-oil model
 and bundled property tables. Its flow calculation needs neither a PHREEQC
-engine nor Parallel Computing Toolbox; startup still performs the library
-check described above. Continue with :doc:`quickstart` or :doc:`examples`.
+engine nor Parallel Computing Toolbox. Core startup does not check chemistry
+libraries. Continue with :doc:`quickstart` or :doc:`examples`.
 
 Optional AMGCL acceleration
 ---------------------------
@@ -145,18 +181,18 @@ Initialize the pinned submodules, then launch native Linux MATLAB:
 .. code-block:: bash
 
    git submodule update --init --recursive
-   MATLAB_BIN=/path/to/MATLAB/bin/matlab bash run_matlab_h2sim.sh "disp('Ready')"
+   MATLAB_BIN=/path/to/MATLAB/bin/matlab bash run_matlab_h2sim.sh --phreeqc "disp('Ready')"
 
 If ``matlab`` is on PATH, ``MATLAB_BIN`` may be omitted. The launcher prefers
 Linux MATLAB and falls back to Windows MATLAB under WSL when none is found.
-It delegates to PhreeqcMatlab's Linux launcher, which preloads the system
+With ``--phreeqc`` it delegates to PhreeqcMatlab's Linux launcher, which preloads the system
 ``libstdc++.so.6`` for its modern GCC binaries. Set
 ``PHREEQCMATLAB_LIBSTDCPP`` to override that library location if necessary.
 The system C++ runtime must provide ``GLIBCXX_3.4.32`` for the supplied
 3.8.6 binaries. MATLAB needs a configured supported C compiler for
 ``loadlibrary`` (``mex -setup C``).
 
-``startupH2sim`` initializes PhreeqcMatlab, which resolves the shared
+``startupH2sim('phreeqc', true)`` initializes PhreeqcMatlab, which resolves the shared
 libraries from its ``libs/`` directory, a local install specified by
 ``PHREEQCMATLAB_LIB_PATH`` (or ``/usr/local/lib``), or release downloads.
 For offline installations, provide the libraries before startup.
@@ -164,7 +200,10 @@ No COM registration is needed on Linux. Use the same explicit absolute
 ``phreeqcDatabaseFile`` path to ``h2_biogeochemistry.dat`` as on Windows;
 ``phreeqcComProgId`` is only used on Windows.
 
-Verify chemistry and cell batching after initialization:
+For an existing MATLAB session with the required runtime configured, run
+``startupH2sim('phreeqc', true)`` or ``initializeH2simPhreeqc`` before these
+checks. The launcher flag performs this initialization automatically. Verify
+chemistry and cell batching:
 
 .. code-block:: matlab
 
@@ -179,7 +218,8 @@ Windows
 
 Install and register IPhreeqcCOM from the
 `USGS PHREEQC distribution <https://www.usgs.gov/software/phreeqc-version-3>`_
-on Windows. Test the COM interface and the bundled database:
+on Windows, then initialize with ``startupH2sim('phreeqc', true)``. Test the
+COM interface and bundled database:
 
 .. code-block:: matlab
 
@@ -217,12 +257,11 @@ Troubleshooting
 * **A different BiochemistryModel is selected:** restart MATLAB and initialize
   this checkout before loading models. Check ``which BiochemistryModel``;
   avoid recursively adding MRST or the complete repository to the path.
-* **First startup fails while downloading chemistry libraries:** startup currently
-  checks those files even for core-only simulations. Provide the pinned
-  PhreeqcMatlab libraries before startup for offline use. A PHREEQC engine is
-  only used by chemistry workflows, but this startup check is unconditional.
+* **Explicit chemistry setup fails while downloading libraries:** provide the
+  pinned PhreeqcMatlab libraries beforehand for offline use. Plain
+  ``startupH2sim`` skips chemistry setup and remains available for core workflows.
 * **Linux reports a GLIBCXX or loadlibrary error:** launch through
-  ``run_matlab_h2sim.sh``, check the runtime requirement in the Linux section,
+  ``run_matlab_h2sim.sh --phreeqc``, check the runtime requirement in the Linux section,
   and configure MATLAB's supported C compiler with ``mex -setup C``.
 * **No MATLAB executable is found by the launcher:** set ``MATLAB_BIN`` to the
   executable for your installation. Under WSL, a Windows executable needs its
