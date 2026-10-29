@@ -17,7 +17,7 @@ H2sim provides MATLAB models and examples for hydrogen storage in saline aquifer
 
 ## Install
 
-Use **MATLAB R2021a or newer** and Git. Clone the repository with its pinned MRST and PhreeqcMatlab dependencies:
+Use **MATLAB R2021a or newer** and Git. See the [verification record](https://sintefmath.github.io/h2-sim/verification.html) for the MATLAB releases and platforms actually tested. Clone the repository with its pinned MRST and PhreeqcMatlab dependencies:
 
 ```sh
 git clone --recurse-submodules https://github.com/sintefmath/h2-sim.git
@@ -38,20 +38,34 @@ startupH2sim
 
 Startup initializes MRST and adds the H2sim modules. Use this startup function rather than recursively adding the entire MRST tree with `genpath`.
 
+Startup currently also checks PhreeqcMatlab's native libraries, even for core-only simulations. The first startup may download them; offline installations must provide the pinned submodules and libraries beforehand. See the [installation guide](https://sintefmath.github.io/h2-sim/installation.html) for platform setup and troubleshooting.
+
+To update a clean checkout on the repository's `master` branch:
+
+```sh
+git pull --ff-only
+git submodule update --init --recursive
+```
+
+Restart MATLAB and run `startupH2sim` after updating. Preserve local work before changing branches or updating. Use Git cloning rather than GitHub's source ZIP, which does not include submodule contents.
+
 **Parallel Computing Toolbox is optional.** The selected examples run serially by default. Optional AMGCL acceleration for larger compositional simulations requires a supported C++ compiler and MRST's compiled gateway; see the [installation guide](https://sintefmath.github.io/h2-sim/installation.html).
 
 ## Run your first simulation
 
-The 2D saline-aquifer example includes hydrogen build-up and five storage cycles. It requires neither PHREEQC nor Parallel Computing Toolbox:
+Start with a coarse-grid 2D saline aquifer and one storage cycle. The flow calculation uses the bundled fluid tables and needs neither a PHREEQC engine nor Parallel Computing Toolbox; the startup library check described above still applies:
 
 ```matlab
-result = exampleBlackOilAquifer2D;
+result = exampleBlackOilAquifer2D( ...
+    'gridSpacing', [10, 10], 'numCycles', 1, 'plotResults', false);
 plotBlackOilAquifer2D(result);
 
 % Inspect the final gas saturation.
 lastState = result.states{end};
 gasSaturation = lastState.s(:, 2);
 ```
+
+For the full five-cycle example on the default grid, run `exampleBlackOilAquifer2D()`; it plots automatically. The introductory command above uses a coarser grid and is not the configuration of the archived notebook figures.
 
 The [aquifer notebook](https://sintefmath.github.io/h2-sim/notebooks/blackoil_storage.html) explains the setup and shows storage-cycle, dissolution, and fluid-table figures.
 
@@ -62,7 +76,8 @@ Run the existing 2D depleted-reservoir case with three microbial reactions:
 ```matlab
 results = exampleCompositionalBacterial2DThreeReactions( ...
     'numCycles', 5, 'scenarios', {'bacterial', 'abiotic'}, ...
-    'molecularDiffusion', false, 'molecularDispersion', false);
+    'molecularDiffusion', false, 'molecularDispersion', false, ...
+    'plotResults', false);
 plotCompositionalBacterial2DThreeReactions(results);
 ```
 
@@ -91,7 +106,7 @@ Run a small mineral-chemistry setup check and inspect its final pH:
 
 ```matlab
 comparison = exampleCompositionalBacterial1DPhreeqcMinerals( ...
-    'gridCells', 4, 'maximumFlowSteps', 2);
+    'gridCells', 4, 'maximumFlowSteps', 2, 'plotResults', false);
 pH = comparison(2).states{end}.phreeqcPH;
 plotPhreeqcMineralComparison(comparison);
 ```
@@ -106,6 +121,12 @@ Read the [PHREEQC workflow guide](https://sintefmath.github.io/h2-sim/phreeqc.ht
 - [Publications and presentations](https://sintefmath.github.io/h2-sim/publications.html): related research and references.
 
 The plotting functions above accept completed result structures, so you can redraw figures without rerunning the simulations. For later use, save the returned structure in MATLAB, for example `save('aquiferResults.mat', 'result', '-v7.3')`.
+
+## License and citation
+
+H2sim is distributed under the [GNU GPL version 3 or later](LICENSE). Inherited MRST/SINTEF copyright and license notices remain in their files; dependencies and bundled datasets retain their own notices and attribution.
+
+Use [CITATION.cff](CITATION.cff) or GitHub's **Cite this repository** metadata to cite the software. Record the H2sim commit and dependency revisions used, and cite the [relevant model publications](https://sintefmath.github.io/h2-sim/publications.html) and chemistry database source for your workflow. The source is available now; the first tagged release is in preparation.
 
 ## Tests and support
 
@@ -136,6 +157,8 @@ cases = runStorageCycleRegressions();
 
 See the [cycle regression guide](tests/cycles/README.md) for coverage, reference
 provenance and comparison bounds.
+
+See the [verification guide](https://sintefmath.github.io/h2-sim/verification.html) for the dated local test record, tested environment, and platform limitations. GitHub Actions checks documentation; MATLAB regressions are run locally.
 
 These local checks do not run the full paper simulations. See
 [contributing guidance](CONTRIBUTING.md) for formatting and reference policies.

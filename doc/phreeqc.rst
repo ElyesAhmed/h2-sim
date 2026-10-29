@@ -4,11 +4,11 @@ PHREEQC coupling
 Platform support
 ----------------
 
-The development integration supports both sequential backends on **Linux
+H2sim supports both sequential backends on **Linux
 MATLAB** through PhreeqcMatlab's native IPhreeqc library and on **Windows
 MATLAB** through IPhreeqcCOM. Linux does not need a COM server.
-Earlier releases use Windows COM; native Linux simulation validation is
-pending. See :ref:`optional-phreeqc-setup` for installation, runtime
+A full native-Linux MATLAB regression run is not recorded in the latest
+:doc:`verification` record. See :ref:`optional-phreeqc-setup` for installation, runtime
 requirements, and a verification command.
 
 

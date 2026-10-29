@@ -3,6 +3,17 @@ Publications & presentations
 
 Research behind the hydrogen-storage, thermodynamic, and biochemical workflows.
 
+Cite the software
+-----------------
+
+H2sim's machine-readable software citation is in
+`CITATION.cff <https://github.com/sintefmath/h2-sim/blob/master/CITATION.cff>`_.
+The metadata follows the author credits in this documentation. Record the
+source commit and pinned dependency revisions used in your study; no software
+DOI or tagged-release version is assigned by this file. Cite the relevant model
+papers below and the PHREEQC database source when using those methods or data.
+Inherited MRST and dataset credits remain separate from the software citation.
+
 Papers & proceedings
 ---------------------
 **Modeling and simulation of coupled biochemical and two-phase compositional flow in underground hydrogen storage**

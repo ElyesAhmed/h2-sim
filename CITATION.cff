@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: >-
+  Cite H2sim when using this software, record the source revision, and cite the
+  model-specific publications and database sources used in your study.
+title: "H2sim: Underground hydrogen storage simulation"
+type: software
+authors:
+  - family-names: Ahmed
+    given-names: Elyes
+  - family-names: Raynaud
+    given-names: Xavier
+repository-code: "https://github.com/sintefmath/h2-sim"
+url: "https://sintefmath.github.io/h2-sim/"
+license: GPL-3.0-or-later
+abstract: >-
+  MATLAB tools built on MRST for hydrogen storage in saline aquifers and depleted
+  gas reservoirs, including black-oil and compositional flow, microbial
+  reactions, thermodynamics, and sequential PHREEQC coupling.
+keywords:
+  - underground hydrogen storage
+  - MATLAB
+  - MRST
+  - reactive transport
+  - PHREEQC
