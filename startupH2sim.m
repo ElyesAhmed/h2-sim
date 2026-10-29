@@ -1,16 +1,14 @@
-function startupH2sim
-
-    % This startup file set up the MATLAB path
+function startupH2sim(varargin)
+    % STARTUPH2SIM Initialize core H2sim modules and optional PHREEQC tools.
     %
-    %% We use first `MRST <https://github.com/SINTEF-AppliedCompSci/MRST>`_ setup for MRST modules.
-    % The source code for MRST is synchronized to H2Sim using a git submodule (see ``submodules/mrst``).
+    % SYNOPSIS:
+    %   startupH2sim
+    %   startupH2sim('phreeqc', true)
     %
-
-    fprintf('\n  /-\\\n | + | H2Sim\n  \\-/\n\n');
-    fprintf('Welcome to the H2 Storage Modeling Toolbox (H2sim)!\n');
-    fprintf('H2sim is based on MRST, which will now be initialized.\n\n');
-
-    rootdirname = fileparts(mfilename('fullpath'));
+    % Core startup initializes the pinned MRST dependency and H2sim modules.
+    % It does not initialize, fetch or check PhreeqcMatlab. Opt in for chemistry
+    % library setup, or call initializeH2simPhreeqc after core startup.
+    % Existing chemistry paths or loaded libraries are not removed.
 
     % A recursively added MRST tree can leave Octave compatibility shims on
     % MATLAB's saved path. In particular, properties.m breaks parpool settings
@@ -27,16 +25,22 @@ function startupH2sim
         end
     end
 
-    %% Make sure the git submodules (MRST, PhreeqcMatlab) are present, downloading them on demand
-    %
-    % If a submodule directory is missing (e.g. the repository was cloned without
-    % ``--recurse-submodules``), it is fetched automatically here using
-    % ``git submodule update --init``. This always checks out the exact commit that is pinned for
-    % that submodule in the H2sim repository, so newer, possibly incompatible, upstream changes to
-    % MRST/PhreeqcMatlab never affect H2sim until that pin is deliberately updated.
+    parser = inputParser();
+    parser.FunctionName = mfilename;
+    parser.PartialMatching = false;
+    addParameter(parser, 'phreeqc', false, @(x) islogical(x) && isscalar(x));
+    parse(parser, varargin{:});
 
-    ensureSubmodule(rootdirname, 'mrst');
-    ensureSubmodule(rootdirname, 'PhreeqcMatlab');
+    fprintf('\n  /-\\\n | + | H2Sim\n  \\-/\n\n');
+    fprintf('Welcome to the H2 Storage Modeling Toolbox (H2sim)!\n');
+    fprintf('H2sim is based on MRST, which will now be initialized.\n\n');
+
+    rootdirname = fileparts(mfilename('fullpath'));
+
+    %% Initialize the core simulation dependency
+    addpath(rootdirname);
+    addpath(fullfile(rootdirname, 'utils'));
+    ensureH2simSubmodule(rootdirname, 'mrst');
 
     run(fullfile(rootdirname, 'submodules', 'mrst', 'startup'));
 
@@ -54,9 +58,10 @@ function startupH2sim
     % Keep that module out of this session and use the explicit H2sim namespace.
     activateH2simBiochemistry(rootdirname);
 
-    %% Install Phreeqcs
-
-    run(fullfile(rootdirname, 'submodules', 'PhreeqcMatlab', 'startup'));
+    %% Initialize chemistry only when requested
+    if parser.Results.phreeqc
+        initializeH2simPhreeqc(rootdirname);
+    end
 
     %% Octave requires some extra functionality
     if mrstPlatform('octave')
@@ -96,39 +101,21 @@ function startupH2sim
 
 end
 
-function ensureSubmodule(rootdirname, name)
-    % Clone the git submodule ``name`` (under ``submodules/<name>``) if it is not already present,
-    % checking out the commit that is pinned for it in the H2sim repository (see ``.gitmodules``).
+%{
+Copyright 2009-2026 SINTEF Digital, Mathematics & Cybernetics.
 
-    submodulepath = fullfile(rootdirname, 'submodules', name);
+This file is part of h2sim.
 
-    if exist(fullfile(submodulepath, 'startup.m'), 'file')
-        % Already downloaded
-        return
-    end
+h2sim is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    if ~(isfolder(fullfile(rootdirname, '.git')) || isfile(fullfile(rootdirname, '.git')))
-        error('h2sim:missingGitRepo', ['Cannot auto-download the ''%s'' submodule because\n  %s\n' ...
-            'is not a git checkout. Please install H2sim using ' ...
-            '''git clone --recurse-submodules'' as described in the documentation ' ...
-            '(doc/installation.rst), or download ''%s'' manually into ''%s''.'], ...
-            name, rootdirname, name, submodulepath);
-    end
+h2sim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    fprintf('Submodule ''%s'' was not found, downloading it now (this may take a while)...\n', name);
-
-    relpath = strrep(fullfile('submodules', name), filesep, '/');
-    cmd = sprintf('git -C "%s" submodule update --init --recursive -- "%s"', rootdirname, relpath);
-    [status, cmdout] = system(cmd);
-
-    if status ~= 0 || ~exist(fullfile(submodulepath, 'startup.m'), 'file')
-        error('h2sim:submoduleSetupFailed', ['Failed to download the ''%s'' submodule automatically.\n' ...
-            'Command: %s\nOutput:\n%s\n\n' ...
-            'You can also do it manually by running from the H2sim root:\n' ...
-            '  git submodule update --init --recursive -- %s'], ...
-            name, cmd, cmdout, relpath);
-    end
-
-    fprintf('Submodule ''%s'' downloaded (pinned commit, matching the tested H2sim version).\n\n', name);
-
-end
+You should have received a copy of the GNU General Public License
+along with h2sim.  If not, see <http://www.gnu.org/licenses/>.
+%}
