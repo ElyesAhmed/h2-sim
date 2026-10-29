@@ -28,7 +28,7 @@ Entry points
    * - ``exampleCompositionalBacterial2DThreeReactions``
      - Existing 2D reservoir case with MET, ACE, SRB, packed cycles, and selectable scenarios
    * - ``runPhreeqcValidation``
-     - Compositional PHREEQC injection benchmark against an external reference
+     - Standalone compositional PHREEQC storage cycle; optional external reference
    * - ``exampleH2BrineSolubilityStudy``
      - Phase-partition and salting-out comparisons
    * - ``setupOptimizedLinearSolver``
@@ -711,7 +711,9 @@ Tests
    checks = runtests('tests/biochemistry');
    assertSuccess(checks);
 
-COM integration tests require the IPhreeqcCOM setup described in :doc:`installation`.
+PHREEQC integration tests require the native Linux or Windows COM setup
+described in :doc:`installation`. See :doc:`verification` for all local test
+commands, the recorded environment and the distinction from documentation CI.
 A skipped test does not validate a backend on that platform. The serial
 fallback tests cover both available and missing optional toolbox checks.
 

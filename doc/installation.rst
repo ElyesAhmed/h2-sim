@@ -28,8 +28,15 @@ Then run:
 
    startupH2sim
 
-Use MATLAB R2021a or newer for the core examples. Startup adds H2sim modules
-and initializes dependencies. Do not add the complete MRST tree with ``genpath``.
+The stated minimum for core examples is MATLAB R2021a. The latest recorded
+regression environment is R2026a Update 5; earlier releases were not retested
+in that record. See :doc:`verification` for tested environments and limits.
+
+Startup adds H2sim modules and initializes dependencies. It currently also
+checks PhreeqcMatlab native libraries for core-only workflows and may download
+them on first startup. Offline use requires those libraries and the pinned
+submodule contents to be present beforehand. Optional chemistry initialization
+is not yet implemented. Do not add the complete MRST tree with ``genpath``.
 
 H2sim uses its own biochemistry implementation, registered as
 ``h2sim-biochem``. Initialize it with ``startupH2sim``; do not use
@@ -57,8 +64,9 @@ utilities. Biochemistry tests live in ``tests/biochemistry``; archived examples
 and older 3D studies live in ``research/biochemistry``. These folders are
 outside the registered module root, so MRST module reactivation does not add
 them. Activation also removes paths left by their previous locations.
-Supported examples and model class locations are unchanged. Developer tools
-that share a supported example folder remain visible pending a separate review.
+Older storage prototypes live in ``research/h2store/prototypes``. Supported
+entry points remain in the module example folders; tests and research code
+are added explicitly only when needed.
 
 Run tests by their explicit folder path from the repository root:
 
@@ -68,19 +76,23 @@ Run tests by their explicit folder path from the repository root:
    assertSuccess(checks);
 
 To inspect an archived study, add only its selected folder explicitly after
-startup. Do not recursively add the entire repository. This separation covers
-the moved biochemistry groups; it does not classify local unpublished studies
-or reorganize the storage and calibration modules.
+startup. Do not recursively add the entire repository. See the README files
+under ``research/`` for the scope and limitations of
+archived studies and prototypes. These are separate from supported tutorials.
 
 Run a first example
 -------------------
 
 .. code-block:: matlab
 
-   result = exampleBlackOilAquifer2D;
+   result = exampleBlackOilAquifer2D( ...
+       'gridSpacing', [10, 10], 'numCycles', 1, 'plotResults', false);
+   plotBlackOilAquifer2D(result);
 
-This two-dimensional saline-aquifer example uses the black-oil model and
-requires neither PHREEQC nor Parallel Computing Toolbox. Continue with :doc:`quickstart` or :doc:`examples`.
+This coarse, one-cycle saline-aquifer configuration uses the black-oil model
+and bundled property tables. Its flow calculation needs neither a PHREEQC
+engine nor Parallel Computing Toolbox; startup still performs the library
+check described above. Continue with :doc:`quickstart` or :doc:`examples`.
 
 Optional AMGCL acceleration
 ---------------------------
@@ -122,11 +134,11 @@ Linux
 
 .. note::
 
-   Native Linux coupling is available in the development checkout containing
-   ``createH2simIPhreeqc.m`` and ``H2simNativeIPhreeqc.m``. Earlier releases
-   use Windows COM for both sequential backends. Check your checkout before
-   following the Linux steps below. Full Linux MATLAB simulation validation
-   is pending; native-interface chemistry has been tested with Windows DLLs.
+   The current source includes native Linux coupling. Full native-Linux
+   MATLAB regression validation is not recorded in the latest verification
+   record; native-interface chemistry has also been tested with Windows DLLs.
+   See :doc:`verification` for the distinction between implemented support
+   and recorded platform validation.
 
 Initialize the pinned submodules, then launch native Linux MATLAB:
 
@@ -180,3 +192,44 @@ on Windows. Test the COM interface and the bundled database:
 
 Configure ``phreeqcComProgId`` if your COM installation uses a different
 identifier. ``phreeqcDatabaseFile`` must resolve to an absolute database path.
+
+Update an existing checkout
+---------------------------
+
+From a clean checkout on the repository's ``master`` branch:
+
+.. code-block:: shell
+
+   git pull --ff-only
+   git submodule update --init --recursive
+
+Preserve local work before changing branches or updating. Restart MATLAB after
+an update and run ``startupH2sim`` before creating model objects. Do not update
+submodules with ``--remote``: the repository pins the revisions used for its
+verification record.
+
+Troubleshooting
+---------------
+
+* **Missing dependencies after downloading a ZIP:** use the Git clone command
+  above. GitHub source ZIPs omit submodule contents, and startup cannot fetch
+  pinned dependencies automatically outside a Git checkout.
+* **A different BiochemistryModel is selected:** restart MATLAB and initialize
+  this checkout before loading models. Check ``which BiochemistryModel``;
+  avoid recursively adding MRST or the complete repository to the path.
+* **First startup fails while downloading chemistry libraries:** startup currently
+  checks those files even for core-only simulations. Provide the pinned
+  PhreeqcMatlab libraries before startup for offline use. A PHREEQC engine is
+  only used by chemistry workflows, but this startup check is unconditional.
+* **Linux reports a GLIBCXX or loadlibrary error:** launch through
+  ``run_matlab_h2sim.sh``, check the runtime requirement in the Linux section,
+  and configure MATLAB's supported C compiler with ``mex -setup C``.
+* **No MATLAB executable is found by the launcher:** set ``MATLAB_BIN`` to the
+  executable for your installation. Under WSL, a Windows executable needs its
+  WSL path; native Linux MATLAB is preferred when available.
+* **An optional backend test is incomplete:** inspect its dependency message.
+  A skipped test does not validate that backend. See :doc:`verification`.
+
+For support, include the H2sim revision, MATLAB version, operating system,
+selected backend and complete error stack. Use the repository's bug-report
+form for reproducible failures or :doc:`community` for setup questions.

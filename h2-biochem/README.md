@@ -38,11 +38,9 @@ rerunning the simulation. See the website notebooks and provenance records for
 these distinctions, including normalization and conservation-audit limitations.
 
 `benchmarkSequentialPhreeqcVolumeFlash` and `profilePhreeqcWorkflows` are
-developer performance tools. Local `paper_2026` includes publication drivers,
-tests and exploratory studies; not every file there is a manuscript case.
-The older transport and 3D examples remain available while their configuration
-and documentation are reviewed. They are not deleted solely because a current
-website or manuscript does not use them.
+developer performance tools. Archived transport and 3D studies are indexed under
+[research/biochemistry](../research/biochemistry/README.md); storage prototypes
+are described under [research/h2store](../research/h2store/README.md). These research files are outside the supported runtime module.
 
 ## Overview
 
@@ -162,15 +160,16 @@ For detailed methodology and validation, see our publication:
 
 ### Prerequisites
 
-- **MATLAB**: Version R2021a or newer
-- **MRST**: MATLAB Reservoir Simulation Toolbox (2023b or newer)
-- **Required MRST Modules**:
-  - `compositional`
-  - `ad-blackoil`
-  - `ad-core`
-  - `ad-props`
-  - `h2store`
-  -`biochemistry`
+Use the pinned MRST and PhreeqcMatlab submodules and run `startupH2sim` from
+the repository root. Startup selects H2sim's `h2sim-biochem` implementation and
+loads the needed MRST dependencies; do not manually load MRST's separate
+`h2-biochem` or `h2store` modules for these examples.
+
+The stated core minimum is MATLAB R2021a. The latest recorded regression run
+used R2026a Update 5; see the [verification guide](https://sintefmath.github.io/h2-sim/verification.html).
+Follow the [installation guide](https://sintefmath.github.io/h2-sim/installation.html)
+for platform-specific chemistry setup. Startup currently checks/downloads
+PhreeqcMatlab libraries even when the selected simulation does not use chemistry.
 
 ### Terminal profiling
 
@@ -183,7 +182,8 @@ bash run_matlab_h2sim.sh "results = profilePhreeqcWorkflows;"
 The launcher prefers Linux MATLAB on PATH and falls back to Windows MATLAB R2026a under WSL. It initializes this checkout from the
 standard MATLAB path, and propagates MATLAB's batch exit status. Set
 `MATLAB_BIN` to the desired Linux executable or Windows executable's WSL path.
-The Windows COM backends require access to your MATLAB license server.
+MATLAB needs a valid license for the selected installation; this is separate
+from configuring the PHREEQC interface.
 
 `profilePhreeqcWorkflows` profiles each baseline and compares three alternating
 unprofiled baseline/candidate pairs. The candidates are the multirate local

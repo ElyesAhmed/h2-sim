@@ -6,6 +6,13 @@ on:
   pull_request:
     paths:
       - 'doc/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'LICENSE'
+      - 'CITATION.cff'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.gitmodules'
+      - 'run_matlab_h2sim.sh'
       - '.github/workflows/doc.yml'
       - 'tools/**'
       - 'utils/**'
@@ -13,7 +20,6 @@ on:
       - 'tests/**'
       - 'research/**'
       - 'h2-store/**'
-      - 'h2-calibration/**'
       - 'startupH2sim.m'
   workflow_dispatch:
 

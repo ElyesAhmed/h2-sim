@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a reproducible installation or simulation failure.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For modeling questions and general setup help, use Discussions.
+        Include only code and data you are allowed to share publicly.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and revisions
+      description: Include H2sim commit, submodule revisions, MATLAB version, OS, and native Linux or Windows MATLAB under WSL where relevant.
+      placeholder: Output of git rev-parse HEAD, git submodule status, MATLAB version and computer.
+    validations:
+      required: true
+  - type: input
+    id: workflow
+    attributes:
+      label: Example or workflow
+      placeholder: Function name and selected PHREEQC backend, if any.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the startup command, example options, installation method, and any necessary small public input files.
+      render: matlab
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Complete error or relevant log
+      description: Paste the full error stack and state whether the issue also occurs in a fresh MATLAB session.
+      render: text
+    validations:
+      required: true

@@ -65,7 +65,7 @@ when possible. Share only files and data you are allowed to make public.
    Ask a question ↗
 
 Report a reproducible bug in
-`GitHub Issues <https://github.com/sintefmath/h2-sim/issues>`_. Use Discussions
+`the bug-report form <https://github.com/sintefmath/h2-sim/issues/new?template=bug_report.yml>`_. Use Discussions
 for questions and open-ended conversations; link the two when a discussion
 identifies a code change.
 
