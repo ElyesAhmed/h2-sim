@@ -258,7 +258,7 @@ plots actual stage endpoints; earlier frames used sequential state indices.
 
 ## Small four-layer anticline
 
-`H2StoreAnticlineExampleTest` adds seven checks for the published-case adaptation
+`H2StoreAnticlineExampleTest` adds eight checks for the published-case adaptation
 `exampleHydrogenAnticline`: layer/grid/completion properties, exact 525-day
 default stage totals, capillary regions and gas compressibility, actual prescribed
 hydrogen exchange across injection/shut-in/withdrawal/reinjection, public
@@ -268,3 +268,7 @@ case runs one cycle after a shorter cushion buildup. It includes pressure-bounda
 gas flux in the balance and excludes inactive-well rates. No PHREEQC or external
 benchmark data is required. These are behavior and conservation checks, not
 external-reference or grid-convergence validation.
+
+The saved-state plotting check verifies that inventory and signed-rate curves
+use the accepted simulation times, snapshot labels match their selected states,
+and the geology section contains all four layers.

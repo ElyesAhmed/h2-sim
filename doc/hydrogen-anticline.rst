@@ -1,10 +1,13 @@
-Cyclic storage beneath an anticline
-===================================
+Anticlinal hydrogen storage
+===========================
 
 This small three-dimensional case adapts **Problem 4 of Okoroafor et al.
 (2023)**: a four-layer Gaussian structure with a storage well at its crest.
 An initially brine-saturated reservoir receives cushion hydrogen, rests during
-shut-in, and then alternates withdrawal and reinjection.
+shut-in, and then alternates withdrawal and reinjection. This page combines
+an animation with figures drawn from the same saved simulation.
+
+**Black-oil flow · Four geological layers · 5625 cells · No PHREEQC required**
 
 .. raw:: html
 
@@ -19,12 +22,59 @@ saturation. The central vertical section shows cell gas saturations above
 ``0.005`` against the four geological layers. The history panel shows hydrogen
 inventory in surface cubic metres. Both saturation panels use fixed color
 limits from zero to 0.8. Vertical exaggeration is fivefold on the 3D surface
-and twofold in the section. For this preview, up to 120 initial/accepted states are selected by physical time, retaining
+and twofold in the section. For this preview, up to 160 initial/accepted states are selected by physical time, retaining
 every operating-stage endpoint, without temporal interpolation. Labelled simulation times are uneven; playback is not real time.
 
 Download the :download:`MP4 <_static/examples/hydrogen_anticline.mp4>`,
 :download:`GIF <_static/examples/hydrogen_anticline.gif>` or
 :download:`provenance record <_static/examples/hydrogen_anticline_provenance.json>`.
+
+Geological structure
+--------------------
+
+.. figure:: _static/examples/anticline_geology.png
+   :alt: Central section through the four-layer Gaussian structure with the shallow aquifer, cap rock, storage formation, underburden and storage well.
+   :width: 100%
+
+   Geological layers and the central well. The well fully penetrates the
+   20 m storage formation. Depth increases downward; vertical exaggeration is
+   twofold. Layer properties are listed below.
+
+:download:`Download vector PDF <_static/examples/anticline_geology.pdf>`.
+
+Plume development
+-----------------
+
+.. figure:: _static/examples/anticline_plume_snapshots.png
+   :alt: Six central-section gas saturation snapshots through cushion buildup, shut-in and the first withdrawal and reinjection.
+   :width: 100%
+
+   Gas migration through cushion injection, shut-in and the first storage
+   cycle. Every panel uses the same saturation scale. Labels show actual
+   accepted-state times, nearest the requested milestones. Cells below 0.005
+   gas saturation are hidden; sections have twofold vertical exaggeration.
+
+:download:`Download vector PDF <_static/examples/anticline_plume_snapshots.pdf>`.
+
+Operating response and ten storage cycles
+-----------------------------------------
+
+.. figure:: _static/examples/anticline_operations.png
+   :alt: Stored hydrogen and integrated exchange, signed surface well rates, active well and completion brine pressure, and a detailed view of ten storage cycles.
+   :width: 100%
+
+   Stored hydrogen agrees with integrated well and boundary exchange.
+   Positive gas rate is injection; negative rate is withdrawal. Inactive-well
+   BHP is omitted, while the mean saved brine-phase pressure in the completion cells remains
+   visible.
+   The cycle close-up shows all ten withdrawal/reinjection pairs: orange
+   shading marks withdrawal and teal shading marks reinjection. Inventory
+   is reported at the stated surface reference conditions.
+
+:download:`Download vector PDF <_static/examples/anticline_operations.pdf>`.
+The :download:`figure provenance <_static/examples/anticline_figures_provenance.json>`
+records the source states and export hashes. These are simulation figures,
+not measurements or external benchmark comparison curves.
 
 Run the example
 ---------------
@@ -36,18 +86,19 @@ change the original version tag's source files.
 .. code-block:: matlab
 
    startupH2sim
-   result = exampleHydrogenAnticline('buildupDays', 730);
+   result = exampleHydrogenAnticline('buildupDays', 730, 'numCycles', 10);
    animateHydrogenAnticline(result, fullfile('build', 'anticline'), ...
-       'frameRate', 6, 'maxFrames', 120);
+       'frameRate', 6, 'maxFrames', 160);
 
 The simulation creates no files or figures. Save the result once to redraw it:
 
 .. code-block:: matlab
 
+   plotHydrogenAnticline(result, 'outputDirectory', fullfile('build', 'anticline'));
    save('anticlineResults.mat', 'result', '-v7');
    load('anticlineResults.mat', 'result');
    animateHydrogenAnticline(result, fullfile('build', 'anticline'), ...
-       'frameRate', 6, 'maxFrames', 120);
+       'frameRate', 6, 'maxFrames', 160);
 
 A smaller complete-operation check uses:
 
@@ -111,7 +162,8 @@ for 90 days, then performs five cycles of seven days of withdrawal and seven
 days of reinjection at 400,000 surface m³/day. Withdrawal controls the gas rate;
 reinjection is pure hydrogen. The default total duration is 525 days.
 The **displayed preview extends cushion injection to 730 days**, retaining the
-same rates, shut-in and five cycles, for a total of **890 days**. This injects
+same rates and 90-day shut-in, and uses **ten storage cycles**, for a total of
+**960 days**. This injects
 twice the cushion volume and allows the resolved plume to spread farther.
 At the end of cushion injection, the resolved plume radius at a cell gas
 saturation of at least 0.05 grows from approximately 429 m in the default run

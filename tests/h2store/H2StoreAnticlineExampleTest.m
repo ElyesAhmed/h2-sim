@@ -98,6 +98,29 @@ classdef H2StoreAnticlineExampleTest < matlab.unittest.TestCase
                 'MATLAB:InputParser:ArgumentFailedValidation');
         end
 
+        function plotsSavedStateHistory(test)
+            result = test.storageCase;
+            figures = plotHydrogenAnticline(result);
+            cleanup = onCleanup(@() close([figures.geology, ...
+                figures.plume, figures.operations]));
+            expectedTimes = [0; cumsum(result.schedule.step.val)] / day;
+            line = findobj(figures.operations, 'Tag', 'inventory-history');
+            test.verifyNumElements(line, 1);
+            test.verifyEqual(line.XData(:), expectedTimes);
+            test.verifyEqual(line.YData(:) * 1e6, ...
+                result.diagnostics.hydrogenSurfaceVolumeM3, 'RelTol', 1e-12);
+            rate = findobj(figures.operations, 'Tag', 'well-gas-rate');
+            test.verifyEqual(rate.XData(:), expectedTimes);
+            expectedRates = result.diagnostics.wellGasSurfaceRateM3PerSecond * day / 1000;
+            test.verifyEqual(rate.YData(:), [expectedRates; expectedRates(end)]);
+            snapshots = figures.plume.UserData;
+            test.verifyEqual(snapshots.actualTimesDays, ...
+                expectedTimes(snapshots.sourceStateIndices));
+            section = figures.geology.UserData.sectionCellIndices;
+            test.verifyEqual(unique(result.model.rock.regions.saturation(section)), ...
+                (1:4).');
+        end
+
         function exportsActualStateFrames(test)
             folder = tempname;
             cleanup = onCleanup(@() rmdir(folder, 's'));
