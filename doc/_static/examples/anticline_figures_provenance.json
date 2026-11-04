@@ -1,0 +1,100 @@
+{
+  "configuration": {
+    "buildupDays": 730,
+    "cycleRate": 400000,
+    "cycleStageDays": 7,
+    "horizontalCells": [
+      25,
+      25
+    ],
+    "injectionRate": 200000,
+    "numCycles": 10,
+    "shutInDays": 90,
+    "layerNames": [
+      "Shallow aquifer",
+      "Cap rock",
+      "Storage formation",
+      "Underburden"
+    ],
+    "layerThicknessM": [
+      10,
+      50,
+      20,
+      25
+    ],
+    "layerPorosity": [
+      0.1,
+      0.1,
+      0.25,
+      0.1
+    ],
+    "layerPermeabilityM2": [
+      9.87e-15,
+      9.87e-20,
+      6.91e-13,
+      9.87e-18
+    ],
+    "capillaryEntryPa": [
+      400000,
+      4000000.0,
+      400000,
+      4000000.0
+    ],
+    "temperatureK": 323.15,
+    "referencePressurePa": 4100000.0,
+    "referenceDepthM": 415,
+    "surfaceTemperatureK": 288.71,
+    "surfacePressurePa": 101325
+  },
+  "snapshots": {
+    "sourceStateIndices": [
+      10,
+      33,
+      57,
+      77,
+      88,
+      99
+    ],
+    "actualTimesDays": [
+      25.55,
+      370.28085106382986,
+      730.0000000000001,
+      820,
+      827,
+      834
+    ],
+    "targetTimesDays": [
+      30,
+      365,
+      730,
+      820,
+      827,
+      834
+    ],
+    "verticalExaggeration": 2,
+    "gasSaturationThreshold": 0.005
+  },
+  "matlab": "26.1.0.3346908 (R2026a) Update 5",
+  "platform": "PCWIN64",
+  "recordedDate": "2026-11-04",
+  "simulationProvenance": "hydrogen_anticline_provenance.json",
+  "simulationProvenanceSha256": "9cef845cf1e4a9c2c6dbc1ca8d58524d36dfedc18036017786dc23f58bb16da6",
+  "plottingSource": "h2-store/examples/anticline/plotHydrogenAnticline.m",
+  "plottingSourceSha256": "bd18d6861b8e2701c07c08083af74432e74ff77e977752dc7a8e656f399842ad",
+  "sourceStates": "Initial and accepted simulation states only; nearest accepted times are labelled. No interpolation or external benchmark curves.",
+  "sectionVerticalExaggeration": 2,
+  "gasSaturationLimits": [
+    0,
+    0.8
+  ],
+  "sectionVisibilityThreshold": 0.005,
+  "operations": "Stored surface hydrogen, active surface gas rate, active-well BHP, and mean saved brine pressure at completion cells; ten-cycle inventory close-up.",
+  "assetSha256": {
+    "anticline_geology.png": "cd19c4aef504ba2fb7cca74670876c8ff1c583a2234cb3df01e5a688d6b6929a",
+    "anticline_geology.pdf": "7b4574b0b8d8f7d41dabd2f0c189f3416022c025f7fdbd51d23ea0dda6f99151",
+    "anticline_plume_snapshots.png": "ad65b8ee8127d14ceb35ead8c5b738ba64257964aff66095680d5e6cfa9d5893",
+    "anticline_plume_snapshots.pdf": "8722b7f2c570a9e4f6328e8577198ee80504b96c43596d382c555ca12e0e296f",
+    "anticline_operations.png": "4cc06bee13e5cb466f55fdb433dd8fe2d48b6704bee0ad8cc765649472750b8f",
+    "anticline_operations.pdf": "84b62e1bb190e59e44f5e807d9f903b16873c7b2fda975746fed2bb566d6bb38"
+  }
+}

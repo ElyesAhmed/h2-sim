@@ -30,6 +30,7 @@ simulation results. Select a panel to discover the capabilities and examples.
      </summary>
      <div class="assessment-description">
       <p>Simulate hydrogen injection, storage, and withdrawal in saline aquifers and depleted gas reservoirs. Examine plume migration, dissolution, component production rates, and well pressure across repeated cycles. Adapt reservoir properties and operating schedules to compare storage scenarios.</p>
+      <a href="hydrogen-anticline.html">Explore anticlinal storage →</a>
       <a href="store.html">Explore aquifer storage →</a>
       <a href="biochem.html">Explore depleted reservoirs →</a>
      </div>
@@ -179,6 +180,7 @@ countries reading the documentation.
    :hidden:
    :caption: Models
 
+   hydrogen-anticline
    store
    biochem
    phreeqc

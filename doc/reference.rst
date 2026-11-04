@@ -23,6 +23,8 @@ Entry points
      - Export saved mixing states to MP4, GIF and a PNG poster
    * - ``exampleHydrogenAnticline``
      - Four-layer cushion injection and storage cycles; see :doc:`hydrogen-anticline`
+   * - ``plotHydrogenAnticline``
+     - Redraw geology, matched-scale plume snapshots and storage-cycle histories
    * - ``animateHydrogenAnticline``
      - Render a storage surface, central section and hydrogen inventory
    * - ``simple1DBacterialExampleMetacet``

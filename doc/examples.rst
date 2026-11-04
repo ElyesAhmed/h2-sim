@@ -30,7 +30,6 @@ Small hydrogen-mixing animation
    :hidden:
 
    hydrogen-mixing
-   hydrogen-anticline
 
 .. grid:: 1
 
@@ -47,7 +46,7 @@ Small hydrogen-mixing animation
       :link: hydrogen-anticline
       :link-type: doc
 
-      A four-layer Gaussian structure, cushion injection, shut-in and five
+      A four-layer Gaussian structure, cushion injection, shut-in and ten
       storage cycles. Watch the plume, well operation and hydrogen inventory.
 
 Storage in saline aquifers
