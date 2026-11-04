@@ -87,6 +87,22 @@ animateHydrogenMixing2D(result, fullfile('build', 'mixing'));
 See the [animation and model details](https://sintefmath.github.io/h2-sim/hydrogen-mixing.html)
 for configuration, attribution and validation limits.
 
+## Watch cyclic storage beneath an anticline
+
+![Hydrogen injection and storage cycles in a small four-layer anticline](doc/_static/examples/hydrogen_anticline.gif)
+
+A second small example adapts Problem 4 of the same published benchmark.
+It follows cushion injection, shut-in and five withdrawal/reinjection cycles
+in a four-layer Gaussian reservoir, without PHREEQC.
+
+```matlab
+result = exampleHydrogenAnticline();
+animateHydrogenAnticline(result, fullfile('build', 'anticline'));
+```
+
+See the [anticline animation and model details](https://sintefmath.github.io/h2-sim/hydrogen-anticline.html)
+for the coarse grid, fluid approximations, attribution and verification scope.
+
 ## Compare bacterial and abiotic storage
 
 Run the existing 2D depleted-reservoir case with three microbial reactions:
@@ -145,7 +161,7 @@ The plotting functions above accept completed result structures, so you can redr
 
 H2sim is distributed under the [GNU GPL version 3 or later](LICENSE). Inherited MRST/SINTEF copyright and license notices remain in their files; dependencies and bundled datasets retain their own notices and attribution.
 
-Use [CITATION.cff](CITATION.cff) or GitHub's **Cite this repository** metadata to cite the software. Record the H2sim commit and dependency revisions used, and cite the [relevant model publications](https://sintefmath.github.io/h2-sim/publications.html) and chemistry database source for your workflow. The source is available now; the first tagged release is in preparation.
+Use [CITATION.cff](CITATION.cff) or GitHub's **Cite this repository** metadata to cite the software. Record the H2sim commit and dependency revisions used, and cite the [relevant model publications](https://sintefmath.github.io/h2-sim/publications.html) and chemistry database source for your workflow. The [v0.1.0 development release](https://github.com/sintefmath/h2-sim/releases/tag/v0.1.0) is available. Newer examples may require a development checkout, as indicated in their guides.
 
 ## Tests and support
 

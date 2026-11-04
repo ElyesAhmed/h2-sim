@@ -21,6 +21,10 @@ Entry points
      - Closed binary-gas gravity/diffusion example; see :doc:`hydrogen-mixing`
    * - ``animateHydrogenMixing2D``
      - Export saved mixing states to MP4, GIF and a PNG poster
+   * - ``exampleHydrogenAnticline``
+     - Four-layer cushion injection and storage cycles; see :doc:`hydrogen-anticline`
+   * - ``animateHydrogenAnticline``
+     - Render a storage surface, central section and hydrogen inventory
    * - ``simple1DBacterialExampleMetacet``
      - MRST compositional microbial example
    * - ``setupH2StorageExampleWithSRB_benchmark``

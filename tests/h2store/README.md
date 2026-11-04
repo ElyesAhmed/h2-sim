@@ -255,3 +255,16 @@ Cycle-endpoint plotting checks use distinct states at nonconsecutive schedule
 indices. They verify state/time pairing, dissolved-H2 mass fractions, well-stage
 metadata, zero dissolved inventory and empty schedules. The 2D paper script now
 plots actual stage endpoints; earlier frames used sequential state indices.
+
+## Small four-layer anticline
+
+`H2StoreAnticlineExampleTest` adds seven checks for the published-case adaptation
+`exampleHydrogenAnticline`: layer/grid/completion properties, exact 525-day
+default stage totals, capillary regions and gas compressibility, actual prescribed
+hydrogen exchange across injection/shut-in/withdrawal/reinjection, public
+inventory agreement, invalid inputs and GIF/poster export with stage-endpoint retention and all four
+central-section layers. A shared 729-cell
+case runs one cycle after a shorter cushion buildup. It includes pressure-boundary
+gas flux in the balance and excludes inactive-well rates. No PHREEQC or external
+benchmark data is required. These are behavior and conservation checks, not
+external-reference or grid-convergence validation.

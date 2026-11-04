@@ -111,10 +111,10 @@ Research & community
 
    <aside class="release-announcement" aria-label="H2sim source and release status">
     <div class="release-logos"><img class="release-h2sim-logo" src="_static/h2sim-logo.svg" alt="H2sim" width="190" height="54"><span>Built on</span><a href="https://www.sintef.no/projectweb/mrst/" aria-label="MRST — MATLAB Reservoir Simulation Toolbox"><img class="release-mrst-logo" src="_static/mrst-logo.png" alt="MRST — MATLAB Reservoir Simulation Toolbox" width="992" height="116"></a></div>
-    <p class="eyebrow">SOURCE AVAILABLE · FIRST TAGGED RELEASE IN PREPARATION</p>
-    <h2>Get the source. Follow the first release.</h2>
+    <p class="eyebrow">DEVELOPMENT RELEASE · v0.1.0</p>
+    <h2>Explore the first development release.</h2>
     <p>Built on the <strong>MATLAB Reservoir Simulation Toolbox (MRST)</strong>, H2sim brings together open tools for hydrogen storage in porous reservoirs: hydrogen–brine flow, microbial reactions, PHREEQC coupling, and thermodynamic models, with selected examples and guided MATLAB notebooks.</p>
-    <p>The source and installation instructions are available now. The first tagged release is in preparation; release details will be announced here.</p>
+    <p>The <a href="https://github.com/sintefmath/h2-sim/releases/tag/v0.1.0">v0.1.0 development release</a> provides a fixed source snapshot and verification record. Its release page also includes supplementary simulation animations from newer development examples.</p>
     <a class="primary-button" href="https://github.com/sintefmath/h2-sim">Follow H2sim on GitHub ↗</a>
    </aside>
 
