@@ -93,11 +93,13 @@ for configuration, attribution and validation limits.
 
 A second small example adapts Problem 4 of the same published benchmark.
 It follows cushion injection, shut-in and five withdrawal/reinjection cycles
-in a four-layer Gaussian reservoir, without PHREEQC.
+in a four-layer Gaussian reservoir, without PHREEQC. The preview uses two years
+of cushion injection to show a larger plume; the example default remains one year.
 
 ```matlab
-result = exampleHydrogenAnticline();
-animateHydrogenAnticline(result, fullfile('build', 'anticline'));
+result = exampleHydrogenAnticline('buildupDays', 730);
+animateHydrogenAnticline(result, fullfile('build', 'anticline'), ...
+    'frameRate', 6, 'maxFrames', 120);
 ```
 
 See the [anticline animation and model details](https://sintefmath.github.io/h2-sim/hydrogen-anticline.html)

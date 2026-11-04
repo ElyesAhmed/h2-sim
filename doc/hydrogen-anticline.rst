@@ -19,7 +19,7 @@ saturation. The central vertical section shows cell gas saturations above
 ``0.005`` against the four geological layers. The history panel shows hydrogen
 inventory in surface cubic metres. Both saturation panels use fixed color
 limits from zero to 0.8. Vertical exaggeration is fivefold on the 3D surface
-and twofold in the section. Up to 90 initial/accepted states are selected by physical time, retaining
+and twofold in the section. For this preview, up to 120 initial/accepted states are selected by physical time, retaining
 every operating-stage endpoint, without temporal interpolation. Labelled simulation times are uneven; playback is not real time.
 
 Download the :download:`MP4 <_static/examples/hydrogen_anticline.mp4>`,
@@ -36,8 +36,9 @@ change the original version tag's source files.
 .. code-block:: matlab
 
    startupH2sim
-   result = exampleHydrogenAnticline();
-   animateHydrogenAnticline(result, fullfile('build', 'anticline'));
+   result = exampleHydrogenAnticline('buildupDays', 730);
+   animateHydrogenAnticline(result, fullfile('build', 'anticline'), ...
+       'frameRate', 6, 'maxFrames', 120);
 
 The simulation creates no files or figures. Save the result once to redraw it:
 
@@ -45,7 +46,8 @@ The simulation creates no files or figures. Save the result once to redraw it:
 
    save('anticlineResults.mat', 'result', '-v7');
    load('anticlineResults.mat', 'result');
-   animateHydrogenAnticline(result, fullfile('build', 'anticline'));
+   animateHydrogenAnticline(result, fullfile('build', 'anticline'), ...
+       'frameRate', 6, 'maxFrames', 120);
 
 A smaller complete-operation check uses:
 
@@ -54,7 +56,7 @@ A smaller complete-operation check uses:
    small = exampleHydrogenAnticline('horizontalCells', [9, 9], ...
        'buildupDays', 90, 'shutInDays', 20, 'numCycles', 1);
 
-This shorter case does not reproduce the displayed default run. PHREEQC,
+This shorter case does not reproduce the displayed extended run. PHREEQC,
 external fluid-data downloads and Parallel Computing Toolbox are unnecessary.
 MP4 requires MATLAB's MPEG-4 VideoWriter profile. Pass ``'writeVideo', false``
 to the renderer on platforms without that profile to export GIF and PNG only.
@@ -107,7 +109,14 @@ for **5625 cells**. Four central well completions span the storage formation.
 The default schedule injects 200,000 surface m³/day for 365 days, shuts the well
 for 90 days, then performs five cycles of seven days of withdrawal and seven
 days of reinjection at 400,000 surface m³/day. Withdrawal controls the gas rate;
-reinjection is pure hydrogen. The total duration is 525 days. Ramp timesteps
+reinjection is pure hydrogen. The default total duration is 525 days.
+The **displayed preview extends cushion injection to 730 days**, retaining the
+same rates, shut-in and five cycles, for a total of **890 days**. This injects
+twice the cushion volume and allows the resolved plume to spread farther.
+At the end of cushion injection, the resolved plume radius at a cell gas
+saturation of at least 0.05 grows from approximately 429 m in the default run
+to 596 m in the extended run. This is a grid-dependent extent measure.
+The extension is an illustration variant, not the published benchmark schedule. Ramp timesteps
 preserve every stage duration. Hydrostatic pressure conditions apply on all
 four lateral sides; top and bottom are sealed. Initial brine pressure is
 4.1 MPa at 415 m depth, and temperature is fixed at 323.15 K.
