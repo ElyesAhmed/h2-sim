@@ -22,6 +22,7 @@ public function names remain available.
 
 | Purpose | Entry point | Dependencies and scope |
 |---|---|---|
+| Binary gas mixing animation | `exampleHydrogenMixing2D` | Small published-case adaptation; no PHREEQC; GIF/MP4 export through `animateHydrogenMixing2D` |
 | Introductory microbial storage | `simple1DBacterialExampleMetacet` | MRST; no PHREEQC |
 | Three-reaction 2D storage | `exampleCompositionalBacterial2DThreeReactions` | Larger cyclic case; no PHREEQC |
 | Phase partitioning and salting-out | `exampleH2BrineSolubilityStudy` | MRST and bundled reference data; no live PC-SAFT solver |

@@ -17,6 +17,10 @@ Entry points
      - Initialize core code and MRST; optional chemistry setup
    * - ``exampleBlackOilAquifer2D``
      - 2D structural trapping and five storage cycles
+   * - ``exampleHydrogenMixing2D``
+     - Closed binary-gas gravity/diffusion example; see :doc:`hydrogen-mixing`
+   * - ``animateHydrogenMixing2D``
+     - Export saved mixing states to MP4, GIF and a PNG poster
    * - ``simple1DBacterialExampleMetacet``
      - MRST compositional microbial example
    * - ``setupH2StorageExampleWithSRB_benchmark``

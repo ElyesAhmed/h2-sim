@@ -23,6 +23,23 @@ Choose how to run an example
 Open ``h2-biochem/examples/Contents.m`` in this checkout for the example
 catalogue. Initialize H2sim with ``startupH2sim`` before running examples.
 
+Small hydrogen-mixing animation
+--------------------------------
+
+.. toctree::
+   :hidden:
+
+   hydrogen-mixing
+
+.. grid:: 1
+
+   .. grid-item-card:: Hydrogen–methane mixing in a sealed section
+      :link: hydrogen-mixing
+      :link-type: doc
+
+      A small adaptation of a published hydrogen benchmark. Watch gravity
+      and diffusion redistribute two gases; no PHREEQC is required.
+
 Storage in saline aquifers
 --------------------------
 

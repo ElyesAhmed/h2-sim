@@ -71,6 +71,22 @@ For the full five-cycle example on the default grid, run `exampleBlackOilAquifer
 
 The [aquifer notebook](https://sintefmath.github.io/h2-sim/notebooks/blackoil_storage.html) explains the setup and shows storage-cycle, dissolution, and fluid-table figures.
 
+## Watch hydrogen and methane mix
+
+![H2sim simulation of hydrogen–methane mixing in a sealed vertical section](doc/_static/examples/hydrogen_mixing.gif)
+
+A small example adapts Problem 2 of the published Okoroafor et al. (2023)
+hydrogen benchmark. Colors show hydrogen mole fraction; timestamps show the
+uneven simulated time intervals. No PHREEQC is needed.
+
+```matlab
+result = exampleHydrogenMixing2D();
+animateHydrogenMixing2D(result, fullfile('build', 'mixing'));
+```
+
+See the [animation and model details](https://sintefmath.github.io/h2-sim/hydrogen-mixing.html)
+for configuration, attribution and validation limits.
+
 ## Compare bacterial and abiotic storage
 
 Run the existing 2D depleted-reservoir case with three microbial reactions:
