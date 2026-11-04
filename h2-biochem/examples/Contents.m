@@ -5,6 +5,8 @@
 % native IPhreeqc on Linux or registered IPhreeqcCOM on Windows.
 %
 % Introductory and no-PHREEQC examples
+%   exampleHydrogenMixing2D                - Closed H2/CH4 gravity-diffusion demonstration.
+%   animateHydrogenMixing2D                - Export simulated mixing to GIF and MP4.
 %   simple1DBacterialExampleMetacet        - 1D microbial growth and bio-clogging.
 %   exampleCompositionalBacterial2DThreeReactions - Five-cycle microbial/abiotic comparison.
 %   exampleH2BrineSolubilityStudy          - Hydrogen-brine thermodynamics; bundled data.
