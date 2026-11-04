@@ -30,6 +30,7 @@ Small hydrogen-mixing animation
    :hidden:
 
    hydrogen-mixing
+   hydrogen-anticline
 
 .. grid:: 1
 
@@ -39,6 +40,15 @@ Small hydrogen-mixing animation
 
       A small adaptation of a published hydrogen benchmark. Watch gravity
       and diffusion redistribute two gases; no PHREEQC is required.
+
+.. grid:: 1
+
+   .. grid-item-card:: Cyclic storage beneath an anticline
+      :link: hydrogen-anticline
+      :link-type: doc
+
+      A four-layer Gaussian structure, cushion injection, shut-in and five
+      storage cycles. Watch the plume, well operation and hydrogen inventory.
 
 Storage in saline aquifers
 --------------------------
