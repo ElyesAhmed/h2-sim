@@ -15,7 +15,8 @@ DATA = ROOT / 'doc/data/multirate'
 OUT = ROOT / 'doc/_static/examples'
 NAMES = ['compositional', 'multirate']
 LABELS = ['Compositional PHREEQC', 'Multirate PHREEQC']
-COLORS = ['#087f82', '#c25b28']
+from storage_gallery_style import TEAL, ORANGE, storage_colormap
+COLORS = [TEAL, ORANGE]
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 10,
                      'axes.spines.top': False, 'axes.spines.right': False,
                      'pdf.fonttype': 42, 'savefig.dpi': 180})
@@ -35,8 +36,7 @@ def time_axis(ax):
 def save(fig, name):
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / f'{name}.png', bbox_inches='tight', facecolor='white')
-    # Vector copies remain local build artifacts.
-    pdf = ROOT / 'build/multirate-figures'
+    pdf = OUT
     pdf.mkdir(parents=True, exist_ok=True)
     fig.savefig(pdf / f'{name}.pdf', bbox_inches='tight')
     plt.close(fig)
@@ -79,7 +79,7 @@ def main():
 
     chemistry = [read(n, 'chemistry') for n in NAMES]
     fig, axes = plt.subplots(2, 2, figsize=(11.5, 5.5), layout='constrained', sharex=True, sharey=True)
-    for col, (field, title, cmap) in enumerate([('ph', 'pH', 'cividis'), ('dic_mmol_kgw', 'DIC (mmol kg⁻¹ water)', 'viridis')]):
+    for col, (field, title, cmap) in enumerate([('ph', 'pH', storage_colormap()), ('dic_mmol_kgw', 'DIC (mmol kg⁻¹ water)', storage_colormap())]):
         lo = min(c[field].min() for c in chemistry)
         hi = max(c[field].max() for c in chemistry)
         for row, (c, label) in enumerate(zip(chemistry, LABELS)):

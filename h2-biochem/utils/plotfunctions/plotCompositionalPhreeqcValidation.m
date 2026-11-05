@@ -63,6 +63,9 @@ function figures = plotCompositionalPhreeqcValidation(result, varargin)
         data, labels, time, nCases, styles);
     styleFigures(figures, time(end));
     exportResults(figures, time, data, contributions, opt.outputDirectory);
+    if usejava('desktop')
+        set(figures, 'Visible', 'on');
+    end
 end
 
 function [data, labels, time, distance, nCases, styles] = prepareData(result)
@@ -89,14 +92,16 @@ function [data, labels, time, distance, nCases, styles] = prepareData(result)
 end
 
 function fig = plotHydrogenProfiles(data, labels, time, distance, nCases, styles)
-    fig = figure('Color', 'w', 'Units', 'centimeters', ...
+    fig = figure('Visible', 'off', 'Color', 'w', 'Units', 'centimeters', ...
         'Position', [2, 2, 29, 11]);
     tiledlayout(1, 1 + nCases, 'TileSpacing', 'compact', 'Padding', 'compact');
     ax = nexttile;
     hold(ax, 'on');
     maximum = 0;
     for j = 1:nCases
-        plot(ax, time, data{j}.lossPercent, styles{j}, 'LineWidth', 1.8);
+        colors = comparisonColors();
+        plot(ax, time, data{j}.lossPercent, styles{j}, ...
+            'LineWidth', 1.8, 'Color', colors(j, :));
         maximum = max(maximum, max(data{j}.h2(:)));
     end
     xlabel(ax, 'Time (days)');
@@ -112,7 +117,7 @@ function fig = plotHydrogenProfiles(data, labels, time, distance, nCases, styles
 end
 
 function fig = plotGeochemistry(data, labels, time, distance, nCases)
-    fig = figure('Color', 'w', 'Units', 'centimeters', ...
+    fig = figure('Visible', 'off', 'Color', 'w', 'Units', 'centimeters', ...
         'Position', [2, 2, 26, 18]);
     tiledlayout(2, nCases, 'TileSpacing', 'compact', 'Padding', 'compact');
     fields = {'pH', 'dic'};
@@ -135,7 +140,7 @@ end
 
 function [fig, contributions] = plotReactionConsumption( ...
     data, labels, time, nCases, styles)
-    fig = figure('Color', 'w', 'Units', 'centimeters', ...
+    fig = figure('Visible', 'off', 'Color', 'w', 'Units', 'centimeters', ...
         'Position', [2, 2, 29, 11]);
     tiledlayout(1, 3, 'TileSpacing', 'compact', 'Padding', 'compact');
     reactions = {'MET', 'ACE', 'SRB'};
@@ -150,7 +155,9 @@ function [fig, contributions] = plotReactionConsumption( ...
         ax = nexttile;
         hold(ax, 'on');
         for j = 1:nCases
-            plot(ax, time, contributions{j}(:, c), styles{j}, 'LineWidth', 1.8);
+            colors = comparisonColors();
+            plot(ax, time, contributions{j}(:, c), styles{j}, ...
+                'LineWidth', 1.8, 'Color', colors(j, :));
         end
         xlabel(ax, 'Time (days)');
         ylabel(ax, 'Consumed H_2 / total prescribed injection (%)');
@@ -158,6 +165,11 @@ function [fig, contributions] = plotReactionConsumption( ...
         legend(ax, labels, 'Location', 'best');
         grid(ax, 'on');
     end
+end
+
+function colors = comparisonColors()
+    style = h2simStoragePlotStyle();
+    colors = [style.figureTeal; style.figureOrange];
 end
 
 function validateComparisonCoordinates(data, time, distance)
@@ -181,6 +193,8 @@ function plotChemistryMap(ax, time, distance, values, name, unit, limits)
     imagesc(ax, time, distance, values);
     set(ax, 'YDir', 'normal');
     caxis(ax, limits);
+    style = h2simStoragePlotStyle();
+    colormap(ax, style.saturation);
     xlabel(ax, 'Time (days)');
     ylabel(ax, 'Distance (m)');
     title(ax, name);

@@ -1,6 +1,42 @@
 PHREEQC coupling
 ================
 
+PHREEQC adds aqueous chemistry and mineral feedback to hydrogen-storage
+workflows. This animation follows the saved **three-cycle 2D compositional
+PHREEQC case**, using the presentation shared by :doc:`hydrogen-anticline`,
+:doc:`store`, and :doc:`biochem`.
+
+.. raw:: html
+
+   <video controls loop muted playsinline preload="metadata" style="width:100%;max-width:1280px" poster="_static/examples/phreeqc_storage.png" aria-label="Dissolved hydrogen and cell-local microbial evolution during three PHREEQC storage cycles">
+     <source src="_static/examples/phreeqc_storage.mp4" type="video/mp4">
+     <a href="_static/examples/phreeqc_storage.gif">View the animated GIF</a>.
+   </video>
+
+The maps show **liquid-phase H₂ mole fraction** and the MET, ACE and SRB
+population scales relative to their initial value. All four maps use fixed
+**log₁₀ scales** shared with the interactive explorer. Before taking logarithms,
+values are floored at 10⁻¹² for H₂ mole fraction and 10⁻⁶ for population/initial.
+These safeguards affect rendering, not the stored chemistry. PHREEQC populations are cell-local:
+their spatial changes represent growth and decay, rather than transport or
+trajectories of individual organisms.
+
+The movie uses selected accepted states from the 347.4-day comparison,
+retaining each operating-stage endpoint without interpolating fields.
+Labelled simulation times are uneven; frames have equal playback duration.
+The first frame is the first saved accepted state, not an invented initial
+state. The section has no vertical exaggeration. The consumption curve uses
+cumulative prescribed injection as its denominator; the rate panel shows
+prescribed surface gas rates, not measured well-component fluxes.
+
+Download the :download:`MP4 <_static/examples/phreeqc_storage.mp4>`,
+:download:`GIF <_static/examples/phreeqc_storage.gif>` or
+:download:`gallery provenance <_static/examples/phreeqc_gallery_provenance.json>`.
+:doc:`phreeqc_2d` retains the interactive workflow comparison and complete
+2D setup. The 250-day 1D validation below is a separate case with a different
+consumption normalization. This presentation update redraws saved results;
+it does not rerun chemistry or resolve the reported audit limitations.
+
 Platform support
 ----------------
 
@@ -83,6 +119,8 @@ and unrecovered gas are excluded.
    Hydrogen consumption and dissolved-H₂ evolution over the complete cycle.
    Vertical lines mark the day-50 and day-200 control changes.
 
+:download:`Download PDF <_static/examples/phreeqc_validation_full_cycle.pdf>`.
+
 .. list-table:: Consumed hydrogen (% of total prescribed injection)
    :header-rows: 1
 
@@ -118,6 +156,8 @@ Geochemical evolution
    inorganic-carbon molality, not only dissolved CO₂; the reference records
    it directly from PHREEQC selected output.
 
+:download:`Download PDF <_static/examples/phreeqc_geochemistry_full_cycle.pdf>`.
+
 The pH and DIC fronts show how reactive aqueous chemistry evolves throughout
 injection, storage, and production. Similar bulk consumption does not imply
 identical spatial chemistry. The compositional run records 87 cell-step
@@ -135,6 +175,9 @@ Consumption by reaction
    Separate MET, ACE, and SRB contributions, each normalized by total
    prescribed hydrogen injection. Their sum equals the total-consumption
    curve for the corresponding implementation.
+
+:download:`Download PDF <_static/examples/phreeqc_reaction_loss_full_cycle.pdf>` or
+:download:`validation data <_static/examples/phreeqc_loss_history.csv>`.
 
 At day 250, the compositional contributions are 33.357% (MET), 5.092% (ACE),
 and 0.408% (SRB), compared with 32.439%, 4.879%, and 0.386% in the reference.
@@ -286,6 +329,8 @@ splitting; this is not a convergence test of reaction substepping alone.
    Full-cycle hydrogen consumption. Dotted lines mark day 50 and day 200.
    Percentages use total prescribed injection as a fixed denominator.
 
+:download:`Download PDF <_static/examples/multirate_full_cycle_loss.pdf>`.
+
 .. figure:: _static/examples/multirate_full_cycle_chemistry_history.png
    :alt: PHREEQC pH and dissolved inorganic carbon spatial medians and minimum–maximum ranges over 250 days.
    :width: 100%
@@ -293,6 +338,8 @@ splitting; this is not a convergence test of reaction substepping alone.
    Chemistry histories: lines are spatial medians, shading is the cellwise
    range. The notebook also compares pH and DIC space-time maps and reports
    the available conservation diagnostics.
+
+:download:`Download PDF <_static/examples/multirate_full_cycle_chemistry_history.pdf>`.
 
 .. button-ref:: notebooks/multirate_reactions
    :color: primary
@@ -346,3 +393,6 @@ Profiling tools
 
 Paired states and timings are saved under ``build/phreeqc-performance``.
 Compare states and diagnostics before interpreting runtime improvements.
+
+The :download:`Model presentation guide <model-presentation.md>` records the
+shared figure and animation conventions.
