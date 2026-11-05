@@ -40,7 +40,6 @@ Geological structure
    20 m storage formation. Depth increases downward; vertical exaggeration is
    twofold. Layer properties are listed below.
 
-:download:`Download vector PDF <_static/examples/anticline_geology.pdf>`.
 
 Plume development
 -----------------
@@ -54,7 +53,6 @@ Plume development
    accepted-state times, nearest the requested milestones. Cells below 0.005
    gas saturation are hidden; sections have twofold vertical exaggeration.
 
-:download:`Download vector PDF <_static/examples/anticline_plume_snapshots.pdf>`.
 
 Operating response and ten storage cycles
 -----------------------------------------
@@ -71,7 +69,6 @@ Operating response and ten storage cycles
    shading marks withdrawal and teal shading marks reinjection. Inventory
    is reported at the stated surface reference conditions.
 
-:download:`Download vector PDF <_static/examples/anticline_operations.pdf>`.
 The :download:`figure provenance <_static/examples/anticline_figures_provenance.json>`
 records the source states and export hashes. These are simulation figures,
 not measurements or external benchmark comparison curves.

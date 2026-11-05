@@ -1,6 +1,8 @@
 """H2sim code and selected examples. No MATLAB execution during docs builds."""
 from pathlib import Path
 import os
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent / "_ext"))
 import pypandoc
 os.environ['PATH'] = str(Path(pypandoc.get_pandoc_path()).parent) + os.pathsep + os.environ.get('PATH', '')
 project = 'H2sim'
@@ -8,7 +10,7 @@ author = 'Elyes Ahmed, Xavier Raynaud'
 master_doc = 'index'
 source_suffix = '.rst'
 extensions = ['nbsphinx', 'nbsphinx_link', 'sphinxcontrib.bibtex', 'sphinx.ext.mathjax',
-              'sphinx.ext.autosectionlabel', 'sphinx_design', 'sphinx_copybutton']
+              'sphinx.ext.autosectionlabel', 'sphinx_design', 'sphinx_copybutton', 'figure_access']
 autosectionlabel_prefix_document = True
 exclude_patterns = ['_build', 'unparsed', '**/.ipynb_checkpoints']
 nbsphinx_execute = 'never'
@@ -19,9 +21,11 @@ html_title = 'H2sim · Hydrogen storage modeling'
 html_logo = '_static/h2sim-logo.svg'
 html_favicon = '_static/h2sim-icon.svg'
 html_static_path = ['_static']
+templates_path = ['_templates']
 html_css_files = ['css/custom.css']
 html_js_files = [
  ('js/community.js', {'defer': 'defer'}),
+ ('js/accessibility.js', {'defer': 'defer'}),
  ('https://cloud.umami.is/script.js', {
   'defer': 'defer',
   'data-website-id': 'aeb4cd9c-9e16-4992-aa40-c418b160424a',

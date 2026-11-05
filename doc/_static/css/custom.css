@@ -16,7 +16,7 @@ a.secondary-button {color:#ecf8f4;text-decoration:none;font-size:.83rem} a.secon
 .sd-card {border-radius:.75rem!important;box-shadow:none!important;border-color:var(--color-background-border)!important;overflow:hidden;transition:transform .15s,border-color .15s}
 .sd-card:hover {transform:translateY(-3px);border-color:#78bcb7!important}.sd-card-title {font-size:1.02rem;letter-spacing:-.02em}.sd-card-body {padding:1.3rem!important}.sd-card-footer {background:transparent!important;font-size:.82rem;color:var(--color-brand-content)}
 .feature-grid {margin-top:1.1rem}article table.docutils {font-size:.88rem}article table.docutils td {padding:.8rem}article .highlight {border-radius:.65rem}article figure {margin:1.7rem 0}article figure img {border-radius:.7rem;border:1px solid var(--color-background-border)}article figcaption {font-size:.82rem;color:var(--color-foreground-secondary);line-height:1.65}
-.platform-note {margin-top:2rem!important}a:focus-visible {outline:3px solid #dca758;outline-offset:4px;border-radius:3px}
+.platform-note {margin-top:2rem!important}a:focus-visible {outline:3px solid var(--color-brand-content);outline-offset:4px;border-radius:3px}
 @media(min-width:1200px){.main {flex-basis:62rem}}
 @media(max-width:860px){.home-hero {grid-template-columns:1fr;padding:2rem 1.5rem}.hero-copy {max-width:35rem}.hero-figure {max-width:26rem;margin:auto}.home-hero h1 {font-size:2.7rem}}
 @media(max-width:480px){.home-hero {padding:1.5rem 1.15rem;border-radius:1rem;margin-top:.5rem}.home-hero h1 {font-size:2.2rem}h1 {font-size:2rem}}
@@ -41,7 +41,7 @@ body[data-theme="dark"] .platform-note>.admonition-title {background:#244d50!imp
 .assessment-card:hover,.assessment-card[open] {border-color:#087f82;box-shadow:0 8px 24px #087f8214}
 .assessment-card summary {cursor:pointer;list-style:none;display:block;padding:0 1.1rem 1.15rem}
 .assessment-card summary::-webkit-details-marker {display:none}
-.assessment-card summary:focus-visible {outline:3px solid #dca758;outline-offset:-4px;border-radius:1rem}
+.assessment-card summary:focus-visible {outline:3px solid var(--color-brand-content);outline-offset:-4px;border-radius:1rem}
 .assessment-visual {display:flex;align-items:center;justify-content:center;height:auto;aspect-ratio:3/2;margin:0 -1.1rem 1.1rem;background:#f8f6f0;border-bottom:1px solid var(--color-background-border);padding:0;box-sizing:border-box}
 .assessment-visual img {width:100%;height:100%;object-fit:cover}
 .assessment-number {display:block;color:var(--color-brand-content);font-size:.62rem;letter-spacing:.08em;font-weight:700;margin-bottom:.55rem}
@@ -140,3 +140,14 @@ a.phreeqc-brand:hover {border-color:var(--color-brand-content)}
 /* Read-only visitor dashboard, with a direct-link fallback in the page. */
 .h2sim-visitor-dashboard {display:block;width:100%;height:1700px;margin:1.3rem 0;border:1px solid var(--color-background-border);border-radius:12px;background:white;}
 @media(max-width:700px){.h2sim-visitor-dashboard {height:2250px;}}
+
+/* Figure links remain available without JavaScript and have distinct link names. */
+.figure-access {font-size:.82rem;margin:.45rem 0 1.5rem;line-height:1.7}
+.figure-access a {display:inline-block;padding:.3rem .15rem;text-underline-offset:.2em}
+.figure-access-context {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+/* Make focus clear on both light and dark surfaces, including native media controls. */
+article :is(a,button,summary,video,[tabindex]):focus-visible {outline:3px solid var(--color-brand-content);outline-offset:3px}
+/* Scientific artwork has a fixed light background in either theme. */
+article img[src*="_static/examples/"],article img[src*="notebook-figure-"],article img[src$="workflows.svg"] {background:#fff}
+
+.table-wrapper[tabindex="0"]:focus-visible {outline:3px solid var(--color-brand-content);outline-offset:3px}

@@ -14,7 +14,6 @@ accepted states retained as packed simulations.
    controls come from the existing 2D mineral-coupling example. This is an
    illustrative layered model, not a calibrated field forecast.
 
-:download:`Download PDF <_static/examples/phreeqc_2d_setup.pdf>`.
 
 .. list-table:: Physical setup
    :header-rows: 1
@@ -79,7 +78,6 @@ Hydrogen consumption and reaction pathways
    contributions; solid curves use PHREEQC, dashed curves use mobile kinetics.
    Dotted lines mark the starts of the three storage cycles.
 
-:download:`Download PDF <_static/examples/phreeqc_2d_loss.pdf>`.
 
 The final consumed amounts are **6.199 kmol (10.426%)** with compositional
 PHREEQC and **6.818 kmol (11.466%)** with mobile flow–biochemistry. These
@@ -100,7 +98,6 @@ Gas composition and aqueous chemistry
    10⁻⁶; pH is shown throughout the aqueous domain. No pressure map is needed
    to inspect the hydrogen plume and its chemical environment.
 
-:download:`Download PDF <_static/examples/phreeqc_2d_chemistry.pdf>`.
 
 This selected mineral inventory represents Bentheimer sandstone: 2% dolomite
 and 98% inert rock by mass, with no initial calcite.

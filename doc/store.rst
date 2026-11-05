@@ -59,7 +59,6 @@ Geological structure
    The three rock regions and the actual completion cells in the teaching grid.
    Elevation increases upward; distances are in metres.
 
-:download:`Download vector PDF <_static/examples/aquifer_geology.pdf>`.
 
 Plume development
 ~~~~~~~~~~~~~~~~~
@@ -71,7 +70,6 @@ Plume development
    Saved-state snapshots use the animation's saturation palette and fixed
    limits. Labels show actual simulation times.
 
-:download:`Download vector PDF <_static/examples/aquifer_plume.pdf>`.
 
 Operating response
 ~~~~~~~~~~~~~~~~~~
@@ -84,7 +82,6 @@ Operating response
    denotes injection and negative gas rate denotes withdrawal. Rates are
    constant over each completed schedule interval; inactive-well BHP is omitted.
 
-:download:`Download vector PDF <_static/examples/aquifer_well_response.pdf>`.
 
 Hydrogen loss due to dissolution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,7 +111,6 @@ can increase during withdrawal as the free-gas inventory decreases.
    Hydrogen partitioned into brine throughout build-up and cycling (left),
    with the dissolved share shown over the cycling period (right).
 
-:download:`Download vector PDF <_static/examples/aquifer_dissolution.pdf>` or
 :download:`inventory data (CSV) <_static/examples/aquifer_dissolution.csv>`.
 
 Reproduce the animation and figures from the same result:
@@ -165,7 +161,6 @@ comparisons, and the route from phase behavior to black-oil tables.
    PVT functions from the bundled aquifer input, evaluated over 30–50 bar.
    These are the existing simulation tables, not newly generated NIST data.
 
-:download:`Download vector PDF <_static/examples/aquifer_fluid_tables.pdf>` or
 :download:`fluid data (CSV) <_static/examples/aquifer_fluid_tables.csv>`.
 
 Replot the fluid properties from a saved aquifer result:
