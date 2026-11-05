@@ -15,22 +15,21 @@ H2sim provides MATLAB models and examples for hydrogen storage in saline aquifer
 | **PHREEQC coupling** | Sequential compositional–geochemical coupling and multirate microbial reaction substeps with aqueous equilibrium feedback. Inspect pH, aqueous chemistry, and mineral effects. |
 | **Hydrogen–brine thermodynamics** | RK, Søreide–Whitson, PR, and Henry–Setschenow calculations, comparisons with supplied ePC-SAFT reference tables, and black-oil PVT tabulation. |
 
+Use the [model selection guide](https://sintefmath.github.io/h2-sim/model-selection.html) to compare physical processes, dependencies and first examples. The [quick start](https://sintefmath.github.io/h2-sim/quickstart.html) provides small aquifer, biochemistry and PHREEQC setup runs; full gallery configurations are listed separately in the [example catalogue](https://sintefmath.github.io/h2-sim/examples.html).
+
 ## Install
 
-Use **MATLAB R2021a or newer** and Git. See the [verification record](https://sintefmath.github.io/h2-sim/verification.html) for the MATLAB releases and platforms actually tested. For a complete checkout, clone the repository with its pinned MRST and optional PhreeqcMatlab source:
+Use **MATLAB R2021a or newer** and Git. See the [verification record](https://sintefmath.github.io/h2-sim/verification.html) for the releases and platforms actually tested. For a first simulation, clone H2sim and initialize only its pinned MRST dependency:
 
 ```sh
-git clone --recurse-submodules https://github.com/sintefmath/h2-sim.git
+git clone https://github.com/sintefmath/h2-sim.git
 cd h2-sim
+git submodule update --init --recursive -- submodules/mrst
 ```
 
-If you already cloned without the dependencies, run this from the repository directory:
+No PHREEQC engine is needed for aquifer, anticline, mixing or core biochemistry examples. Chemistry setup can initialize the optional PhreeqcMatlab submodule later. Alternatively, `git clone --recurse-submodules https://github.com/sintefmath/h2-sim.git` fetches both pinned dependencies from the start; use one clone recipe. For an existing checkout missing its dependencies, run `git submodule update --init --recursive` from the repository root.
 
-```sh
-git submodule update --init --recursive
-```
-
-For a core-only checkout, omit `--recurse-submodules` when cloning and initialize only MRST with `git submodule update --init --recursive -- submodules/mrst`. Chemistry setup can initialize PhreeqcMatlab later.
+These instructions follow the current `master` branch. Some examples were added after `v0.1.0`; their guides identify the required development checkout.
 
 In MATLAB, set the current folder to the cloned `h2-sim` directory and initialize:
 

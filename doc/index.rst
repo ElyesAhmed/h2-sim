@@ -68,6 +68,8 @@ simulation results. Select a panel to discover the capabilities and examples.
 Build the assessment you need
 ------------------------------
 
+Use :doc:`model-selection` to compare dependencies and starting examples.
+
 Start with hydrogen–brine flow in **h2-store**, add compositional transport
 and microbial reactions in **h2-biochem**, and include **PHREEQC** when
 aqueous and mineral chemistry matter. Thermodynamic models and PVT tables
@@ -173,6 +175,7 @@ countries reading the documentation.
 
    installation
    dependencies
+   model-selection
    quickstart
    verification
 
