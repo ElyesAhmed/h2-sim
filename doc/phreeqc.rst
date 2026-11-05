@@ -15,7 +15,7 @@ PHREEQC case**, using the presentation shared by :doc:`hydrogen-anticline`,
 
 The maps show **liquid-phase H₂ mole fraction** and the MET, ACE and SRB
 population scales relative to their initial value. All four maps use fixed
-**log₁₀ scales** shared with the interactive explorer. Before taking logarithms,
+**log₁₀ scales** held constant throughout the movie. Before taking logarithms,
 values are floored at 10⁻¹² for H₂ mole fraction and 10⁻⁶ for population/initial.
 These safeguards affect rendering, not the stored chemistry. PHREEQC populations are cell-local:
 their spatial changes represent growth and decay, rather than transport or
@@ -32,8 +32,8 @@ prescribed surface gas rates, not measured well-component fluxes.
 Download the :download:`MP4 <_static/examples/phreeqc_storage.mp4>`,
 :download:`GIF <_static/examples/phreeqc_storage.gif>` or
 :download:`gallery provenance <_static/examples/phreeqc_gallery_provenance.json>`.
-:doc:`phreeqc_2d` retains the interactive workflow comparison and complete
-2D setup. The 250-day 1D validation below is a separate case with a different
+:doc:`phreeqc_2d` provides the complete 2D setup and workflow comparison.
+The 250-day 1D validation below is a separate case with a different
 consumption normalization. This presentation update redraws saved results;
 it does not rerun chemistry or resolve the reported audit limitations.
 
@@ -351,7 +351,7 @@ Three-cycle 2D storage
 
 Explore the completed layered storage comparison with compositional PHREEQC:
 three cycles, hydrogen consumption by pathway, gas composition and pH maps,
-and an interactive animation of hydrogen and microbial evolution.
+and an animation of hydrogen and microbial evolution in the shared style.
 
 .. figure:: _static/examples/phreeqc_2d_chemistry.png
    :alt: Third-injection gas H2, CO2, methane and aqueous pH maps in the layered coupled model.
