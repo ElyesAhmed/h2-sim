@@ -251,16 +251,16 @@
     "biochemistry_storage.gif": "5417a0cc46261969093c613a1a4eb07c6ff272e95824dfe6f52b2782fc751aab",
     "biochemistry_storage.mp4": "362d917b61afdd4ae3fff8f692a6a0e4473a57ded25d5e32b6882e23e48b86a2",
     "biochemistry_storage.png": "28b738004bf2bd1c6e9ce36d73c59ee9aabb586279cdae48df08e8d0981d3b7e",
-    "compositional_2d_geology.png": "f8923016177f25935fbdd3625933f68a1212b20ee5400be8aa95ae03df7b039e",
-    "compositional_2d_geology.pdf": "715523b731843a59f270ee5e480c349a3650585906168a90c498073efbf79a6e",
-    "compositional_2d_gas_maps.png": "0c900a4aa81bd53b7ae2c277c83d3c9ff67a5e611c2b2827ebe7ea6b6b815698",
-    "compositional_2d_gas_maps.pdf": "dcb0de67f95e39487965add110308cad9db2028414bb13ccb8dbbbc182f2ce02",
-    "compositional_2d_bacterial_maps.png": "488cf0e9b1922c5a0412cfa88462675bdd08675a2ae22c86de21b715b56292b6",
-    "compositional_2d_bacterial_maps.pdf": "eaaf860f9bce8f18e2e8023020a6605ea313d1cada6ba0010c62ae26a93ace2b",
-    "compositional_2d_cycle_logs.png": "662418bd4c7cd33c66ee00b81373755c96b294c3c6e900bafb9ebcfd2d1517b5",
-    "compositional_2d_cycle_logs.pdf": "e120c49bab1b9bef54735333be58d8317c57c1a07daf876c7af6f63047fd9917",
-    "compositional_2d_h2_consumption.png": "6c39176814f817b2bf5766bbe3a8baf311306606a0e8ddf393187e94f21eef7a",
-    "compositional_2d_h2_consumption.pdf": "5af5b347dc24c66b0d3a17339492e7376f394d375c2fa56dc234e73347564605",
+    "compositional_2d_geology.png": "a7e127f6e41fe10437dad17cb9396467b52abb9c9e58c88d3eb06ae11127a9da",
+    "compositional_2d_geology.pdf": "35d9bc5ae6b488d648de5e3b7a71ed0944fd18e3ec12dd3721ab452ea4efcacc",
+    "compositional_2d_gas_maps.png": "ecf65a3f92d12645ebe07096eb535705e4982dade55aba4debc0ff3be19b9219",
+    "compositional_2d_gas_maps.pdf": "7a709859bf826eafa10ddbe80f9493de0328211ef1d67dc0eb4140e8e576c59e",
+    "compositional_2d_bacterial_maps.png": "9fecb312323355d3663636c3fd355f1e3416207a85b8c8ca4eb2540a25012ba1",
+    "compositional_2d_bacterial_maps.pdf": "241465d7c165a653c4c82f7cae0b0713c54d7658eda3d385cb5c5ca2ba492340",
+    "compositional_2d_cycle_logs.png": "3a3cb152968fe7fd462750ea82aea0f1b145111b0f462e3c843e061abd715e10",
+    "compositional_2d_cycle_logs.pdf": "08b8ba1be2c4d63501f6450eded3c4e6ee4a516b3cd69e2f1df366f92e4b5672",
+    "compositional_2d_h2_consumption.png": "efb99af854cc8b11b0b231e4386408ad3982eef160597e79ab7ee1bbffb203d3",
+    "compositional_2d_h2_consumption.pdf": "fe40fb0bdfaa294574ea3728131731f482fc5e527c9f2d06a04251746825c4e7",
     "bacterial_well_logs.csv": "9e0fbbad418c874c8f522282791372ba63fadcb443db6a69e26353934b322302",
     "abiotic_well_logs.csv": "17c36ce3095b9f62a999ae569106bd2a7dd69bb1ab39be175bed1c91a23a9da5",
     "compositional_2d_h2_consumption.csv": "c9bb38c3a333ce28e2e3bf61d8561f8e2c828638d5440cec69c7b22deae20ad1"
@@ -355,5 +355,17 @@
     },
     "scientificDataChanged": false,
     "layout": "Attribution band appended below the original frame."
+  },
+  "figureBranding": {
+    "manifest": "figure_branding_provenance.json",
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-light.svg",
+      "logoSha256": "f139d2090baaabc0110ccd0fbd3fdfc94642aec73efe2faf1bbf042159272c4e",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "logoWidthRatio": 0.06,
+      "marginWidthRatio": 0.024,
+      "fontWidthRatio": 0.0065
+    },
+    "scientificDataChanged": false
   }
 }

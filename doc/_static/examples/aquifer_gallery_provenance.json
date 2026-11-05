@@ -264,16 +264,16 @@
     "aquifer_storage.gif": "b0abc588b04f35a788c8b57786e216d403c9eb931a7009962f36767d9a54abbc",
     "aquifer_storage.mp4": "9290cbc131f953638e5e5280bd26835361a95e02b24e0b512f646759586c008b",
     "aquifer_storage.png": "ab649326bb7f86c224879f19d02b935abb49ee262dd5d827ad01d87f63f16967",
-    "aquifer_geology.png": "cf277d6c8fb4a02987e7232efa84d29e5521fcb2cd51ec8ddbfaf8a7f3d7d7bf",
-    "aquifer_geology.pdf": "70bc710fb6e999c762b2f1e08347c77ba32a607d82b14dd69a8e45de5c62a774",
-    "aquifer_plume.png": "d330a23c591d44b55c6e6bd59a3a2d2003b92e90e0fdedf7a20e9ca0062844f6",
-    "aquifer_plume.pdf": "06ce4fe2e2200eefb905b084e47d3f23da2dc8f806b007a491d038516404134d",
-    "aquifer_well_response.png": "9949f91b9ae35ef44d571b753fbee832a3ac698d2fd4b445c7395acc5d451745",
-    "aquifer_well_response.pdf": "1201002f9ff445666e90a9a9af2aef4deae12725c2d281bef45ce844040d239c",
-    "aquifer_dissolution.png": "2d85efba1f189fed4d87dabb19007633cb557821f4096d7a3c7ff0d2932f92f2",
-    "aquifer_dissolution.pdf": "03bd69a50cf561c438d475d83e42a8d442cc966c2ad55de167562be253229881",
-    "aquifer_fluid_tables.png": "254f8976a2612b1b35d4a0b35c1ec5d7c0913e4b6c48c11a789af908a26e698e",
-    "aquifer_fluid_tables.pdf": "63196989e54e386226f4196c2ea68c3a26f47e54d69df76167a90c68ab27e343",
+    "aquifer_geology.png": "c04fe57e95e7c7dcb850ae5f4eb6f15b7a09ce7ca1e9c4813303d477eda7ddf1",
+    "aquifer_geology.pdf": "c963e428e48c2f50e02b14cdf878ab632ddec6a1d185f4e58e5e92a8be011634",
+    "aquifer_plume.png": "39c35eb755f5992a8443531b0f3133e712a03af28c9f5b9b2c334e133c8d3ad7",
+    "aquifer_plume.pdf": "eacaaf605fa1d4b1c7571d25da7058dc0ed7c7014ae39ec531204e167de105d3",
+    "aquifer_well_response.png": "f603a2db852b13e864ef2a87ac2daea606fc8518b9c6afa0199f01beeb830e0b",
+    "aquifer_well_response.pdf": "30514300df5649dd4f14001ece305d977bc25fae9d580d44fdd2aaae3eec5220",
+    "aquifer_dissolution.png": "908285c5599b60312d3a2177e1470edae5370e7f3f97ee4c6caccda04e831cb2",
+    "aquifer_dissolution.pdf": "0405cd72f6670b6a76f5325c39321a780a4fc3a356a98cb8b3bbf7a6f00b3c40",
+    "aquifer_fluid_tables.png": "9db4202ba8f2c10e02f7bbcf43f915febfd1c16d6aa678306ceb8207c967b42f",
+    "aquifer_fluid_tables.pdf": "5bd4970b1a58c2fd3bbea2b9f2769a977aa56042f070c8b4125127dea91dc851",
     "aquifer_dissolution.csv": "de96135613e1fe69754b295e640d0025421ece69f8c84a7cb25337318c4ca010",
     "aquifer_fluid_tables.csv": "4d0651cfd1080f96ba31850d2866449883a7b6b4733966e839b93a4113ac9ce5"
   },
@@ -369,5 +369,17 @@
     },
     "scientificDataChanged": false,
     "layout": "Attribution band appended below the original frame."
+  },
+  "figureBranding": {
+    "manifest": "figure_branding_provenance.json",
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-light.svg",
+      "logoSha256": "f139d2090baaabc0110ccd0fbd3fdfc94642aec73efe2faf1bbf042159272c4e",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "logoWidthRatio": 0.06,
+      "marginWidthRatio": 0.024,
+      "fontWidthRatio": 0.0065
+    },
+    "scientificDataChanged": false
   }
 }

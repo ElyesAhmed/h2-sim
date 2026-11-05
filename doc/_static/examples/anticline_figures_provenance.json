@@ -90,11 +90,23 @@
   "sectionVisibilityThreshold": 0.005,
   "operations": "Stored surface hydrogen, active surface gas rate, active-well BHP, and mean saved brine pressure at completion cells; ten-cycle inventory close-up.",
   "assetSha256": {
-    "anticline_geology.png": "cd19c4aef504ba2fb7cca74670876c8ff1c583a2234cb3df01e5a688d6b6929a",
-    "anticline_geology.pdf": "7b4574b0b8d8f7d41dabd2f0c189f3416022c025f7fdbd51d23ea0dda6f99151",
-    "anticline_plume_snapshots.png": "ad65b8ee8127d14ceb35ead8c5b738ba64257964aff66095680d5e6cfa9d5893",
-    "anticline_plume_snapshots.pdf": "8722b7f2c570a9e4f6328e8577198ee80504b96c43596d382c555ca12e0e296f",
-    "anticline_operations.png": "4cc06bee13e5cb466f55fdb433dd8fe2d48b6704bee0ad8cc765649472750b8f",
-    "anticline_operations.pdf": "84b62e1bb190e59e44f5e807d9f903b16873c7b2fda975746fed2bb566d6bb38"
+    "anticline_geology.png": "da0dc15eb048325a8ab212c2958e3aed9bed0571c417b34b88aa5ea85aa82656",
+    "anticline_geology.pdf": "5fdf93b26e5e649d8998d2572c461b636d4e08b50e51126c615e41e85635c733",
+    "anticline_plume_snapshots.png": "1edffb34e66fb9ffd30de29d23dcc3a7b4c219ada3435d5cbe02b0a516cadfa7",
+    "anticline_plume_snapshots.pdf": "fd548cf429e21e58e3c2c2a9bb290871ce801e7aa76bfacd697de0385b661517",
+    "anticline_operations.png": "aebde6c230662146b87780c94e3ffb6e65646fa3fcdcca87b2e8f977b697a84a",
+    "anticline_operations.pdf": "aca400158e8882bc9fc0e82b8325554a27ddf491a917dff08fb35d3d0d97c29c"
+  },
+  "figureBranding": {
+    "manifest": "figure_branding_provenance.json",
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-light.svg",
+      "logoSha256": "f139d2090baaabc0110ccd0fbd3fdfc94642aec73efe2faf1bbf042159272c4e",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "logoWidthRatio": 0.06,
+      "marginWidthRatio": 0.024,
+      "fontWidthRatio": 0.0065
+    },
+    "scientificDataChanged": false
   }
 }
