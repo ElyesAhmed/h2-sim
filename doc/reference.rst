@@ -17,6 +17,10 @@ Entry points
      - Initialize core code and MRST; optional chemistry setup
    * - ``exampleBlackOilAquifer2D``
      - 2D structural trapping and five storage cycles
+   * - ``animateBlackOilAquifer2D``
+     - Export saved aquifer states, inventories and operating stages to MP4/GIF
+   * - ``plotBlackOilAquifer2D``
+     - Redraw matched-scale plume, well response, dissolution and geology figures
    * - ``exampleHydrogenMixing2D``
      - Closed binary-gas gravity/diffusion example; see :doc:`hydrogen-mixing`
    * - ``animateHydrogenMixing2D``

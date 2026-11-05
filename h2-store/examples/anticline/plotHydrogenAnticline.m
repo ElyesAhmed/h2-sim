@@ -132,8 +132,9 @@ end
 function fig = operationFigure(result, states, times, diagnostics)
     fig = newFigure('Anticline storage operations', [25, 18]);
     layout = tiledlayout(fig, 2, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
-    teal = [0.02, 0.48, 0.49];
-    orange = [0.85, 0.36, 0.12];
+    style = h2simStoragePlotStyle();
+    teal = style.figureTeal;
+    orange = style.figureOrange;
     inventory = diagnostics.hydrogenSurfaceVolumeM3 / 1e6;
     dt = result.schedule.step.val;
     exchange = inventory(1) + [0; cumsum(dt .* ( ...
@@ -257,9 +258,8 @@ function styleAxes(ax)
 end
 
 function colors = plumeColors()
-    anchors = [0.12, 0.22, 0.35; 0.08, 0.48, 0.65; ...
-        0.15, 0.75, 0.62; 0.85, 0.88, 0.3; 1, 0.65, 0.18];
-    colors = interp1(linspace(0, 1, size(anchors, 1)), anchors, linspace(0, 1, 256));
+    style = h2simStoragePlotStyle();
+    colors = style.saturation;
 end
 
 %{

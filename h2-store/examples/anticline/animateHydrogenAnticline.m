@@ -226,15 +226,12 @@ function map = appendGif(rgb, file, frame, rate, map)
 end
 
 function colors = storageColors()
-    anchors = [0.12, 0.22, 0.35; 0.08, 0.48, 0.65; ...
-        0.15, 0.75, 0.62; 0.85, 0.88, 0.3; 1, 0.65, 0.18];
-    colors = interp1(linspace(0, 1, size(anchors, 1)), anchors, linspace(0, 1, 256));
+    style = h2simStoragePlotStyle();
+    colors = style.saturation;
 end
 
 function styleAxes(ax)
-    set(ax, 'Color', [0.025, 0.055, 0.1], 'XColor', 'w', 'YColor', 'w', ...
-        'ZColor', 'w', 'FontSize', 10, 'Box', 'off');
-    ax.Title.Color = 'w';
+    h2simStoragePlotStyle(ax);
 end
 
 function closeVideo(writer)
