@@ -1,7 +1,8 @@
 # Model presentation reference
 
-Use the anticline page (`hydrogen-anticline.rst`) and saline aquifer page
-(`store.rst`) when adding or refreshing a Model page.
+Use the anticline page (`hydrogen-anticline.rst`), saline aquifer page
+(`store.rst`), and biochemistry page (`biochem.rst`) when adding or refreshing
+a Model page.
 
 - Render scientific data from the initial and accepted simulation states.
   Retain operating-stage endpoints; label actual times and disclose uneven
@@ -23,5 +24,5 @@ Use the anticline page (`hydrogen-anticline.rst`) and saline aquifer page
   hashes in a JSON provenance file. Verify the HTML targets, decode the media,
   and visually inspect figures and representative animation frames.
 
-The animation colour/axes helper is shared by both cases. Physical models,
-solvers and tolerances remain independent of the presentation functions.
+The animation colour/axes helper is shared by the storage and biochemistry
+galleries. Physical models, solvers and tolerances remain independent of the presentation functions.
