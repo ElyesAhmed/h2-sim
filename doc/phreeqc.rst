@@ -119,7 +119,6 @@ and unrecovered gas are excluded.
    Hydrogen consumption and dissolved-H₂ evolution over the complete cycle.
    Vertical lines mark the day-50 and day-200 control changes.
 
-:download:`Download PDF <_static/examples/phreeqc_validation_full_cycle.pdf>`.
 
 .. list-table:: Consumed hydrogen (% of total prescribed injection)
    :header-rows: 1
@@ -156,7 +155,6 @@ Geochemical evolution
    inorganic-carbon molality, not only dissolved CO₂; the reference records
    it directly from PHREEQC selected output.
 
-:download:`Download PDF <_static/examples/phreeqc_geochemistry_full_cycle.pdf>`.
 
 The pH and DIC fronts show how reactive aqueous chemistry evolves throughout
 injection, storage, and production. Similar bulk consumption does not imply
@@ -176,7 +174,6 @@ Consumption by reaction
    prescribed hydrogen injection. Their sum equals the total-consumption
    curve for the corresponding implementation.
 
-:download:`Download PDF <_static/examples/phreeqc_reaction_loss_full_cycle.pdf>` or
 :download:`validation data <_static/examples/phreeqc_loss_history.csv>`.
 
 At day 250, the compositional contributions are 33.357% (MET), 5.092% (ACE),
@@ -329,7 +326,6 @@ splitting; this is not a convergence test of reaction substepping alone.
    Full-cycle hydrogen consumption. Dotted lines mark day 50 and day 200.
    Percentages use total prescribed injection as a fixed denominator.
 
-:download:`Download PDF <_static/examples/multirate_full_cycle_loss.pdf>`.
 
 .. figure:: _static/examples/multirate_full_cycle_chemistry_history.png
    :alt: PHREEQC pH and dissolved inorganic carbon spatial medians and minimum–maximum ranges over 250 days.
@@ -339,7 +335,6 @@ splitting; this is not a convergence test of reaction substepping alone.
    range. The notebook also compares pH and DIC space-time maps and reports
    the available conservation diagnostics.
 
-:download:`Download PDF <_static/examples/multirate_full_cycle_chemistry_history.pdf>`.
 
 .. button-ref:: notebooks/multirate_reactions
    :color: primary

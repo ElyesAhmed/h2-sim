@@ -79,7 +79,6 @@ Geological structure
    Rock regions and completion cells from the 10,116-cell grid used by the
    saved comparison. The geometry is shared by the bacterial and abiotic runs.
 
-:download:`Download vector PDF <_static/examples/compositional_2d_geology.pdf>`.
 
 Bacterial and abiotic gas composition
 -------------------------------------
@@ -91,7 +90,6 @@ Bacterial and abiotic gas composition
    Composition at the end of fifth-cycle injection (day 460). Every panel uses
    limits from zero to one and masks cells with gas saturation below 0.001.
 
-:download:`Download vector PDF <_static/examples/compositional_2d_gas_maps.pdf>`.
 
 Hydrogen plume and microbial populations
 ----------------------------------------
@@ -106,7 +104,6 @@ Hydrogen plume and microbial populations
    history. H₂ is masked where gas saturation is below 0.001. ``nbact`` is the model's population variable; the plotted
    values are not a calibrated cell count per volume.
 
-:download:`Download vector PDF <_static/examples/compositional_2d_bacterial_maps.pdf>`.
 
 Operating response
 ------------------
@@ -128,7 +125,6 @@ Operating response
    shut-in well records retain the preceding active-step values. Rates are
    shown over their actual completed schedule intervals.
 
-:download:`Download vector PDF <_static/examples/compositional_2d_cycle_logs.pdf>`,
 :download:`bacterial well data <_static/examples/bacterial_well_logs.csv>` or
 :download:`abiotic well data <_static/examples/abiotic_well_logs.csv>`.
 
@@ -159,8 +155,7 @@ consumption.
 
    Reaction-specific hydrogen consumption and its total over time.
 
-:download:`Download vector PDF <_static/examples/compositional_2d_h2_consumption.pdf>`
-or :download:`consumption data <_static/examples/compositional_2d_h2_consumption.csv>`.
+:download:`consumption data <_static/examples/compositional_2d_h2_consumption.csv>`.
 
 Reproduce the presentation
 --------------------------

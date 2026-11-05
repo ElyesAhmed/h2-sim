@@ -38,3 +38,20 @@ when changing startup or example options. verification.rst records dated local
 MATLAB checks separately from documentation CI. Do not label an untested
 platform or MATLAB release as verified. Update CITATION.cff from agreed project
 credits and retain dependency and dataset attribution.
+
+** Figure access and accessibility
+
+The figure_access Sphinx extension adds full-size links and available paired
+PDF links beneath scientific figures, including notebook attachments. Links
+are generated at build time and remain usable without JavaScript. Keep PNG
+and PDF base names aligned; figures without a PDF get only a full-size link.
+Notebook attachments should contain the same current PNG bytes as the shared
+_static/examples asset so downloaded notebooks remain portable and website
+pages share one figure. Keep the code cells and numerical results unchanged.
+
+Use descriptive alt text that identifies the quantities, comparison and
+operating stage; retain detailed interpretation in the caption/body. Native
+video controls support pause/play without autoplay. Wide tables become keyboard
+focusable only when they overflow. Check figure links, focus visibility, video
+controls and sideways table scrolling in light/dark desktop and mobile layouts
+when changing presentation. The site checks do not establish numerical accuracy.
