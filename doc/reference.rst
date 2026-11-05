@@ -41,6 +41,10 @@ Entry points
      - Coarse-flow / local-reaction multirate example
    * - ``exampleCompositionalBacterial2DThreeReactions``
      - Existing 2D reservoir case with MET, ACE, SRB, packed cycles, and selectable scenarios
+   * - ``animateCompositionalBacterial2DThreeReactions``
+     - Animate saved hydrogen/population fields and microbial consumption
+   * - ``plotCompositionalBacterial2DThreeReactions``
+     - Redraw matched-scale gas/population maps, well logs, consumption and geology
    * - ``runPhreeqcValidation``
      - Standalone compositional PHREEQC storage cycle; optional external reference
    * - ``exampleH2BrineSolubilityStudy``
