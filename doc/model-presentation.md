@@ -57,3 +57,30 @@ hashes. Repeating it skips unchanged branded files. After changing the footer
 or logo, regenerate the original scientific exports before branding again.
 Poster plots retain their original pixels; movie and GIF frames retain their
 source times and order, with normal video encoding/palette quantization.
+
+## Small figure attribution
+
+Use a small teal H2sim logo and the existing SINTEF copyright line in the
+lower-right margin of scientific figures. Keep the mark below the original
+artwork, including legends and colour bars. The logo occupies about 6% of the
+figure width; the margin is about 2.4% of that width.
+
+After exporting figures, apply:
+
+```bash
+python -m pip install -r tools/requirements-figures.txt
+python tools/brand_website_figures.py
+```
+
+This covers the website's plot PNGs, matching PDFs and two SVG diagrams.
+Animation posters use the animation attribution step above. For a local set:
+
+```bash
+python tools/brand_website_figures.py --directory build/aquifer-gallery
+```
+
+The PNG plot area is preserved pixel-for-pixel. PDFs keep the original artwork
+coordinates and vector content. The command records input/output hashes and
+margin geometry in `figure_branding_provenance.json`, updates existing figure
+asset hashes, and skips unchanged branded files on subsequent runs. Regenerate
+original exports before changing the signature itself.

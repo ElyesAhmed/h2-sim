@@ -1,0 +1,902 @@
+{
+  "assets": {
+    "workflows.svg": {
+      "sourceSize": [
+        960.0,
+        330.0
+      ],
+      "outputSize": [
+        960.0,
+        353.0
+      ],
+      "marginHeight": 23,
+      "originalDiagramElementsPreserved": true,
+      "sourceSha256": "1a409cc588f033e450ff55ca5da5f7f175990a3ad4434d6ff80fa16ad94a9ef7",
+      "outputSha256": "5e2ca028d060f613b00d86f8f6084caf1c0c99d5d6ff8b04dcb61173f5d0ab70"
+    },
+    "reservoir.svg": {
+      "sourceSize": [
+        520.0,
+        420.0
+      ],
+      "outputSize": [
+        520.0,
+        442.0
+      ],
+      "marginHeight": 22,
+      "originalDiagramElementsPreserved": true,
+      "sourceSha256": "ae263aa1064ff18d14eb580a18f9c5e04862f041556ac0de4b2693ab523acd02",
+      "outputSha256": "0579c63842ec0faad73c2ad24aac5400de041a481e171328a4f4a79bb65001bb"
+    },
+    "examples/anticline_geology.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            625.0,
+            192.0
+          ],
+          "outputSizePoints": [
+            625.0,
+            207.0
+          ],
+          "marginHeightPoints": 15.0
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "7b4574b0b8d8f7d41dabd2f0c189f3416022c025f7fdbd51d23ea0dda6f99151",
+      "outputSha256": "5fdf93b26e5e649d8998d2572c461b636d4e08b50e51126c615e41e85635c733"
+    },
+    "examples/anticline_operations.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            675.0,
+            502.0
+          ],
+          "outputSizePoints": [
+            675.0,
+            518.2
+          ],
+          "marginHeightPoints": 16.2
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "84b62e1bb190e59e44f5e807d9f903b16873c7b2fda975746fed2bb566d6bb38",
+      "outputSha256": "aca400158e8882bc9fc0e82b8325554a27ddf491a917dff08fb35d3d0d97c29c"
+    },
+    "examples/anticline_plume_snapshots.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            723.0,
+            266.0
+          ],
+          "outputSizePoints": [
+            723.0,
+            283.352
+          ],
+          "marginHeightPoints": 17.352
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "8722b7f2c570a9e4f6328e8577198ee80504b96c43596d382c555ca12e0e296f",
+      "outputSha256": "fd548cf429e21e58e3c2c2a9bb290871ce801e7aa76bfacd697de0385b661517"
+    },
+    "examples/aquifer_dissolution.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            617.0,
+            275.0
+          ],
+          "outputSizePoints": [
+            617.0,
+            289.808
+          ],
+          "marginHeightPoints": 14.808
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "03bd69a50cf561c438d475d83e42a8d442cc966c2ad55de167562be253229881",
+      "outputSha256": "0405cd72f6670b6a76f5325c39321a780a4fc3a356a98cb8b3bbf7a6f00b3c40"
+    },
+    "examples/aquifer_fluid_tables.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            646.0,
+            473.0
+          ],
+          "outputSizePoints": [
+            646.0,
+            488.504
+          ],
+          "marginHeightPoints": 15.504
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "63196989e54e386226f4196c2ea68c3a26f47e54d69df76167a90c68ab27e343",
+      "outputSha256": "5bd4970b1a58c2fd3bbea2b9f2769a977aa56042f070c8b4125127dea91dc851"
+    },
+    "examples/aquifer_geology.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            472.0,
+            367.0
+          ],
+          "outputSizePoints": [
+            472.0,
+            378.328
+          ],
+          "marginHeightPoints": 11.328
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "70bc710fb6e999c762b2f1e08347c77ba32a607d82b14dd69a8e45de5c62a774",
+      "outputSha256": "c963e428e48c2f50e02b14cdf878ab632ddec6a1d185f4e58e5e92a8be011634"
+    },
+    "examples/aquifer_plume.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            734.0,
+            193.0
+          ],
+          "outputSizePoints": [
+            734.0,
+            210.61599999999999
+          ],
+          "marginHeightPoints": 17.616
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "06ce4fe2e2200eefb905b084e47d3f23da2dc8f806b007a491d038516404134d",
+      "outputSha256": "eacaaf605fa1d4b1c7571d25da7058dc0ed7c7014ae39ec531204e167de105d3"
+    },
+    "examples/aquifer_well_response.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            621.0,
+            275.0
+          ],
+          "outputSizePoints": [
+            621.0,
+            289.904
+          ],
+          "marginHeightPoints": 14.904
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "1201002f9ff445666e90a9a9af2aef4deae12725c2d281bef45ce844040d239c",
+      "outputSha256": "30514300df5649dd4f14001ece305d977bc25fae9d580d44fdd2aaae3eec5220"
+    },
+    "examples/compositional_2d_bacterial_maps.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            863.0,
+            356.0
+          ],
+          "outputSizePoints": [
+            863.0,
+            376.712
+          ],
+          "marginHeightPoints": 20.712
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "eaaf860f9bce8f18e2e8023020a6605ea313d1cada6ba0010c62ae26a93ace2b",
+      "outputSha256": "241465d7c165a653c4c82f7cae0b0713c54d7658eda3d385cb5c5ca2ba492340"
+    },
+    "examples/compositional_2d_cycle_logs.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            675.0,
+            475.0
+          ],
+          "outputSizePoints": [
+            675.0,
+            491.2
+          ],
+          "marginHeightPoints": 16.2
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "e120c49bab1b9bef54735333be58d8317c57c1a07daf876c7af6f63047fd9917",
+      "outputSha256": "08b8ba1be2c4d63501f6450eded3c4e6ee4a516b3cd69e2f1df366f92e4b5672"
+    },
+    "examples/compositional_2d_gas_maps.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            713.0,
+            361.0
+          ],
+          "outputSizePoints": [
+            713.0,
+            378.112
+          ],
+          "marginHeightPoints": 17.112000000000002
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "dcb0de67f95e39487965add110308cad9db2028414bb13ccb8dbbbc182f2ce02",
+      "outputSha256": "7a709859bf826eafa10ddbe80f9493de0328211ef1d67dc0eb4140e8e576c59e"
+    },
+    "examples/compositional_2d_geology.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            472.0,
+            367.0
+          ],
+          "outputSizePoints": [
+            472.0,
+            378.328
+          ],
+          "marginHeightPoints": 11.328
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "715523b731843a59f270ee5e480c349a3650585906168a90c498073efbf79a6e",
+      "outputSha256": "35d9bc5ae6b488d648de5e3b7a71ed0944fd18e3ec12dd3721ab452ea4efcacc"
+    },
+    "examples/compositional_2d_h2_consumption.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            547.0,
+            298.0
+          ],
+          "outputSizePoints": [
+            547.0,
+            311.128
+          ],
+          "marginHeightPoints": 13.128
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "5af5b347dc24c66b0d3a17339492e7376f394d375c2fa56dc234e73347564605",
+      "outputSha256": "fe40fb0bdfaa294574ea3728131731f482fc5e527c9f2d06a04251746825c4e7"
+    },
+    "examples/multirate_full_cycle_chemistry_history.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            836.39952,
+            281.99952
+          ],
+          "outputSizePoints": [
+            836.39952,
+            302.07310848000003
+          ],
+          "marginHeightPoints": 20.07358848
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "f26a8a58cf2ba94c5372f8800e5d50f0b81d26686e4dd0a254ec4cd3de5a11ce",
+      "outputSha256": "18ecb09a671280bf042809d959fa9a5610baf945d322946073995b1a94e9da84"
+    },
+    "examples/multirate_full_cycle_chemistry_maps.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            835.5829516331,
+            404.39952
+          ],
+          "outputSizePoints": [
+            835.5829516331,
+            424.4535108391944
+          ],
+          "marginHeightPoints": 20.0539908391944
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "b9e10cb8a90c4fc633a2290eed9476e6995acd07ae6adc8060fae14beb443262",
+      "outputSha256": "65e7e25be8e44ac3a0dc9480f3a33498bed24d950112ecaf5793a06c276f0c1f"
+    },
+    "examples/multirate_full_cycle_loss.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            836.39952,
+            303.59952
+          ],
+          "outputSizePoints": [
+            836.39952,
+            323.67310848
+          ],
+          "marginHeightPoints": 20.07358848
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "d0c772abfb87ed43c85b12f48675f335f82ac60f8a7e155f4f62bacabab31a12",
+      "outputSha256": "6f81423a891f19e832577968619ab7542df32821757b4c2b35948377d901b2bc"
+    },
+    "examples/phreeqc_2d_chemistry.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            869.4416649701,
+            292.5150068258
+          ],
+          "outputSizePoints": [
+            869.4416649701,
+            313.3816067850824
+          ],
+          "marginHeightPoints": 20.8665999592824
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "e6812bdaa04b428db5fcb7b4b2cd96a1ecf0f6f8be6750cc360caab1fb0bcb63",
+      "outputSha256": "e3e0fed7d19efa156a3fcf5570800a8580b5b0930e01e0ab21d293afc3c30d76"
+    },
+    "examples/phreeqc_2d_loss.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            800.39952,
+            274.79952
+          ],
+          "outputSizePoints": [
+            800.39952,
+            294.00910847999995
+          ],
+          "marginHeightPoints": 19.20958848
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "5eeef5b9e35ebe492432b7010b9d87d05f16171ed248e6dfb6dfab8d4ddfe2bc",
+      "outputSha256": "c2b901205b76095fbd36bc30d4b394ac449c05dfec1f303f6e4190f4e1ef92cd"
+    },
+    "examples/phreeqc_2d_setup.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            800.250641348,
+            310.79952
+          ],
+          "outputSizePoints": [
+            800.250641348,
+            330.005535392352
+          ],
+          "marginHeightPoints": 19.206015392352
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "337047e716bfb17f47953fa8e6c8ff4aede25762970a133f923df8549c0969a6",
+      "outputSha256": "6de2904c24f8bbe87f349829054477c4476a6720c8edc1eae1b1e39d0decf7e9"
+    },
+    "examples/phreeqc_geochemistry_full_cycle.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            709.0,
+            502.0
+          ],
+          "outputSizePoints": [
+            709.0,
+            519.016
+          ],
+          "marginHeightPoints": 17.016000000000002
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "d61441969ef0127163f8284c9be15747975e18d488f4523e304ae8683a846abc",
+      "outputSha256": "a9b78b3e3b112d3e0c1ce676148f7575f9314ea54e700ca612a2eff5da48dc47"
+    },
+    "examples/phreeqc_reaction_loss_full_cycle.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            766.0,
+            303.0
+          ],
+          "outputSizePoints": [
+            766.0,
+            321.384
+          ],
+          "marginHeightPoints": 18.384
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "111610769c696a680674368e23887cb7d3cfd47f76b3ac6a5c82bf33bac3b206",
+      "outputSha256": "e9a9f9d615a19157293f87ca3e9f47cb505630575d7abd26b76c787da9d186c8"
+    },
+    "examples/phreeqc_validation_full_cycle.pdf": {
+      "pages": [
+        {
+          "sourceSizePoints": [
+            791.0,
+            305.0
+          ],
+          "outputSizePoints": [
+            791.0,
+            323.984
+          ],
+          "marginHeightPoints": 18.984
+        }
+      ],
+      "vectorContentPreserved": true,
+      "originalPdfCoordinatesPreserved": true,
+      "pdfHeader": "%PDF-1.4",
+      "sourceSha256": "9cc26b9ca7c5746fa2b5de482dcb531f40b56bd610a0bf17aa24b83f3dc80e4b",
+      "outputSha256": "60201ad71ef7c1e2bc0b99e475cfe5d7f90c29ef869c488f03dfe5143569ae20"
+    },
+    "examples/anticline_geology.png": {
+      "sourceSize": [
+        1733,
+        526
+      ],
+      "outputSize": [
+        1733,
+        568
+      ],
+      "marginHeight": 42,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "57a1b6d0c15218ef42a15b94e0e7e625b9e1608f6b4c30ceddc5daffeb298cd1",
+      "sourceSha256": "cd19c4aef504ba2fb7cca74670876c8ff1c583a2234cb3df01e5a688d6b6929a",
+      "outputSha256": "da0dc15eb048325a8ab212c2958e3aed9bed0571c417b34b88aa5ea85aa82656"
+    },
+    "examples/anticline_operations.png": {
+      "sourceSize": [
+        1873,
+        1388
+      ],
+      "outputSize": [
+        1873,
+        1433
+      ],
+      "marginHeight": 45,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "353072ff3753539f4544c27cc0f437932e012dfa93fde376195882f5fc400df9",
+      "sourceSha256": "4cc06bee13e5cb466f55fdb433dd8fe2d48b6704bee0ad8cc765649472750b8f",
+      "outputSha256": "aebde6c230662146b87780c94e3ffb6e65646fa3fcdcca87b2e8f977b697a84a"
+    },
+    "examples/anticline_plume_snapshots.png": {
+      "sourceSize": [
+        2004,
+        735
+      ],
+      "outputSize": [
+        2004,
+        783
+      ],
+      "marginHeight": 48,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "d06d29acddc3db24364b72200315b93cee0628720bec42f00b05e01773bda38f",
+      "sourceSha256": "ad65b8ee8127d14ceb35ead8c5b738ba64257964aff66095680d5e6cfa9d5893",
+      "outputSha256": "1edffb34e66fb9ffd30de29d23dcc3a7b4c219ada3435d5cbe02b0a516cadfa7"
+    },
+    "examples/aquifer_dissolution.png": {
+      "sourceSize": [
+        1713,
+        760
+      ],
+      "outputSize": [
+        1713,
+        801
+      ],
+      "marginHeight": 41,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "a4d6b00b3119728749646cd7386c8c773b4eccced5a3873030bc2ea9d5dbf35c",
+      "sourceSha256": "2d85efba1f189fed4d87dabb19007633cb557821f4096d7a3c7ff0d2932f92f2",
+      "outputSha256": "908285c5599b60312d3a2177e1470edae5370e7f3f97ee4c6caccda04e831cb2"
+    },
+    "examples/aquifer_fluid_tables.png": {
+      "sourceSize": [
+        1790,
+        1311
+      ],
+      "outputSize": [
+        1790,
+        1354
+      ],
+      "marginHeight": 43,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "d7402e97036f961b40ad7a8a3430c7cea827cb11600efb712ad895855205c4a4",
+      "sourceSha256": "254f8976a2612b1b35d4a0b35c1ec5d7c0913e4b6c48c11a789af908a26e698e",
+      "outputSha256": "9db4202ba8f2c10e02f7bbcf43f915febfd1c16d6aa678306ceb8207c967b42f"
+    },
+    "examples/aquifer_geology.png": {
+      "sourceSize": [
+        1306,
+        1014
+      ],
+      "outputSize": [
+        1306,
+        1045
+      ],
+      "marginHeight": 31,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "acf8d5d1fa2aec4574fe98af8e0c92ec20c69df719a0485bc1486cb3fb58a930",
+      "sourceSha256": "cf277d6c8fb4a02987e7232efa84d29e5521fcb2cd51ec8ddbfaf8a7f3d7d7bf",
+      "outputSha256": "c04fe57e95e7c7dcb850ae5f4eb6f15b7a09ce7ca1e9c4813303d477eda7ddf1"
+    },
+    "examples/aquifer_plume.png": {
+      "sourceSize": [
+        2034,
+        528
+      ],
+      "outputSize": [
+        2034,
+        577
+      ],
+      "marginHeight": 49,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "623a40aa62a6e9be8580d506704673b8c6afcb6297c32a1fa7abfaf9de11b4a5",
+      "sourceSha256": "d330a23c591d44b55c6e6bd59a3a2d2003b92e90e0fdedf7a20e9ca0062844f6",
+      "outputSha256": "39c35eb755f5992a8443531b0f3133e712a03af28c9f5b9b2c334e133c8d3ad7"
+    },
+    "examples/aquifer_well_response.png": {
+      "sourceSize": [
+        1721,
+        760
+      ],
+      "outputSize": [
+        1721,
+        801
+      ],
+      "marginHeight": 41,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "779deb88a0efc243076503f6c42eeb12dddc524005cdebd314525f12baee74de",
+      "sourceSha256": "9949f91b9ae35ef44d571b753fbee832a3ac698d2fd4b445c7395acc5d451745",
+      "outputSha256": "f603a2db852b13e864ef2a87ac2daea606fc8518b9c6afa0199f01beeb830e0b"
+    },
+    "examples/compositional_2d_bacterial_maps.png": {
+      "sourceSize": [
+        2394,
+        985
+      ],
+      "outputSize": [
+        2394,
+        1042
+      ],
+      "marginHeight": 57,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "585cff9ca10dad903676cd131247101102236bf1436cd92071cef2f99d22b23e",
+      "sourceSha256": "488cf0e9b1922c5a0412cfa88462675bdd08675a2ae22c86de21b715b56292b6",
+      "outputSha256": "9fecb312323355d3663636c3fd355f1e3416207a85b8c8ca4eb2540a25012ba1"
+    },
+    "examples/compositional_2d_cycle_logs.png": {
+      "sourceSize": [
+        1873,
+        1311
+      ],
+      "outputSize": [
+        1873,
+        1356
+      ],
+      "marginHeight": 45,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "34c671177d8dce0c5ce642b2e90e24dfe35a67c93a4a5b2fb97f82b96f955ca2",
+      "sourceSha256": "662418bd4c7cd33c66ee00b81373755c96b294c3c6e900bafb9ebcfd2d1517b5",
+      "outputSha256": "3a3cb152968fe7fd462750ea82aea0f1b145111b0f462e3c843e061abd715e10"
+    },
+    "examples/compositional_2d_gas_maps.png": {
+      "sourceSize": [
+        1975,
+        999
+      ],
+      "outputSize": [
+        1975,
+        1046
+      ],
+      "marginHeight": 47,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "85a77dda11d39a5b4e746cb0e31fdf9bc3186a0904d1554733a73fea4275a043",
+      "sourceSha256": "0c900a4aa81bd53b7ae2c277c83d3c9ff67a5e611c2b2827ebe7ea6b6b815698",
+      "outputSha256": "ecf65a3f92d12645ebe07096eb535705e4982dade55aba4debc0ff3be19b9219"
+    },
+    "examples/compositional_2d_geology.png": {
+      "sourceSize": [
+        1306,
+        1014
+      ],
+      "outputSize": [
+        1306,
+        1045
+      ],
+      "marginHeight": 31,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "db61a41fafc00de2608b3b43a518f55aa2fc7b574f49d185c6ff9ef83917840a",
+      "sourceSha256": "f8923016177f25935fbdd3625933f68a1212b20ee5400be8aa95ae03df7b039e",
+      "outputSha256": "a7e127f6e41fe10437dad17cb9396467b52abb9c9e58c88d3eb06ae11127a9da"
+    },
+    "examples/compositional_2d_h2_consumption.png": {
+      "sourceSize": [
+        1518,
+        821
+      ],
+      "outputSize": [
+        1518,
+        857
+      ],
+      "marginHeight": 36,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "762803797519d26ed047fa1b677c25ee92dd0d61697b22a38d414b8c41b3c2aa",
+      "sourceSha256": "6c39176814f817b2bf5766bbe3a8baf311306606a0e8ddf393187e94f21eef7a",
+      "outputSha256": "efb99af854cc8b11b0b231e4386408ad3982eef160597e79ab7ee1bbffb203d3"
+    },
+    "examples/compositional_2d_well_logs_verified.png": {
+      "sourceSize": [
+        2200,
+        1400
+      ],
+      "outputSize": [
+        2200,
+        1453
+      ],
+      "marginHeight": 53,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "b51b01ad4fc19387c17c3b4fe3647c081b47a7c343141463481ab86fbb792260",
+      "sourceSha256": "ae8da5b76a7b3966ddbff0c7dc4816661d99f23550c3a773faad20a980a1c06d",
+      "outputSha256": "a7072a15cdb95cda75e00813e99b1d4c777d08c034113a46c3be51fade9f3b6b"
+    },
+    "examples/mineral_comparison.png": {
+      "sourceSize": [
+        3780,
+        1654
+      ],
+      "outputSize": [
+        3780,
+        1745
+      ],
+      "marginHeight": 91,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "3a598a49d11a2bd2bcb097028985f8459b9b16985f2c112510f6989ef75c92e9",
+      "sourceSha256": "6ef8005540af9dbf20e620a3594fe0eefdadd048fa6dfc7e0e88b4ae4fcc542e",
+      "outputSha256": "91739351f66fc29e1a40798583de62d85130b2b596decd6b6856b032e5afd3a5"
+    },
+    "examples/multirate_full_cycle_chemistry_history.png": {
+      "sourceSize": [
+        2090,
+        704
+      ],
+      "outputSize": [
+        2090,
+        754
+      ],
+      "marginHeight": 50,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "402495dbc087da9314834f9911ca1f47934e324361333709e2384d571494811e",
+      "sourceSha256": "c55a981a2bfc9a50f5246f18fcbaaabe6c32f8ab1724f4fdc6c0872249b62587",
+      "outputSha256": "e1efeaa5994a78a5743689c3aee63462aa01e973149db74cf37470cd1d18eb8c"
+    },
+    "examples/multirate_full_cycle_chemistry_maps.png": {
+      "sourceSize": [
+        2088,
+        1010
+      ],
+      "outputSize": [
+        2088,
+        1060
+      ],
+      "marginHeight": 50,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "94a75a2544f3073f4b88ef0e578a2c5f7c53642e7e47691587a08ce9428fdf7e",
+      "sourceSha256": "c6217af4adb196e8223e9b1aa0b0ff33647b9a74806d379021f0466aee4875fd",
+      "outputSha256": "a64f0f3236cc935688f3187853f123f5fec002d3f8d5c39d0c0f2953c5843c9c"
+    },
+    "examples/multirate_full_cycle_loss.png": {
+      "sourceSize": [
+        2090,
+        758
+      ],
+      "outputSize": [
+        2090,
+        808
+      ],
+      "marginHeight": 50,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "ad70a6958c744e99133d1fe8647f9512da51e9dfcbbf83ea4166e95cf14c8ef6",
+      "sourceSha256": "469fe0a84e92e8149f8409ff0324d70bdebd4acecd2f7acc778d35c165e9a658",
+      "outputSha256": "27958663043e543907864234a091783ca57e53fb317e9f6bee43929b8aed44fb"
+    },
+    "examples/multirate_profiles.png": {
+      "sourceSize": [
+        2955,
+        2126
+      ],
+      "outputSize": [
+        2955,
+        2197
+      ],
+      "marginHeight": 71,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "2452c0a2a8025ecf0ee2ac2ce18ce8fd305c4f2b7baa2f565c298604735c8d32",
+      "sourceSha256": "3ba138a18bb1ae5a8268df89082cbd9070792d37a8d3351b8c940568e99292c3",
+      "outputSha256": "ca046099a4a367244f65e7c0cdac4ba85eb44d74995f772bf1e1e3d9e63ce982"
+    },
+    "examples/phase_partitioning.png": {
+      "sourceSize": [
+        1848,
+        841
+      ],
+      "outputSize": [
+        1848,
+        885
+      ],
+      "marginHeight": 44,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "c864833460f00eadae0520b1fb4349edb0d7134abf810cbf9cd4308c90ca2dc6",
+      "sourceSha256": "462dac114a4be54952f433d8160a3060ba9da0de848d4f6fb1764d741a01c0ff",
+      "outputSha256": "33c4edaab094d6f77c952ae914d863431eed4c70cc1853d1e6638ae59908a4f6"
+    },
+    "examples/phreeqc_2d_chemistry.png": {
+      "sourceSize": [
+        2415,
+        814
+      ],
+      "outputSize": [
+        2415,
+        872
+      ],
+      "marginHeight": 58,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "6cc03b0c118ebe9161442daf0c2a61d73a43b53974ae2be6ef2c6393e6943d18",
+      "sourceSha256": "b6ee5fed29a1086db47e78eb7c126edf7788371da8ae53d323a4b5fbdec59234",
+      "outputSha256": "ae79af8a74220438dde2712988f855b89ba4b3d097ed398ae1266907617ff01e"
+    },
+    "examples/phreeqc_2d_loss.png": {
+      "sourceSize": [
+        2223,
+        763
+      ],
+      "outputSize": [
+        2223,
+        816
+      ],
+      "marginHeight": 53,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "f7653e2aed57d895fd3fa7da6326b8634f41ea96b32042992091591da12d434e",
+      "sourceSha256": "ee8cf44bd04b268162dfaff9e373097ef61afe35f4617915caf076f52e74ece8",
+      "outputSha256": "c562005979a1301afd1866983213c959b779013a58a3f4bb1919576dc8b3dcc4"
+    },
+    "examples/phreeqc_2d_setup.png": {
+      "sourceSize": [
+        2212,
+        863
+      ],
+      "outputSize": [
+        2212,
+        916
+      ],
+      "marginHeight": 53,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "bf15c50c6ee169ee60127709a8f36ee256b3b5805a2b2f987cd3b734cb81e8be",
+      "sourceSha256": "58a5844d004b3eab4d32b41bcc102f1176b8a6ed6bb2ea1d56510d937e3fc3ce",
+      "outputSha256": "835f7d808579127ddffa80c8f8e85c345228138013da6159c301462dd32311bb"
+    },
+    "examples/phreeqc_geochemistry_full_cycle.png": {
+      "sourceSize": [
+        1966,
+        1388
+      ],
+      "outputSize": [
+        1966,
+        1435
+      ],
+      "marginHeight": 47,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "fef01b6c2b1fc2a8c053fa6863a2cd2e1b00f947d115dbc0291313921d2ce07e",
+      "sourceSha256": "8b484dbf75a4a50e6d5c5be5bbde7b70cceec4994fdb7b4660bb5438dcf77358",
+      "outputSha256": "75c54cf1b85f807f56ba6e6f25cb50f922159d5b23aecd37de19417528218ea3"
+    },
+    "examples/phreeqc_reaction_loss_full_cycle.png": {
+      "sourceSize": [
+        2124,
+        836
+      ],
+      "outputSize": [
+        2124,
+        887
+      ],
+      "marginHeight": 51,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "18b38c391eca13c9b90caf8100c92be00bc093ebc754c4926da89263e198a7d3",
+      "sourceSha256": "bb156e4a3b744df2a348d0e7daae16525f93cda5a07c8641b57f0eeaf78ac49a",
+      "outputSha256": "da550c450da2b78f429d368c25cd8e31184628da23fa128382f96476c7f3f9b8"
+    },
+    "examples/phreeqc_validation_full_cycle.png": {
+      "sourceSize": [
+        2188,
+        845
+      ],
+      "outputSize": [
+        2188,
+        898
+      ],
+      "marginHeight": 53,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "f1da89d97aca0aa244e621225d2daa0e730c93d7319aa8bb7998bec5e761a7ee",
+      "sourceSha256": "81ccaf89493782182af6937f886d24881f496abb84ec534e6ecae6549ce74ee5",
+      "outputSha256": "575326f53bac2e1af81fc3780dcd643d4a19086db9440389b6615ee17b51a431"
+    },
+    "examples/salting_out.png": {
+      "sourceSize": [
+        1701,
+        763
+      ],
+      "outputSize": [
+        1701,
+        804
+      ],
+      "marginHeight": 41,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "3a10b137d0e1b2301f89afb11838eea11b12d543f43fedd3a6124cf63a7d9d8d",
+      "sourceSha256": "11533c34f7df4110604dae0e18f3684872b1021389c166ba6a5716aa8fed1843",
+      "outputSha256": "ea21ccdade385dd3808d75295edb4acffe07d2e4cf46c4ca8d93e395457f6213"
+    },
+    "examples/temperature_partitioning.png": {
+      "sourceSize": [
+        1841,
+        841
+      ],
+      "outputSize": [
+        1841,
+        885
+      ],
+      "marginHeight": 44,
+      "originalPixelsPreserved": true,
+      "originalRegionRgbaSha256": "4a5f0b30b89c4757ffa515c2171a9c6921fc061d1b7590befdfbbfd79d4921fc",
+      "sourceSha256": "8707d95367967e67f404b62de83282002a2f972ebe24bfdc917eaa767a23f6da",
+      "outputSha256": "d7704c722eaa2e135bbaa9f300e2490d3a0a2c30eea85941d6cf27f60bd41996"
+    }
+  },
+  "signature": {
+    "logo": "doc/_static/h2sim-logo-on-light.svg",
+    "logoSha256": "f139d2090baaabc0110ccd0fbd3fdfc94642aec73efe2faf1bbf042159272c4e",
+    "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+    "logoWidthRatio": 0.06,
+    "marginWidthRatio": 0.024,
+    "fontWidthRatio": 0.0065
+  },
+  "scientificDataChanged": false,
+  "baseDirectory": "doc/_static"
+}
