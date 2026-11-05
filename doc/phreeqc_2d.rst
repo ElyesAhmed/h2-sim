@@ -53,36 +53,17 @@ Movie preview
    </video>
 
 This is the compositional PHREEQC workflow from the comparison below.
-It uses the same fixed logarithmic map limits as the explorer, with no
-interpolated fields. The population fields are relative model scales, not
-calibrated cell counts. PHREEQC populations remain cell-local.
+Its maps use fixed logarithmic limits throughout, without interpolated
+fields. Hydrogen is liquid-phase H₂ mole fraction, not gas saturation.
+Population fields are relative model scales, not calibrated cell counts.
+PHREEQC populations remain cell-local: their spatial changes represent
+growth and decay, rather than microbial transport or individual trajectories.
+The mobile comparison uses a different biomass representation, so equal
+relative values do not establish equal physical biomass.
 
 Download the :download:`MP4 <_static/examples/phreeqc_storage.mp4>`,
 :download:`GIF <_static/examples/phreeqc_storage.gif>` or
 :download:`gallery provenance <_static/examples/phreeqc_gallery_provenance.json>`.
-
-Explore hydrogen and microbial evolution
-----------------------------------------
-
-Choose a workflow, press **Play**, or move the time slider. Colors retain the
-same logarithmic limits through time and between workflows. The animation
-uses selected accepted states, with no interpolated spatial fields.
-
-.. raw:: html
-
-   <iframe id="h2sim-field-explorer" src="_static/field2d/explorer.html" title="Interactive animation of dissolved hydrogen and three microbial populations over three cycles" loading="lazy" style="width:100%;height:1130px;border:0;border-radius:14px;"></iframe>
-   <script>window.addEventListener("message",function(e){const f=document.getElementById("h2sim-field-explorer");if(f && e.origin===location.origin && e.source===f.contentWindow && e.data.type==="h2sim-field-height" && e.data.height>300 && e.data.height<4000){f.style.height=Math.ceil(e.data.height)+"px";}});</script>
-
-The hydrogen panel shows **liquid-phase H₂ mole fraction**, not gas saturation.
-Population panels show the model population scale relative to its initial
-value. They make fronts and localized activity visible, but the two kinetic
-formulations use different biomass representations. Equal colors do not
-establish equal physical biomass.
-
-In the PHREEQC workflow, populations remain **cell-local**: spatial changes
-represent growth and decay. Select the mobile workflow to see aqueous
-transport together with growth and decay. Neither animation depicts
-chemotaxis or follows individual bacteria.
 
 .. _phreeqc-2d-loss:
 
@@ -172,6 +153,6 @@ time order. The manifest contains local input paths and is not published.
    python -m pip install -r tools/requirements-figures.txt
    python tools/plot_phreeqc_2d_results.py --manifest /path/to/manifest.json
 
-The exporter writes the movie, GIF, poster, PNG/PDF figures, explorer data,
+The exporter writes the movie, GIF, poster, PNG/PDF figures, selected-field data,
 histories and source provenance. It overwrites those gallery assets. The
 source result files and packed states remain unchanged.
