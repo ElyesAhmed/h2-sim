@@ -248,9 +248,9 @@
     }
   },
   "assetsSha256": {
-    "biochemistry_storage.gif": "a3eb987dc84981ba6d69809a03b2f6c8dae1efa7ee99a0a6b944486db07e41b3",
-    "biochemistry_storage.mp4": "2547a0dbd6d4b96c1cfa3b32eef6c381a56458d573b857a4a9614bb3aa19c2ca",
-    "biochemistry_storage.png": "29b78a4f988105e05d0769b4a71c959d77a1fe8c35f0c2d217bfd5f660bc5dfd",
+    "biochemistry_storage.gif": "5417a0cc46261969093c613a1a4eb07c6ff272e95824dfe6f52b2782fc751aab",
+    "biochemistry_storage.mp4": "362d917b61afdd4ae3fff8f692a6a0e4473a57ded25d5e32b6882e23e48b86a2",
+    "biochemistry_storage.png": "28b738004bf2bd1c6e9ce36d73c59ee9aabb586279cdae48df08e8d0981d3b7e",
     "compositional_2d_geology.png": "f8923016177f25935fbdd3625933f68a1212b20ee5400be8aa95ae03df7b039e",
     "compositional_2d_geology.pdf": "715523b731843a59f270ee5e480c349a3650585906168a90c498073efbf79a6e",
     "compositional_2d_gas_maps.png": "0c900a4aa81bd53b7ae2c277c83d3c9ff67a5e611c2b2827ebe7ea6b6b815698",
@@ -298,5 +298,62 @@
     "media": "98 GIF frames verified, MP4 fully decoded, poster and all five final figures visually inspected.",
     "numericalScope": "Existing full-resolution saved runs reused; all 567 reports in each scenario converged. No physical simulation rerun. Regenerated well/consumption data agree with prior figure CSVs within rounding (maximum absolute difference below 1e-13).",
     "codeAnalyzer": "Three caxis compatibility advisories retained for MATLAB R2021a, plus an axes-creation performance advisory for per-case figures."
+  },
+  "branding": {
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-dark.svg",
+      "logoSha256": "62c1ede5a7b3c4d7be68024250702473909c46d67dd5fdb4a09c5065c2a78b13",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "attribution": "H2sim software \u2022 GPL-3.0-or-later  |  sintefmath.github.io/h2-sim",
+      "footerHeightRatio": 0.14
+    },
+    "assets": {
+      "biochemistry_storage.png": {
+        "sourceSize": [
+          1600,
+          926
+        ],
+        "outputSize": [
+          1600,
+          1150
+        ],
+        "scientificPixelsPreservedExactly": true,
+        "sourceSha256": "29b78a4f988105e05d0769b4a71c959d77a1fe8c35f0c2d217bfd5f660bc5dfd",
+        "outputSha256": "28b738004bf2bd1c6e9ce36d73c59ee9aabb586279cdae48df08e8d0981d3b7e"
+      },
+      "biochemistry_storage.gif": {
+        "sourceSize": [
+          800,
+          463
+        ],
+        "outputSize": [
+          800,
+          575
+        ],
+        "frames": 98,
+        "durationMs": 16660,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "a3eb987dc84981ba6d69809a03b2f6c8dae1efa7ee99a0a6b944486db07e41b3",
+        "outputSha256": "5417a0cc46261969093c613a1a4eb07c6ff272e95824dfe6f52b2782fc751aab"
+      },
+      "biochemistry_storage.mp4": {
+        "sourceSize": [
+          1600,
+          926
+        ],
+        "outputSize": [
+          1600,
+          1150
+        ],
+        "frames": 98,
+        "fps": 6.0,
+        "durationSeconds": 16.333333333333332,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "2547a0dbd6d4b96c1cfa3b32eef6c381a56458d573b857a4a9614bb3aa19c2ca",
+        "outputSha256": "362d917b61afdd4ae3fff8f692a6a0e4473a57ded25d5e32b6882e23e48b86a2"
+      }
+    },
+    "scientificDataChanged": false,
+    "layout": "Attribution band appended below the original frame."
   }
 }

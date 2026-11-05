@@ -4,3 +4,4 @@ scipy
 matplotlib
 Pillow
 imageio-ffmpeg
+CairoSVG

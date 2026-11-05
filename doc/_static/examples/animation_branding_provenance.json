@@ -1,0 +1,232 @@
+{
+  "assets": {
+    "hydrogen_anticline.png": {
+      "sourceSize": [
+        1600,
+        926
+      ],
+      "outputSize": [
+        1600,
+        1150
+      ],
+      "scientificPixelsPreservedExactly": true,
+      "sourceSha256": "12a4414fcc4f3fc3a20ba884f730f1a301ac1fa5e6290c933d8dee94d49c7d2d",
+      "outputSha256": "e2b55b3f1f66544e8ea57456a9c9df8637d0f47a3d01aa1939dac31f91940ef6"
+    },
+    "hydrogen_anticline.gif": {
+      "sourceSize": [
+        800,
+        463
+      ],
+      "outputSize": [
+        800,
+        575
+      ],
+      "frames": 96,
+      "durationMs": 16320,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "480cfab91af6c33ebb589b660a20bc427fc715225c4a7707166243b9e910aaef",
+      "outputSha256": "7d014c3e62e7d05d3516d37398fca97d96c3fe80de394841b9c9cfb5f351dd9d"
+    },
+    "hydrogen_anticline.mp4": {
+      "sourceSize": [
+        1600,
+        926
+      ],
+      "outputSize": [
+        1600,
+        1150
+      ],
+      "frames": 96,
+      "fps": 6.0,
+      "durationSeconds": 16.0,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "bdb43d274b2bab7c9908d76321df719773a3dc2c5f56ff44294ec208bf3e38bc",
+      "outputSha256": "ce1a6f4bdaca133c66afadc31d58c7db4a13845b78ceb9ff2ff218d238a9e692"
+    },
+    "aquifer_storage.png": {
+      "sourceSize": [
+        1600,
+        926
+      ],
+      "outputSize": [
+        1600,
+        1150
+      ],
+      "scientificPixelsPreservedExactly": true,
+      "sourceSha256": "8f40168e5dbe3261daae78c8e48fa38c35a53fd9b2456cc64886278b215d2ed6",
+      "outputSha256": "ab649326bb7f86c224879f19d02b935abb49ee262dd5d827ad01d87f63f16967"
+    },
+    "aquifer_storage.gif": {
+      "sourceSize": [
+        800,
+        463
+      ],
+      "outputSize": [
+        800,
+        575
+      ],
+      "frames": 98,
+      "durationMs": 16660,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "d1a6e128c8c30829ecc699b6a7bfc4737528f1755c839f25afd93eeacc6fa92a",
+      "outputSha256": "b0abc588b04f35a788c8b57786e216d403c9eb931a7009962f36767d9a54abbc"
+    },
+    "aquifer_storage.mp4": {
+      "sourceSize": [
+        1600,
+        926
+      ],
+      "outputSize": [
+        1600,
+        1150
+      ],
+      "frames": 98,
+      "fps": 6.0,
+      "durationSeconds": 16.333333333333332,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "0eaba95e99ca44b8bbdc75d3711a94c86ef79415338ab8eb6e470e511ba9c5f1",
+      "outputSha256": "9290cbc131f953638e5e5280bd26835361a95e02b24e0b512f646759586c008b"
+    },
+    "biochemistry_storage.png": {
+      "sourceSize": [
+        1600,
+        926
+      ],
+      "outputSize": [
+        1600,
+        1150
+      ],
+      "scientificPixelsPreservedExactly": true,
+      "sourceSha256": "29b78a4f988105e05d0769b4a71c959d77a1fe8c35f0c2d217bfd5f660bc5dfd",
+      "outputSha256": "28b738004bf2bd1c6e9ce36d73c59ee9aabb586279cdae48df08e8d0981d3b7e"
+    },
+    "biochemistry_storage.gif": {
+      "sourceSize": [
+        800,
+        463
+      ],
+      "outputSize": [
+        800,
+        575
+      ],
+      "frames": 98,
+      "durationMs": 16660,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "a3eb987dc84981ba6d69809a03b2f6c8dae1efa7ee99a0a6b944486db07e41b3",
+      "outputSha256": "5417a0cc46261969093c613a1a4eb07c6ff272e95824dfe6f52b2782fc751aab"
+    },
+    "biochemistry_storage.mp4": {
+      "sourceSize": [
+        1600,
+        926
+      ],
+      "outputSize": [
+        1600,
+        1150
+      ],
+      "frames": 98,
+      "fps": 6.0,
+      "durationSeconds": 16.333333333333332,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "2547a0dbd6d4b96c1cfa3b32eef6c381a56458d573b857a4a9614bb3aa19c2ca",
+      "outputSha256": "362d917b61afdd4ae3fff8f692a6a0e4473a57ded25d5e32b6882e23e48b86a2"
+    },
+    "phreeqc_storage.png": {
+      "sourceSize": [
+        1280,
+        740
+      ],
+      "outputSize": [
+        1280,
+        920
+      ],
+      "scientificPixelsPreservedExactly": true,
+      "sourceSha256": "6baf6836a62cab548728df3bddf1acd7a9fc0c542b0b0a52e05a7c1277ea8c46",
+      "outputSha256": "4481089fb1b47b40c83a2e1a3da1ca9f0d29d829be9ad9fb7843be527f563bb0"
+    },
+    "phreeqc_storage.gif": {
+      "sourceSize": [
+        800,
+        462
+      ],
+      "outputSize": [
+        800,
+        574
+      ],
+      "frames": 98,
+      "durationMs": 16660,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "00259817f9a4f4a9742ba48ee6ae16dad04e867088b570f7e203732820102843",
+      "outputSha256": "da93c232762c22068e33db13fe5da4e9636e05d144b99b4016cf85d0eef861fa"
+    },
+    "phreeqc_storage.mp4": {
+      "sourceSize": [
+        1280,
+        740
+      ],
+      "outputSize": [
+        1280,
+        920
+      ],
+      "frames": 98,
+      "fps": 6.0,
+      "durationSeconds": 16.333333333333332,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "de6ba9cd1e0148e5d7f8ca46e6408b9f01f7e475a94bdf598fd03bdb253176ed",
+      "outputSha256": "b42edbb1c8f007202a8103ff3713afd901c05c054f73fa47d6f6f1b493d17c8a"
+    },
+    "hydrogen_mixing.png": {
+      "sourceSize": [
+        1250,
+        814
+      ],
+      "outputSize": [
+        1250,
+        990
+      ],
+      "scientificPixelsPreservedExactly": true,
+      "sourceSha256": "e3768aeaa91767906f401530660c0f57fafe4a3c273c4f33b21d872a4fd4eb1d",
+      "outputSha256": "f3602187e897a5544e70f565bc7aba3b0efcbbbc9a31f5611b1f8d7a6623cf45"
+    },
+    "hydrogen_mixing.gif": {
+      "sourceSize": [
+        800,
+        521
+      ],
+      "outputSize": [
+        800,
+        633
+      ],
+      "frames": 81,
+      "durationMs": 10530,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "3ad6ff760613c19b07bc66426e57958bef77f60a4dbc0a62601055b2f9df1679",
+      "outputSha256": "7d66f2937eb8f55bddbc62fb4c817047c8b91c37c3ed50ea7adfc21aa473dfba"
+    },
+    "hydrogen_mixing.mp4": {
+      "sourceSize": [
+        1250,
+        814
+      ],
+      "outputSize": [
+        1250,
+        990
+      ],
+      "frames": 81,
+      "fps": 8.0,
+      "durationSeconds": 10.125,
+      "playbackTimingPreserved": true,
+      "sourceSha256": "43e28f5c2f54ea1e65ab5e696eaf75af4ba538a25d41e749281ba6f75ae0e31f",
+      "outputSha256": "248c135b66cf096846a9578343b33319742bbddb5354d931ceb3cc9bdbb5f6d8"
+    }
+  },
+  "signature": {
+    "logo": "doc/_static/h2sim-logo-on-dark.svg",
+    "logoSha256": "62c1ede5a7b3c4d7be68024250702473909c46d67dd5fdb4a09c5065c2a78b13",
+    "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+    "attribution": "H2sim software \u2022 GPL-3.0-or-later  |  sintefmath.github.io/h2-sim",
+    "footerHeightRatio": 0.14
+  },
+  "scientificDataChanged": false
+}

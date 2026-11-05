@@ -28,3 +28,32 @@ The animation colour/axes helper is shared by the storage and biochemistry
 galleries. Python exporters use `tools/storage_gallery_style.py`, whose
 palette is checked against the MATLAB helper. Label logarithmic scales and
 workflow-specific population normalizations explicitly. Physical models, solvers and tolerances remain independent of the presentation functions.
+
+## Animation attribution
+
+Use the H2sim logo and the existing SINTEF copyright attribution in a footer
+band below the original plot area. The GPL notice identifies the software
+license. Leave space beneath the signature for the video player's controls.
+
+After exporting the scientific movies, GIFs and posters, apply the shared
+branding step before publishing:
+
+```bash
+python -m pip install -r tools/requirements-figures.txt
+python tools/brand_storage_animations.py
+```
+
+The default covers all five website animations. GIF/PNG-only exports are
+supported too; a missing MP4 is skipped. To brand one local export:
+
+```bash
+python tools/brand_storage_animations.py --directory build/anticline \
+    --animations hydrogen_anticline
+```
+
+The command records input/output hashes, dimensions, frame counts and timing
+in `animation_branding_provenance.json`, and updates available per-case asset
+hashes. Repeating it skips unchanged branded files. After changing the footer
+or logo, regenerate the original scientific exports before branding again.
+Poster plots retain their original pixels; movie and GIF frames retain their
+source times and order, with normal video encoding/palette quantization.
