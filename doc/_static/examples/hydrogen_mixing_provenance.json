@@ -453,7 +453,7 @@
     "posterSelection": "Frame with minimum mass-weighted hydrogen depth; initial and accepted simulation states only.",
     "gifDimensionsPixels": [
       800,
-      521
+      633
     ],
     "gifFrameDelaySeconds": 0.13,
     "videoFramesPerSecond": 8,
@@ -469,8 +469,77 @@
   },
   "testSourceSha256": "f58e5f86b3e233eb37bcfdc43ea85d6a6ef1748b7383ccc923e4d7b079c719a3",
   "assetSha256": {
-    "hydrogen_mixing.gif": "3ad6ff760613c19b07bc66426e57958bef77f60a4dbc0a62601055b2f9df1679",
-    "hydrogen_mixing.mp4": "43e28f5c2f54ea1e65ab5e696eaf75af4ba538a25d41e749281ba6f75ae0e31f",
-    "hydrogen_mixing.png": "e3768aeaa91767906f401530660c0f57fafe4a3c273c4f33b21d872a4fd4eb1d"
+    "hydrogen_mixing.gif": "7d66f2937eb8f55bddbc62fb4c817047c8b91c37c3ed50ea7adfc21aa473dfba",
+    "hydrogen_mixing.mp4": "248c135b66cf096846a9578343b33319742bbddb5354d931ceb3cc9bdbb5f6d8",
+    "hydrogen_mixing.png": "f3602187e897a5544e70f565bc7aba3b0efcbbbc9a31f5611b1f8d7a6623cf45"
+  },
+  "branding": {
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-dark.svg",
+      "logoSha256": "62c1ede5a7b3c4d7be68024250702473909c46d67dd5fdb4a09c5065c2a78b13",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "attribution": "H2sim software \u2022 GPL-3.0-or-later  |  sintefmath.github.io/h2-sim",
+      "footerHeightRatio": 0.14
+    },
+    "assets": {
+      "hydrogen_mixing.png": {
+        "sourceSize": [
+          1250,
+          814
+        ],
+        "outputSize": [
+          1250,
+          990
+        ],
+        "scientificPixelsPreservedExactly": true,
+        "sourceSha256": "e3768aeaa91767906f401530660c0f57fafe4a3c273c4f33b21d872a4fd4eb1d",
+        "outputSha256": "f3602187e897a5544e70f565bc7aba3b0efcbbbc9a31f5611b1f8d7a6623cf45"
+      },
+      "hydrogen_mixing.gif": {
+        "sourceSize": [
+          800,
+          521
+        ],
+        "outputSize": [
+          800,
+          633
+        ],
+        "frames": 81,
+        "durationMs": 10530,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "3ad6ff760613c19b07bc66426e57958bef77f60a4dbc0a62601055b2f9df1679",
+        "outputSha256": "7d66f2937eb8f55bddbc62fb4c817047c8b91c37c3ed50ea7adfc21aa473dfba"
+      },
+      "hydrogen_mixing.mp4": {
+        "sourceSize": [
+          1250,
+          814
+        ],
+        "outputSize": [
+          1250,
+          990
+        ],
+        "frames": 81,
+        "fps": 8.0,
+        "durationSeconds": 10.125,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "43e28f5c2f54ea1e65ab5e696eaf75af4ba538a25d41e749281ba6f75ae0e31f",
+        "outputSha256": "248c135b66cf096846a9578343b33319742bbddb5354d931ceb3cc9bdbb5f6d8"
+      }
+    },
+    "scientificDataChanged": false,
+    "layout": "Attribution band appended below the original frame."
+  },
+  "originalReleaseAssetNames": {
+    "hydrogen_mixing.png": "hydrogen_mixing.png",
+    "hydrogen_mixing.gif": "hydrogen_mixing.gif",
+    "hydrogen_mixing.mp4": "hydrogen_mixing.mp4",
+    "hydrogen_mixing_provenance.json": "hydrogen_mixing_provenance.json"
+  },
+  "releaseAssetNames": {
+    "hydrogen_mixing.png": "hydrogen_mixing_branded.png",
+    "hydrogen_mixing.gif": "hydrogen_mixing_branded.gif",
+    "hydrogen_mixing.mp4": "hydrogen_mixing_branded.mp4",
+    "hydrogen_mixing_provenance.json": "hydrogen_mixing_branded_provenance.json"
   }
 }

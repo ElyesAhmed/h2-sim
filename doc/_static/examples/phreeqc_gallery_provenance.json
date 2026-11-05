@@ -286,9 +286,9 @@
     "doc/model-presentation.md": "454b8d0630ce68ce64948192108baf6c0b13a2b7b71d6be0784548b9f93ee9da"
   },
   "assetsSha256": {
-    "phreeqc_storage.gif": "00259817f9a4f4a9742ba48ee6ae16dad04e867088b570f7e203732820102843",
-    "phreeqc_storage.mp4": "de6ba9cd1e0148e5d7f8ca46e6408b9f01f7e475a94bdf598fd03bdb253176ed",
-    "phreeqc_storage.png": "6baf6836a62cab548728df3bddf1acd7a9fc0c542b0b0a52e05a7c1277ea8c46",
+    "phreeqc_storage.gif": "da93c232762c22068e33db13fe5da4e9636e05d144b99b4016cf85d0eef861fa",
+    "phreeqc_storage.mp4": "b42edbb1c8f007202a8103ff3713afd901c05c054f73fa47d6f6f1b493d17c8a",
+    "phreeqc_storage.png": "4481089fb1b47b40c83a2e1a3da1ca9f0d29d829be9ad9fb7843be527f563bb0",
     "phreeqc_validation_full_cycle.png": "81ccaf89493782182af6937f886d24881f496abb84ec534e6ecae6549ce74ee5",
     "phreeqc_validation_full_cycle.pdf": "9cc26b9ca7c5746fa2b5de482dcb531f40b56bd610a0bf17aa24b83f3dc80e4b",
     "phreeqc_geochemistry_full_cycle.png": "8b484dbf75a4a50e6d5c5be5bbde7b70cceec4994fdb7b4660bb5438dcf77358",
@@ -335,5 +335,62 @@
     "matplotlib": "3.11.2",
     "Pillow": "13.0.0",
     "imageio-ffmpeg": "0.8.1"
+  },
+  "branding": {
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-dark.svg",
+      "logoSha256": "62c1ede5a7b3c4d7be68024250702473909c46d67dd5fdb4a09c5065c2a78b13",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "attribution": "H2sim software \u2022 GPL-3.0-or-later  |  sintefmath.github.io/h2-sim",
+      "footerHeightRatio": 0.14
+    },
+    "assets": {
+      "phreeqc_storage.png": {
+        "sourceSize": [
+          1280,
+          740
+        ],
+        "outputSize": [
+          1280,
+          920
+        ],
+        "scientificPixelsPreservedExactly": true,
+        "sourceSha256": "6baf6836a62cab548728df3bddf1acd7a9fc0c542b0b0a52e05a7c1277ea8c46",
+        "outputSha256": "4481089fb1b47b40c83a2e1a3da1ca9f0d29d829be9ad9fb7843be527f563bb0"
+      },
+      "phreeqc_storage.gif": {
+        "sourceSize": [
+          800,
+          462
+        ],
+        "outputSize": [
+          800,
+          574
+        ],
+        "frames": 98,
+        "durationMs": 16660,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "00259817f9a4f4a9742ba48ee6ae16dad04e867088b570f7e203732820102843",
+        "outputSha256": "da93c232762c22068e33db13fe5da4e9636e05d144b99b4016cf85d0eef861fa"
+      },
+      "phreeqc_storage.mp4": {
+        "sourceSize": [
+          1280,
+          740
+        ],
+        "outputSize": [
+          1280,
+          920
+        ],
+        "frames": 98,
+        "fps": 6.0,
+        "durationSeconds": 16.333333333333332,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "de6ba9cd1e0148e5d7f8ca46e6408b9f01f7e475a94bdf598fd03bdb253176ed",
+        "outputSha256": "b42edbb1c8f007202a8103ff3713afd901c05c054f73fa47d6f6f1b493d17c8a"
+      }
+    },
+    "scientificDataChanged": false,
+    "layout": "Attribution band appended below the original frame."
   }
 }

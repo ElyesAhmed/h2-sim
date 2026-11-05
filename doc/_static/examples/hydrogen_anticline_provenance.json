@@ -1584,10 +1584,10 @@
   },
   "previewVariant": "Extended cushion injection: 730 days followed by 90 days shut-in and ten storage cycles; total 960 days. Default example parameters are unchanged.",
   "releaseAssetNames": {
-    "hydrogen_anticline.gif": "hydrogen_anticline_ten_cycles.gif",
-    "hydrogen_anticline.mp4": "hydrogen_anticline_ten_cycles.mp4",
-    "hydrogen_anticline.png": "hydrogen_anticline_ten_cycles.png",
-    "hydrogen_anticline_provenance.json": "hydrogen_anticline_ten_cycles_provenance.json"
+    "hydrogen_anticline.png": "hydrogen_anticline_ten_cycles_branded.png",
+    "hydrogen_anticline.gif": "hydrogen_anticline_ten_cycles_branded.gif",
+    "hydrogen_anticline.mp4": "hydrogen_anticline_ten_cycles_branded.mp4",
+    "hydrogen_anticline_provenance.json": "hydrogen_anticline_ten_cycles_branded_provenance.json"
   },
   "rendering": {
     "maxFrames": 160,
@@ -1792,7 +1792,7 @@
     "gifFrameDelaySeconds": 0.17,
     "gifDimensionsPixels": [
       800,
-      463
+      575
     ],
     "selection": "Actual initial/accepted states selected by physical time, retaining every operating-stage endpoint; no interpolation.",
     "surfaceQuantity": "Storage-column pore-volume-weighted gas saturation, draped on storage top.",
@@ -1814,8 +1814,71 @@
   },
   "testSourceSha256": "e8fc4bbe84eb1b78865fdec4fafd1c87fa7728216f5747cbf50e3543eeef19f3",
   "assetSha256": {
-    "hydrogen_anticline.gif": "480cfab91af6c33ebb589b660a20bc427fc715225c4a7707166243b9e910aaef",
-    "hydrogen_anticline.mp4": "bdb43d274b2bab7c9908d76321df719773a3dc2c5f56ff44294ec208bf3e38bc",
-    "hydrogen_anticline.png": "12a4414fcc4f3fc3a20ba884f730f1a301ac1fa5e6290c933d8dee94d49c7d2d"
+    "hydrogen_anticline.gif": "7d014c3e62e7d05d3516d37398fca97d96c3fe80de394841b9c9cfb5f351dd9d",
+    "hydrogen_anticline.mp4": "ce1a6f4bdaca133c66afadc31d58c7db4a13845b78ceb9ff2ff218d238a9e692",
+    "hydrogen_anticline.png": "e2b55b3f1f66544e8ea57456a9c9df8637d0f47a3d01aa1939dac31f91940ef6"
+  },
+  "branding": {
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-dark.svg",
+      "logoSha256": "62c1ede5a7b3c4d7be68024250702473909c46d67dd5fdb4a09c5065c2a78b13",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "attribution": "H2sim software \u2022 GPL-3.0-or-later  |  sintefmath.github.io/h2-sim",
+      "footerHeightRatio": 0.14
+    },
+    "assets": {
+      "hydrogen_anticline.png": {
+        "sourceSize": [
+          1600,
+          926
+        ],
+        "outputSize": [
+          1600,
+          1150
+        ],
+        "scientificPixelsPreservedExactly": true,
+        "sourceSha256": "12a4414fcc4f3fc3a20ba884f730f1a301ac1fa5e6290c933d8dee94d49c7d2d",
+        "outputSha256": "e2b55b3f1f66544e8ea57456a9c9df8637d0f47a3d01aa1939dac31f91940ef6"
+      },
+      "hydrogen_anticline.gif": {
+        "sourceSize": [
+          800,
+          463
+        ],
+        "outputSize": [
+          800,
+          575
+        ],
+        "frames": 96,
+        "durationMs": 16320,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "480cfab91af6c33ebb589b660a20bc427fc715225c4a7707166243b9e910aaef",
+        "outputSha256": "7d014c3e62e7d05d3516d37398fca97d96c3fe80de394841b9c9cfb5f351dd9d"
+      },
+      "hydrogen_anticline.mp4": {
+        "sourceSize": [
+          1600,
+          926
+        ],
+        "outputSize": [
+          1600,
+          1150
+        ],
+        "frames": 96,
+        "fps": 6.0,
+        "durationSeconds": 16.0,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "bdb43d274b2bab7c9908d76321df719773a3dc2c5f56ff44294ec208bf3e38bc",
+        "outputSha256": "ce1a6f4bdaca133c66afadc31d58c7db4a13845b78ceb9ff2ff218d238a9e692"
+      }
+    },
+    "scientificDataChanged": false,
+    "layout": "Attribution band appended below the original frame."
+  },
+  "originalReleaseAssetNames": {
+    "hydrogen_anticline.gif": "hydrogen_anticline_ten_cycles.gif",
+    "hydrogen_anticline.mp4": "hydrogen_anticline_ten_cycles.mp4",
+    "hydrogen_anticline.png": "hydrogen_anticline_ten_cycles.png",
+    "hydrogen_anticline_provenance.json": "hydrogen_anticline_ten_cycles_provenance.json"
   }
 }

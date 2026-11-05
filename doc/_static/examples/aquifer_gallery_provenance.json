@@ -261,9 +261,9 @@
   "dissolvedHydrogenSurfaceM3": 81.71556455938808,
   "physicalModelChanged": false,
   "assetsSha256": {
-    "aquifer_storage.gif": "d1a6e128c8c30829ecc699b6a7bfc4737528f1755c839f25afd93eeacc6fa92a",
-    "aquifer_storage.mp4": "0eaba95e99ca44b8bbdc75d3711a94c86ef79415338ab8eb6e470e511ba9c5f1",
-    "aquifer_storage.png": "8f40168e5dbe3261daae78c8e48fa38c35a53fd9b2456cc64886278b215d2ed6",
+    "aquifer_storage.gif": "b0abc588b04f35a788c8b57786e216d403c9eb931a7009962f36767d9a54abbc",
+    "aquifer_storage.mp4": "9290cbc131f953638e5e5280bd26835361a95e02b24e0b512f646759586c008b",
+    "aquifer_storage.png": "ab649326bb7f86c224879f19d02b935abb49ee262dd5d827ad01d87f63f16967",
     "aquifer_geology.png": "cf277d6c8fb4a02987e7232efa84d29e5521fcb2cd51ec8ddbfaf8a7f3d7d7bf",
     "aquifer_geology.pdf": "70bc710fb6e999c762b2f1e08347c77ba32a607d82b14dd69a8e45de5c62a774",
     "aquifer_plume.png": "d330a23c591d44b55c6e6bd59a3a2d2003b92e90e0fdedf7a20e9ca0062844f6",
@@ -312,5 +312,62 @@
     "date": "2026-11-05"
   },
   "gifFrames": 98,
-  "maxFrames": 100
+  "maxFrames": 100,
+  "branding": {
+    "signature": {
+      "logo": "doc/_static/h2sim-logo-on-dark.svg",
+      "logoSha256": "62c1ede5a7b3c4d7be68024250702473909c46d67dd5fdb4a09c5065c2a78b13",
+      "copyright": "\u00a9 2009\u20132026 SINTEF Digital, Mathematics & Cybernetics.",
+      "attribution": "H2sim software \u2022 GPL-3.0-or-later  |  sintefmath.github.io/h2-sim",
+      "footerHeightRatio": 0.14
+    },
+    "assets": {
+      "aquifer_storage.png": {
+        "sourceSize": [
+          1600,
+          926
+        ],
+        "outputSize": [
+          1600,
+          1150
+        ],
+        "scientificPixelsPreservedExactly": true,
+        "sourceSha256": "8f40168e5dbe3261daae78c8e48fa38c35a53fd9b2456cc64886278b215d2ed6",
+        "outputSha256": "ab649326bb7f86c224879f19d02b935abb49ee262dd5d827ad01d87f63f16967"
+      },
+      "aquifer_storage.gif": {
+        "sourceSize": [
+          800,
+          463
+        ],
+        "outputSize": [
+          800,
+          575
+        ],
+        "frames": 98,
+        "durationMs": 16660,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "d1a6e128c8c30829ecc699b6a7bfc4737528f1755c839f25afd93eeacc6fa92a",
+        "outputSha256": "b0abc588b04f35a788c8b57786e216d403c9eb931a7009962f36767d9a54abbc"
+      },
+      "aquifer_storage.mp4": {
+        "sourceSize": [
+          1600,
+          926
+        ],
+        "outputSize": [
+          1600,
+          1150
+        ],
+        "frames": 98,
+        "fps": 6.0,
+        "durationSeconds": 16.333333333333332,
+        "playbackTimingPreserved": true,
+        "sourceSha256": "0eaba95e99ca44b8bbdc75d3711a94c86ef79415338ab8eb6e470e511ba9c5f1",
+        "outputSha256": "9290cbc131f953638e5e5280bd26835361a95e02b24e0b512f646759586c008b"
+      }
+    },
+    "scientificDataChanged": false,
+    "layout": "Attribution band appended below the original frame."
+  }
 }
