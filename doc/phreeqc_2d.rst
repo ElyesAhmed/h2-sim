@@ -14,6 +14,8 @@ accepted states retained as packed simulations.
    controls come from the existing 2D mineral-coupling example. This is an
    illustrative layered model, not a calibrated field forecast.
 
+:download:`Download PDF <_static/examples/phreeqc_2d_setup.pdf>`.
+
 .. list-table:: Physical setup
    :header-rows: 1
 
@@ -22,9 +24,9 @@ accepted states retained as packed simulations.
    * - Storage aquifer
      - Porosity 0.25; permeability 10 mD
    * - Caprock
-     - Porosity 0.10; permeability 0.01 mD
-   * - Bedrock
      - Porosity 0.10; permeability 0.0001 mD
+   * - Bedrock
+     - Porosity 0.10; permeability 0.01 mD
    * - Temperature
      - 317.50 K
    * - Initial salinity
@@ -40,8 +42,27 @@ bacterial diffusion, chemotaxis, or bioclogging. The workflow comparison
 therefore includes changes in kinetic formulation and population transport;
 it does not isolate mineral chemistry alone.
 
+Movie preview
+-------------
+
+.. raw:: html
+
+   <video controls loop muted playsinline preload="metadata" style="width:100%;max-width:1280px" poster="_static/examples/phreeqc_storage.png" aria-label="Dissolved hydrogen and cell-local microbial evolution during three PHREEQC storage cycles">
+     <source src="_static/examples/phreeqc_storage.mp4" type="video/mp4">
+     <a href="_static/examples/phreeqc_storage.gif">View the animated GIF</a>.
+   </video>
+
+This is the compositional PHREEQC workflow from the comparison below.
+It uses the same fixed logarithmic map limits as the explorer, with no
+interpolated fields. The population fields are relative model scales, not
+calibrated cell counts. PHREEQC populations remain cell-local.
+
+Download the :download:`MP4 <_static/examples/phreeqc_storage.mp4>`,
+:download:`GIF <_static/examples/phreeqc_storage.gif>` or
+:download:`gallery provenance <_static/examples/phreeqc_gallery_provenance.json>`.
+
 Explore hydrogen and microbial evolution
------------------------------------------
+----------------------------------------
 
 Choose a workflow, press **Play**, or move the time slider. Colors retain the
 same logarithmic limits through time and between workflows. The animation
@@ -77,6 +98,8 @@ Hydrogen consumption and reaction pathways
    contributions; solid curves use PHREEQC, dashed curves use mobile kinetics.
    Dotted lines mark the starts of the three storage cycles.
 
+:download:`Download PDF <_static/examples/phreeqc_2d_loss.pdf>`.
+
 The final consumed amounts are **6.199 kmol (10.426%)** with compositional
 PHREEQC and **6.818 kmol (11.466%)** with mobile flow–biochemistry. These
 percentages measure metabolic conversion, excluding dissolved or unrecovered
@@ -85,7 +108,7 @@ cumulative prescribed injection; it is not the final total injection used
 at every time.
 
 Gas composition and aqueous chemistry
---------------------------------------
+-------------------------------------
 
 .. figure:: _static/examples/phreeqc_2d_chemistry.png
    :alt: End-of-injection maps of gas-phase H2, CO2 and methane mole fractions, and aqueous pH in the coupled two-dimensional case.
@@ -95,6 +118,8 @@ Gas composition and aqueous chemistry
    (day 307.6). Gas compositions are hidden where gas saturation is below
    10⁻⁶; pH is shown throughout the aqueous domain. No pressure map is needed
    to inspect the hydrogen plume and its chemical environment.
+
+:download:`Download PDF <_static/examples/phreeqc_2d_chemistry.pdf>`.
 
 This selected mineral inventory represents Bentheimer sandstone: 2% dolomite
 and 98% inert rock by mass, with no initial calcite.
@@ -132,3 +157,21 @@ retain spatial fields and redraw figures without rerunning chemistry.
 
    Download the :download:`consumption histories <_static/field2d/histories.csv>`
    and :download:`result provenance <_static/field2d/provenance.json>`.
+
+Regenerate the gallery from saved comparison files
+--------------------------------------------------
+
+The optional Python plotting tools read the three saved result segments per
+workflow and the accepted snapshot state in their packed output folders.
+They do not invoke MATLAB or PHREEQC. Supply a local JSON manifest with
+``mobile`` and ``phreeqc`` arrays, each listing the three result MAT files in
+time order. The manifest contains local input paths and is not published.
+
+.. code-block:: bash
+
+   python -m pip install -r tools/requirements-figures.txt
+   python tools/plot_phreeqc_2d_results.py --manifest /path/to/manifest.json
+
+The exporter writes the movie, GIF, poster, PNG/PDF figures, explorer data,
+histories and source provenance. It overwrites those gallery assets. The
+source result files and packed states remain unchanged.

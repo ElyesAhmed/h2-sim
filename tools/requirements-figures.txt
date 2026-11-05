@@ -1,0 +1,6 @@
+# Optional offline figure/animation exporters; not simulation dependencies.
+numpy
+scipy
+matplotlib
+Pillow
+imageio-ffmpeg

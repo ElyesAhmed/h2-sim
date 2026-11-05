@@ -1,8 +1,8 @@
 # Model presentation reference
 
 Use the anticline page (`hydrogen-anticline.rst`), saline aquifer page
-(`store.rst`), and biochemistry page (`biochem.rst`) when adding or refreshing
-a Model page.
+(`store.rst`), biochemistry page (`biochem.rst`), and PHREEQC page (`phreeqc.rst`) when
+adding or refreshing a Model page.
 
 - Render scientific data from the initial and accepted simulation states.
   Retain operating-stage endpoints; label actual times and disclose uneven
@@ -25,4 +25,6 @@ a Model page.
   and visually inspect figures and representative animation frames.
 
 The animation colour/axes helper is shared by the storage and biochemistry
-galleries. Physical models, solvers and tolerances remain independent of the presentation functions.
+galleries. Python exporters use `tools/storage_gallery_style.py`, whose
+palette is checked against the MATLAB helper. Label logarithmic scales and
+workflow-specific population normalizations explicitly. Physical models, solvers and tolerances remain independent of the presentation functions.
