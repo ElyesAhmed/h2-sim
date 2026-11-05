@@ -32,7 +32,8 @@ push to master publishes the site through the GitHub Pages workflow.
 
 ** Onboarding and verification
 
-Keep README.md, installation.rst, quickstart.rst and dependencies.rst aligned
+Keep README.md, installation.rst, model-selection.rst, quickstart.rst,
+examples.rst and dependencies.rst aligned
 when changing startup or example options. verification.rst records dated local
 MATLAB checks separately from documentation CI. Do not label an untested
 platform or MATLAB release as verified. Update CITATION.cff from agreed project

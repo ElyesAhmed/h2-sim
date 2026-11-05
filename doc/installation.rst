@@ -1,11 +1,31 @@
 Installation
 ============
 
-Clone H2sim with its pinned dependencies, then initialize it from MATLAB.
-See :doc:`dependencies` for required and optional components.
+Install MATLAB and Git, clone H2sim with its pinned MRST dependency, then
+initialize it from MATLAB. No PHREEQC installation is needed for the first
+simulation. See :doc:`dependencies` for the complete component list and
+:doc:`model-selection` to choose a workflow.
 
-Clone the repository
+Choose your checkout
 --------------------
+
+For a first core simulation (aquifer, anticline, gas mixing or biochemistry):
+
+.. code-block:: shell
+
+   git clone https://github.com/sintefmath/h2-sim.git
+   cd h2-sim
+   git submodule update --init --recursive -- submodules/mrst
+
+This is the recommended starting path. Add chemistry only when you need a
+PHREEQC example. These instructions follow the current ``master`` checkout;
+the website also covers examples added after the ``v0.1.0`` development tag.
+Individual example guides identify those additions.
+
+Complete checkout (including optional chemistry source)
+--------------------------------------------------------
+
+Alternatively, fetch both pinned dependencies from the start:
 
 .. code-block:: shell
 
@@ -103,13 +123,15 @@ Older storage prototypes live in ``research/h2store/prototypes``. Supported
 entry points remain in the module example folders; tests and research code
 are added explicitly only when needed.
 
-Run tests by their explicit folder path from the repository root:
+Check the core storage installation without chemistry dependencies:
 
 .. code-block:: matlab
 
-   startupH2sim('phreeqc', true)
-   checks = runtests('tests/biochemistry');
-   assertSuccess(checks);
+   addpath(fullfile(pwd, 'tests', 'h2store'));
+   checks = runH2StoreTests();
+
+For biochemistry, chemistry and restart checks, follow :doc:`verification`.
+Run test folders explicitly; they are outside the runtime module path.
 
 To inspect an archived study, add only its selected folder explicitly after
 startup. Do not recursively add the entire repository. See the README files
@@ -124,6 +146,12 @@ Run a first example
    result = exampleBlackOilAquifer2D( ...
        'gridSpacing', [10, 10], 'numCycles', 1, 'plotResults', false);
    plotBlackOilAquifer2D(result);
+
+The returned ``result.states`` contains accepted flow states;
+``result.states{end}.s(:, 2)`` contains final gas saturation. The plotting call
+shows plume snapshots, well response and dissolved hydrogen. The command
+uses a 10 m target spacing and one cycle, so it does not reproduce the finer,
+five-cycle website figures. See :ref:`example-runtime-guide` for timing scope.
 
 This coarse, one-cycle saline-aquifer configuration uses the black-oil model
 and bundled property tables. Its flow calculation needs neither a PHREEQC

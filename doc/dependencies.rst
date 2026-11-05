@@ -1,6 +1,10 @@
 Dependencies
 ============
 
+For core simulation, install **MATLAB, Git and the pinned MRST submodule**.
+PHREEQC is optional. Use :doc:`model-selection` to choose a family and follow
+the core-only checkout in :doc:`installation` for a first run.
+
 The standard workflows run serially. Plain ``startupH2sim`` initializes core
 modules and MRST without checking or fetching chemistry libraries. Request
 ``startupH2sim('phreeqc', true)`` only for chemistry workflows, or initialize
