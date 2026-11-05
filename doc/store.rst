@@ -28,19 +28,63 @@ saved through MRST packed simulation output and can be replotted locally.
 Withdrawal has a 35 bar minimum bottom-hole pressure limit, so the well can
 reduce its rate as available hydrogen decreases.
 
-.. figure:: _static/examples/aquifer_plume.png
-   :alt: Hydrogen gas saturation in the 2D aquifer after build-up, injection, and withdrawal.
+.. raw:: html
+
+   <video controls loop muted playsinline preload="metadata" style="width:100%;max-width:1280px" poster="_static/examples/aquifer_storage.png" aria-label="Simulated hydrogen injection, shut-in and withdrawal in a saline aquifer">
+     <source src="_static/examples/aquifer_storage.mp4" type="video/mp4">
+     <a href="_static/examples/aquifer_storage.gif">View the animated GIF</a>.
+   </video>
+
+The animation follows the same presentation as :doc:`hydrogen-anticline`:
+fixed saturation limits, labelled operating stages, and a history of retained
+hydrogen. The orange inventory curve shows dissolved hydrogen, which remains
+inside the model. The rate panel uses positive injection and negative withdrawal.
+Initial and accepted states are selected by physical time, retaining every
+operating-stage endpoint, without interpolation. Labelled simulation times are
+uneven; playback is not real time. The 2D section has no vertical exaggeration.
+The saturation range is fixed across this case's frames and snapshots; its
+upper limit comes from this simulation, rather than the anticline case.
+
+Download the :download:`MP4 <_static/examples/aquifer_storage.mp4>`,
+:download:`GIF <_static/examples/aquifer_storage.gif>` or
+:download:`provenance record <_static/examples/aquifer_gallery_provenance.json>`.
+
+Geological structure
+~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: _static/examples/aquifer_geology.png
+   :alt: Curved caprock above the aquifer reservoir, bedrock below and well completion beneath the crest.
    :width: 100%
 
-   Hydrogen plume snapshots after build-up and in the fifth cycle. The same saturation
-   color scale is used in every panel.
+   The three rock regions and the actual completion cells in the teaching grid.
+   Elevation increases upward; distances are in metres.
+
+:download:`Download vector PDF <_static/examples/aquifer_geology.pdf>`.
+
+Plume development
+~~~~~~~~~~~~~~~~~
+
+.. figure:: _static/examples/aquifer_plume.png
+   :alt: Hydrogen gas saturation after build-up and after injection and withdrawal in the fifth cycle.
+   :width: 100%
+
+   Saved-state snapshots use the animation's saturation palette and fixed
+   limits. Labels show actual simulation times.
+
+:download:`Download vector PDF <_static/examples/aquifer_plume.pdf>`.
+
+Operating response
+~~~~~~~~~~~~~~~~~~
 
 .. figure:: _static/examples/aquifer_well_response.png
    :alt: Gas surface rate and bottom-hole pressure over the aquifer build-up and storage cycle.
    :width: 100%
 
    Well response through the prescribed storage schedule. Positive gas rate
-   denotes injection and negative gas rate denotes withdrawal.
+   denotes injection and negative gas rate denotes withdrawal. Rates are
+   constant over each completed schedule interval; inactive-well BHP is omitted.
+
+:download:`Download vector PDF <_static/examples/aquifer_well_response.pdf>`.
 
 Hydrogen loss due to dissolution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,6 +113,24 @@ can increase during withdrawal as the free-gas inventory decreases.
 
    Hydrogen partitioned into brine throughout build-up and cycling (left),
    with the dissolved share shown over the cycling period (right).
+
+:download:`Download vector PDF <_static/examples/aquifer_dissolution.pdf>` or
+:download:`inventory data (CSV) <_static/examples/aquifer_dissolution.csv>`.
+
+Reproduce the animation and figures from the same result:
+
+.. code-block:: matlab
+
+   startupH2sim
+   result = exampleBlackOilAquifer2D('numCycles', 5, 'plotResults', false);
+   output = fullfile('build', 'aquifer-gallery');
+   animateBlackOilAquifer2D(result, output, 'frameRate', 6, 'maxFrames', 100);
+   plotBlackOilAquifer2D(result, 'outputDirectory', output);
+   plotAquiferFluidTables(result, 'outputDirectory', output);
+
+Set ``'writeVideo', false`` when the MPEG-4 VideoWriter profile is unavailable.
+The GIF and poster remain available. Plotting and animation functions only read
+saved results; they do not rerun flow or alter the physical model.
 
 .. button-ref:: notebooks/blackoil_storage
    :color: primary
@@ -103,8 +165,14 @@ comparisons, and the route from phase behavior to black-oil tables.
    PVT functions from the bundled aquifer input, evaluated over 30–50 bar.
    These are the existing simulation tables, not newly generated NIST data.
 
+:download:`Download vector PDF <_static/examples/aquifer_fluid_tables.pdf>` or
+:download:`fluid data (CSV) <_static/examples/aquifer_fluid_tables.csv>`.
+
 Replot the fluid properties from a saved aquifer result:
 
 .. code-block:: matlab
 
    plotAquiferFluidTables(result);
+
+For contributors, the :download:`Model presentation guide <model-presentation.md>`
+records the figure and animation conventions used on this page.
