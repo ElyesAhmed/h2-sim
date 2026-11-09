@@ -54,8 +54,8 @@
         1150
       ],
       "scientificPixelsPreservedExactly": true,
-      "sourceSha256": "8f40168e5dbe3261daae78c8e48fa38c35a53fd9b2456cc64886278b215d2ed6",
-      "outputSha256": "ab649326bb7f86c224879f19d02b935abb49ee262dd5d827ad01d87f63f16967"
+      "sourceSha256": "20d44fdf2586799530d9c0ec06d980b4e69bd6b82bcddfe92f14a5c1ea0eb12a",
+      "outputSha256": "86a82c79e8bae3093c894a1127de5d03eb9cae2f18da1ca008a82577cf637306"
     },
     "aquifer_storage.gif": {
       "sourceSize": [
@@ -69,8 +69,8 @@
       "frames": 98,
       "durationMs": 16660,
       "playbackTimingPreserved": true,
-      "sourceSha256": "d1a6e128c8c30829ecc699b6a7bfc4737528f1755c839f25afd93eeacc6fa92a",
-      "outputSha256": "b0abc588b04f35a788c8b57786e216d403c9eb931a7009962f36767d9a54abbc"
+      "sourceSha256": "6707399ce5cc34426ec4fe7d8430357501443991d552ce1ee000224e2f1ce64a",
+      "outputSha256": "f7d01c2ee348d82dfaf9b4994a705d0b32fa57d6ae0cbe4c5ac3b6d4e771e6e8"
     },
     "aquifer_storage.mp4": {
       "sourceSize": [
@@ -85,8 +85,8 @@
       "fps": 6.0,
       "durationSeconds": 16.333333333333332,
       "playbackTimingPreserved": true,
-      "sourceSha256": "0eaba95e99ca44b8bbdc75d3711a94c86ef79415338ab8eb6e470e511ba9c5f1",
-      "outputSha256": "9290cbc131f953638e5e5280bd26835361a95e02b24e0b512f646759586c008b"
+      "sourceSha256": "ce75a24458ca4e0b5c0c36a6ddbd030a2cbf99ae9d806c7d66c247e6ae4ae08a",
+      "outputSha256": "799af1f137dc88b04fb65caeeb33220deb2d078fb8fe2a9d4b43dfe59fba770a"
     },
     "biochemistry_storage.png": {
       "sourceSize": [
