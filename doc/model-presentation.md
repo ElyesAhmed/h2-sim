@@ -22,6 +22,12 @@ adding or refreshing a Model page.
   plot stale inactive-well BHP. For the single-completion aquifer with zero
   connection-pressure correction, obtain shut-in BHP from the saved reservoir
   pressure using the local zero-drawdown balance; record this in provenance.
+  For the multi-completion microbial case with zero depth and pressure
+  corrections, use completion pressures weighted by well index times total
+  phase mobility to impose zero net reservoir-volume flow. This is a local
+  diagnostic, not a coupled shut-in simulation: completion crossflow is not
+  fed back into the saved states. Keep active BHP and closed-well rates
+  unchanged, and record the balance residual in provenance.
   Distinguish dissolution from irreversible hydrogen loss.
 - Record source hashes, configuration, selected state indices/times and asset
   hashes in a JSON provenance file. Verify the HTML targets, decode the media,

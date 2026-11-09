@@ -77,7 +77,8 @@ function figures = plotCompositionalBacterial2DThreeReactions(results, varargin)
                     'Tag', sprintf('%s-rate-%d', r.name, c));
             else
                 plot(axesLogs(c), t, logData(:, c), 'Color', color, ...
-                    'LineStyle', style, 'LineWidth', 1.7, 'DisplayName', r.name);
+                    'LineStyle', style, 'LineWidth', 1.7, 'DisplayName', r.name, ...
+                    'Tag', sprintf('%s-bhp', r.name));
             end
         end
         if ~isempty(opt.outputDirectory)
@@ -95,7 +96,7 @@ function figures = plotCompositionalBacterial2DThreeReactions(results, varargin)
             yline(a, 0, ':', 'HandleVisibility', 'off');
         else
             ylabel(a, 'Bottom-hole pressure (bar)');
-            title(a, 'Active well pressure');
+            title(a, 'Well pressure');
         end
         grid(a, 'on');
         box(a, 'on');

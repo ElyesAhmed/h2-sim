@@ -225,8 +225,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "e120c49bab1b9bef54735333be58d8317c57c1a07daf876c7af6f63047fd9917",
-      "outputSha256": "08b8ba1be2c4d63501f6450eded3c4e6ee4a516b3cd69e2f1df366f92e4b5672"
+      "sourceSha256": "71a920a37e73b81251681d3568cf5852a74a47c739848c7ed4485f16cda90e97",
+      "outputSha256": "3ea2d404eeb44546c2b5dfdf8567ffccbf3dc61404ffb60800d1f920fb05438c"
     },
     "examples/compositional_2d_gas_maps.pdf": {
       "pages": [
@@ -614,9 +614,9 @@
       ],
       "marginHeight": 45,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "34c671177d8dce0c5ce642b2e90e24dfe35a67c93a4a5b2fb97f82b96f955ca2",
-      "sourceSha256": "662418bd4c7cd33c66ee00b81373755c96b294c3c6e900bafb9ebcfd2d1517b5",
-      "outputSha256": "3a3cb152968fe7fd462750ea82aea0f1b145111b0f462e3c843e061abd715e10"
+      "originalRegionRgbaSha256": "0caa2447cf64930a236333c33213ce816cfe08e79abd4733d231e6744c5f6b95",
+      "sourceSha256": "0cf751a5aad76bc9f6df19d607f11ae099d7aa20b7d8f8cc30f364aefb53aa48",
+      "outputSha256": "05b1210e55a7911ce63058bb62ea693128def04feffb01a79a65f645beaed9d1"
     },
     "examples/compositional_2d_gas_maps.png": {
       "sourceSize": [
