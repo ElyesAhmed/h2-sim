@@ -24,7 +24,7 @@ classdef H2StoreAquiferPresentationTest < matlab.unittest.TestCase
             test.result = struct('model', model, 'state0', initial, ...
                 'states', {repmat({state}, count, 1)}, 'schedule', schedule, ...
                 'setup', setup, 'wellSols', {repmat({struct('qGs', 1, ...
-                'bhp', 4e6)}, count, 1)});
+                'bhp', 4e6, 'cdp', 0)}, count, 1)});
         end
 
     end
@@ -59,12 +59,18 @@ classdef H2StoreAquiferPresentationTest < matlab.unittest.TestCase
                 ones(numel(schedule.control(1).W.cells), 1));
         end
 
-        function inactiveWellValuesAreOmitted(test)
+        function shutInBhpUsesZeroDrawdownBalance(test)
             data = aquiferPresentationData(test.result);
             shut = strcmp(data.stages, 'shut');
             test.verifyTrue(any(shut));
             test.verifyEqual(data.rate(shut), zeros(nnz(shut), 1));
-            test.verifyTrue(all(isnan(data.bhp(shut))));
+            well = test.result.schedule.control(1).W;
+            expected = test.result.states{1}.pressure(well.cells) / barsa;
+            test.verifyEqual(data.shutInBhp(shut), ...
+                repmat(expected, nnz(shut), 1), 'AbsTol', 1e-10);
+            test.verifyTrue(all(isnan(data.shutInBhp(~shut))));
+            test.verifyTrue(all(isfinite(data.bhp)));
+            test.verifyEqual(data.bhp(~shut), 40 * ones(nnz(~shut), 1), 'AbsTol', 1e-10);
             test.verifyEqual(data.rate(~shut), day * ones(nnz(~shut), 1));
             test.verifyEqual(data.total, data.free + data.dissolved);
         end
@@ -76,9 +82,39 @@ classdef H2StoreAquiferPresentationTest < matlab.unittest.TestCase
             line = findobj(figures(2), 'Tag', 'aquifer-well-rate');
             test.verifyEqual(line.XData(:), data.times);
             test.verifyEqual(line.YData(:), [data.rate; data.rate(end)]);
+            pressure = findobj(figures(2), 'Tag', 'aquifer-pressure');
+            test.verifyEqual(pressure.YData(:), data.bhp, 'AbsTol', 1e-10);
             test.verifyEqual(figures(1).UserData.saturationLimits, ...
                 [0, data.saturationMaximum]);
             test.verifyEqual(figures(3).UserData.dissolvedSurfaceM3, data.dissolved(2:end));
+        end
+
+        function shutInUsesCurrentStateNotStaleWellBhp(test)
+            result = test.result;
+            original = aquiferPresentationData(result);
+            index = find(strcmp(original.stages, 'shut'), 1);
+            result.states{index}.pressure(:) = 38 * barsa;
+            result.wellSols{index}.bhp = 99 * barsa;
+            data = aquiferPresentationData(result);
+            test.verifyEqual(data.bhp(index), 38, 'AbsTol', 1e-10);
+            test.verifyEqual(data.shutInBhp(index), 38, 'AbsTol', 1e-10);
+        end
+
+        function nonzeroConnectionCorrectionIsRejected(test)
+            result = test.result;
+            data = aquiferPresentationData(result);
+            index = find(strcmp(data.stages, 'shut'), 1);
+            result.wellSols{index}.cdp = 100;
+            test.verifyError(@() aquiferPresentationData(result), 'H2sim:AquiferShutInBhp');
+        end
+
+        function multipleCompletionsAreRejected(test)
+            result = test.result;
+            data = aquiferPresentationData(result);
+            index = find(strcmp(data.stages, 'shut'), 1);
+            control = result.schedule.step.control(index);
+            result.schedule.control(control).W.cells = [1; 2];
+            test.verifyError(@() aquiferPresentationData(result), 'H2sim:AquiferShutInBhp');
         end
 
         function gifRetainsEveryStageEndpoint(test)

@@ -18,8 +18,11 @@ adding or refreshing a Model page.
   provenance. Explain simplifications without claiming benchmark agreement.
 - Export a muted, looping MP4 with user controls, an actual-state PNG poster,
   and a GIF download. Use 200-dpi PNG and vector PDF for scientific figures.
-- Show signed active-well rates over their actual schedule intervals. Omit
-  inactive-well BHP. Distinguish dissolution from irreversible hydrogen loss.
+- Show signed active-well rates over their actual schedule intervals. Do not
+  plot stale inactive-well BHP. For the single-completion aquifer with zero
+  connection-pressure correction, obtain shut-in BHP from the saved reservoir
+  pressure using the local zero-drawdown balance; record this in provenance.
+  Distinguish dissolution from irreversible hydrogen loss.
 - Record source hashes, configuration, selected state indices/times and asset
   hashes in a JSON provenance file. Verify the HTML targets, decode the media,
   and visually inspect figures and representative animation frames.

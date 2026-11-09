@@ -267,8 +267,8 @@
     "aquifer_geology.pdf": "8b9a43e2f41661bb7b15a0d9060fcf599efe74fccd4ed5d3ce232053bd773f38",
     "aquifer_plume.png": "b3b3d3fc9117562fdada62b94336269632c027de134ba3f51d26322f50327229",
     "aquifer_plume.pdf": "e0e3d5d594fb1e9faa7ba264d25c8069603b113294617befaf615a2f77dc1cb6",
-    "aquifer_well_response.png": "c33ea3147f75bf7bd75af8f6e32ef69abe9590a7a684a71dc9a7fbe2aaa6312a",
-    "aquifer_well_response.pdf": "55c813642781778397e2d4ff86c807873c38e209c82d9157b7b2cca51047815a",
+    "aquifer_well_response.png": "d1a7c37507f4c08f40353d5d37fa4bf9c344e117ea81e8e0b82bbbbc505316e7",
+    "aquifer_well_response.pdf": "baae4a04636eeb4a1969c740a874ab1c20ace1ce3aba02d1a0aca777a5d91cdd",
     "aquifer_dissolution.png": "6f564abab3bfd816eaefc6b1bd85d6089a83d15d00be848a942790ceee7091c7",
     "aquifer_dissolution.pdf": "3a2cb445c7c2a04819d30a6df08d34b708fdd30a85b57071b29f27d8e3737fc6",
     "aquifer_fluid_tables.png": "e0a1d64af118397cb48ccb26c7c938bfd7b257916c275f8ba845f11f4991bbd7",
@@ -278,16 +278,16 @@
   },
   "sourceSha256": {
     "h2-store/utils/animateBlackOilAquifer2D.m": "eb63c77b5b9fb83de7c9c7a40ee6f360b6e617794a25030115c69a46bfd3a8ad",
-    "h2-store/utils/aquiferPresentationData.m": "a487a78c7f6c3f41a0ecff75c2a5f30ae21eb332d4a2a3a4a96cf494c59721d5",
+    "h2-store/utils/aquiferPresentationData.m": "d9e30dfca60be4262e5b6e121f523630a5cb76f41d31defb1e4c46fb2445d61c",
     "h2-store/utils/h2simStoragePlotStyle.m": "a72e5f1965f5bc9d776510607371585afd5507566bfa78f8c6ac6c995d9a75c6",
-    "h2-store/utils/plotBlackOilAquifer2D.m": "d6b82ab2b9020d0acf92034db683214a0e4861dc1c797c77d61a405fc4061f01",
+    "h2-store/utils/plotBlackOilAquifer2D.m": "bfdaf90703232757c661f74fd2184f18e647b78490709446f0511de2cd25319d",
     "h2-store/utils/plotAquiferFluidTables.m": "446b234291b5c76ae1d6ea6fd23709895f813a5902244e1459c62e849358d006",
     "h2-store/examples/exampleBlackOilAquifer2D.m": "90d765396653a853b8b051f30c4a0b15d494bf7db7207e941c55c58ee8ab3c7f",
     "h2-store/utils/modelForSimple2DAquifer.m": "4ac82c40ba78c42e179bd7c737ee50bd2f70b683e0cb23f6025e9e44160ec169",
     "h2-store/utils/makeAquifer2DSchedule.m": "2070f963aef7819dd3c9c58a33443b525ca3d28a7b1dc538da3eee0c7ac5c601",
-    "tests/h2store/H2StoreAquiferPresentationTest.m": "c4596def36d3c5ff74d0ac306629b2fe3504048d03440f6cbff5637224776adb",
-    "doc/store.rst": "7c4fa794b32a477672a15658bee45e7a8944e0902086ac195d91c32bb26154e0",
-    "doc/model-presentation.md": "d61c4041b0d7fd2cd1670abf23859103776f301a821edd9964463ae47516a49f",
+    "tests/h2store/H2StoreAquiferPresentationTest.m": "b44cd6e78381459c2a466631c88bbdc9bee5aa4fb324b9b3fe1cc58cf7d1afb1",
+    "doc/store.rst": "eb747897028687109d072bcc603d8ffd2e8f38171b406528565e78982e4c24db",
+    "doc/model-presentation.md": "d582a6e1d5f1bfb5410bfec85a42f899cb833ed35817b7c5ec387b1867f7b46e",
     "h2-store/examples/data/Aquifer2D/H2STORAGE_RS.DATA": "54d8b84f52ceb5d7731b3a05176d3c03b64cbed9864db0ecc2ff6566f9cb2790",
     "h2-store/examples/data/Aquifer2D/H2TRAP.GRDECL": "da63ede78b3e194b5b17f3521e90ae6d86beade618c4631fedc931dcfdd51590",
     "h2-store/examples/data/Aquifer2D/PERM.inc": "013ca4bfd8ff9a5bce2dafcf1772bbc1eb87db9ff3903d215bfb708470c2839b",
@@ -303,7 +303,7 @@
   "validation": {
     "date": "2026-11-09",
     "simulation": "Fresh five-cycle run on the face-conforming grid; finite pressure and saturation.",
-    "matlabTests": "7/7 presentation and geometry tests passed, including 8 m, 2 m and 0.5 m grids.",
+    "matlabTests": "10/10 aquifer presentation and geometry tests passed, including stale BHP rejection, multiple-completion guards and continuous pressure plotting.",
     "scope": "Grid geometry correction; not independent validation of physical laws.",
     "documentation": "Strict Sphinx HTML build passed.",
     "pythonTests": "7 gallery-style and 6 branding tests passed.",
@@ -385,5 +385,19 @@
     },
     "scientificDataChanged": false,
     "layout": "Attribution band appended below the original frame."
+  },
+  "pressureHistory": {
+    "active": "Saved wellSols BHP, unchanged.",
+    "shutIn": "Local zero-drawdown well balance from saved reservoir pressure.",
+    "scope": "Single completion, zero cdp; other well configurations raise an error.",
+    "shutInSamples": 251,
+    "maximumAbsoluteReservoirPhaseFlux_m3_day": 6.47061934708e-14,
+    "minimumWI_times_totalMobility_m3_Pa_s": 1.29147850562e-09,
+    "shutInPressureRange_bar": [
+      37.6636203,
+      38.8284712
+    ],
+    "simulationRerun": false,
+    "rawSavedBhpModified": false
   }
 }

@@ -59,11 +59,11 @@ function figures = plotBlackOilAquifer2D(result, varargin)
     ylabel(ax, 'Gas surface rate (m^3/day)');
     title(ax, 'Injection and withdrawal');
     ax2 = nexttile;
-    bhp = data.bhp * barsa;
-    plot(ax2, times, bhp / 1e5, 'LineWidth', 1.8, 'Color', style.figureOrange);
+    plot(ax2, times, data.bhp, 'Tag', 'aquifer-pressure', ...
+        'LineWidth', 1.8, 'Color', style.figureOrange);
     xlabel(ax2, 'Time (days)');
     ylabel(ax2, 'Bottom-hole pressure (bar)');
-    title(ax2, 'Active well pressure');
+    title(ax2, 'Well pressure');
     for j = 1:numel(ends.charge)
         if j == 1
             cycleStart = times(ends.cushion(1)) + result.setup.timeShut / day;
@@ -143,7 +143,8 @@ function figures = plotBlackOilAquifer2D(result, varargin)
     f.UserData = struct('sourceStateIndices', indices + 1, ...
         'actualTimesDays', times(indices), 'saturationLimits', [0, maximum]);
     g.UserData = struct('actualTimesDays', data.times, ...
-        'rateSurfaceM3PerDay', data.rate, 'activeBhpBar', data.bhp);
+        'rateSurfaceM3PerDay', data.rate, 'bhpBar', data.bhp, ...
+        'shutInBhpBar', data.shutInBhp);
     h.UserData = struct('actualTimesDays', times, ...
         'dissolvedSurfaceM3', dissolved, 'freeSurfaceM3', free);
     figures = [f, g, h, geology];
