@@ -84,7 +84,7 @@ Operating response
 
    Well response through the prescribed storage schedule. Positive gas rate
    denotes injection and negative gas rate denotes withdrawal. Rates are
-   constant over each completed schedule interval; inactive-well BHP is omitted.
+   constant over each completed schedule interval.
 
 
 Hydrogen loss due to dissolution

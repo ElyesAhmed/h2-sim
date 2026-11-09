@@ -185,8 +185,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "dbb062bf72f57fe74ffa479abb42f355bbc91be6e19b818efb8ad1113de8d1b1",
-      "outputSha256": "55c813642781778397e2d4ff86c807873c38e209c82d9157b7b2cca51047815a"
+      "sourceSha256": "133db0ea5855ec045c74fc688e98578d70f78f90344299a559dcfffc515b33ff",
+      "outputSha256": "baae4a04636eeb4a1969c740a874ab1c20ace1ce3aba02d1a0aca777a5d91cdd"
     },
     "examples/compositional_2d_bacterial_maps.pdf": {
       "pages": [
@@ -584,9 +584,9 @@
       ],
       "marginHeight": 41,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "a1bd3d8f0fa96c5a071e23c10ac17edf72f1432b94feae0d9e023f4a5da43ccf",
-      "sourceSha256": "d43e88898798c1a66ee7fc9b2e9c4c5f28c513bc00c95ddabdd795446930840b",
-      "outputSha256": "c33ea3147f75bf7bd75af8f6e32ef69abe9590a7a684a71dc9a7fbe2aaa6312a"
+      "originalRegionRgbaSha256": "eb47779e963f878e5cc4558458ed23cf6f9f73de3623270af954a8e23c7ec192",
+      "sourceSha256": "d74c1d01a912c5562e11a896527e55a11eb17ed19e4e00fd10dd959afa6dcddf",
+      "outputSha256": "d1a7c37507f4c08f40353d5d37fa4bf9c344e117ea81e8e0b82bbbbc505316e7"
     },
     "examples/compositional_2d_bacterial_maps.png": {
       "sourceSize": [

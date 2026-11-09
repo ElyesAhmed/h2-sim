@@ -4,7 +4,10 @@ function data = aquiferPresentationData(result)
     % Uses the initial and saved accepted states. Volumes are surface m^3;
     % rates are surface m^3/day, time days and pressure bar. Dissolved hydrogen
     % is phase partitioning, not irreversible consumption. Shut-in rates are
-    % zero and shut-in well BHP is NaN because saved well values may be stale.
+    % zero. Shut-in BHP follows the local zero-drawdown well balance for a
+    % single completion with zero connection-pressure correction. Disabled
+    % well BHP is stale and is not used. Other completions require a coupled
+    % wellbore calculation and are rejected rather than pressure-averaged.
     % Stage endpoints follow stage names, including ramped-rate controls.
     states = [{result.state0}; result.states(:)];
     data.times = [0; cumsum(result.schedule.step.val)] / day;
@@ -15,6 +18,7 @@ function data = aquiferPresentationData(result)
     data.free = data.dissolved;
     data.rate = zeros(numel(states) - 1, 1);
     data.bhp = nan(size(data.rate));
+    data.shutInBhp = nan(size(data.rate));
     data.stages = cell(size(data.rate));
     for k = 1:numel(states)
         state = states{k};
@@ -28,6 +32,15 @@ function data = aquiferPresentationData(result)
             if well.status
                 data.rate(k - 1) = result.wellSols{k - 1}(1).qGs * day;
                 data.bhp(k - 1) = result.wellSols{k - 1}(1).bhp / barsa;
+            else
+                savedWell = result.wellSols{k - 1}(1);
+                assert(numel(well.cells) == 1 && isfield(savedWell, 'cdp') && ...
+                    isscalar(savedWell.cdp) && savedWell.cdp == 0, ...
+                    'H2sim:AquiferShutInBhp', ...
+                    ['Shut-in BHP requires a single completion with zero ', ...
+                    'connection-pressure correction.']);
+                data.shutInBhp(k - 1) = state.pressure(well.cells) / barsa;
+                data.bhp(k - 1) = data.shutInBhp(k - 1);
             end
         end
     end
