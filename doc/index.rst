@@ -69,6 +69,8 @@ Build the assessment you need
 ------------------------------
 
 Use :doc:`model-selection` to compare dependencies and starting examples.
+Read :doc:`modeling` for governing equations, constitutive assumptions,
+microbial kinetics and numerical coupling.
 
 Start with hydrogen–brine flow in **h2-store**, add compositional transport
 and microbial reactions in **h2-biochem**, and include **PHREEQC** when
@@ -181,7 +183,13 @@ countries reading the documentation.
 
 .. toctree::
    :hidden:
-   :caption: Models
+   :caption: Mathematical models
+
+   modeling
+
+.. toctree::
+   :hidden:
+   :caption: Storage workflows
 
    hydrogen-anticline
    store

@@ -6,6 +6,9 @@ black-oil storage simulations. Choose a property model, examine its
 partitioning and salinity response, then generate the tables your flow model
 requires.
 
+For the fugacity equations, flash balances, salinity correction and
+PVT closure, see :doc:`phase-behavior` and :doc:`black-oil-model`.
+
 Phase-behavior capabilities
 ---------------------------
 

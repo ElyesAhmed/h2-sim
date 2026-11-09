@@ -5,6 +5,8 @@ Start with the physical processes your question needs. All simulation families
 use MATLAB and the pinned MRST checkout. Initialize H2sim from the repository
 root with ``startupH2sim``; PHREEQC is an additional, explicit setup.
 See :doc:`installation` before running the :doc:`quickstart` commands.
+The :doc:`modeling` section explains the governing equations and how
+constitutive closures and reaction ownership differ between formulations.
 On a narrow screen, scroll the comparison table sideways to see every column.
 
 .. list-table:: Model families and first examples

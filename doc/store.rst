@@ -7,6 +7,9 @@ The storage module connects hydrogen–brine fluid properties to MRST black-oil
 models. It provides PVT tabulation, relative-permeability tools, and aquifer
 setups for injection, storage, and withdrawal.
 
+For the component balances and PVT closure, see
+:doc:`black-oil-model` and :doc:`phase-behavior`.
+
 A 2D structural-trap example
 ----------------------------
 
