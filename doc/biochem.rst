@@ -10,6 +10,10 @@ gases. The selected 2D example uses the existing three-reaction reservoir case
 with residual methane and five storage cycles. A one-dimensional notebook
 remains available as an introduction.
 
+See :doc:`biochemistry-model` for the population balances, Monod rates
+and reaction-source normalization, and :doc:`compositional-model`
+for component and aqueous-tracer transport.
+
 .. raw:: html
 
    <video controls loop muted playsinline preload="metadata" style="width:100%;max-width:1280px" poster="_static/examples/biochemistry_storage.png" aria-label="Hydrogen gas fraction and three microbial populations through five storage cycles">

@@ -35,6 +35,11 @@ body[data-theme="dark"] .platform-note>.admonition-title {background:#244d50!imp
 .main .content {width:100%}
 .nbinput .input_area,.nboutput .output_area {min-width:0;max-width:100%;overflow-x:auto}
 
+/* Keep equation numbers beside, not over, horizontally scrollable formulas. */
+.math-wrapper>.math {display:flex;align-items:center;gap:1.5rem;min-width:min-content}
+.math-wrapper .math .eqno {position:static;order:1;flex-shrink:0;margin-inline-start:auto}
+.math-wrapper mjx-container[display="true"] {flex:1;min-width:max-content}
+
 /* Native disclosure panels: keyboard accessible and usable without JavaScript. */
 .assessment-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;align-items:start;margin:1.6rem 0 2.2rem}
 .assessment-card {border:1px solid var(--color-background-border);border-radius:1rem;overflow:hidden;background:var(--color-background-secondary);transition:border-color .18s,box-shadow .18s}

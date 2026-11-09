@@ -6,6 +6,10 @@ workflows. This animation follows the saved **three-cycle 2D compositional
 PHREEQC case**, using the presentation shared by :doc:`hydrogen-anticline`,
 :doc:`store`, and :doc:`biochem`.
 
+The equations for aqueous speciation, mineral equilibrium and local
+kinetics are described in :doc:`geochemistry-model`. See
+:doc:`numerical-methods` for the flow-reaction coupling order.
+
 .. raw:: html
 
    <video controls loop muted playsinline preload="metadata" style="width:100%;max-width:1280px" poster="_static/examples/phreeqc_storage.png" aria-label="Dissolved hydrogen and cell-local microbial evolution during three PHREEQC storage cycles">
