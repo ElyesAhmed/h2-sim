@@ -105,8 +105,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "03bd69a50cf561c438d475d83e42a8d442cc966c2ad55de167562be253229881",
-      "outputSha256": "0405cd72f6670b6a76f5325c39321a780a4fc3a356a98cb8b3bbf7a6f00b3c40"
+      "sourceSha256": "aa342e26d5ba6af4e0eb6ce044ad19cf3102ee0082d9537ec591afee83aa0090",
+      "outputSha256": "3a2cb445c7c2a04819d30a6df08d34b708fdd30a85b57071b29f27d8e3737fc6"
     },
     "examples/aquifer_fluid_tables.pdf": {
       "pages": [
@@ -125,8 +125,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "63196989e54e386226f4196c2ea68c3a26f47e54d69df76167a90c68ab27e343",
-      "outputSha256": "5bd4970b1a58c2fd3bbea2b9f2769a977aa56042f070c8b4125127dea91dc851"
+      "sourceSha256": "d05a29e5417d0dac1df83c6398a82addf4f228c4209e355344db1c15d04c33b7",
+      "outputSha256": "cce333e02349e9f1bc12c17a60256ac9a26213c2ff67143f019a36d8ef9e3600"
     },
     "examples/aquifer_geology.pdf": {
       "pages": [
@@ -145,8 +145,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "70bc710fb6e999c762b2f1e08347c77ba32a607d82b14dd69a8e45de5c62a774",
-      "outputSha256": "c963e428e48c2f50e02b14cdf878ab632ddec6a1d185f4e58e5e92a8be011634"
+      "sourceSha256": "57f87df6777286a2e0160cdde7368b5683daf36cea35a5adb0834c8b5739b0e0",
+      "outputSha256": "8b9a43e2f41661bb7b15a0d9060fcf599efe74fccd4ed5d3ce232053bd773f38"
     },
     "examples/aquifer_plume.pdf": {
       "pages": [
@@ -165,8 +165,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "06ce4fe2e2200eefb905b084e47d3f23da2dc8f806b007a491d038516404134d",
-      "outputSha256": "eacaaf605fa1d4b1c7571d25da7058dc0ed7c7014ae39ec531204e167de105d3"
+      "sourceSha256": "dea72982d1e955a2a69459ec6ce2a81978a36395efe25eec39ca512c4764629a",
+      "outputSha256": "e0e3d5d594fb1e9faa7ba264d25c8069603b113294617befaf615a2f77dc1cb6"
     },
     "examples/aquifer_well_response.pdf": {
       "pages": [
@@ -185,8 +185,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "1201002f9ff445666e90a9a9af2aef4deae12725c2d281bef45ce844040d239c",
-      "outputSha256": "30514300df5649dd4f14001ece305d977bc25fae9d580d44fdd2aaae3eec5220"
+      "sourceSha256": "dbb062bf72f57fe74ffa479abb42f355bbc91be6e19b818efb8ad1113de8d1b1",
+      "outputSha256": "55c813642781778397e2d4ff86c807873c38e209c82d9157b7b2cca51047815a"
     },
     "examples/compositional_2d_bacterial_maps.pdf": {
       "pages": [
@@ -524,9 +524,9 @@
       ],
       "marginHeight": 41,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "a4d6b00b3119728749646cd7386c8c773b4eccced5a3873030bc2ea9d5dbf35c",
-      "sourceSha256": "2d85efba1f189fed4d87dabb19007633cb557821f4096d7a3c7ff0d2932f92f2",
-      "outputSha256": "908285c5599b60312d3a2177e1470edae5370e7f3f97ee4c6caccda04e831cb2"
+      "originalRegionRgbaSha256": "e973a8996f187715f0a09a281d57dd62ae1d1422268bd9737510729cc2abbc01",
+      "sourceSha256": "717fe6e2f2b054716f0f9bf484b77f6cff79b6df8c935530f902c3be5f3c1c6a",
+      "outputSha256": "6f564abab3bfd816eaefc6b1bd85d6089a83d15d00be848a942790ceee7091c7"
     },
     "examples/aquifer_fluid_tables.png": {
       "sourceSize": [
@@ -540,8 +540,8 @@
       "marginHeight": 43,
       "originalPixelsPreserved": true,
       "originalRegionRgbaSha256": "d7402e97036f961b40ad7a8a3430c7cea827cb11600efb712ad895855205c4a4",
-      "sourceSha256": "254f8976a2612b1b35d4a0b35c1ec5d7c0913e4b6c48c11a789af908a26e698e",
-      "outputSha256": "9db4202ba8f2c10e02f7bbcf43f915febfd1c16d6aa678306ceb8207c967b42f"
+      "sourceSha256": "62ee817ae96ff0714bfe850dd4647d6a6d075a54097963e24b06db365d03f32d",
+      "outputSha256": "e0a1d64af118397cb48ccb26c7c938bfd7b257916c275f8ba845f11f4991bbd7"
     },
     "examples/aquifer_geology.png": {
       "sourceSize": [
@@ -554,9 +554,9 @@
       ],
       "marginHeight": 31,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "acf8d5d1fa2aec4574fe98af8e0c92ec20c69df719a0485bc1486cb3fb58a930",
-      "sourceSha256": "cf277d6c8fb4a02987e7232efa84d29e5521fcb2cd51ec8ddbfaf8a7f3d7d7bf",
-      "outputSha256": "c04fe57e95e7c7dcb850ae5f4eb6f15b7a09ce7ca1e9c4813303d477eda7ddf1"
+      "originalRegionRgbaSha256": "69bea8aa51983329a789be703e15f841ff4d90fc31ab83723a5eefe495a680b5",
+      "sourceSha256": "b04e008a52bdf631661d83c4eee29072eecc93207602b140d92f12add0d8c70b",
+      "outputSha256": "31e25f83caf5c04d7f7ee67966f871eb19e7777adc81421d64ba19e07b78cb4b"
     },
     "examples/aquifer_plume.png": {
       "sourceSize": [
@@ -569,9 +569,9 @@
       ],
       "marginHeight": 49,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "623a40aa62a6e9be8580d506704673b8c6afcb6297c32a1fa7abfaf9de11b4a5",
-      "sourceSha256": "d330a23c591d44b55c6e6bd59a3a2d2003b92e90e0fdedf7a20e9ca0062844f6",
-      "outputSha256": "39c35eb755f5992a8443531b0f3133e712a03af28c9f5b9b2c334e133c8d3ad7"
+      "originalRegionRgbaSha256": "9f6b94c3a42b5942c40dc22d63632bb2ee753866decd7bf48ecef4889009441e",
+      "sourceSha256": "edc9d4a05c9a8bc25913f7b5de64bc976da00d4b27651eeb1a59a2778395cdae",
+      "outputSha256": "b3b3d3fc9117562fdada62b94336269632c027de134ba3f51d26322f50327229"
     },
     "examples/aquifer_well_response.png": {
       "sourceSize": [
@@ -584,9 +584,9 @@
       ],
       "marginHeight": 41,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "779deb88a0efc243076503f6c42eeb12dddc524005cdebd314525f12baee74de",
-      "sourceSha256": "9949f91b9ae35ef44d571b753fbee832a3ac698d2fd4b445c7395acc5d451745",
-      "outputSha256": "f603a2db852b13e864ef2a87ac2daea606fc8518b9c6afa0199f01beeb830e0b"
+      "originalRegionRgbaSha256": "a1bd3d8f0fa96c5a071e23c10ac17edf72f1432b94feae0d9e023f4a5da43ccf",
+      "sourceSha256": "d43e88898798c1a66ee7fc9b2e9c4c5f28c513bc00c95ddabdd795446930840b",
+      "outputSha256": "c33ea3147f75bf7bd75af8f6e32ef69abe9590a7a684a71dc9a7fbe2aaa6312a"
     },
     "examples/compositional_2d_bacterial_maps.png": {
       "sourceSize": [

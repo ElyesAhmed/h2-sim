@@ -21,7 +21,11 @@ hydrogen dissolution are included; lateral boundaries use hydrostatic
 pressure. The bundled input uses zero added salt and disables diffusion.
 
 The default teaching grid has a 2 m target spacing. The original setup's
-0.5 m target spacing remains available. The schedule includes a 120-day
+0.5 m target spacing remains available. Grid faces follow the sampled
+caprock curve and the horizontal bedrock interface, so cells do not straddle
+the rock-layer boundaries. This replaces the earlier cell-centred curve
+constraint; results from that grid must be rerun, not merely replotted.
+The schedule includes a 120-day
 hydrogen build-up, a 30-day shut-in, then five 70-day storage cycles
 (30 days of injection, 10 days idle, and 30 days withdrawal). Results are
 saved through MRST packed simulation output and can be replotted locally.

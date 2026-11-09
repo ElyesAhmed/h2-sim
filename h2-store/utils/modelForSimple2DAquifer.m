@@ -18,8 +18,8 @@ function [description, options, state0, model, schedule, plotOptions] = ...
     %   plotOptions - Display settings for the 2D domain. Requesting only the
     %                 first two outputs returns before grid generation.
     %
-    % The 50 m by 50 m PEBI grid follows y = 25 + 5*sin(pi*x/50). A caprock
-    % polygon is offset 0.1 m above this curve; bedrock lies below y = 5 m.
+    % The 50 m by 50 m PEBI grid has face-conforming rock interfaces at the
+    % sampled curve y = 25.1 + 5*sin(pi*x/50) and the bedrock top at y = 5 m.
     % Brine is the oil phase. The model includes dissolved gas and uses gravity
     % along negative y. With use_bc, lateral pressure boundaries are imposed.
     %
@@ -129,11 +129,10 @@ function G = setUpGrid(spacing)
     validateattributes(spacing, {'numeric'}, ...
         {'vector', 'numel', 2, 'positive', 'finite'});
     x = linspace(0, 1);
-    y = 25 + 5 * sin(pi * x);
-    constraints = {[50 .* x', y']};
+    y = 25.1 + 5 * sin(pi * x);
+    constraints = {[50 .* x', y'], [0, 5; 50, 5]};
     G = compositePebiGrid2D(spacing, [50, 50], ...
-        'cellConstraints', constraints, 'interpolateCC', true, ...
-        'protLayer', false);
+        'faceConstraints', constraints, 'interpolateFC', false);
     G = computeGeometry(G);
 end
 

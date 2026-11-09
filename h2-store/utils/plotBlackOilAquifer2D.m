@@ -28,7 +28,7 @@ function figures = plotBlackOilAquifer2D(result, varargin)
         ax = nexttile;
         plotCellData(G, result.states{indices(j)}.s(:, 2), 'EdgeColor', 'none');
         hold(ax, 'on');
-        x = linspace(0, 50, 150);
+        x = linspace(0, 50, 100);
         plot(ax, x, 25.1 + 5 * sin(pi * x / 50), 'k-', 'LineWidth', 1.1);
         wc = result.schedule.control(1).W.cells;
         plot(ax, G.cells.centroids(wc, 1), G.cells.centroids(wc, 2), ...

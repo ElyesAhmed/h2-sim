@@ -3,6 +3,10 @@ classdef H2StoreAquiferPresentationTest < matlab.unittest.TestCase
     properties (Access = private)
         result
     end
+    properties (TestParameter)
+        gridSpacing = struct('coarse', [8, 8], 'teaching', [2, 2], ...
+            'original', [0.5, 0.5]);
+    end
     methods (TestClassSetup)
 
         function prepareSavedHistory(test)
@@ -25,6 +29,35 @@ classdef H2StoreAquiferPresentationTest < matlab.unittest.TestCase
 
     end
     methods (Test)
+
+        function rockInterfacesFollowGridFaces(test, gridSpacing)
+            deckFile = fullfile(fileparts(which('exampleBlackOilAquifer2D')), ...
+                'data', 'Aquifer2D', 'H2STORAGE_RS.DATA');
+            [~, ~, ~, model, schedule] = modelForSimple2DAquifer( ...
+                readEclipseDeck(deckFile), 'gridSpacing', gridSpacing, 'numCycles', 1);
+            G = model.G;
+            region = model.rock.regions.saturation;
+            interior = find(all(G.faces.neighbors > 0, 2));
+            adjacent = region(G.faces.neighbors(interior, :));
+            caprock = interior(any(adjacent == 3, 2) & any(adjacent == 1, 2));
+            bedrock = interior(any(adjacent == 2, 2) & any(adjacent == 1, 2));
+            nodeFaces = rldecode((1:G.faces.num)', diff(G.faces.nodePos));
+            top = G.nodes.coords(G.faces.nodes(ismember(nodeFaces, caprock)), :);
+            bottom = G.nodes.coords(G.faces.nodes(ismember(nodeFaces, bedrock)), :);
+            x = linspace(0, 50, 100);
+            expected = interp1(x, 25.1 + 5 * sin(pi * x / 50), top(:, 1));
+            test.verifyNotEmpty(top);
+            test.verifyNotEmpty(bottom);
+            % clippedPebi2D rounds grid vertices to micrometres.
+            test.verifyEqual(top(:, 2), expected, 'AbsTol', 1e-6);
+            test.verifyEqual(bottom(:, 2), 5 * ones(size(bottom, 1), 1), 'AbsTol', 1e-8);
+            test.verifyEqual([min(top(:, 1)), max(top(:, 1))], [0, 50], 'AbsTol', 1e-8);
+            test.verifyEqual([min(bottom(:, 1)), max(bottom(:, 1))], [0, 50], 'AbsTol', 1e-8);
+            test.verifyGreaterThan(min(G.cells.volumes), 0);
+            test.verifyEqual(sum(G.cells.volumes), 2500, 'AbsTol', 1e-6);
+            test.verifyEqual(region(schedule.control(1).W.cells), ...
+                ones(numel(schedule.control(1).W.cells), 1));
+        end
 
         function inactiveWellValuesAreOmitted(test)
             data = aquiferPresentationData(test.result);
