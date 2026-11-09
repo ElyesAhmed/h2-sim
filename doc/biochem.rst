@@ -121,9 +121,8 @@ Operating response
    bacterial and abiotic runs. Positive component rates denote injection;
    negative rates denote production. These logs use the summed well
    component fluxes rather than local cell compositions. Closed-well rates
-   are zero; BHP is shown only while the well is active, because saved
-   shut-in well records retain the preceding active-step values. Rates are
-   shown over their actual completed schedule intervals.
+   are zero. Bottom-hole pressure is shown throughout the operating cycle.
+   Rates are shown over their actual completed schedule intervals.
 
 :download:`bacterial well data <_static/examples/bacterial_well_logs.csv>` or
 :download:`abiotic well data <_static/examples/abiotic_well_logs.csv>`.

@@ -257,31 +257,35 @@
     "compositional_2d_gas_maps.pdf": "7a709859bf826eafa10ddbe80f9493de0328211ef1d67dc0eb4140e8e576c59e",
     "compositional_2d_bacterial_maps.png": "9fecb312323355d3663636c3fd355f1e3416207a85b8c8ca4eb2540a25012ba1",
     "compositional_2d_bacterial_maps.pdf": "241465d7c165a653c4c82f7cae0b0713c54d7658eda3d385cb5c5ca2ba492340",
-    "compositional_2d_cycle_logs.png": "3a3cb152968fe7fd462750ea82aea0f1b145111b0f462e3c843e061abd715e10",
-    "compositional_2d_cycle_logs.pdf": "08b8ba1be2c4d63501f6450eded3c4e6ee4a516b3cd69e2f1df366f92e4b5672",
+    "compositional_2d_cycle_logs.png": "05b1210e55a7911ce63058bb62ea693128def04feffb01a79a65f645beaed9d1",
+    "compositional_2d_cycle_logs.pdf": "3ea2d404eeb44546c2b5dfdf8567ffccbf3dc61404ffb60800d1f920fb05438c",
     "compositional_2d_h2_consumption.png": "efb99af854cc8b11b0b231e4386408ad3982eef160597e79ab7ee1bbffb203d3",
     "compositional_2d_h2_consumption.pdf": "fe40fb0bdfaa294574ea3728131731f482fc5e527c9f2d06a04251746825c4e7",
-    "bacterial_well_logs.csv": "9e0fbbad418c874c8f522282791372ba63fadcb443db6a69e26353934b322302",
-    "abiotic_well_logs.csv": "17c36ce3095b9f62a999ae569106bd2a7dd69bb1ab39be175bed1c91a23a9da5",
+    "bacterial_well_logs.csv": "d9d9304da315583741ca0111316df274802d6e22ae5ba461406e85c7a08d60c8",
+    "abiotic_well_logs.csv": "a06a080fbf30116aa36a30706a4c9dc81598ca1aa7b734f3ec611af80251396e",
     "compositional_2d_h2_consumption.csv": "c9bb38c3a333ce28e2e3bf61d8561f8e2c828638d5440cec69c7b22deae20ad1"
   },
   "renderSourceSha256": {
     "h2-biochem/utils/plotfunctions/animateCompositionalBacterial2DThreeReactions.m": "10ecf873efd9f5bfaf2b31c48f9cd6ca37e2895d68041dbcee278f86e0bee53c",
-    "h2-biochem/utils/plotfunctions/biochemistryStoragePresentationData.m": "bb3c364177fbc6d5c0136d14980ac83ac7c467995fe2a90aef5dfb7baa0bad08",
-    "h2-biochem/utils/plotfunctions/plotCompositionalBacterial2DThreeReactions.m": "dd9ca28aa7ac807c98ed31d6e7f147071c6fa7d3b1a590661f4c5f163cc3a405",
+    "h2-biochem/utils/plotfunctions/biochemistryStoragePresentationData.m": "e749cebbfd5c18e0a72cc1aec0b16142bf7d7532e50a772814f4c4d3af3b9f6a",
+    "h2-biochem/utils/plotfunctions/plotCompositionalBacterial2DThreeReactions.m": "ae8b2436ddcf451994c19d6576af16d5bf490f3946c1e6ada26483036f52e047",
     "h2-store/utils/h2simStoragePlotStyle.m": "a72e5f1965f5bc9d776510607371585afd5507566bfa78f8c6ac6c995d9a75c6",
-    "tests/biochemistry/BiochemistryStoragePresentationTest.m": "8a7988183d539909cbafb33515f34e721dd2416c1d159816a6cd498c36b23559",
-    "doc/biochem.rst": "e53179fa2ff79e501de52d40fd456914bab99c1370d6f4ccb2d66b0bcdbaf343",
+    "tests/biochemistry/BiochemistryStoragePresentationTest.m": "fbe24f6a4f308bd09138c4130a155494a5a5cbebcb537a52fa5357d9e22be918",
+    "doc/biochem.rst": "bca32935880893bb06504610c1df02c5d4ffd582c7fec1a59a7a56b89a2fe79b",
     "h2-biochem/examples/2D_experiments/exampleCompositionalBacterial2DThreeReactions.m": "1eae4173b6240ae1f47f777504814a644c0b0976286c628871576f3d75b065fe"
   },
   "historyComparisonToPreviousFigures": {
     "bacterial_well_logs.csv": {
       "rows": 567,
-      "maximumAbsoluteDifference": 4.973799150320701e-14
+      "maximumTimeOrComponentRateDifference": 0.0,
+      "maximumActiveBhpDifference_bar": 0.0,
+      "newlyFiniteShutInBhpRows": 251
     },
     "abiotic_well_logs.csv": {
       "rows": 567,
-      "maximumAbsoluteDifference": 4.973799150320701e-14
+      "maximumTimeOrComponentRateDifference": 0.0,
+      "maximumActiveBhpDifference_bar": 0.0,
+      "newlyFiniteShutInBhpRows": 251
     },
     "compositional_2d_h2_consumption.csv": {
       "rows": 567,
@@ -296,8 +300,9 @@
     "python": "13/13 tests passed.",
     "documentation": "Strict Sphinx build; 31 HTML pages and 2672 local links/images checked. Video, poster and all five figures resolve.",
     "media": "98 GIF frames verified, MP4 fully decoded, poster and all five final figures visually inspected.",
-    "numericalScope": "Existing full-resolution saved runs reused; all 567 reports in each scenario converged. No physical simulation rerun. Regenerated well/consumption data agree with prior figure CSVs within rounding (maximum absolute difference below 1e-13).",
-    "codeAnalyzer": "Three caxis compatibility advisories retained for MATLAB R2021a, plus an axes-creation performance advisory for per-case figures."
+    "numericalScope": "Existing 567-step, 10116-cell bacterial and abiotic saved runs reused. No flow rerun or state changes. Only shut-in BHP values added to exported well logs; time, component rates, active BHP and reaction histories unchanged.",
+    "codeAnalyzer": "Three caxis compatibility advisories retained for MATLAB R2021a, plus an axes-creation performance advisory for per-case figures.",
+    "matlabShutInBhp": "All focused presentation/example tests passed. Every shut-in sample in both full-resolution results checked using MRST phase-flux evaluation; all BHP samples finite, active BHP and component-rate histories unchanged."
   },
   "branding": {
     "signature": {
@@ -367,5 +372,59 @@
       "fontWidthRatio": 0.0065
     },
     "scientificDataChanged": false
+  },
+  "pressureHistory": {
+    "active": "Saved wellSols BHP, unchanged.",
+    "shutIn": "Completion-pressure weighted local zero-net-reservoir-volume balance. Weights are WI times the sum of saved-state phase mobilities; closed connections have zero weight.",
+    "scope": "Eight completions, zero dZ and cdp, crossflow enabled. Unsupported depth/pressure corrections, disabled crossflow, invalid mobilities and zero conductance raise errors.",
+    "equation": "sum_i WI_i * sum_phase(mobility_i_phase) * (BHP - p_i) = 0",
+    "validationEquation": "MRST calculatePhaseRate, summing all phases and completions.",
+    "limitation": "Local hydraulic diagnostic, not a coupled zero-surface-rate simulation. Potential completion crossflow is not fed back into saved reservoir states; reported closed-well component rates remain zero.",
+    "simulationRerun": false,
+    "rawSavedBhpModified": false,
+    "scenarios": {
+      "bacterial": {
+        "shutInSamples": 251,
+        "completionCells": [
+          5112,
+          5113,
+          5114,
+          5115,
+          5116,
+          5117,
+          5118,
+          5119
+        ],
+        "minimumTotalConductance_m3_Pa_s": 2.5108726389877833e-08,
+        "pressureRange_bar": [
+          40.41488398444633,
+          45.82582802935386
+        ],
+        "maximumAbsoluteNetVolumeRate_m3_day": 5.504465769935675e-12,
+        "maximumActiveBhpDifference_bar": 4.973799150320701e-14,
+        "maximumComponentRateDifference_kg_day": 4.973799150320701e-14
+      },
+      "abiotic": {
+        "shutInSamples": 251,
+        "completionCells": [
+          5112,
+          5113,
+          5114,
+          5115,
+          5116,
+          5117,
+          5118,
+          5119
+        ],
+        "minimumTotalConductance_m3_Pa_s": 2.507259964284694e-08,
+        "pressureRange_bar": [
+          40.62337932742747,
+          46.9979948273705
+        ],
+        "maximumAbsoluteNetVolumeRate_m3_day": 5.776238862290466e-12,
+        "maximumActiveBhpDifference_bar": 4.973799150320701e-14,
+        "maximumComponentRateDifference_kg_day": 4.973799150320701e-14
+      }
+    }
   }
 }
