@@ -305,8 +305,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "f26a8a58cf2ba94c5372f8800e5d50f0b81d26686e4dd0a254ec4cd3de5a11ce",
-      "outputSha256": "18ecb09a671280bf042809d959fa9a5610baf945d322946073995b1a94e9da84"
+      "sourceSha256": "33635c0a4f1a2e2a7ac19a4a66fb5eca21023d954c49863d938c4391c8ed37c2",
+      "outputSha256": "fce52833741c5bde873376b56e221e7e7b4103bc65a8aaef36ad2908dbeb1800"
     },
     "examples/multirate_full_cycle_chemistry_maps.pdf": {
       "pages": [
@@ -325,8 +325,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "b9e10cb8a90c4fc633a2290eed9476e6995acd07ae6adc8060fae14beb443262",
-      "outputSha256": "65e7e25be8e44ac3a0dc9480f3a33498bed24d950112ecaf5793a06c276f0c1f"
+      "sourceSha256": "d71632bac6b77685d9721beb763e8464e867bdf171007e1d3cb22346968292e3",
+      "outputSha256": "002c548be2b6fbfbdb82f6046f3f957a2a2b1a3219381cc7baad7b930d378208"
     },
     "examples/multirate_full_cycle_loss.pdf": {
       "pages": [
@@ -345,8 +345,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "d0c772abfb87ed43c85b12f48675f335f82ac60f8a7e155f4f62bacabab31a12",
-      "outputSha256": "6f81423a891f19e832577968619ab7542df32821757b4c2b35948377d901b2bc"
+      "sourceSha256": "6cf2791e575085ee524dddea3385a6b34e82d47914d5cce24e1894918698924e",
+      "outputSha256": "7046892d7ab380c10789f69a7794d5b24914fac772d4b5fb98c301c82e26d855"
     },
     "examples/phreeqc_2d_chemistry.pdf": {
       "pages": [
@@ -425,8 +425,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "d61441969ef0127163f8284c9be15747975e18d488f4523e304ae8683a846abc",
-      "outputSha256": "a9b78b3e3b112d3e0c1ce676148f7575f9314ea54e700ca612a2eff5da48dc47"
+      "sourceSha256": "d10c969c24923412869d17bc598e35dde38122cf12a7dc48d9332d02c95f64a0",
+      "outputSha256": "cbcd9f2e18cef47dc6b6e72122059414c53d43967588c3cfc83684137d283cd4"
     },
     "examples/phreeqc_reaction_loss_full_cycle.pdf": {
       "pages": [
@@ -445,8 +445,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "111610769c696a680674368e23887cb7d3cfd47f76b3ac6a5c82bf33bac3b206",
-      "outputSha256": "e9a9f9d615a19157293f87ca3e9f47cb505630575d7abd26b76c787da9d186c8"
+      "sourceSha256": "18e65f8ee78c8c28eea9444b3c97ec31bb82f6b50a6e4e6c7ae4e70f5e437286",
+      "outputSha256": "3044a8a6230927a37c9824f03e932106be0ccde7d3ab66b18616a739afe7b884"
     },
     "examples/phreeqc_validation_full_cycle.pdf": {
       "pages": [
@@ -465,8 +465,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "9cc26b9ca7c5746fa2b5de482dcb531f40b56bd610a0bf17aa24b83f3dc80e4b",
-      "outputSha256": "60201ad71ef7c1e2bc0b99e475cfe5d7f90c29ef869c488f03dfe5143569ae20"
+      "sourceSha256": "1d64efcf0775f485bc50f765658ff90ca76264110289a3c0795ac14933db967b",
+      "outputSha256": "2f0f0309a87f067dd7c4beb669991535145ebe92ebf8cb166fb1325ca893fa3f"
     },
     "examples/anticline_geology.png": {
       "sourceSize": [
@@ -704,9 +704,9 @@
       ],
       "marginHeight": 50,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "402495dbc087da9314834f9911ca1f47934e324361333709e2384d571494811e",
-      "sourceSha256": "c55a981a2bfc9a50f5246f18fcbaaabe6c32f8ab1724f4fdc6c0872249b62587",
-      "outputSha256": "e1efeaa5994a78a5743689c3aee63462aa01e973149db74cf37470cd1d18eb8c"
+      "originalRegionRgbaSha256": "b3928d3c452938726d933a23ac895af6fda349497573a98a93887f52df0405a8",
+      "sourceSha256": "3448b62ee70076895404a701070bf428b0da818fbe6119bf812b817954171709",
+      "outputSha256": "973b224289b145b7c8e79ce77d9e22c2eb111bb4998f8390039280bd5536f862"
     },
     "examples/multirate_full_cycle_chemistry_maps.png": {
       "sourceSize": [
@@ -719,9 +719,9 @@
       ],
       "marginHeight": 50,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "94a75a2544f3073f4b88ef0e578a2c5f7c53642e7e47691587a08ce9428fdf7e",
-      "sourceSha256": "c6217af4adb196e8223e9b1aa0b0ff33647b9a74806d379021f0466aee4875fd",
-      "outputSha256": "a64f0f3236cc935688f3187853f123f5fec002d3f8d5c39d0c0f2953c5843c9c"
+      "originalRegionRgbaSha256": "0799503539e8d4f3051f48d6d537c21e0ba1ff097173aabb0801eb0e745513f2",
+      "sourceSha256": "4397c3eec3e2a703543ab978583694c907bc2a35c9a7b1b436998be356df38ce",
+      "outputSha256": "3c7d9c2043934390b59413c8dbd21c124c751512ef2c3902e8cd0101e51543b2"
     },
     "examples/multirate_full_cycle_loss.png": {
       "sourceSize": [
@@ -734,9 +734,9 @@
       ],
       "marginHeight": 50,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "ad70a6958c744e99133d1fe8647f9512da51e9dfcbbf83ea4166e95cf14c8ef6",
-      "sourceSha256": "469fe0a84e92e8149f8409ff0324d70bdebd4acecd2f7acc778d35c165e9a658",
-      "outputSha256": "27958663043e543907864234a091783ca57e53fb317e9f6bee43929b8aed44fb"
+      "originalRegionRgbaSha256": "e52ffd9a2fe9a65063b77dcdd32026ad6b35d6e21942a2a7ad316863bceea488",
+      "sourceSha256": "eb2932a421454981417a946282cd23e6a096027308f75d6557a0b99d56fa72cd",
+      "outputSha256": "50dc4438abb0419a03369dc458dbefcc0e5baf07c579bf4a389cced590de1e0b"
     },
     "examples/multirate_profiles.png": {
       "sourceSize": [
@@ -824,9 +824,9 @@
       ],
       "marginHeight": 47,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "fef01b6c2b1fc2a8c053fa6863a2cd2e1b00f947d115dbc0291313921d2ce07e",
-      "sourceSha256": "8b484dbf75a4a50e6d5c5be5bbde7b70cceec4994fdb7b4660bb5438dcf77358",
-      "outputSha256": "75c54cf1b85f807f56ba6e6f25cb50f922159d5b23aecd37de19417528218ea3"
+      "originalRegionRgbaSha256": "1b4854f88780ecf119410281e460ccd6432dd2e0172213a5258fa59ef8000d83",
+      "sourceSha256": "cc4d07a16a776a82e3fb761bab121126a9f9a0ffa8f03ee4e7e7b0fa8a48c138",
+      "outputSha256": "0367a2b07184f82b3623e2341335124f5530721f9d37e1a64fc22ce86420d5f2"
     },
     "examples/phreeqc_reaction_loss_full_cycle.png": {
       "sourceSize": [
@@ -839,9 +839,9 @@
       ],
       "marginHeight": 51,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "18b38c391eca13c9b90caf8100c92be00bc093ebc754c4926da89263e198a7d3",
-      "sourceSha256": "bb156e4a3b744df2a348d0e7daae16525f93cda5a07c8641b57f0eeaf78ac49a",
-      "outputSha256": "da550c450da2b78f429d368c25cd8e31184628da23fa128382f96476c7f3f9b8"
+      "originalRegionRgbaSha256": "541c42f4facba07dd5bbfdd75f99932fcb50805be103dbc18df816943fa12d00",
+      "sourceSha256": "d30e33472531f0855bf64124643cdb207297cf2e7db300e43aab6d7e388e8bb9",
+      "outputSha256": "a33311a6cb2d17a6938b669d8d328118604433b18e29610aa59f8e2a889ee658"
     },
     "examples/phreeqc_validation_full_cycle.png": {
       "sourceSize": [
@@ -854,9 +854,9 @@
       ],
       "marginHeight": 53,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "f1da89d97aca0aa244e621225d2daa0e730c93d7319aa8bb7998bec5e761a7ee",
-      "sourceSha256": "81ccaf89493782182af6937f886d24881f496abb84ec534e6ecae6549ce74ee5",
-      "outputSha256": "575326f53bac2e1af81fc3780dcd643d4a19086db9440389b6615ee17b51a431"
+      "originalRegionRgbaSha256": "c33adaf8a361a61bd5c9dd68bd0e19ed5f76a04171db7d729f138a936a9f2b46",
+      "sourceSha256": "c326400ee5e0a20a63e87b5adbe99d5b9d2fbf8bb8f4c260304986e3ad3933c0",
+      "outputSha256": "607b21109f48cc9f2e59f9343e2a28639f170fd9a0b48c451fb29453ce944522"
     },
     "examples/salting_out.png": {
       "sourceSize": [

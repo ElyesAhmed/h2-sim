@@ -263,16 +263,20 @@
     }
   ],
   "validation1DSource": {
-    "file": "full_cycle_validation_results.mat",
-    "sha256": "143e954e37ca806b41b7cf0d062dc125bca7356299b345ed8a45d5f5867be240"
+    "file": "corrected_validation_diagnostics.mat",
+    "sha256": "a77c0a56149fad1aba381d7b9ba11550ca3f86e280b501ff7c7e88e21bc1d241",
+    "source_checkpoints": {
+      "validation_cp.mat": "61c5d00d93dcba32f37ab0ab4f039c3d868f14d56fc2078c4c86ffa36c82210c",
+      "replay_sequential_withdrawal_days200_250_20261111.mat": "4c1153e0875303e10b6e90f0af31f16c8938d0b303fc4bb5552eed9748da674a"
+    }
   },
   "multirateInputSha256": {
     "README.md": "1ec858d7208870fe7e07e8574f9336a661eac88a0da504a4ed877f6398abf490",
-    "compositional_chemistry.csv": "08426dddd1cd0dabf405b04c4bb875f3ca3d5dc80b59f6bc9bae240cf9bd32c3",
-    "compositional_history.csv": "32cec6427169fe05d9e96457ac614eb2e82408334acc8b9a69a8d5089857807f",
+    "compositional_chemistry.csv": "59d793f388033137e9fba2a8542d61ea2366958e4bb454df5e1543eb7fb937eb",
+    "compositional_history.csv": "5e97fcba44456082205d56676ab4d58f1ae175b1bedbd0f82afeb0a26649e2af",
     "multirate_chemistry.csv": "806c5a85ca7e52f633ab3756ec3f57ce92e3b7de77d45a903c84262de0d22ded",
     "multirate_history.csv": "3d67b950790a7737d3d1792630af49a124430892f094e558dce428a42484a4cc",
-    "provenance.json": "68209d24d94bbc328a99f1d3a78d77a4cfbecfbe66efe4751ee55052a113234e"
+    "provenance.json": "2dd51f800f4b8df8d7818ba3fac7bd7af3458af5eb744d8a8ecd5f5d001a8303"
   },
   "renderSourceSha256": {
     "tools/storage_gallery_style.py": "323ed730b1bde91bfaab570aeb1077acce990dc8110e48f644e98042753eacb7",
@@ -281,7 +285,7 @@
     "tools/tests/test_storage_gallery_style.py": "0e361161e057ea746360f69113df4439ba2956a7ba0135d88f731f696ed2e636",
     "h2-store/utils/h2simStoragePlotStyle.m": "a72e5f1965f5bc9d776510607371585afd5507566bfa78f8c6ac6c995d9a75c6",
     "h2-biochem/utils/plotfunctions/plotCompositionalPhreeqcValidation.m": "056bdc32be6eed2df9a94596fb28473089ba31d69744ad8ec580c2c200b2a4b3",
-    "doc/phreeqc.rst": "fd35582d34f45d4ea5aedd230187d345687fbdfd2d693af18caeed8b1ad97a90",
+    "doc/phreeqc.rst": "2286afd4c33be8cc5cbf36d5710c52696ad5594ff1d535c84ed7f8552d0275aa",
     "doc/phreeqc_2d.rst": "84fb1b5902edcb7a88a45e3269729d9bc839bb16fab83966eb0c58f3f90a84f4",
     "doc/model-presentation.md": "454b8d0630ce68ce64948192108baf6c0b13a2b7b71d6be0784548b9f93ee9da"
   },
@@ -289,25 +293,25 @@
     "phreeqc_storage.gif": "da93c232762c22068e33db13fe5da4e9636e05d144b99b4016cf85d0eef861fa",
     "phreeqc_storage.mp4": "b42edbb1c8f007202a8103ff3713afd901c05c054f73fa47d6f6f1b493d17c8a",
     "phreeqc_storage.png": "4481089fb1b47b40c83a2e1a3da1ca9f0d29d829be9ad9fb7843be527f563bb0",
-    "phreeqc_validation_full_cycle.png": "575326f53bac2e1af81fc3780dcd643d4a19086db9440389b6615ee17b51a431",
-    "phreeqc_validation_full_cycle.pdf": "60201ad71ef7c1e2bc0b99e475cfe5d7f90c29ef869c488f03dfe5143569ae20",
-    "phreeqc_geochemistry_full_cycle.png": "75c54cf1b85f807f56ba6e6f25cb50f922159d5b23aecd37de19417528218ea3",
-    "phreeqc_geochemistry_full_cycle.pdf": "a9b78b3e3b112d3e0c1ce676148f7575f9314ea54e700ca612a2eff5da48dc47",
-    "phreeqc_reaction_loss_full_cycle.png": "da550c450da2b78f429d368c25cd8e31184628da23fa128382f96476c7f3f9b8",
-    "phreeqc_reaction_loss_full_cycle.pdf": "e9a9f9d615a19157293f87ca3e9f47cb505630575d7abd26b76c787da9d186c8",
+    "phreeqc_validation_full_cycle.png": "607b21109f48cc9f2e59f9343e2a28639f170fd9a0b48c451fb29453ce944522",
+    "phreeqc_validation_full_cycle.pdf": "2f0f0309a87f067dd7c4beb669991535145ebe92ebf8cb166fb1325ca893fa3f",
+    "phreeqc_geochemistry_full_cycle.png": "0367a2b07184f82b3623e2341335124f5530721f9d37e1a64fc22ce86420d5f2",
+    "phreeqc_geochemistry_full_cycle.pdf": "cbcd9f2e18cef47dc6b6e72122059414c53d43967588c3cfc83684137d283cd4",
+    "phreeqc_reaction_loss_full_cycle.png": "a33311a6cb2d17a6938b669d8d328118604433b18e29610aa59f8e2a889ee658",
+    "phreeqc_reaction_loss_full_cycle.pdf": "3044a8a6230927a37c9824f03e932106be0ccde7d3ab66b18616a739afe7b884",
     "phreeqc_2d_setup.png": "835f7d808579127ddffa80c8f8e85c345228138013da6159c301462dd32311bb",
     "phreeqc_2d_setup.pdf": "6de2904c24f8bbe87f349829054477c4476a6720c8edc1eae1b1e39d0decf7e9",
     "phreeqc_2d_loss.png": "c562005979a1301afd1866983213c959b779013a58a3f4bb1919576dc8b3dcc4",
     "phreeqc_2d_loss.pdf": "c2b901205b76095fbd36bc30d4b394ac449c05dfec1f303f6e4190f4e1ef92cd",
     "phreeqc_2d_chemistry.png": "ae79af8a74220438dde2712988f855b89ba4b3d097ed398ae1266907617ff01e",
     "phreeqc_2d_chemistry.pdf": "e3e0fed7d19efa156a3fcf5570800a8580b5b0930e01e0ab21d293afc3c30d76",
-    "multirate_full_cycle_loss.png": "27958663043e543907864234a091783ca57e53fb317e9f6bee43929b8aed44fb",
-    "multirate_full_cycle_loss.pdf": "6f81423a891f19e832577968619ab7542df32821757b4c2b35948377d901b2bc",
-    "multirate_full_cycle_chemistry_history.png": "e1efeaa5994a78a5743689c3aee63462aa01e973149db74cf37470cd1d18eb8c",
-    "multirate_full_cycle_chemistry_history.pdf": "18ecb09a671280bf042809d959fa9a5610baf945d322946073995b1a94e9da84",
-    "multirate_full_cycle_chemistry_maps.png": "a64f0f3236cc935688f3187853f123f5fec002d3f8d5c39d0c0f2953c5843c9c",
-    "multirate_full_cycle_chemistry_maps.pdf": "65e7e25be8e44ac3a0dc9480f3a33498bed24d950112ecaf5793a06c276f0c1f",
-    "phreeqc_loss_history.csv": "211ff1517d15dd8383d53b2d86b80a841ceae5ac10d73caa11bc0ac58e271e0c"
+    "multirate_full_cycle_loss.png": "50dc4438abb0419a03369dc458dbefcc0e5baf07c579bf4a389cced590de1e0b",
+    "multirate_full_cycle_loss.pdf": "7046892d7ab380c10789f69a7794d5b24914fac772d4b5fb98c301c82e26d855",
+    "multirate_full_cycle_chemistry_history.png": "973b224289b145b7c8e79ce77d9e22c2eb111bb4998f8390039280bd5536f862",
+    "multirate_full_cycle_chemistry_history.pdf": "fce52833741c5bde873376b56e221e7e7b4103bc65a8aaef36ad2908dbeb1800",
+    "multirate_full_cycle_chemistry_maps.png": "3c7d9c2043934390b59413c8dbd21c124c751512ef2c3902e8cd0101e51543b2",
+    "multirate_full_cycle_chemistry_maps.pdf": "002c548be2b6fbfbdb82f6046f3f957a2a2b1a3219381cc7baad7b930d378208",
+    "phreeqc_loss_history.csv": "077a43b1d68ace6aaf6be4c61e0430917ee160e6a44a5a93227a31f1f1615589"
   },
   "explorerAssetSha256": {
     "frames.json.gz": "76c5ce8b3c3726737674f4fb3eaeda3d9a7d32e178f4f29d131dab3cf2ecbabd",
@@ -324,7 +328,7 @@
     "pythonTests": "20/20 passed, including 7 new sampling, palette and diagnostic contracts.",
     "history2D": "738 rows preserved byte-for-byte; source hashes and final consumption/audit metrics unchanged.",
     "history1DRows": 125,
-    "history1DMaximumAbsoluteDifference": 5.684341886080802e-14,
+    "history1DMaximumAbsoluteDifference": 4.973799150320701e-14,
     "media": "GIF frame count verified, full MP4 decoded, PNG/PDF files validated, poster and all displayed figures visually inspected.",
     "scope": "Historical saved outputs redrawn. Chemistry, timestep/grid convergence and elemental conservation were not revalidated; reported audit limitations remain.",
     "documentation": "Strict Sphinx build passed; 31 HTML pages and all 2700 local links/images checked. Both video/poster pairs and the existing explorer resolve."

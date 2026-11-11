@@ -49,9 +49,10 @@ Talks & software milestones
       Elyes Ahmed presented at *Enabling large scale hydrogen storage in
       subsurface porous reservoirs*, Porto, Portugal.
 
-      +++
-      `Workshop <https://eage.eventsair.com/ecmor-2026/workshop>`__ ·
-      `Presentation record <https://nva.sikt.no/registration/01a0c817f343-b6c2d580-3c8e-4426-a760-a382ff72d27b>`__
+      .. card-footer::
+
+         `Workshop <https://eage.eventsair.com/ecmor-2026/workshop>`__ ·
+         `Presentation record <https://nva.sikt.no/registration/01a0c817f343-b6c2d580-3c8e-4426-a760-a382ff72d27b>`__
 
    .. grid-item-card:: MRST 2025b · h2-biochem released
 
@@ -59,8 +60,9 @@ Talks & software milestones
       growth and hydrogen-consuming reactions, alongside Søreide–Whitson
       phase behavior and bio-clogging capabilities.
 
-      +++
-      `Official release notes <https://www.sintef.no/projectweb/mrst/download/release-notes-for-mrst-2025b/>`__ · :doc:`biochem`
+      .. card-footer::
+
+         `Official release notes <https://www.sintef.no/projectweb/mrst/download/release-notes-for-mrst-2025b/>`__ · :doc:`biochem`
 
    .. grid-item-card:: MRST 2025a · h2store released
 
@@ -69,7 +71,8 @@ Talks & software milestones
       from ePC-SAFT and Henry–Setchenow correlations. This site uses the
       module name **h2-store**.
 
-      +++
-      `Official release notes <https://www.sintef.no/projectweb/mrst/download/release-notes-for-mrst-2025a/>`__ · :doc:`store`
+      .. card-footer::
+
+         `Official release notes <https://www.sintef.no/projectweb/mrst/download/release-notes-for-mrst-2025a/>`__ · :doc:`store`
 
 These release milestones refer to inclusion in official MRST releases.

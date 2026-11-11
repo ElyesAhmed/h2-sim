@@ -21,16 +21,17 @@
   "normalization": "Cumulative reaction-source H2 consumption / total prescribed H2 injection, nominal ideal gas at 101325 Pa and 288.15 K",
   "workflows": {
     "compositional": {
-      "source_checkpoint": "validation_cp.mat",
-      "source_sha256": "61c5d00d93dcba32f37ab0ab4f039c3d868f14d56fc2078c4c86ffa36c82210c",
       "injected_moles": 13284.902981457584,
-      "final_loss_percent": 38.85737804726577,
-      "runtime_seconds": 881.9819172,
+      "final_loss_percent": 40.17999183920286,
       "element_audit_available": true,
-      "element_audit_failures": 87,
+      "element_audit_failures": 98,
       "element_audit_max_absolute_residual_mol": 3.613308581407182e-05,
       "eos_audit_available": false,
-      "eos_audit_failures": 0
+      "eos_audit_failures": 0,
+      "source_checkpoints": {
+        "validation_cp.mat": "61c5d00d93dcba32f37ab0ab4f039c3d868f14d56fc2078c4c86ffa36c82210c",
+        "replay_sequential_withdrawal_days200_250_20261111.mat": "4c1153e0875303e10b6e90f0af31f16c8938d0b303fc4bb5552eed9748da674a"
+      }
     },
     "multirate": {
       "source_checkpoint": "validation_mr.mat",
