@@ -204,6 +204,7 @@ function [model, schedule, state0] = setupH2simCase(opt)
         'phreeqcTimestepCoupling', true, ...
         'phreeqcBackend',          'sequential-compositional-phreeqc', ...
         'phreeqcDatabaseFile',     which('h2_biogeochemistry.dat'));
+    model.productionNonlinearTolerance = 1e-8;
 end
 
 function schedule = selectSchedule(schedule, totalDays)

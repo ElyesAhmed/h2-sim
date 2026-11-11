@@ -134,14 +134,14 @@ and unrecovered gas are excluded.
    * - Compositional PHREEQC
      - 5.577
      - 34.862
-     - 38.857
+     - 40.180
    * - Reference
      - 5.303
      - 31.728
      - 37.704
 
 Conversion continues during storage without fresh injection. The final
-compositional result exceeds the reference by 1.153 percentage points.
+compositional result exceeds the reference by 2.476 percentage points.
 These results retain the measured discrepancy; they do not demonstrate
 splitting or spatial convergence. H2sim tracks acetate as an EOS component,
 whereas the reference uses nitrogen and separate aqueous organic-carbon
@@ -162,7 +162,7 @@ Geochemical evolution
 
 The pH and DIC fronts show how reactive aqueous chemistry evolves throughout
 injection, storage, and production. Similar bulk consumption does not imply
-identical spatial chemistry. The compositional run records 87 cell-step
+identical spatial chemistry. The compositional run records 98 cell-step
 element-audit failures, with a maximum absolute residual of 3.61 × 10⁻⁵ mol.
 The reference does not expose the same elemental audit. These limitations
 remain part of the comparison.
@@ -180,7 +180,7 @@ Consumption by reaction
 
 :download:`validation data <_static/examples/phreeqc_loss_history.csv>`.
 
-At day 250, the compositional contributions are 33.357% (MET), 5.092% (ACE),
+At day 250, the compositional contributions are 34.456% (MET), 5.316% (ACE),
 and 0.408% (SRB), compared with 32.439%, 4.879%, and 0.386% in the reference.
 All plots use the full 0–250-day interval. Setups and accepted outputs remain
 saved as packed simulations; the plotting function also exports the loss
@@ -318,7 +318,7 @@ The separate ``simulateSequentialH2BiochemPhreeqc`` runner is an outer Picard
 scheme, distinct from this coarse-flow multirate example.
 
 The saved 20-cell comparison covers all 250 days of injection, storage, and
-production. Final microbial consumption is 46.41% for multirate and 38.86%
+production. Final microbial consumption is 46.41% for multirate and 40.18%
 for compositional PHREEQC, normalized by total prescribed H₂ injection.
 The workflows differ in kinetic ownership, biomass representation, and
 splitting; this is not a convergence test of reaction substepping alone.

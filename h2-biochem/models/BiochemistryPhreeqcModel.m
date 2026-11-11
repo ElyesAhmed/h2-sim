@@ -111,6 +111,7 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
         phreeqcDatabaseFile = ''           % Absolute path to h2_biogeochemistry.dat
         phreeqcComProgId = 'IPhreeqcCOM.Object'  % Registered IPhreeqcCOM server ProgID
         phreeqcCouplingOptions = struct()  % Backend-specific coupling parameters (kinetics, brine, tolerances)
+        productionNonlinearTolerance = []  % Optional tighter residual tolerance during withdrawal
         % Set only by simulateSequentialH2BiochemPhreeqc. Keeping the
         % automatic post-step hook disabled prevents an accidental,
         % lagged one-pass chemistry update for this backend.
@@ -768,7 +769,14 @@ classdef BiochemistryPhreeqcModel < BiochemistryModel
 
         % -----------------------------------------------------------------%
         function [v_eqs, tolerances, names] = getConvergenceValues(model, problem, varargin)
-            % Get values for convergence check with CNV-style scaling
+            forces = problem.drivingForces;
+            if ~isempty(model.productionNonlinearTolerance) && isfield(forces, 'W') && ...
+                    ~isempty(forces.W) && any([forces.W.sign] < 0)
+                % A raw component residual can otherwise exceed a producer's
+                % entire component rate in a small benchmark column.
+                model.nonlinearTolerance = min(model.nonlinearTolerance, ...
+                    model.productionNonlinearTolerance);
+            end
             [v_eqs, tolerances, names] = getConvergenceValues@ReservoirModel(model, problem, varargin{:});
 
             if model.bacteriamodel && ~model.isSequentialCompositionalPhreeqcBackend()
