@@ -91,8 +91,9 @@ Start small. Build understanding.
       Required dependencies, optional PHREEQC, and serial execution without
       Parallel Computing Toolbox.
 
-      +++
-      Check dependencies →
+      .. card-footer::
+
+         Check dependencies →
 
    .. grid-item-card:: Guided MATLAB notebooks
       :link: examples
@@ -100,8 +101,9 @@ Start small. Build understanding.
 
       A 2D aquifer cycle, microbial transport, thermodynamics, and PHREEQC validation.
 
-      +++
-      Browse examples →
+      .. card-footer::
+
+         Browse examples →
 
 .. admonition:: A serial path for every selected example
    :class: platform-note
@@ -133,8 +135,9 @@ Research & community
 
       Papers, conference talks, and posters behind the simulation workflows.
 
-      +++
-      Explore the research →
+      .. card-footer::
+
+         Explore the research →
 
    .. grid-item-card:: Coming up · HydroGEMM 2026
       :link: events
@@ -144,8 +147,9 @@ Research & community
 
       Elyes Ahmed’s invited talk on MRST, PHREEQC, and reactive hydrogen storage.
 
-      +++
-      Talks, releases & events →
+      .. card-footer::
+
+         Talks, releases & events →
 
 
 Talk with the H2sim community
