@@ -22,17 +22,17 @@
     {
       "workflow": "phreeqc",
       "file": "field_mineral2d_a_c1_g0.5.mat",
-      "sha256": "db9f0fde1eb21cc455976ee086183820af9d8ec9b52ac3f1ded6a61af56127b1"
+      "sha256": "ac22efd68c74ac286a38a3e7f931312b89a44a187f22662f1b2ada2c58db37c6"
     },
     {
       "workflow": "phreeqc",
       "file": "field_mineral2d_a_cycle2_cpr.mat",
-      "sha256": "6f4eff4bdd38f6e905bcf8fe5e82c83ade8818536f0591a553e687e1bd4c37fd"
+      "sha256": "9340cd35f748b0de7d0cd1552a037883f0cd12b70b58ea01599b9dae37936db5"
     },
     {
       "workflow": "phreeqc",
       "file": "field_mineral2d_a_cycle3_cpr.mat",
-      "sha256": "943fe1a693cf6d0ffe15d75517da8eaea861659a28b5b5992adb8f28811d214a"
+      "sha256": "51da0016a5f315abce8e6ae088cceaa13fd799c8c80ddaba0b27da5a0dc73e56"
     }
   ],
   "loss_normalization": "Cumulative consumed H2 divided by cumulative prescribed H2 injection at each time.",
@@ -47,11 +47,19 @@
       "element_audit_max_mol": 0.0
     },
     "phreeqc": {
-      "loss_percent": 10.42560778239683,
-      "consumed_kmol": 6.199420280987409,
+      "loss_percent": 9.947138371779992,
+      "consumed_kmol": 5.914906127959472,
       "element_audit_available": true,
-      "element_audit_failures": 62,
-      "element_audit_max_mol": 2.6799334023053234e-06
+      "element_audit_failures": 76,
+      "element_audit_max_mol": 2.72874954987401e-06,
+      "hydrogen_balance_kmol": {
+        "initial": 0.0354660034758,
+        "inward": 59.47864519481,
+        "outward": 21.10830138918,
+        "remaining": 32.5400721584,
+        "consumed": 5.91490612796,
+        "residual": -0.0491684772581
+      }
     }
   },
   "animation_source_state_indices_zero_based": [

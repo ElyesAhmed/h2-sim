@@ -365,8 +365,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "e6812bdaa04b428db5fcb7b4b2cd96a1ecf0f6f8be6750cc360caab1fb0bcb63",
-      "outputSha256": "e3e0fed7d19efa156a3fcf5570800a8580b5b0930e01e0ab21d293afc3c30d76"
+      "sourceSha256": "3163927bb473455dc4c090c923584ebff0dc3b9cbab3890ad468669e2fc3fd7a",
+      "outputSha256": "05538a9afbf861e0f5608f252e518df6366b8f175942c0419bdd394ed480b898"
     },
     "examples/phreeqc_2d_loss.pdf": {
       "pages": [
@@ -385,8 +385,8 @@
       "vectorContentPreserved": true,
       "originalPdfCoordinatesPreserved": true,
       "pdfHeader": "%PDF-1.4",
-      "sourceSha256": "5eeef5b9e35ebe492432b7010b9d87d05f16171ed248e6dfb6dfab8d4ddfe2bc",
-      "outputSha256": "c2b901205b76095fbd36bc30d4b394ac449c05dfec1f303f6e4190f4e1ef92cd"
+      "sourceSha256": "f3674ad67510463cde750eb1a2781acfa254c6c55ab642e6fe1547c9439fd3b4",
+      "outputSha256": "a59b0ae298fbbfef970df0562892b2b14af071b47ce98fa0a936f074f75b040f"
     },
     "examples/phreeqc_2d_setup.pdf": {
       "pages": [
@@ -779,9 +779,9 @@
       ],
       "marginHeight": 58,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "6cc03b0c118ebe9161442daf0c2a61d73a43b53974ae2be6ef2c6393e6943d18",
-      "sourceSha256": "b6ee5fed29a1086db47e78eb7c126edf7788371da8ae53d323a4b5fbdec59234",
-      "outputSha256": "ae79af8a74220438dde2712988f855b89ba4b3d097ed398ae1266907617ff01e"
+      "originalRegionRgbaSha256": "4f7dda849502359cd9590ad7cfb9a93b30cbd7bae5f8e74dfbb63086fbf4a8e3",
+      "sourceSha256": "7156881895a1c8613b365d335d1e4ea479dea9bd71edf3965152e3da130f0548",
+      "outputSha256": "9cc4f4c7071c6500f45adcf847d09628c842006847a22ed46811519fe6edfa65"
     },
     "examples/phreeqc_2d_loss.png": {
       "sourceSize": [
@@ -794,9 +794,9 @@
       ],
       "marginHeight": 53,
       "originalPixelsPreserved": true,
-      "originalRegionRgbaSha256": "f7653e2aed57d895fd3fa7da6326b8634f41ea96b32042992091591da12d434e",
-      "sourceSha256": "ee8cf44bd04b268162dfaff9e373097ef61afe35f4617915caf076f52e74ece8",
-      "outputSha256": "c562005979a1301afd1866983213c959b779013a58a3f4bb1919576dc8b3dcc4"
+      "originalRegionRgbaSha256": "50ab68f6f942686ab99c971cc3d07348ccb26d98c0326e8b9f4fd6fcdcc48a0a",
+      "sourceSha256": "2e39110380e34d2b4163cf9db6da5e38bce33c43bbf7e42aad9fd7c7e6048eb9",
+      "outputSha256": "fd277671a6e30480377e14d06ab9869aaa284ae3598dceaa9d95a9f3deb1d43a"
     },
     "examples/phreeqc_2d_setup.png": {
       "sourceSize": [

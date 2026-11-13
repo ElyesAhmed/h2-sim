@@ -142,8 +142,8 @@
         920
       ],
       "scientificPixelsPreservedExactly": true,
-      "sourceSha256": "6baf6836a62cab548728df3bddf1acd7a9fc0c542b0b0a52e05a7c1277ea8c46",
-      "outputSha256": "4481089fb1b47b40c83a2e1a3da1ca9f0d29d829be9ad9fb7843be527f563bb0"
+      "sourceSha256": "c939faa090ac2f323fbfd96efb76545d916554e0629b0485262a3fc4d0738475",
+      "outputSha256": "75bf9210d1cdb83e2d28d44ae3d395f4826b41af5812473ff172e7aeaa6608b1"
     },
     "phreeqc_storage.gif": {
       "sourceSize": [
@@ -157,8 +157,8 @@
       "frames": 98,
       "durationMs": 16660,
       "playbackTimingPreserved": true,
-      "sourceSha256": "00259817f9a4f4a9742ba48ee6ae16dad04e867088b570f7e203732820102843",
-      "outputSha256": "da93c232762c22068e33db13fe5da4e9636e05d144b99b4016cf85d0eef861fa"
+      "sourceSha256": "2d91a5f32fa5b44e6537168c27a109620fdb18fae9c55faaa1b5d2a8ea8b722d",
+      "outputSha256": "05adb9b0c3a858ec5d776b9932cc1eaea4545d11d50752dee3e7b0399b536a6e"
     },
     "phreeqc_storage.mp4": {
       "sourceSize": [
@@ -173,8 +173,8 @@
       "fps": 6.0,
       "durationSeconds": 16.333333333333332,
       "playbackTimingPreserved": true,
-      "sourceSha256": "de6ba9cd1e0148e5d7f8ca46e6408b9f01f7e475a94bdf598fd03bdb253176ed",
-      "outputSha256": "b42edbb1c8f007202a8103ff3713afd901c05c054f73fa47d6f6f1b493d17c8a"
+      "sourceSha256": "5188b5bf7dbd051d80bd07be2dac94b3b42ddd788af52aa995b2d11a23bce0c6",
+      "outputSha256": "ee59c21716d6ea47787942fdc28bfa835458427d339bc7a22075b0d640f8a9cc"
     },
     "hydrogen_mixing.png": {
       "sourceSize": [

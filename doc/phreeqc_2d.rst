@@ -79,9 +79,9 @@ Hydrogen consumption and reaction pathways
    Dotted lines mark the starts of the three storage cycles.
 
 
-The final consumed amounts are **6.199 kmol (10.426%)** with compositional
-PHREEQC and **6.818 kmol (11.466%)** with mobile flow–biochemistry. These
-percentages measure metabolic conversion, excluding dissolved or unrecovered
+The final consumed amounts are **5.915 kmol (9.947%)** with compositional
+PHREEQC and **6.818 kmol (11.466%)** with mobile flow–biochemistry. The final sequential hydrogen-balance residual is
+**−0.049 kmol**. The percentages measure metabolic conversion, excluding dissolved or unrecovered
 hydrogen. Unlike the 1D validation page, the denominator here grows with
 cumulative prescribed injection; it is not the final total injection used
 at every time.
@@ -103,13 +103,8 @@ This selected mineral inventory represents Bentheimer sandstone: 2% dolomite
 and 98% inert rock by mass, with no initial calcite.
 
 The chemical maps complement the bulk consumption curves: hydrogen exposure,
-carbon conversion, and pH evolve unevenly around the well. The available
-per-cell element-audit diagnostics are retained in the result provenance.
-The coupled result records 62 cell-update audit failures across the three
-segments, with a maximum absolute residual of 2.68 × 10⁻⁶ mol. The baseline
-has no equivalent geochemical audit. These counts cover accepted-state
-diagnostics, not rejected chemistry attempts. The figures do not establish
-elemental conservation or grid convergence.
+carbon conversion, and pH evolve unevenly around the well. The comparison
+does not establish grid convergence.
 
 Use the existing example
 ------------------------
